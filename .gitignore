@@ -36,3 +36,6 @@ Cargo.lock
 # evolution/ runtime state (autopilot_runner.py)
 evolution/.autopilot.lock
 evolution/autopilot.log
+
+# evolution/ ad-hoc console capture (--once 实测)
+evolution/_once_console.log
