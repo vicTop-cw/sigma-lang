@@ -1389,6 +1389,8 @@ fn parse_sigma_module(path: &PathBuf) -> Result<Module> {
             in_guarantee = false;
             in_determinism = false;
             in_signature = false;
+            in_shadowing = false;
+            in_timing = false;
             continue;
         }
         if line == "## Timing" {
@@ -1401,6 +1403,7 @@ fn parse_sigma_module(path: &PathBuf) -> Result<Module> {
             in_determinism = false;
             in_signature = false;
             in_capabilities = false;
+            in_shadowing = false;
             continue;
         }
         if line == "## Shadowing" {
@@ -1748,6 +1751,19 @@ fn parse_sigma_module(path: &PathBuf) -> Result<Module> {
             }
             continue;
         }
+        // Signature detection must run BEFORE the `≡`-in-line law heuristic:
+        // an operator whose glyph is `≡` (e.g. `≡ : ℕ × ℕ → ℕ`) would otherwise
+        // be swallowed as a law line and lose its signature/name.
+        if blk_sig.is_empty() && looks_like_signature(line) {
+            blk_sig = line.to_string();
+            if let Some(left) = line.split(':').next() {
+                let nm = left.trim();
+                if !nm.is_empty() && !nm.contains(' ') {
+                    blk_name = Some(nm.to_string());
+                }
+            }
+            continue;
+        }
         if blk_in_laws || line.starts_with('∀') || line.starts_with('∃') || line.contains('≡') {
             if !line.contains('|') {
                 let is_universal = line.starts_with('∀');
@@ -1756,16 +1772,6 @@ fn parse_sigma_module(path: &PathBuf) -> Result<Module> {
                     statement: line.to_string(),
                     is_universal,
                 });
-            }
-            continue;
-        }
-        if blk_sig.is_empty() && looks_like_signature(line) {
-            blk_sig = line.to_string();
-            if let Some(left) = line.split(':').next() {
-                let nm = left.trim();
-                if !nm.is_empty() && !nm.contains(' ') {
-                    blk_name = Some(nm.to_string());
-                }
             }
             continue;
         }

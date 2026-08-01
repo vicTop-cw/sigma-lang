@@ -39,3 +39,5 @@ evolution/autopilot.log
 
 # evolution/ ad-hoc console capture (--once 实测)
 evolution/_once_console.log
+evolution/_normal_console.log
+evolution/_normal_err.log

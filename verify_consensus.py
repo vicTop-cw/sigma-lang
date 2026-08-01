@@ -329,15 +329,18 @@ def parse_module(path):
             if len(cells) >= 2:
                 blk["tests"].append((cells[0], cells[1]))
             continue
-        if blk["mode"] == "laws" or line.startswith(("∀", "∃")) or "≡" in line:
-            if "|" not in line:
-                blk["laws"].append(line)
-            continue
+        # Signature detection must run BEFORE the `≡`-in-line law heuristic:
+        # an operator whose glyph is `≡` (e.g. `≡ : ℕ × ℕ → ℕ`) would otherwise
+        # be swallowed as a law line and lose its signature/name.
         if not blk["sig"] and ":" in line and "→" in line and not line.startswith("|"):
             blk["sig"] = line
             name = line.split(":", 1)[0].strip()
             if name and not re.search(r"\s", name):
                 blk["name"] = name
+            continue
+        if blk["mode"] == "laws" or line.startswith(("∀", "∃")) or "≡" in line:
+            if "|" not in line:
+                blk["laws"].append(line)
             continue
 
     flush()
@@ -590,6 +593,62 @@ def eval_expr(s):
         if isinstance(vb, str):
             return vb
         return mat_mul(va, vb)
+    if "⊖" in s:
+        a, b = s.split("⊖", 1)
+        va, vb = eval_expr(a), eval_expr(b)
+        if isinstance(va, str):
+            return va
+        if isinstance(vb, str):
+            return vb
+        return elemwise_sub(va, vb)
+    if "⊘" in s:
+        a, b = s.split("⊘", 1)
+        va, vb = eval_expr(a), eval_expr(b)
+        if isinstance(va, str):
+            return va
+        if isinstance(vb, str):
+            return vb
+        return elemwise_div(va, vb)
+    if "⊙" in s:
+        a, b = s.split("⊙", 1)
+        va, vb = eval_expr(a), eval_expr(b)
+        if isinstance(va, str):
+            return va
+        if isinstance(vb, str):
+            return vb
+        return elemwise_mul(va, vb)
+    if "≡" in s:
+        a, b = s.split("≡", 1)
+        va, vb = eval_expr(a), eval_expr(b)
+        if isinstance(va, str):
+            return va
+        if isinstance(vb, str):
+            return vb
+        return value_eq(va, vb)
+    if "≥" in s:
+        a, b = s.split("≥", 1)
+        va, vb = eval_expr(a), eval_expr(b)
+        if isinstance(va, str):
+            return va
+        if isinstance(vb, str):
+            return vb
+        return value_cmp(va, vb, "ge")
+    if "≤" in s:
+        a, b = s.split("≤", 1)
+        va, vb = eval_expr(a), eval_expr(b)
+        if isinstance(va, str):
+            return va
+        if isinstance(vb, str):
+            return vb
+        return value_cmp(va, vb, "le")
+    if "∈" in s:
+        a, b = s.split("∈", 1)
+        va, vb = eval_expr(a), eval_expr(b)
+        if isinstance(va, str):
+            return va
+        if isinstance(vb, str):
+            return vb
+        return value_in(va, vb)
     if s.startswith("index(") and s.endswith(")"):
         inner = s[len("index("):-1]
         parts = split_top_level(inner, ",")
@@ -646,6 +705,116 @@ def mat_mul(a, b):
             out.append(("fnum", acc) if is_float else ("num", int(acc)))
         return ("list", out)
     return "ShapeError"
+
+
+def elemwise_sub(a, b):
+    """Element-wise subtraction (⊖), mirroring elemwise_add."""
+    if a[0] == "num" and b[0] == "num":
+        return ("num", a[1] - b[1])
+    if a[0] in ("num", "fnum") and b[0] in ("num", "fnum"):
+        return ("fnum", float(a[1]) - float(b[1]))
+    if a[0] == "list" and b[0] == "list":
+        if len(a[1]) != len(b[1]):
+            return "ShapeError"
+        out = []
+        for x, y in zip(a[1], b[1]):
+            r = elemwise_sub(x, y)
+            if isinstance(r, str):
+                return r
+            out.append(r)
+        return ("list", out)
+    return "ShapeError"
+
+
+def elemwise_div(a, b):
+    """Element-wise division (⊘): num/num -> num when divisible, else fnum;
+    division by zero is a DivByZero error."""
+    if a[0] == "num" and b[0] == "num":
+        if b[1] == 0:
+            return "DivByZero"
+        if a[1] % b[1] == 0:
+            return ("num", a[1] // b[1])
+        return ("fnum", a[1] / b[1])
+    if a[0] in ("num", "fnum") and b[0] in ("num", "fnum"):
+        if float(b[1]) == 0.0:
+            return "DivByZero"
+        return ("fnum", float(a[1]) / float(b[1]))
+    if a[0] == "list" and b[0] == "list":
+        if len(a[1]) != len(b[1]):
+            return "ShapeError"
+        out = []
+        for x, y in zip(a[1], b[1]):
+            r = elemwise_div(x, y)
+            if isinstance(r, str):
+                return r
+            out.append(r)
+        return ("list", out)
+    return "ShapeError"
+
+
+def elemwise_mul(a, b):
+    """Element-wise multiplication (⊙, Hadamard), mirroring elemwise_add."""
+    if a[0] == "num" and b[0] == "num":
+        return ("num", a[1] * b[1])
+    if a[0] in ("num", "fnum") and b[0] in ("num", "fnum"):
+        return ("fnum", float(a[1]) * float(b[1]))
+    if a[0] == "list" and b[0] == "list":
+        if len(a[1]) != len(b[1]):
+            return "ShapeError"
+        out = []
+        for x, y in zip(a[1], b[1]):
+            r = elemwise_mul(x, y)
+            if isinstance(r, str):
+                return r
+            out.append(r)
+        return ("list", out)
+    return "ShapeError"
+
+
+def value_eq(a, b):
+    """≡ — structural equality, returns num 1/0; mixed kinds are TypeError."""
+    if a[0] != b[0]:
+        return "TypeError"
+    if a[0] == "list":
+        if len(a[1]) != len(b[1]):
+            return ("num", 0)
+        for x, y in zip(a[1], b[1]):
+            r = value_eq(x, y)
+            if isinstance(r, str):
+                return r
+            if r == ("num", 0):
+                return ("num", 0)
+        return ("num", 1)
+    if a[0] == "num":
+        return ("num", 1) if a[1] == b[1] else ("num", 0)
+    if a[0] == "fnum":
+        return ("num", 1) if a[1] == b[1] else ("num", 0)
+    return "TypeError"
+
+
+def value_cmp(a, b, op):
+    """≥ / ≤ — scalar comparison, returns num 1/0; lists are TypeError."""
+    if a[0] == "list" or b[0] == "list":
+        return "TypeError"
+    if a[0] not in ("num", "fnum") or b[0] not in ("num", "fnum"):
+        return "TypeError"
+    x, y = float(a[1]), float(b[1])
+    if op == "ge":
+        return ("num", 1) if x >= y else ("num", 0)
+    return ("num", 1) if x <= y else ("num", 0)
+
+
+def value_in(a, b):
+    """∈ — membership: element a in list b, returns num 1/0; non-list is TypeError."""
+    if b[0] != "list":
+        return "TypeError"
+    for e in b[1]:
+        r = value_eq(a, e)
+        if isinstance(r, str):
+            return r
+        if r == ("num", 1):
+            return ("num", 1)
+    return ("num", 0)
 
 
 def index_into(target, idx):
@@ -911,7 +1080,7 @@ def main(paths=None):
     for r in rows:
         print(f"{r['module']:<20}{r['expected']:<10}{r['python']:<8}{r['rust']:<8}{r['elixir']:<8}{r['agree']:<6}{r['detail']}")
 
-    passed = sum(1 for r in rows if r["agree"])
+    passed = sum(1 for r in rows if r["agree"] == "✅")
     print("-" * len(hdr))
     print(f"Consensus: {passed}/{len(rows)} modules agree (Python == Rust == Elixir == Expected)")
     if agree_all:

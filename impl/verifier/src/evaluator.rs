@@ -54,6 +54,41 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
         let (va, vb) = (eval_expr(a)?, eval_expr(b)?);
         return mat_mul(&va, &vb);
     }
+    if s.contains('⊖') {
+        let (a, b) = s.split_once('⊖').unwrap();
+        let (va, vb) = (eval_expr(a)?, eval_expr(b)?);
+        return elemwise_sub(&va, &vb);
+    }
+    if s.contains('⊘') {
+        let (a, b) = s.split_once('⊘').unwrap();
+        let (va, vb) = (eval_expr(a)?, eval_expr(b)?);
+        return elemwise_div(&va, &vb);
+    }
+    if s.contains('⊙') {
+        let (a, b) = s.split_once('⊙').unwrap();
+        let (va, vb) = (eval_expr(a)?, eval_expr(b)?);
+        return elemwise_mul(&va, &vb);
+    }
+    if s.contains('≡') {
+        let (a, b) = s.split_once('≡').unwrap();
+        let (va, vb) = (eval_expr(a)?, eval_expr(b)?);
+        return value_eq(&va, &vb);
+    }
+    if s.contains('≥') {
+        let (a, b) = s.split_once('≥').unwrap();
+        let (va, vb) = (eval_expr(a)?, eval_expr(b)?);
+        return value_cmp(&va, &vb, true);
+    }
+    if s.contains('≤') {
+        let (a, b) = s.split_once('≤').unwrap();
+        let (va, vb) = (eval_expr(a)?, eval_expr(b)?);
+        return value_cmp(&va, &vb, false);
+    }
+    if s.contains('∈') {
+        let (a, b) = s.split_once('∈').unwrap();
+        let (va, vb) = (eval_expr(a)?, eval_expr(b)?);
+        return value_in(&va, &vb);
+    }
     if let Some(rest) = s.strip_prefix("index(") {
         let inner = rest.strip_suffix(')').ok_or("bad index call")?;
         let (target, idx) = split_top_level(inner, ',')
@@ -135,6 +170,147 @@ fn mat_mul(a: &TVal, b: &TVal) -> Result<TVal, String> {
         }
         _ => Err("ShapeError".to_string()),
     }
+}
+
+/// Element-wise subtraction (⊖), mirroring elemwise_add.
+fn elemwise_sub(a: &TVal, b: &TVal) -> Result<TVal, String> {
+    match (a, b) {
+        (TVal::Num(x), TVal::Num(y)) => Ok(TVal::Num(x - y)),
+        (TVal::FNum(x), TVal::FNum(y)) => Ok(TVal::FNum(x - y)),
+        (TVal::Num(x), TVal::FNum(y)) => Ok(TVal::FNum(*x as f64 - y)),
+        (TVal::FNum(x), TVal::Num(y)) => Ok(TVal::FNum(x - *y as f64)),
+        (TVal::List(xs), TVal::List(ys)) => {
+            if xs.len() != ys.len() {
+                return Err("ShapeError".to_string());
+            }
+            let mut out = Vec::with_capacity(xs.len());
+            for (x, y) in xs.iter().zip(ys) {
+                out.push(elemwise_sub(x, y)?);
+            }
+            Ok(TVal::List(out))
+        }
+        _ => Err("ShapeError".to_string()),
+    }
+}
+
+/// Element-wise division (⊘): num/num -> num when divisible, else fnum;
+/// division by zero is a DivByZero error.
+fn elemwise_div(a: &TVal, b: &TVal) -> Result<TVal, String> {
+    match (a, b) {
+        (TVal::Num(x), TVal::Num(y)) => {
+            if *y == 0 {
+                return Err("DivByZero".to_string());
+            }
+            if x % y == 0 {
+                Ok(TVal::Num(x / y))
+            } else {
+                Ok(TVal::FNum(*x as f64 / *y as f64))
+            }
+        }
+        (TVal::FNum(x), TVal::FNum(y)) => {
+            if *y == 0.0 {
+                return Err("DivByZero".to_string());
+            }
+            Ok(TVal::FNum(x / y))
+        }
+        (TVal::Num(x), TVal::FNum(y)) => {
+            if *y == 0.0 {
+                return Err("DivByZero".to_string());
+            }
+            Ok(TVal::FNum(*x as f64 / y))
+        }
+        (TVal::FNum(x), TVal::Num(y)) => {
+            if *y == 0 {
+                return Err("DivByZero".to_string());
+            }
+            Ok(TVal::FNum(x / *y as f64))
+        }
+        (TVal::List(xs), TVal::List(ys)) => {
+            if xs.len() != ys.len() {
+                return Err("ShapeError".to_string());
+            }
+            let mut out = Vec::with_capacity(xs.len());
+            for (x, y) in xs.iter().zip(ys) {
+                out.push(elemwise_div(x, y)?);
+            }
+            Ok(TVal::List(out))
+        }
+        _ => Err("ShapeError".to_string()),
+    }
+}
+
+/// Element-wise multiplication (⊙, Hadamard), mirroring elemwise_add.
+fn elemwise_mul(a: &TVal, b: &TVal) -> Result<TVal, String> {
+    match (a, b) {
+        (TVal::Num(x), TVal::Num(y)) => Ok(TVal::Num(x * y)),
+        (TVal::FNum(x), TVal::FNum(y)) => Ok(TVal::FNum(x * y)),
+        (TVal::Num(x), TVal::FNum(y)) => Ok(TVal::FNum(*x as f64 * y)),
+        (TVal::FNum(x), TVal::Num(y)) => Ok(TVal::FNum(x * *y as f64)),
+        (TVal::List(xs), TVal::List(ys)) => {
+            if xs.len() != ys.len() {
+                return Err("ShapeError".to_string());
+            }
+            let mut out = Vec::with_capacity(xs.len());
+            for (x, y) in xs.iter().zip(ys) {
+                out.push(elemwise_mul(x, y)?);
+            }
+            Ok(TVal::List(out))
+        }
+        _ => Err("ShapeError".to_string()),
+    }
+}
+
+/// ≡ — structural equality, returns num 1/0; mixed kinds are TypeError.
+fn value_eq(a: &TVal, b: &TVal) -> Result<TVal, String> {
+    match (a, b) {
+        (TVal::Num(x), TVal::Num(y)) => Ok(TVal::Num(i64::from(x == y))),
+        (TVal::FNum(x), TVal::FNum(y)) => Ok(TVal::Num(i64::from(x == y))),
+        (TVal::List(xs), TVal::List(ys)) => {
+            if xs.len() != ys.len() {
+                return Ok(TVal::Num(0));
+            }
+            for (x, y) in xs.iter().zip(ys) {
+                if value_eq(x, y)? == TVal::Num(0) {
+                    return Ok(TVal::Num(0));
+                }
+            }
+            Ok(TVal::Num(1))
+        }
+        _ => Err("TypeError".to_string()),
+    }
+}
+
+/// ≥ / ≤ — scalar comparison, returns num 1/0; lists are TypeError.
+/// `ge=true` for ≥, `ge=false` for ≤.
+fn value_cmp(a: &TVal, b: &TVal, ge: bool) -> Result<TVal, String> {
+    let x = match a {
+        TVal::Num(n) => *n as f64,
+        TVal::FNum(f) => *f,
+        _ => return Err("TypeError".to_string()),
+    };
+    let y = match b {
+        TVal::Num(n) => *n as f64,
+        TVal::FNum(f) => *f,
+        _ => return Err("TypeError".to_string()),
+    };
+    if ge {
+        Ok(TVal::Num(i64::from(x >= y)))
+    } else {
+        Ok(TVal::Num(i64::from(x <= y)))
+    }
+}
+
+/// ∈ — membership: element a in list b, returns num 1/0; non-list is TypeError.
+fn value_in(a: &TVal, b: &TVal) -> Result<TVal, String> {
+    let TVal::List(items) = b else {
+        return Err("TypeError".to_string());
+    };
+    for e in items {
+        if value_eq(a, e)? == TVal::Num(1) {
+            return Ok(TVal::Num(1));
+        }
+    }
+    Ok(TVal::Num(0))
 }
 
 /// index(target, idx) — follow the index path through nested lists.

@@ -389,6 +389,14 @@ defmodule SigmaVerify do
             end
         end
 
+      # Signature detection must run BEFORE the `≡`-in-line law heuristic:
+      # an operator whose glyph is `≡` (e.g. `≡ : ℕ × ℕ → ℕ`) would otherwise
+      # be swallowed as a law line and lose its signature/name.
+      state.blk != nil and state.blk.sig == "" and looks_like_signature(t) ->
+        name = t |> String.split(":", parts: 2) |> List.first() |> String.trim()
+        name = if name == "" or String.contains?(name, " "), do: state.blk.name, else: name
+        {:cont, %{state | blk: %{state.blk | sig: t, name: name}}}
+
       state.blk != nil and (state.blk.mode == :laws or String.starts_with?(t, "∀") or
                             String.starts_with?(t, "∃") or String.contains?(t, "≡")) ->
         if String.contains?(t, "|") do
@@ -396,11 +404,6 @@ defmodule SigmaVerify do
         else
           {:cont, %{state | blk: %{state.blk | laws: state.blk.laws ++ [t]}}}
         end
-
-      state.blk != nil and state.blk.sig == "" and looks_like_signature(t) ->
-        name = t |> String.split(":", parts: 2) |> List.first() |> String.trim()
-        name = if name == "" or String.contains?(name, " "), do: state.blk.name, else: name
-        {:cont, %{state | blk: %{state.blk | sig: t, name: name}}}
 
       true ->
         {:cont, state}
@@ -808,6 +811,34 @@ defmodule SigmaVerify do
         [a, b] = String.split(t, "⊗", parts: 2)
         with {:ok, va} <- eval_expr(a), {:ok, vb} <- eval_expr(b),
              do: mat_mul(va, vb)
+      String.contains?(t, "⊖") ->
+        [a, b] = String.split(t, "⊖", parts: 2)
+        with {:ok, va} <- eval_expr(a), {:ok, vb} <- eval_expr(b),
+             do: elemwise_sub(va, vb)
+      String.contains?(t, "⊘") ->
+        [a, b] = String.split(t, "⊘", parts: 2)
+        with {:ok, va} <- eval_expr(a), {:ok, vb} <- eval_expr(b),
+             do: elemwise_div(va, vb)
+      String.contains?(t, "⊙") ->
+        [a, b] = String.split(t, "⊙", parts: 2)
+        with {:ok, va} <- eval_expr(a), {:ok, vb} <- eval_expr(b),
+             do: elemwise_mul(va, vb)
+      String.contains?(t, "≡") ->
+        [a, b] = String.split(t, "≡", parts: 2)
+        with {:ok, va} <- eval_expr(a), {:ok, vb} <- eval_expr(b),
+             do: value_eq(va, vb)
+      String.contains?(t, "≥") ->
+        [a, b] = String.split(t, "≥", parts: 2)
+        with {:ok, va} <- eval_expr(a), {:ok, vb} <- eval_expr(b),
+             do: value_cmp(va, vb, :ge)
+      String.contains?(t, "≤") ->
+        [a, b] = String.split(t, "≤", parts: 2)
+        with {:ok, va} <- eval_expr(a), {:ok, vb} <- eval_expr(b),
+             do: value_cmp(va, vb, :le)
+      String.contains?(t, "∈") ->
+        [a, b] = String.split(t, "∈", parts: 2)
+        with {:ok, va} <- eval_expr(a), {:ok, vb} <- eval_expr(b),
+             do: value_in(va, vb)
       String.starts_with?(t, "index(") and String.ends_with?(t, ")") ->
         inner = String.slice(t, 6..-2//1)
         case split_top_level(inner, ?,) do
@@ -875,6 +906,113 @@ defmodule SigmaVerify do
     end
   end
   defp mat_mul(_, _), do: {:error, "ShapeError"}
+
+  # ⊖ — element-wise subtraction (mirrors elemwise_add).
+  defp elemwise_sub({:num, x}, {:num, y}), do: {:ok, {:num, x - y}}
+  defp elemwise_sub({:fnum, x}, {:fnum, y}), do: {:ok, {:fnum, x - y}}
+  defp elemwise_sub({:num, x}, {:fnum, y}), do: {:ok, {:fnum, x * 1.0 - y}}
+  defp elemwise_sub({:fnum, x}, {:num, y}), do: {:ok, {:fnum, x - y * 1.0}}
+  defp elemwise_sub({:list, xs}, {:list, ys}) do
+    if length(xs) != length(ys) do
+      {:error, "ShapeError"}
+    else
+      result = Enum.zip(xs, ys)
+               |> Enum.map(fn {x, y} -> elemwise_sub(x, y) end)
+      case Enum.split_with(result, &match?({:ok, _}, &1)) do
+        {oks, []} -> {:ok, {:list, Enum.map(oks, fn {:ok, v} -> v end)}}
+        _ -> {:error, "ShapeError"}
+      end
+    end
+  end
+  defp elemwise_sub(_, _), do: {:error, "ShapeError"}
+
+  # ⊘ — element-wise division: num/num -> num when divisible, else fnum;
+  # division by zero is a DivByZero error.
+  defp elemwise_div({:num, x}, {:num, y}) when y != 0 do
+    if rem(x, y) == 0, do: {:ok, {:num, div(x, y)}}, else: {:ok, {:fnum, x / y}}
+  end
+  defp elemwise_div({:num, _}, {:num, 0}), do: {:error, "DivByZero"}
+  defp elemwise_div({:fnum, _}, {:fnum, y}) when y == 0.0, do: {:error, "DivByZero"}
+  defp elemwise_div({:fnum, x}, {:fnum, y}), do: {:ok, {:fnum, x / y}}
+  defp elemwise_div({:num, x}, {:fnum, y}) when y != 0.0, do: {:ok, {:fnum, x / y}}
+  defp elemwise_div({:num, _}, {:fnum, y}) when y == 0.0, do: {:error, "DivByZero"}
+  defp elemwise_div({:fnum, x}, {:num, y}) when y != 0, do: {:ok, {:fnum, x / y}}
+  defp elemwise_div({:fnum, _}, {:num, 0}), do: {:error, "DivByZero"}
+  defp elemwise_div({:list, xs}, {:list, ys}) do
+    if length(xs) != length(ys) do
+      {:error, "ShapeError"}
+    else
+      result = Enum.zip(xs, ys)
+               |> Enum.map(fn {x, y} -> elemwise_div(x, y) end)
+      case Enum.split_with(result, &match?({:ok, _}, &1)) do
+        {oks, []} -> {:ok, {:list, Enum.map(oks, fn {:ok, v} -> v end)}}
+        _ -> {:error, "ShapeError"}
+      end
+    end
+  end
+  defp elemwise_div(_, _), do: {:error, "ShapeError"}
+
+  # ⊙ — element-wise multiplication (Hadamard, mirrors elemwise_add).
+  defp elemwise_mul({:num, x}, {:num, y}), do: {:ok, {:num, x * y}}
+  defp elemwise_mul({:fnum, x}, {:fnum, y}), do: {:ok, {:fnum, x * y}}
+  defp elemwise_mul({:num, x}, {:fnum, y}), do: {:ok, {:fnum, x * 1.0 * y}}
+  defp elemwise_mul({:fnum, x}, {:num, y}), do: {:ok, {:fnum, x * y * 1.0}}
+  defp elemwise_mul({:list, xs}, {:list, ys}) do
+    if length(xs) != length(ys) do
+      {:error, "ShapeError"}
+    else
+      result = Enum.zip(xs, ys)
+               |> Enum.map(fn {x, y} -> elemwise_mul(x, y) end)
+      case Enum.split_with(result, &match?({:ok, _}, &1)) do
+        {oks, []} -> {:ok, {:list, Enum.map(oks, fn {:ok, v} -> v end)}}
+        _ -> {:error, "ShapeError"}
+      end
+    end
+  end
+  defp elemwise_mul(_, _), do: {:error, "ShapeError"}
+
+  # ≡ — structural equality, returns num 1/0; mixed kinds are TypeError.
+  defp value_eq({:num, x}, {:num, y}), do: {:ok, {:num, if(x == y, do: 1, else: 0)}}
+  defp value_eq({:fnum, x}, {:fnum, y}), do: {:ok, {:num, if(x == y, do: 1, else: 0)}}
+  defp value_eq({:list, xs}, {:list, ys}) do
+    if length(xs) != length(ys) do
+      {:ok, {:num, 0}}
+    else
+      Enum.reduce_while(Enum.zip(xs, ys), {:ok, {:num, 1}}, fn {x, y}, acc ->
+        case value_eq(x, y) do
+          {:ok, {:num, 1}} -> {:cont, acc}
+          {:ok, {:num, 0}} -> {:halt, {:ok, {:num, 0}}}
+          {:error, e} -> {:halt, {:error, e}}
+        end
+      end)
+    end
+  end
+  defp value_eq(_, _), do: {:error, "TypeError"}
+
+  # ≥ / ≤ — scalar comparison, returns num 1/0; lists are TypeError.
+  defp value_cmp({:list, _}, _, _), do: {:error, "TypeError"}
+  defp value_cmp(_, {:list, _}, _), do: {:error, "TypeError"}
+  defp value_cmp(a, b, op) do
+    {x, y} = {to_float(a), to_float(b)}
+    case op do
+      :ge -> {:ok, {:num, if(x >= y, do: 1, else: 0)}}
+      :le -> {:ok, {:num, if(x <= y, do: 1, else: 0)}}
+    end
+  end
+
+  defp to_float({:num, n}), do: n * 1.0
+  defp to_float({:fnum, f}), do: f
+
+  # ∈ — membership: element a in list b, returns num 1/0; non-list is TypeError.
+  defp value_in(_, {:list, []}), do: {:ok, {:num, 0}}
+  defp value_in(a, {:list, [h | t]}) do
+    case value_eq(a, h) do
+      {:ok, {:num, 1}} -> {:ok, {:num, 1}}
+      {:error, e} -> {:error, e}
+      {:ok, {:num, 0}} -> value_in(a, {:list, t})
+    end
+  end
+  defp value_in(_, _), do: {:error, "TypeError"}
 
   defp index_into(target, idx) do
     path = collect_path(idx, [])
