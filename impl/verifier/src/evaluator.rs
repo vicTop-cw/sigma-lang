@@ -103,6 +103,9 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
             TVal::List(vec![TVal::Num(0), TVal::Num(1)]),
         ]));
     }
+    if let Some(v) = resolve_constant(s) {
+        return Ok(v);
+    }
     parse_val(s).ok_or_else(|| format!("unparseable: {}", s))
 }
 
@@ -401,6 +404,38 @@ pub fn parse_val(s: &str) -> Option<TVal> {
         return Some(TVal::List(items));
     }
     None
+}
+
+/// §C Real-World Constants (spec_top_rules.md §C) — resolvable by fingerprint.
+/// Reference values (non-normative precision) held as IEEE-754 doubles so the
+/// Python/Elixir evaluators agree on float handling.
+fn resolve_constant(s: &str) -> Option<TVal> {
+    Some(match s {
+        // C.1 Mathematical (0xK0xx)
+        "0xK001" => TVal::FNum(3.141592653589793), // π
+        "0xK002" => TVal::FNum(2.718281828459045), // e
+        "0xK003" => TVal::FNum(1.618033988749895), // φ
+        "0xK004" => TVal::FNum(0.5772156649015329), // γ
+        "0xK005" => TVal::FNum(1.4142135623730951), // √2
+        "0xK006" => TVal::FNum(0.6931471805599453), // ln2
+        "0xK007" => TVal::FNum(0.915965594177219), // G_𝒦
+        "0xK008" => TVal::FNum(1.2020569031595942), // ζ3
+        "0xK009" => TVal::FNum(4.66920160910299), // δ_ℱ
+        // C.2 Physics (0xQ0xx)
+        "0xQ001" => TVal::Num(299_792_458), // c (exact SI integer)
+        "0xQ002" => TVal::FNum(6.62607015e-34), // h
+        "0xQ003" => TVal::FNum(1.054571817e-34), // ℏ
+        "0xQ004" => TVal::FNum(6.67430e-11), // G_𝔫
+        "0xQ005" => TVal::FNum(8.8541878128e-12), // ε₀
+        "0xQ006" => TVal::FNum(1.25663706212e-6), // μ₀
+        "0xQ007" => TVal::FNum(1.602176634e-19), // e
+        "0xQ008" => TVal::FNum(1.380649e-23), // k_B
+        "0xQ009" => TVal::FNum(6.02214076e23), // N_A
+        "0xQ00A" => TVal::FNum(8.314462618), // R
+        "0xQ00B" => TVal::FNum(9.1093837015e-31), // mₑ
+        "0xQ00C" => TVal::FNum(1.67262192369e-27), // mₚ
+        _ => return None,
+    })
 }
 
 /// Split at the first top-level (depth-0) occurrence of `sep`.

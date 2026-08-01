@@ -38,7 +38,7 @@
 > (math-domain symbols cannot be shadowed), **R7-warning** (declared Free-class shadows
 > pass with a report warning). Corpus: `shadow_break.md`/`shadow_opaque_break.md` FAIL,
 > `shadow_free_ok.md` PASS (R7-warning), `shadow_escape_ok.md` PASS (R2 escape hatch),
-> **30/30 modules agree (Python == Rust == Elixir)**.
+> **33/33 modules agree (Python == Rust == Elixir)**.
 > Full §S semantics (R2 escape hatch, R4 propagation, R6 declarative domains) are v0.2 scope.
 
 ---
@@ -310,6 +310,10 @@ Recorded 2026-08-01:
 > definitions are normative; implementation precision bounds are declared per Law VIII
 > and E-08 (Eval Determinism).
 > **Fingerprint prefixes**: `0xK0xx` (mathematical), `0xQ0xx` (physics) — registry placeholders.
+> **Verifier**: constants resolve by fingerprint in canonical-test evaluation (e.g.
+> `0xK001` → π) and constant fingerprints are Opaque-class shadow targets —
+> **implemented in all three verifiers (2026-08-01)**; corpus: `const_ok.md` PASS,
+> `const_shadow_break.md` FAIL (OpaqueShadowAttempt).
 
 ### C.1 Mathematical Constants
 

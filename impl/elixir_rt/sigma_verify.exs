@@ -13,6 +13,35 @@
 defmodule SigmaVerify do
   @numeric_types ["ℕ", "ℤ", "ℚ", "ℝ", "ℂ", "Conf", "Time"]
 
+  # §C Real-World Constants (spec_top_rules.md §C) — resolvable by fingerprint.
+  # Reference values (non-normative precision) held as IEEE-754 doubles so the
+  # Python/Rust evaluators agree on float handling.
+  @constants %{
+    # C.1 Mathematical (0xK0xx)
+    "0xK001" => {:fnum, 3.141592653589793},  # π
+    "0xK002" => {:fnum, 2.718281828459045},  # e
+    "0xK003" => {:fnum, 1.618033988749895},  # φ
+    "0xK004" => {:fnum, 0.5772156649015329},  # γ
+    "0xK005" => {:fnum, 1.4142135623730951},  # √2
+    "0xK006" => {:fnum, 0.6931471805599453},  # ln2
+    "0xK007" => {:fnum, 0.915965594177219},  # G_𝒦
+    "0xK008" => {:fnum, 1.2020569031595942},  # ζ3
+    "0xK009" => {:fnum, 4.66920160910299},  # δ_ℱ
+    # C.2 Physics (0xQ0xx)
+    "0xQ001" => {:num, 299_792_458},  # c (exact SI integer)
+    "0xQ002" => {:fnum, 6.62607015e-34},  # h
+    "0xQ003" => {:fnum, 1.054571817e-34},  # ℏ
+    "0xQ004" => {:fnum, 6.67430e-11},  # G_𝔫
+    "0xQ005" => {:fnum, 8.8541878128e-12},  # ε₀
+    "0xQ006" => {:fnum, 1.25663706212e-6},  # μ₀
+    "0xQ007" => {:fnum, 1.602176634e-19},  # e
+    "0xQ008" => {:fnum, 1.380649e-23},  # k_B
+    "0xQ009" => {:fnum, 6.02214076e23},  # N_A
+    "0xQ00A" => {:fnum, 8.314462618},  # R
+    "0xQ00B" => {:fnum, 9.1093837015e-31},  # mₑ
+    "0xQ00C" => {:fnum, 1.67262192369e-27}  # mₚ
+  }
+
   # ============================================================
   # Parser (mirrors impl/verifier/src/main.rs parse_sigma_module)
   # ============================================================
@@ -717,7 +746,9 @@ defmodule SigmaVerify do
     opaque_math = ["⊕", "⊗", "⊖", "⊘", "⊙", "≡", "≥", "≤", "∈", "ℕ", "ℤ", "ℚ", "ℝ"]
     violations =
       Enum.reduce(state.shadow_targets, violations, fn target, v ->
-        if target in opaque_math,
+        # §C constant fingerprints (0xK0xx math / 0xQ0xx physics) are Opaque
+        # class too (§S.3.1 core-constant) — shadow attempts are violations.
+        if target in opaque_math or String.starts_with?(target, ["0xK", "0xQ"]),
           do: v ++ ["OpaqueShadowAttempt(#{target})"],
           else: v
       end)
@@ -850,6 +881,8 @@ defmodule SigmaVerify do
       t == "I₂" ->
         {:ok, {:list, [{:list, [{:num, 1}, {:num, 0}]},
                        {:list, [{:num, 0}, {:num, 1}]}]}}
+      Map.has_key?(@constants, t) ->
+        {:ok, Map.fetch!(@constants, t)}
       true ->
         parse_val(t)
     end

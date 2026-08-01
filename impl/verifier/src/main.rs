@@ -743,9 +743,14 @@ impl Verifier {
                     .push(Violation::DuplicateSymbol(sym.name.clone()));
             }
         }
-        // R5: math-domain symbols cannot be shadowed (Opaque class).
+        // R5: math-domain symbols cannot be shadowed (Opaque class). §C
+        // constant fingerprints (0xK0xx math / 0xQ0xx physics) are Opaque
+        // class too (§S.3.1 core-constant).
         for target in &module.shadow_targets {
-            if OPAQUE_MATH.contains(&target.as_str()) {
+            if OPAQUE_MATH.contains(&target.as_str())
+                || target.starts_with("0xK")
+                || target.starts_with("0xQ")
+            {
                 self.violations
                     .push(Violation::OpaqueShadowAttempt(target.clone()));
             }
