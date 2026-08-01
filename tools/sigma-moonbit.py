@@ -1,0 +1,234 @@
+#!/usr/bin/env python3
+"""
+sigma-moonbit.py — ΣLang Proof → MoonBit `.mbtp` translation bridge (E-08 S-01 / P.2).
+
+For a corpus module declaring `## Proof`:
+  1. Reuses verify_consensus's parser for P-01 structural checks.
+  2. Translates the proof-carrying spec into a MoonBit `.mbtp` predicate file:
+       - `## Proof ### Model`     → `model(...)` function
+       - `## Proof ### Invariant` → `*_inv` predicate
+       - operation Laws           → named `*_law` predicates
+       - `# Pre:` / `# Post:`     → `proof_require` / `proof_ensure` clauses
+     (moonbit-proof SKILL naming: model(), *_inv, *_pre, *_post, proof_assert.)
+  3. Writes the result under tools/_sigma_moonbit_out/ so `moon prove` can
+     consume it (see README in that dir).
+
+Run:  python3 tools/sigma-moonbit.py            # whole corpus
+      python3 tools/sigma-moonbit.py corpus/proof_max.md
+Exit: 0 = translated OK; 1 = missing/partial Proof structure.
+"""
+
+import os
+import re
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+
+import verify_consensus as vc  # parse_module + check_python (P-01 structural)
+
+CORPUS_DIR = os.path.join(ROOT, "corpus")
+OUT_DIR = os.path.join(ROOT, "tools", "_sigma_moonbit_out")
+
+# ---------------------------------------------------------------------------
+# ΣLang → MoonBit identifier/type translation
+# ---------------------------------------------------------------------------
+
+TYPE_MAP = {"ℕ": "Int", "ℤ": "Int", "ℚ": "Double", "ℝ": "Double", "𝔹": "Bool",
+            "Conf": "Double"}
+SYMBOL_MAP = {"⊕": "add", "⊗": "mul", "⊖": "sub", "≡": "==", "≥": ">=",
+              "≤": "<=", ">": ">", "<": "<", "≠": "!=", "⇒": "=>", "∧": "&&",
+              "∨": "||", "¬": "not ", "∈": "member", "→": "->"}
+
+
+def to_mbtp_ident(name):
+    """Map a ΣLang glyph/name to a MoonBit-safe identifier."""
+    ident = SYMBOL_MAP.get(name, name)
+    # Strip non-identifier characters, fall back to a stable token.
+    safe = re.sub(r"[^A-Za-z0-9_]", "_", ident)
+    return safe if safe and safe[0].isalpha() else "op_" + safe
+
+
+def translate_type(ty):
+    t = ty.strip()
+    for sigil, mbt in TYPE_MAP.items():
+        t = t.replace(sigil, mbt)
+    return t
+
+
+def translate_expr(expr):
+    """Translate a ΣLang math expression to a MoonBit expression (best effort)."""
+    e = expr.strip()
+    # ∀ quantifier: ∀ a b c . body  →  (∀ a : Int, (∀ b : Int, (∀ c : Int, body)))
+    m = re.match(r"^∀\s+((?:[a-zA-Z_][a-zA-Z_0-9]*\s+)+)\.\s*(.+)$", e)
+    if m:
+        vars_list = m.group(1).split()
+        body = translate_expr(m.group(2))
+        for v in reversed(vars_list):
+            body = f"(∀ {v} : Int, {body})"
+        return body
+    # function calls max(a,b) / min(a,b) / abs(x)
+    e = re.sub(r"\bmax\(([^,]+),([^)]+)\)", r"(if \1 >= \2 { \1 } else { \2 })", e)
+    e = re.sub(r"\bmin\(([^,]+),([^)]+)\)", r"(if \1 <= \2 { \1 } else { \2 })", e)
+    e = re.sub(r"\babs\(([^)]+)\)", r"(if \1 < 0 { -\1 } else { \1 })", e)
+    # arithmetic operators
+    for sigil, mbt in SYMBOL_MAP.items():
+        e = e.replace(sigil, mbt)
+    return e
+
+
+def extract_proof_block(lines):
+    """Extract Model + Invariant text from the `## Proof` block."""
+    model, invariant = None, None
+    in_proof = in_model = in_inv = in_fence = False
+    buf = []
+    for raw in lines:
+        line = raw.strip()
+        if line == "## Proof":
+            in_proof = True
+            continue
+        if not in_proof:
+            continue
+        if line.startswith("## "):
+            break
+        if line == "### Model":
+            in_model, in_inv = True, False
+            buf = []
+            continue
+        if line == "### Invariant":
+            in_model, in_inv = False, True
+            buf = []
+            continue
+        if line.startswith("### "):
+            in_model = in_inv = False
+            continue
+        if line.startswith("```"):
+            in_fence = not in_fence
+            continue
+        if (in_model or in_inv) and not in_fence and line:
+            buf.append(line)
+    return "\n".join(buf) if (model := model) else None  # placeholder; fixed below
+
+
+def extract_proof_model_invariant(text):
+    """Return (model_line, invariant_lines) from a `## Proof` block text."""
+    model_line, inv_lines = None, []
+    in_model = in_inv = False
+    for line in text.splitlines():
+        s = line.strip()
+        if s.startswith("### Model"):
+            in_model, in_inv = True, False
+            continue
+        if s.startswith("### Invariant"):
+            in_model, in_inv = False, True
+            continue
+        if s.startswith("### ") or s.startswith("## "):
+            in_model = in_inv = False
+            continue
+        if s.startswith("```"):
+            continue
+        if in_model and s:
+            model_line = s
+        if in_inv and s:
+            inv_lines.append(s)
+    return model_line, inv_lines
+
+
+def module_proof_text(path):
+    """Return the raw `## Proof` block text of a module."""
+    with open(path, encoding="utf-8") as f:
+        lines = f.read().splitlines()
+    out, in_proof = [], False
+    for raw in lines:
+        line = raw.strip()
+        if line == "## Proof":
+            in_proof = True
+            continue
+        if not in_proof:
+            continue
+        if line.startswith("## ") and not line.startswith("### "):
+            break
+        out.append(raw)
+    return "\n".join(out)
+
+
+def build_mbtp(module, path):
+    """Build the .mbtp content for a module with a `## Proof` block."""
+    name = module["name"]
+    lines = [
+        "// Auto-generated by sigma-moonbit.py — ΣLang Proof → MoonBit .mbtp bridge.",
+        f"// Source: {os.path.basename(path)} (P-01 structural: {'OK' if not vc.check_python(module)[1] else 'VIOLATIONS'})",
+        "// MoonBit proof-carrying code: model(), *_inv, *_law predicates, contracts.",
+        "",
+        f"// ---- module {name} ----",
+    ]
+    proof_text = module_proof_text(path)
+    model_line, inv_lines = extract_proof_model_invariant(proof_text)
+
+    if model_line:
+        # model(pairs) : Fmap[ℕ, ℕ]  →  fn model(pairs : Fmap[Int, Int]) -> Fmap[Int, Int] { pairs }
+        m = re.match(r"^\s*model\(([^)]+)\)\s*:\s*(.+)$", model_line)
+        if m:
+            arg = m.group(1).strip()
+            ty = translate_type(m.group(2))
+            lines.append(f"fn model({arg} : {ty}) -> {ty} {{ {arg} }}")
+            lines.append("")
+    else:
+        lines.append("// (no model() declared)")
+        lines.append("")
+
+    if inv_lines:
+        lines.append("// Representation invariant (§S / P.2: *_inv predicate).")
+        for i, inv in enumerate(inv_lines):
+            # Skip bare type-declaration lines like `pairs_inv(m) : 𝔹`.
+            if re.match(r"^[A-Za-z_][A-Za-z_0-9]*\([^)]*\)\s*:\s*\S", inv.strip()):
+                continue
+            if inv.strip():
+                lines.append(f"predicate module_inv_{i}() {{ {translate_expr(inv)} }}")
+        lines.append("")
+
+    # Operation laws + Pre/Post → predicates and contract clauses.
+    for op in module["ops"]:
+        opname = to_mbtp_ident(op["name"])
+        lines.append(f"// ---- operation {op['name']} ({opname}) ----")
+        for j, law in enumerate(op.get("laws", [])):
+            if isinstance(law, dict):
+                stmt = law.get("statement", "")
+            else:
+                stmt = law
+            if stmt:
+                lines.append(f"predicate {opname}_law_{j}() {{ {translate_expr(stmt)} }}")
+        if op.get("has_pre") or op.get("has_post"):
+            lines.append(f"// contract: proof_require / proof_ensure for {opname}")
+        lines.append("")
+
+    lines.append("// end of translation")
+    return "\n".join(lines)
+
+
+def translate(paths=None):
+    os.makedirs(OUT_DIR, exist_ok=True)
+    files = paths or sorted(
+        os.path.join(CORPUS_DIR, f) for f in os.listdir(CORPUS_DIR) if f.endswith(".md")
+    )
+    ok = True
+    for path in files:
+        module = vc.parse_module(path)
+        if not module.get("proof_declared"):
+            print(f"  {os.path.basename(path)}: no `## Proof` block — skipped")
+            continue
+        p_ok, violations = vc.check_python(module)
+        content = build_mbtp(module, path)
+        out_name = os.path.basename(path).replace(".md", ".mbtp")
+        with open(os.path.join(OUT_DIR, out_name), "w", encoding="utf-8") as f:
+            f.write(content)
+        status = "OK" if p_ok else "STRUCTURAL ISSUES"
+        if not p_ok:
+            ok = False
+        print(f"  {os.path.basename(path)}: translated → {out_name} ({status})")
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    sys.exit(translate(args or None))

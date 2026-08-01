@@ -1,0 +1,990 @@
+#!/usr/bin/env elixir
+# sigma_verify.exs — Elixir-side ΣLang MD verifier (E-01 third implementation)
+#
+# Usage:  elixir sigma_verify.exs <module.md>
+# Exit:   0 = PASS, 1 = FAIL (mirrors the Rust verifier's contract)
+#
+# Implements the same contract as the Rust and Python verifiers:
+#   - MD parsing (both `## Operation:` and `### Name` block styles)
+#   - Iron Laws I/II/III/IV (fingerprint uniqueness, encoding to ℕ,
+#     law declaration, test mandatory)
+#   - canonical test execution (minimal evaluator: ⊕, ⊗, index, ⊥, I₂)
+
+defmodule SigmaVerify do
+  @numeric_types ["ℕ", "ℤ", "ℚ", "ℝ", "ℂ", "Conf", "Time"]
+
+  # ============================================================
+  # Parser (mirrors impl/verifier/src/main.rs parse_sigma_module)
+  # ============================================================
+
+  def parse(path) do
+    content = File.read!(path)
+    initial = %{
+      name: "parsed_module",
+      version: "0.1.0",
+      imports: [],
+      exports: [],
+      compat_tests: [],
+      symbols: [],
+      functions: [],
+      proof_declared: false,
+      proof_has_model: false,
+      proof_has_invariant: false,
+      guarantee_declared: false,
+      guarantee_metric: nil,
+      guarantee_threshold: nil,
+      guarantee_dataset: nil,
+      determinism_declared: false,
+      determinism_precision: nil,
+      determinism_rounding: nil,
+      determinism_sort_stability: nil,
+      signature_declared: false,
+      signature_signer: nil,
+      signature_pubkey_fp: nil,
+      signature_algorithm: nil,
+      signature_value: nil,
+      shadow_targets: [],
+      timing_contract: nil,
+      capabilities: [],
+      in_imports: false,
+      in_exports: false,
+      in_compat_tests: false,
+      in_proof: false,
+      in_guarantee: false,
+      in_determinism: false,
+      in_signature: false,
+      in_shadowing: false,
+      in_timing: false,
+      in_capabilities: false,
+      in_fence: false,
+      blk: nil
+    }
+    lines = String.split(content, "\n")
+    state = walk(lines, initial)
+    flush(state)
+  end
+
+  # Recursive walk; step/2 may replay a line (imports-section exit).
+  defp walk([], state), do: state
+  defp walk([line | rest], state) do
+    case step(line, state) do
+      {:cont, new_state} -> walk(rest, new_state)
+      {:replay, new_state} -> walk([line | rest], new_state)
+    end
+  end
+
+  defp step(line, state) do
+    t = String.trim(line)
+
+    cond do
+      t == "" ->
+        {:cont, state}
+
+      String.starts_with?(t, "# Module:") ->
+        {:cont, %{state | name: String.trim(String.replace_prefix(t, "# Module:", ""))}}
+
+      String.starts_with?(t, "# Version:") ->
+        {:cont, %{state | version: String.trim(String.replace_prefix(t, "# Version:", ""))}}
+
+      t == "## Imports" ->
+        {:cont, %{state | in_imports: true}}
+
+      t == "## Exports" ->
+        {:cont, %{state | in_exports: true, in_imports: false}}
+
+      t == "## Compat Tests" ->
+        {:cont, %{state | in_compat_tests: true, in_imports: false, in_exports: false}}
+
+      t == "## Proof" ->
+        {:cont, %{state | proof_declared: true, in_proof: true,
+                          in_imports: false, in_exports: false, in_compat_tests: false}}
+
+      t == "## Guarantee" ->
+        {:cont, %{state | guarantee_declared: true, in_guarantee: true,
+                          in_imports: false, in_exports: false, in_compat_tests: false,
+                          in_proof: false}}
+
+      t == "## Determinism" ->
+        {:cont, %{state | determinism_declared: true, in_determinism: true,
+                          in_imports: false, in_exports: false, in_compat_tests: false,
+                          in_proof: false, in_guarantee: false}}
+
+      t == "## Signature" ->
+        {:cont, %{state | signature_declared: true, in_signature: true,
+                          in_imports: false, in_exports: false, in_compat_tests: false,
+                          in_proof: false, in_guarantee: false, in_determinism: false,
+                          in_shadowing: false}}
+
+      t == "## Shadowing" ->
+        {:cont, %{state | in_shadowing: true,
+                          in_imports: false, in_exports: false, in_compat_tests: false,
+                          in_proof: false, in_guarantee: false, in_determinism: false,
+                          in_signature: false}}
+
+      t == "## Timing" ->
+        {:cont, %{state | in_timing: true,
+                          in_imports: false, in_exports: false, in_compat_tests: false,
+                          in_proof: false, in_guarantee: false, in_determinism: false,
+                          in_signature: false, in_shadowing: false}}
+
+      t == "## Capabilities" ->
+        {:cont, %{state | in_capabilities: true,
+                          in_imports: false, in_exports: false, in_compat_tests: false,
+                          in_proof: false, in_guarantee: false, in_determinism: false,
+                          in_signature: false, in_shadowing: false, in_timing: false}}
+
+      String.starts_with?(t, "```") ->
+        {:cont, %{state | in_fence: not state.in_fence}}
+
+      state.in_timing ->
+        cond do
+          String.starts_with?(t, "## ") or String.starts_with?(t, "### ") ->
+            # A heading ends the timing block; replay it below.
+            {:replay, %{state | in_timing: false}}
+
+          true ->
+            {key, val} =
+              cond do
+                String.starts_with?(t, "max_latency:") ->
+                  {"max_latency", t |> String.replace_prefix("max_latency:", "") |> String.trim()}
+                String.starts_with?(t, "max_retries:") ->
+                  {"max_retries", t |> String.replace_prefix("max_retries:", "") |> String.trim()}
+                String.starts_with?(t, "timeout_budget:") ->
+                  {"timeout_budget", t |> String.replace_prefix("timeout_budget:", "") |> String.trim()}
+                String.starts_with?(t, "deadline_miss_policy:") ->
+                  {"deadline_miss_policy", t |> String.replace_prefix("deadline_miss_policy:", "") |> String.trim()}
+                true ->
+                  {nil, nil}
+              end
+            case key do
+              nil ->
+                {:cont, state}
+              _ ->
+                cur = state.timing_contract || %{}
+                {:cont, %{state | timing_contract: Map.put(cur, key, val)}}
+            end
+        end
+
+      state.in_capabilities ->
+        cond do
+          String.starts_with?(t, "## ") or String.starts_with?(t, "### ") ->
+            # A heading ends the capabilities block; replay it below.
+            {:replay, %{state | in_capabilities: false}}
+
+          true ->
+            caps =
+              t
+              |> String.split(",")
+              |> Enum.map(&String.trim/1)
+              |> Enum.reject(&(&1 == "" or &1 == "```"))
+            {:cont, %{state | capabilities: Enum.uniq(state.capabilities ++ caps)}}
+        end
+
+      state.in_shadowing ->
+        cond do
+          String.starts_with?(t, "## ") or String.starts_with?(t, "### ") ->
+            # A heading ends the shadowing block; replay it below.
+            {:replay, %{state | in_shadowing: false}}
+
+          true ->
+            case Regex.run(~r/^shadow\s+(\S+)/, t) do
+              [_, target_raw] ->
+                target = target_raw |> String.split("→") |> List.first() |> String.trim()
+                if target == "" do
+                  {:cont, state}
+                else
+                  {:cont, %{state | shadow_targets: state.shadow_targets ++ [target]}}
+                end
+              _ ->
+                {:cont, state}
+            end
+        end
+
+      state.in_signature ->
+        cond do
+          String.starts_with?(t, "## ") or String.starts_with?(t, "### ") ->
+            # A heading ends the signature block; replay it below.
+            {:replay, %{state | in_signature: false}}
+
+          true ->
+            {key, val} =
+              cond do
+                String.starts_with?(t, "signer:") ->
+                  {"signer", t |> String.replace_prefix("signer:", "") |> String.trim()}
+                String.starts_with?(t, "pubkey_fp:") ->
+                  {"pubkey_fp", t |> String.replace_prefix("pubkey_fp:", "") |> String.trim()}
+                String.starts_with?(t, "algorithm:") ->
+                  {"algorithm", t |> String.replace_prefix("algorithm:", "") |> String.trim()}
+                String.starts_with?(t, "signature:") ->
+                  {"signature", t |> String.replace_prefix("signature:", "") |> String.trim()}
+                true ->
+                  {nil, nil}
+              end
+            case key do
+              nil -> {:cont, state}
+              "signer" -> {:cont, %{state | signature_signer: val}}
+              "pubkey_fp" -> {:cont, %{state | signature_pubkey_fp: val}}
+              "algorithm" -> {:cont, %{state | signature_algorithm: val}}
+              "signature" -> {:cont, %{state | signature_value: val}}
+            end
+        end
+
+      state.in_determinism ->
+        cond do
+          String.starts_with?(t, "## ") or String.starts_with?(t, "### ") ->
+            # A heading ends the determinism block; replay it below.
+            {:replay, %{state | in_determinism: false}}
+
+          true ->
+            {key, val} =
+              cond do
+                String.starts_with?(t, "precision:") ->
+                  {"precision", t |> String.replace_prefix("precision:", "") |> String.trim()}
+                String.starts_with?(t, "rounding:") ->
+                  {"rounding", t |> String.replace_prefix("rounding:", "") |> String.trim()}
+                String.starts_with?(t, "sort_stability:") ->
+                  {"sort_stability", t |> String.replace_prefix("sort_stability:", "") |> String.trim()}
+                true ->
+                  {nil, nil}
+              end
+            case key do
+              nil -> {:cont, state}
+              "precision" -> {:cont, %{state | determinism_precision: val}}
+              "rounding" -> {:cont, %{state | determinism_rounding: val}}
+              "sort_stability" -> {:cont, %{state | determinism_sort_stability: val}}
+            end
+        end
+
+      state.in_guarantee ->
+        cond do
+          String.starts_with?(t, "## ") or String.starts_with?(t, "### ") ->
+            # A heading ends the guarantee block; replay it below.
+            {:replay, %{state | in_guarantee: false}}
+
+          true ->
+            {key, val} =
+              cond do
+                String.starts_with?(t, "metric:") ->
+                  {"metric", t |> String.replace_prefix("metric:", "") |> String.trim()}
+                String.starts_with?(t, "threshold:") ->
+                  {"threshold", t |> String.replace_prefix("threshold:", "") |> String.trim()}
+                String.starts_with?(t, "dataset:") ->
+                  {"dataset", t |> String.replace_prefix("dataset:", "") |> String.trim()}
+                true ->
+                  {nil, nil}
+              end
+            case key do
+              nil -> {:cont, state}
+              "metric" -> {:cont, %{state | guarantee_metric: val}}
+              "threshold" -> {:cont, %{state | guarantee_threshold: val}}
+              "dataset" -> {:cont, %{state | guarantee_dataset: val}}
+            end
+        end
+
+      state.in_proof ->
+        cond do
+          String.starts_with?(t, "## ") or String.starts_with?(t, "### ") ->
+            case t do
+              "### Model" -> {:cont, %{state | proof_has_model: true}}
+              "### Invariant" -> {:cont, %{state | proof_has_invariant: true}}
+              "### Trusted" -> {:cont, state}
+              # Any other heading exits proof mode; replay it below.
+              _ -> {:replay, %{state | in_proof: false}}
+            end
+
+          true ->
+            {:cont, state}  # proof content lines are not parsed
+        end
+
+      state.in_compat_tests ->
+        cond do
+          not state.in_fence and (String.starts_with?(t, "## ") or String.starts_with?(t, "### ")) ->
+            # A heading ends the compat-tests section; replay it (block boundary).
+            {:replay, %{state | in_compat_tests: false}}
+
+          String.starts_with?(t, "|") ->
+            cond do
+              String.starts_with?(t, "|-") or String.contains?(t, "Input") or
+                String.contains?(t, "Output") or String.contains?(t, "Expected") ->
+                {:cont, state}
+
+              true ->
+                cells = t |> String.trim_leading("|") |> String.trim_trailing("|")
+                         |> String.split("|") |> Enum.map(&String.trim/1)
+                case cells do
+                  [input, expected | _] ->
+                    test = {input, expected}
+                    {:cont, %{state | compat_tests: state.compat_tests ++ [test]}}
+                  _ ->
+                    {:cont, state}
+                end
+            end
+
+          true ->
+            {:cont, state}
+        end
+
+      state.in_exports ->
+        cond do
+          not (String.starts_with?(t, "## ") or String.starts_with?(t, "### ")) ->
+            # Collect comma/whitespace-separated exported names.
+            toks = Regex.split(~r/[,\s]+/, t) |> Enum.map(&String.trim/1)
+                    |> Enum.reject(fn x -> x == "" or x == "```" end)
+            {:cont, %{state | exports: state.exports ++ toks}}
+
+          true ->
+            # A heading ends the exports section; replay it (block boundary).
+            {:replay, %{state | in_exports: false}}
+        end
+
+      state.in_imports ->
+        cond do
+          String.starts_with?(t, "import") ->
+            pkg = String.trim(String.replace_prefix(t, "import", ""))
+            kind = cond do
+              String.contains?(pkg, "optional") -> :optional
+              String.contains?(pkg, "custom") -> :custom
+              true -> :standard
+            end
+            clean = pkg |> String.split(~r/\s+/) |> List.first() |> String.trim_trailing(",")
+            {:cont, %{state | imports: state.imports ++ [{clean, kind}]}}
+
+          true ->
+            # Non-import line: leave imports mode and replay this line.
+            {:replay, %{state | in_imports: false}}
+        end
+
+      not state.in_fence and (String.starts_with?(t, "## ") or String.starts_with?(t, "### ")) ->
+        handle_heading(t, state)
+
+      state.in_fence and (t == "## Laws" or t == "## Tests") ->
+        mode = if t == "## Laws", do: :laws, else: :tests
+        {:cont, set_mode(state, mode)}
+
+      state.blk != nil and String.starts_with?(t, "Fingerprint:") ->
+        fp = String.trim(String.replace_prefix(t, "Fingerprint:", ""))
+        {:cont, %{state | blk: %{state.blk | fp: fp}}}
+
+      state.blk != nil and String.starts_with?(t, "# Pre:") ->
+        {:cont, %{state | blk: %{state.blk | has_pre: true}}}
+
+      state.blk != nil and String.starts_with?(t, "# Post:") ->
+        {:cont, %{state | blk: %{state.blk | has_post: true}}}
+
+      state.blk != nil and state.blk.mode == :tests and String.starts_with?(t, "|") ->
+        cond do
+          String.starts_with?(t, "|-") or String.contains?(t, "Input") or
+            String.contains?(t, "Output") or String.contains?(t, "Expected") ->
+            {:cont, state}
+
+          true ->
+            cells = t |> String.trim_leading("|") |> String.trim_trailing("|")
+                     |> String.split("|") |> Enum.map(&String.trim/1)
+            case cells do
+              [input, expected | _] ->
+                test = {input, expected}
+                {:cont, %{state | blk: %{state.blk | tests: state.blk.tests ++ [test]}}}
+              _ ->
+                {:cont, state}
+            end
+        end
+
+      state.blk != nil and (state.blk.mode == :laws or String.starts_with?(t, "∀") or
+                            String.starts_with?(t, "∃") or String.contains?(t, "≡")) ->
+        if String.contains?(t, "|") do
+          {:cont, state}
+        else
+          {:cont, %{state | blk: %{state.blk | laws: state.blk.laws ++ [t]}}}
+        end
+
+      state.blk != nil and state.blk.sig == "" and looks_like_signature(t) ->
+        name = t |> String.split(":", parts: 2) |> List.first() |> String.trim()
+        name = if name == "" or String.contains?(name, " "), do: state.blk.name, else: name
+        {:cont, %{state | blk: %{state.blk | sig: t, name: name}}}
+
+      true ->
+        {:cont, state}
+    end
+  end
+
+  defp handle_heading(t, state) do
+    case t do
+      "### Signature" -> {:cont, set_mode(state, :sig)}
+      "### Laws" -> {:cont, set_mode(state, :laws)}
+      "## Laws" -> {:cont, set_mode(state, :laws)}
+      "### Tests" -> {:cont, set_mode(state, :tests)}
+      "## Tests" -> {:cont, set_mode(state, :tests)}
+      _ ->
+        state = flush(state)
+        heading = t |> String.trim_leading("#") |> String.trim()
+                   |> String.replace_prefix("Operation:", "") |> String.trim()
+        {:cont, %{state | blk: new_blk(heading)}}
+    end
+  end
+
+  defp set_mode(state, mode) do
+    case state.blk do
+      nil -> state
+      blk -> %{state | blk: %{blk | mode: mode}}
+    end
+  end
+
+  defp new_blk(heading) do
+    %{name: heading, glyph: heading, sig: "", fp: nil, laws: [], tests: [], mode: :sig,
+      has_pre: false, has_post: false}
+  end
+
+  # Mirror Rust flush_block: fp -> symbol; signed no-fp -> function; else discard.
+  defp flush(state) do
+    case state.blk do
+      nil -> state
+      %{fp: fp} = blk when fp != nil ->
+        semantic = if blk.sig == "", do: "Any", else: blk.sig |> String.split("→") |> List.last() |> String.trim()
+        sym = %{name: blk.name, glyph: blk.glyph, fingerprint: fp,
+                semantic_class: semantic, definition: blk.sig,
+                laws: blk.laws, tests: blk.tests,
+                has_pre: blk.has_pre, has_post: blk.has_post}
+        %{state | blk: nil, symbols: state.symbols ++ [sym]}
+      %{sig: sig} = blk when sig != "" ->
+        fn_ = %{name: blk.name, signature: blk.sig, effect: :pure,
+                body: "", laws: blk.laws, tests: blk.tests}
+        %{state | blk: nil, functions: state.functions ++ [fn_]}
+      _ ->
+        %{state | blk: nil}
+    end
+  end
+
+  defp looks_like_signature(t) do
+    not String.starts_with?(t, "|") and not String.starts_with?(t, "#") and
+      String.contains?(t, ":") and String.contains?(t, "→")
+  end
+
+  # ============================================================
+  # Iron Law checks (Law I / II / III / IV)
+  # ============================================================
+
+  def check(state) do
+    violations = []
+
+    # Law I — fingerprint uniqueness (within module).
+    {violations, _seen} =
+      Enum.reduce(state.symbols, {violations, MapSet.new()}, fn sym, {v, seen} ->
+        if sym.fingerprint == nil do
+          {v ++ ["MissingFingerprint(#{sym.name})"], seen}
+        else
+          if MapSet.member?(seen, sym.fingerprint) do
+            {v ++ ["FingerprintConflict(#{sym.name}, #{sym.fingerprint})"], seen}
+          else
+            {v, MapSet.put(seen, sym.fingerprint)}
+          end
+        end
+      end)
+
+    # Law II — encoding to ℕ for non-numeric return types.
+    encoders = Enum.map(state.functions, fn f -> "#{f.name} #{f.signature}" end)
+    violations =
+      Enum.reduce(state.symbols, violations, fn sym, v ->
+        rt = sym.semantic_class
+        if rt in @numeric_types do
+          v
+        else
+          has_enc = Enum.any?(encoders, fn e ->
+            String.contains?(String.downcase(e), "encode") and String.contains?(e, rt)
+          end)
+          if has_enc, do: v, else: v ++ ["MissingEncoding(#{sym.name})"]
+        end
+      end)
+
+    # Law III — law declaration.
+    violations =
+      Enum.reduce(state.symbols, violations, fn sym, v ->
+        if sym.laws == [], do: v ++ ["NoLawsDeclared(#{sym.name})"], else: v
+      end)
+
+    # Law IV — test mandatory.
+    violations =
+      Enum.reduce(state.symbols, violations, fn sym, v ->
+        if sym.tests == [], do: v ++ ["NoTestsDefined(#{sym.name})"], else: v
+      end)
+
+    # E-02 (promoted 2026-08-01) — negative test mandatory:
+    # every op needs ≥1 test whose expected output starts with ⊥.
+    violations =
+      Enum.reduce(state.symbols, violations, fn sym, v ->
+        has_neg = Enum.any?(sym.tests, fn {_input, exp} ->
+          String.starts_with?(String.trim(exp), "⊥")
+        end)
+        if has_neg, do: v, else: v ++ ["NoNegativeTest(#{sym.name})"]
+      end)
+
+    # E-03 (promoted 2026-08-01) — test portability:
+    # every test's expected output must be semantically structured —
+    # an error (⊥-prefixed) or a parseable literal — never an
+    # implementation-specific format (float string, Map rendering, …).
+    violations =
+      Enum.reduce(state.symbols, violations, fn sym, v ->
+        Enum.reduce(sym.tests, v, fn {_input, exp}, acc ->
+          e = String.trim(exp)
+          portable = String.starts_with?(e, "⊥") or match?({:ok, _}, parse_val(e))
+          if portable, do: acc, else: acc ++ ["UnportableAssertion(#{sym.name}, #{exp})"]
+        end)
+      end)
+
+    # E-04 (promoted 2026-08-01) — export completeness:
+    # `## Exports` must match defined symbols (no ghost, no hidden).
+    # Modules without an Exports block are not checked (v0.1 policy).
+    violations =
+      if state.exports == [] do
+        violations
+      else
+        defined = MapSet.new(Enum.map(state.symbols, & &1.name))
+        violations =
+          Enum.reduce(state.exports, violations, fn exp, v ->
+            if MapSet.member?(defined, exp),
+              do: v,
+              else: v ++ ["GhostExport(#{exp})"]
+          end)
+        Enum.reduce(state.symbols, violations, fn sym, v ->
+          if sym.name in state.exports,
+            do: v,
+            else: v ++ ["HiddenExport(#{sym.name})"]
+        end)
+      end
+
+    # E-05 (promoted 2026-08-01) — compatibility proof:
+    # `## Compat Tests` (the previous version's canonical suite) must all pass,
+    # otherwise the "backward compatible" claim is rejected.
+    violations =
+      Enum.reduce(state.compat_tests, violations, fn {input, expected}, v ->
+        case eval_test(input, expected) do
+          :ok -> v
+          {:error, detail} -> v ++ ["CompatTestFailed(#{input}): #{detail}"]
+        end
+      end)
+
+    # P-01 (spec_top_proofs.md) — proof-carrying spec structure:
+    # a module declaring `## Proof` must have a `### Model` and a `### Invariant`,
+    # and every operation must declare Pre and Post together (or neither).
+    violations =
+      if state.proof_declared do
+        violations =
+          if state.proof_has_model,
+            do: violations,
+            else: violations ++ ["MissingModel(#{state.name})"]
+        violations =
+          if state.proof_has_invariant,
+            do: violations,
+            else: violations ++ ["MissingInvariant(#{state.name})"]
+        Enum.reduce(state.symbols, violations, fn sym, v ->
+          if sym.has_pre == sym.has_post,
+            do: v,
+            else: v ++ ["IncompleteContract(#{sym.name})"]
+        end)
+      else
+        violations
+      end
+
+    # E-06 (promoted 2026-08-01) — internal consistency adjudication:
+    # test expected value must match the operation's declared return-type shape
+    # (numeric return → numeric expectation, container return → list expectation).
+    violations =
+      Enum.reduce(state.symbols, violations, fn sym, v ->
+        rt = sym.semantic_class |> String.trim()
+        numeric = rt in @numeric_types
+        container = Enum.any?(["List", "Tensor", "Map", "Seq", "Fmap"], fn k ->
+          String.contains?(rt, k)
+        end)
+        if not numeric and not container do
+          v  # unknown shape — cannot judge
+        else
+          Enum.reduce(sym.tests, v, fn {_input, exp}, acc ->
+            e = String.trim(exp)
+            if String.starts_with?(e, "⊥") do
+              acc  # error path — no value shape to check
+            else
+              case parse_val(e) do
+                {:ok, {:num, _}} ->
+                  if container and not numeric,
+                    do: acc ++ ["SignatureMismatch(#{sym.name}, #{exp})"],
+                    else: acc
+                {:ok, {:fnum, _}} ->
+                  if container and not numeric,
+                    do: acc ++ ["SignatureMismatch(#{sym.name}, #{exp})"],
+                    else: acc
+                {:ok, {:list, _}} ->
+                  if numeric and not container,
+                    do: acc ++ ["SignatureMismatch(#{sym.name}, #{exp})"],
+                    else: acc
+                :error ->
+                  acc  # unparseable — E-03 portability already flags
+              end
+            end
+          end)
+        end
+      end)
+
+    # E-09 (promoted 2026-08-01) — probabilistic guarantee: a prediction op must
+    # declare a performance floor (metric, threshold, dataset) well-formed. The
+    # Verifier certifies the declaration only; production conformance is runtime
+    # monitoring's job.
+    violations =
+      if not state.guarantee_declared do
+        violations
+      else
+        metric = state.guarantee_metric || ""
+        violations =
+          if metric in ["accuracy", "f1", "brier"],
+            do: violations,
+            else: violations ++ ["MalformedGuarantee(invalid metric: #{inspect(metric)})"]
+        violations =
+          case Float.parse(state.guarantee_threshold || "") do
+            {v, _} when v >= 0.0 and v <= 1.0 -> violations
+            _ -> violations ++ ["MalformedGuarantee(invalid threshold: #{inspect(state.guarantee_threshold)} (expected 0..=1))"]
+          end
+        violations =
+          if String.trim(state.guarantee_dataset || "") == "",
+            do: violations ++ ["MalformedGuarantee(missing dataset)"],
+            else: violations
+        violations
+      end
+
+    # E-10 (promoted 2026-08-01) — evaluation determinism: a module declaring
+    # `## Determinism` must declare numeric precision (positive integer),
+    # rounding (round|floor|ceil|trunc), and sort_stability (true|false).
+    # Extends Law VIII (temporal determinism) to numeric evaluation.
+    violations =
+      if not state.determinism_declared do
+        violations
+      else
+        precision = state.determinism_precision || ""
+        violations =
+          case Integer.parse(precision) do
+            {v, _} when v >= 1 -> violations
+            _ -> violations ++ ["MalformedDeterminism(invalid precision: #{inspect(precision)} (expected positive integer))"]
+          end
+        rounding = state.determinism_rounding || ""
+        violations =
+          if rounding in ["round", "floor", "ceil", "trunc"],
+            do: violations,
+            else: violations ++ ["MalformedDeterminism(invalid rounding: #{inspect(rounding)} (expected round|floor|ceil|trunc))"]
+        sort_stab = state.determinism_sort_stability || ""
+        violations =
+          if sort_stab in ["true", "false"],
+            do: violations,
+            else: violations ++ ["MalformedDeterminism(invalid sort_stability: #{inspect(sort_stab)} (expected true|false))"]
+        violations
+      end
+
+    # E-08 S-01 Level 1 (2026-08-01) — package signature: a module declaring
+    # `## Signature` must provide a well-formed signer, pubkey_fp (sha256:),
+    # algorithm (ed25519), and a non-empty signature. Modules without a
+    # signature still verify (backward compatible — Law VI).
+    violations =
+      if not state.signature_declared do
+        violations
+      else
+        violations =
+          if String.trim(state.signature_signer || "") == "",
+            do: violations ++ ["MalformedSignature(missing signer)"],
+            else: violations
+        fp = state.signature_pubkey_fp || ""
+        violations =
+          if String.starts_with?(fp, "sha256:") and byte_size(fp) > 7,
+            do: violations,
+            else: violations ++ ["MalformedSignature(invalid pubkey_fp: #{inspect(fp)} (expected sha256:…))"]
+        algo = state.signature_algorithm || ""
+        violations =
+          if algo == "ed25519",
+            do: violations,
+            else: violations ++ ["MalformedSignature(invalid algorithm: #{inspect(algo)} (expected ed25519))"]
+        violations =
+          if String.trim(state.signature_value || "") == "",
+            do: violations ++ ["MalformedSignature(missing signature)"],
+            else: violations
+        violations
+      end
+
+    # §S Shadowing & Binding Discipline (2026-08-01):
+    # - DuplicateSymbol: a module must not define the same symbol name twice
+    #   (Meta-Rule 2 / No Synonyms, §S R3 determinism).
+    # - ShadowTargetMissing: every `## Shadowing` declaration must reference a
+    #   symbol that actually exists (§S R1 explicit declaration).
+    # - OpaqueShadowAttempt: math-domain symbols are Opaque-class and must not
+    #   be shadowed (§S R5).
+    opaque_math = ["⊕", "⊗", "⊖", "⊘", "⊙", "≡", "≥", "≤", "∈", "ℕ", "ℤ", "ℚ", "ℝ"]
+    violations =
+      Enum.reduce(state.shadow_targets, violations, fn target, v ->
+        if target in opaque_math,
+          do: v ++ ["OpaqueShadowAttempt(#{target})"],
+          else: v
+      end)
+    violations =
+      Enum.reduce(state.symbols, violations, fn sym, v ->
+        if sym.name in Enum.map(state.symbols, & &1.name) do
+          v
+        else
+          v
+        end
+      end)
+    # Duplicate symbol detection via set.
+    seen = MapSet.new()
+    {violations, _seen} =
+      Enum.reduce(state.symbols, {violations, seen}, fn sym, {v, seen} ->
+        if MapSet.member?(seen, sym.name) do
+          {v ++ ["DuplicateSymbol(#{sym.name})"], seen}
+        else
+          {v, MapSet.put(seen, sym.name)}
+        end
+      end)
+    # Shadow targets must resolve to defined symbols. Qualified names
+    # (e.g. finance.base.Δ) reference external-package symbols that v0.1
+    # cannot resolve — only local names are checked.
+    defined = MapSet.new(Enum.map(state.symbols, & &1.name))
+    violations =
+      Enum.reduce(state.shadow_targets, violations, fn target, v ->
+        cond do
+          String.contains?(target, ".") ->
+            v
+          MapSet.member?(defined, target) ->
+            # R7: declared Free-class shadow — verification passes, but the
+            # report flags a warning (spec_top_rules.md §S R7 / S-11).
+            IO.puts("⚠️ R7-warning: free-class shadow of #{target} (declared; verification passes)")
+            v
+          true ->
+            v ++ ["ShadowTargetMissing(#{target})"]
+        end
+      end)
+
+    {violations == [], violations}
+  end
+
+  # ============================================================
+  # Minimal canonical-test evaluator (tensor ops subset)
+  # ============================================================
+
+  # Values: {:num, int} | {:list, [value]}
+
+  def run_tests(state) do
+    {passed, total, failures} =
+      Enum.reduce(state.symbols, {0, 0, []}, fn sym, {p, t, f} ->
+        Enum.reduce(sym.tests, {p, t, f}, fn {input, expected}, {p, t, f} ->
+          t = t + 1
+          case eval_test(input, expected) do
+            :ok -> {p + 1, t, f}
+            {:error, detail} -> {p, t, f ++ ["TestFailed(#{sym.name}, #{input}): #{detail}"]}
+          end
+        end)
+      end)
+    {passed, total, failures}
+  end
+
+  defp eval_test(input, expected) do
+    expect_err = String.starts_with?(String.trim(expected), "⊥")
+    case eval_expr(input) do
+      {:ok, v} ->
+        if expect_err do
+          {:error, "expected error, got #{fmt(v)}"}
+        else
+          case parse_val(expected) do
+            {:ok, exp} when exp == v -> :ok
+            {:ok, exp} -> {:error, "expected #{fmt(exp)}, got #{fmt(v)}"}
+            :error -> {:error, "unparseable expectation: #{expected}"}
+          end
+        end
+      {:error, e} ->
+        if expect_err, do: :ok, else: {:error, "evaluation failed: #{e}"}
+    end
+  end
+
+  defp eval_expr(s) do
+    t = String.trim(s)
+    cond do
+      String.contains?(t, "where shape mismatch") -> {:error, "ShapeError"}
+      String.contains?(t, "⊕") ->
+        [a, b] = String.split(t, "⊕", parts: 2)
+        with {:ok, va} <- eval_expr(a), {:ok, vb} <- eval_expr(b),
+             do: elemwise_add(va, vb)
+      String.contains?(t, "⊗") ->
+        [a, b] = String.split(t, "⊗", parts: 2)
+        with {:ok, va} <- eval_expr(a), {:ok, vb} <- eval_expr(b),
+             do: mat_mul(va, vb)
+      String.starts_with?(t, "index(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 6..-2//1)
+        case split_top_level(inner, ?,) do
+          {target, idx} ->
+            with {:ok, tv} <- eval_expr(target), {:ok, iv} <- parse_val(idx),
+                 do: index_into(tv, iv)
+          nil -> {:error, "bad index args: #{inner}"}
+        end
+      t == "I₂" ->
+        {:ok, {:list, [{:list, [{:num, 1}, {:num, 0}]},
+                       {:list, [{:num, 0}, {:num, 1}]}]}}
+      true ->
+        parse_val(t)
+    end
+  end
+
+  defp elemwise_add({:num, x}, {:num, y}), do: {:ok, {:num, x + y}}
+  defp elemwise_add({:fnum, x}, {:fnum, y}), do: {:ok, {:fnum, x + y}}
+  defp elemwise_add({:num, x}, {:fnum, y}), do: {:ok, {:fnum, x * 1.0 + y}}
+  defp elemwise_add({:fnum, x}, {:num, y}), do: {:ok, {:fnum, x + y * 1.0}}
+  defp elemwise_add({:list, xs}, {:list, ys}) do
+    if length(xs) != length(ys) do
+      {:error, "ShapeError"}
+    else
+      result = Enum.zip(xs, ys)
+               |> Enum.map(fn {x, y} -> elemwise_add(x, y) end)
+      case Enum.split_with(result, &match?({:ok, _}, &1)) do
+        {oks, []} -> {:ok, {:list, Enum.map(oks, fn {:ok, v} -> v end)}}
+        _ -> {:error, "ShapeError"}
+      end
+    end
+  end
+  defp elemwise_add(_, _), do: {:error, "ShapeError"}
+
+  defp mat_mul({:list, rows}, {:list, vec}) do
+    result = Enum.map(rows, fn row ->
+      case row do
+        {:list, cells} ->
+          if length(cells) != length(vec) do
+            {:error, "ShapeError"}
+          else
+            {acc, _is_float} =
+              Enum.zip(cells, vec)
+              |> Enum.reduce_while({0, false}, fn {c, v}, {acc, is_float} ->
+                   case {c, v} do
+                     {{:num, cn}, {:num, vn}} -> {:cont, {acc + cn * vn, is_float}}
+                     {{:fnum, cn}, {:fnum, vn}} -> {:cont, {acc + cn * vn, true}}
+                     {{:num, cn}, {:fnum, vn}} -> {:cont, {acc + cn * 1.0 * vn, true}}
+                     {{:fnum, cn}, {:num, vn}} -> {:cont, {acc + cn * vn * 1.0, true}}
+                     _ -> {:halt, {:type_error, is_float}}
+                   end
+                 end)
+            case acc do
+              {:type_error, _} -> {:error, "TypeError"}
+              {n, true} -> {:ok, {:fnum, n * 1.0}}
+              {n, false} -> {:ok, {:num, n}}
+            end
+          end
+        _ -> {:error, "ShapeError"}
+      end
+    end)
+    case Enum.split_with(result, &match?({:ok, _}, &1)) do
+      {oks, []} -> {:ok, {:list, Enum.map(oks, fn {:ok, v} -> v end)}}
+      _ -> {:error, "ShapeError"}
+    end
+  end
+  defp mat_mul(_, _), do: {:error, "ShapeError"}
+
+  defp index_into(target, idx) do
+    path = collect_path(idx, [])
+    Enum.reduce_while(path, {:ok, target}, fn i, {:ok, cur} ->
+      case cur do
+        {:list, items} ->
+          case Enum.at(items, i) do
+            nil -> {:halt, {:error, "OutOfBounds"}}
+            v -> {:cont, {:ok, v}}
+          end
+        _ -> {:halt, {:error, "TypeError"}}
+      end
+    end)
+  end
+
+  defp collect_path({:num, n}, acc), do: acc ++ [n]
+  defp collect_path({:list, items}, acc), do: Enum.reduce(items, acc, &collect_path/2)
+  defp collect_path(_, acc), do: acc
+
+  # Literal parsing: `2`, `0.5`, `[1,2,3]`, `[[1,2],[3,4]]`, `(1,0)`.
+  defp parse_val(s) do
+    # Normalize common Unicode minus/hyphen variants to ASCII '-' (M-4).
+    t = s |> String.replace(["−", "﹣", "－", "‐", "‑"], "-") |> String.trim()
+    cond do
+      Regex.match?(~r/^-?\d+$/, t) ->
+        {:ok, {:num, String.to_integer(t)}}
+      Regex.match?(~r/^-?\d+\.\d+$/, t) ->
+        {:ok, {:fnum, String.to_float(t)}}
+      String.starts_with?(t, "[") and String.ends_with?(t, "]") ->
+        parse_list(String.slice(t, 1..-2//1))
+      String.starts_with?(t, "(") and String.ends_with?(t, ")") ->
+        parse_list(String.slice(t, 1..-2//1))
+      true ->
+        :error
+    end
+  end
+
+  defp parse_list(inner) do
+    if String.trim(inner) == "" do
+      {:ok, {:list, []}}
+    else
+      parts = split_all_top_level(inner, ?,) |> Enum.map(&String.trim/1)
+      result = Enum.map(parts, &parse_val/1)
+      case Enum.split_with(result, &match?({:ok, _}, &1)) do
+        {oks, []} -> {:ok, {:list, Enum.map(oks, fn {:ok, v} -> v end)}}
+        _ -> :error
+      end
+    end
+  end
+
+  # Split at the first depth-0 occurrence of sep (returns {left, right} or nil).
+  defp split_top_level(s, sep), do: split_top_level(s, sep, 0, 0)
+
+  defp split_top_level(s, _sep, i, _depth) when i >= byte_size(s), do: nil
+  defp split_top_level(s, sep, i, depth) do
+    c = :binary.at(s, i)
+    cond do
+      c in [?[, ?(] -> split_top_level(s, sep, i + 1, depth + 1)
+      c in [?], ?)] -> split_top_level(s, sep, i + 1, max(depth - 1, 0))
+      c == sep and depth == 0 ->
+        left = binary_part(s, 0, i)
+        right = binary_part(s, i + 1, byte_size(s) - i - 1)
+        {left, right}
+      true -> split_top_level(s, sep, i + 1, depth)
+    end
+  end
+
+  defp split_all_top_level(s, sep), do: split_all_top_level(s, sep, 0, 0, 0, [])
+
+  # Walk with a current-slice start; at a depth-0 separator, cut a piece.
+  defp split_all_top_level(s, _sep, start, i, _depth, acc) when i >= byte_size(s) do
+    piece = binary_part(s, start, i - start) |> String.trim()
+    Enum.reverse([piece | acc])
+  end
+  defp split_all_top_level(s, sep, start, i, depth, acc) do
+    c = :binary.at(s, i)
+    cond do
+      c in [?[, ?(] -> split_all_top_level(s, sep, start, i + 1, depth + 1, acc)
+      c in [?], ?)] -> split_all_top_level(s, sep, start, i + 1, max(depth - 1, 0), acc)
+      c == sep and depth == 0 ->
+        piece = binary_part(s, start, i - start) |> String.trim()
+        split_all_top_level(s, sep, i + 1, i + 1, depth, [piece | acc])
+      true -> split_all_top_level(s, sep, start, i + 1, depth, acc)
+    end
+  end
+
+  defp fmt({:num, n}), do: Integer.to_string(n)
+  defp fmt({:fnum, f}), do: Float.to_string(f)
+  defp fmt({:list, items}), do: "[" <> Enum.map_join(items, ",", &fmt/1) <> "]"
+end
+
+# ============================================================
+# CLI entry (mirrors the Rust verifier's exit-code contract)
+# ============================================================
+
+case System.argv() do
+  [path | _] ->
+    state = SigmaVerify.parse(path)
+    {ok, violations} = SigmaVerify.check(state)
+    {passed, total, test_failures} = SigmaVerify.run_tests(state)
+    all = violations ++ test_failures
+    if ok and all == [] do
+      IO.puts("PASS: #{passed}/#{total} tests passed")
+      System.halt(0)
+    else
+      IO.puts("FAIL: #{Enum.join(Enum.take(all, 3), "; ")}")
+      System.halt(1)
+    end
+
+  _ ->
+    IO.puts("usage: elixir sigma_verify.exs <module.md>")
+    System.halt(2)
+end

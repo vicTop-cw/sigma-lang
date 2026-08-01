@@ -1,0 +1,48 @@
+name: Verifier Consensus
+
+# E-01 gate — three independent verifiers (Python / Rust / Elixir) must agree
+# on every corpus module. See spec_top_extensions.md E-01.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  consensus:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.18"
+          otp-version: "27"
+
+      - name: Build Rust verifier
+        working-directory: impl/verifier
+        run: cargo build
+
+      - name: Install z3 (proof backend)
+        run: pip install z3-solver
+
+      - name: Run three-verifier consensus (E-01 gate)
+        run: python3 verify_consensus.py
+
+      - name: Run proof discharge (P-01 obligations via sigma-prove)
+        run: python3 tools/sigma-prove.py corpus/proof_ok.md corpus/proof_max.md
+
+      - name: Run MoonBit proof bridge (sigma-moonbit translation)
+        run: python3 tools/sigma-moonbit.py corpus/proof_ok.md corpus/proof_max.md
+
+      - name: Run P0 algorithmic checks
+        run: python3 verify_p0.py
