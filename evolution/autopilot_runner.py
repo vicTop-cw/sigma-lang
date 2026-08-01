@@ -56,15 +56,15 @@ def pid_alive(pid):
         return False
     if os.name == "nt":
         try:
-            out = subprocess.run(
+            p = subprocess.run(
                 ["tasklist", "/FI", f"PID eq {pid}", "/NH"],
-                capture_output=True, text=True, encoding="utf-8", errors="replace",
-            ).stdout
-            # 输出为 GBK 时可能乱码；用"不包含 no tasks"且非空判断，规避编码问题。
-            lowered = out.lower()
-            if "no tasks" in lowered:
-                return False
-            return out.strip() != ""
+                capture_output=True,
+            )
+            # 中文 Windows 下输出为 GBK（"没有运行的任务匹配指定标准"）。
+            # tasklist 对不存在的 PID 也返回 0，故用"输出是否含该 PID 数字"判据，
+            # 与编码无关、与退出码无关。
+            out = p.stdout.decode("gbk", errors="replace")
+            return str(pid) in out
         except OSError:
             return False
     try:
@@ -150,8 +150,12 @@ def run_once():
 def main():
     ap = argparse.ArgumentParser(description="ΣLang 自演化守护脚本")
     ap.add_argument("--once", action="store_true", help="只跑一轮（供外部调度器调用）")
-    ap.add_argument("--interval", type=int, default=0,
-                    help="循环间隔秒数（>0 则进入守护循环）")
+    ap.add_argument("--interval", type=int, default=900,
+                    help="normal 模式：每 N 秒跑一轮（默认 900 = 15 分钟）")
+    ap.add_argument("--max-wait", type=int, default=5,
+                    help="normal 模式：重入时最多等待次数（默认 5）")
+    ap.add_argument("--wait-interval", type=int, default=60,
+                    help="normal 模式：每次等待秒数（默认 60）")
     ap.add_argument("--kill", action="store_true", help="强杀上次还在跑的进程")
     ap.add_argument("--status", action="store_true", help="显示锁/上次运行状态")
     args = ap.parse_args()
@@ -168,13 +172,32 @@ def main():
                   f"→ {'仍在运行' if alive else '已退出'}")
         return 0
 
-    if args.once or args.interval <= 0:
+    if args.once:
         return run_once()
 
-    log(f"进入守护循环：每 {args.interval} 秒一轮（Ctrl+C 退出）。")
+    log(f"进入 normal 调度：每 {args.interval}s 跑一轮；"
+        f"若上次仍在运行则等待（{args.wait_interval}s/次，最多 {args.max_wait} 次），"
+        f"仍存活则强杀后接管（Ctrl+C 退出）。")
     try:
         while True:
             rc = run_once()
+            if rc == 1:
+                # 重入拒绝（上次还在跑）：按 max-wait 次等待，仍存活则强杀后接管。
+                waited = 0
+                while waited < args.max_wait:
+                    log(f"上次任务仍在运行，等待 {args.wait_interval}s "
+                        f"({waited + 1}/{args.max_wait})…")
+                    time.sleep(args.wait_interval)
+                    lock = read_lock()
+                    pid = (lock or {}).get("pid", 0)
+                    if not pid_alive(pid):
+                        break  # 上次已结束，可接管
+                    waited += 1
+                lock = read_lock()
+                if pid_alive((lock or {}).get("pid", 0)):
+                    log(f"等待 {args.max_wait} 次后上次任务仍在运行，执行强杀。")
+                    kill_previous()
+                rc = run_once()  # 接管重跑
             log(f"轮次结束 (rc={rc})，休眠 {args.interval}s…")
             time.sleep(args.interval)
     except KeyboardInterrupt:

@@ -28,21 +28,37 @@ atomcode -p "<自主维护提示词>" -C <仓库根目录>
 # 1) 跑一轮（适合：手动触发 / Windows 任务计划器 / cron）
 python3 evolution/autopilot_runner.py --once
 
-# 2) 守护循环：每 1 小时自动跑一轮（前台常驻）
-python3 evolution/autopilot_runner.py --interval 3600
+# 2) normal 调度：每 15 分钟自动跑一轮（默认参数，前台常驻）
+python3 evolution/autopilot_runner.py
 
-# 3) 强杀上次还在跑的轮次（重入拒绝时用）
+# 3) normal 调度：自定义间隔与等待策略（如每 30 分钟一轮，最多等 10 次）
+python3 evolution/autopilot_runner.py --interval 1800 --max-wait 10 --wait-interval 60
+
+# 4) 强杀上次还在跑的轮次（重入拒绝时用）
 python3 evolution/autopilot_runner.py --kill
 
-# 4) 查看上次运行状态
+# 5) 查看上次运行状态
 python3 evolution/autopilot_runner.py --status
 ```
+
+normal 模式参数（均可调整）：
+
+| 参数 | 默认 | 含义 |
+|------|------|------|
+| `--interval` | 900（15 分钟） | 每 N 秒跑一轮 |
+| `--max-wait` | 5 | 上次仍在运行时，最多等待 N 次 |
+| `--wait-interval` | 60 | 每次等待 N 秒后重新检查上次进程 |
+
+normal 行为：每 `interval` 秒尝试一轮；若发现上次任务仍在运行，则每 `wait-interval` 秒
+检查一次、最多 `max-wait` 次；等待后仍存活 → **强杀**并接管重跑；然后休眠 `interval`
+继续下一轮（Ctrl+C 退出）。
 
 bash 包装等价：
 
 ```sh
 ./evolution/run_autopilot.sh --once
-./evolution/run_autopilot.sh --interval 3600
+./evolution/run_autopilot.sh                      # normal：默认 15 分钟一轮
+./evolution/run_autopilot.sh --interval 1800 --max-wait 10
 ./evolution/run_autopilot.sh --kill
 ./evolution/run_autopilot.sh --status
 ```
