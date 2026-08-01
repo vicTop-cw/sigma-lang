@@ -32,3 +32,7 @@ Cargo.lock
 
 # MoonBit
 .moon/
+
+# evolution/ runtime state (autopilot_runner.py)
+evolution/.autopilot.lock
+evolution/autopilot.log
