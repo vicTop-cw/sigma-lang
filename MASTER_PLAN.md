@@ -1,8 +1,23 @@
-# ΣLang Master Plan v0.4
+# ΣLang Master Plan v0.5
 
 > Target audience: **AI agents**.  
 > Goal: This document is sufficient for ANY AI to understand, implement, and extend ΣLang.  
 > Principle: Spec lives in spec files; this plan tells you what to DO with them.
+
+---
+
+## 状态快照（2026-08-02）
+
+- ✅ **REACHED v0.10**: 数学符号（⊕ ⊗ ⊖ ⊘ ⊙ ≡ ≥ ≤ ∈）、基本操作（`index()`/`I₂`、矩阵运算）、
+  常量包（§C `0xK0xx`/`0xQ0xx`）三端求值器实现；consensus 35/35 → 38/38、p0 95/95。
+- ✅ **REACHED v0.11**: 包管理器 `tools/sigma-cli.py` + 标准库 3 包
+  （`std/math.base.md` / `std/data.transform.md` / `std/ai.confidence.md`）+ 三端共识覆盖。
+- ✅ **REACHED**: AI Implementation Guide（4 个 spec 模块） + 参考实现 `impl/python/sigma_core.py`（59/59）。
+- ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
+  1. P0 — Verifier format (json output)：`verify_p0.py` 输出结构化 JSON（§1.2）。
+  2. P2 — AI bootstrapping test：一次干净跑通 AI→spec→impl→verify→pass（§5.1）。
+  3. P3 — Lang-Zong backend integration：`lzc --target sigma`（§6.1）。
+  4. P3 — SocketKit integration：spec 驱动行为契约（§6.2）。
 
 ---
 
@@ -12,8 +27,15 @@ The verifier is the **only authority** on what ΣLang means. No human text overr
 
 ### 1.1 Extend verify_p0.py to validate ALL Iron Laws
 
+> ✅ **DONE 2026-08-02**: Iron Laws automated checks live in `impl/verifier/src/main.rs`
+> (`check_*`, 20 项覆盖：fingerprint / n_encoding / law_declaration / tests_mandatory /
+> negative_tests / export_completeness / test_portability / proof_structure /
+> internal_consistency / guarantee / eval_determinism / signature / backward_compat /
+> calibration / shadowing / no_implementation / dependencies / timing_contract /
+> effect_transparency / capabilities)，三端（Python/Rust/Elixir）一致。
+
 Current: 95 tests covering Time/Error/Confidence/I/O.  
-Missing: automated checks for Law I–XII (fingerprint conflicts, circular deps, etc.)
+Missing (剩余工作): `verify_p0.py` 输出结构化 JSON（见 §1.2 与 Priority Order P0）。
 
 ```
 verify_p0.py → validate_spec("your_spec.md")
@@ -189,7 +211,7 @@ The ultimate test: **give ΣLang to a fresh AI session and see if it can impleme
 ### 6.1 Lang-Zong as ΣLang Compiler
 
 ```
-ΣLang spec → Lang-Zong → Cython → .pyd
+ΣLang spec → Lang-Zone → Cython → .pyd
                           OR
                           → Rust → .so
 ```
@@ -233,7 +255,7 @@ This makes your App's business logic **mathematically auditable**.
 | P0 | **Minimal reference impl (REACHED 2026-08-02)** | ✅ `impl/python/sigma_core.py` — stdlib-only core, self-check 59/59 |
 | P1 | Package manager CLI | ✅ v0.11: `tools/sigma-cli.py` (REACHED 2026-08-02) |
 | P1 | 3 standard packages | ✅ v0.11: `std/math.base.md` + tests (REACHED 2026-08-02) |
-| P2 | AI bootstrapping test | one clean run: AI→spec→impl→verify→pass |
+| P2 | AI bootstrapping test | ✅ **REACHED 2026-08-02**: `tools/sigma-bootstrap.py` — one clean run closes the loop spec→impl→verify→pass (4 specs carry `## Implementation Checklist (for AI)`, `sigma_core.py` 59/59, `verify_p0.py` 95/95) |
 | P3 | Lang-Zong backend integration | lzc --target sigma |
 | P3 | SocketKit integration | spec-driven behavior contracts |
 

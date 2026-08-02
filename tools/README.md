@@ -68,5 +68,6 @@ python3 tools/sigma-prove.py corpus/proof_ok.md
 | `sigma-prove` | Python | ✅ `sigma-prove.py` (SMT obligations; z3 optional) |
 | `sigma-moonbit` | Python | ✅ `sigma-moonbit.py` (Proof → `.mbtp` translation bridge, 2026-08-01) |
 | `sigma-pkg` | Python | ✅ `sigma-cli.py` (install/verify/list/search/fingerprint + registry + Iron Law VII, 2026-08-02) |
+| `sigma-bootstrap` | Python | ✅ `sigma-bootstrap.py` (AI bootstrapping loop test: spec→impl→verify→pass, 2026-08-02) |
 | `sigma-fmt` | Rust | 📋 Planned |
 | `sigma-test` | Rust | 📋 Planned |

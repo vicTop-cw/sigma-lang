@@ -51,3 +51,6 @@ evolution/avatar_loop.log
 evolution/_once_console.log
 evolution/_normal_console.log
 evolution/_normal_err.log
+
+# editor/backup files
+*.bak

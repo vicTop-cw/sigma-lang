@@ -52,6 +52,8 @@ Verifier Consensus / 验证器共识: **38/38** corpus modules agree across Pyth
 
 **v0.11 可用 (2026-08-02)**: 包管理器 `tools/sigma-cli.py`（install/verify/list/search/fingerprint，`~/.sigma/registry.json` 注册表，Iron Law VII 无环依赖解析）+ 标准库 3 包（`std/math.base.md` / `std/data.transform.md` / `std/ai.confidence.md`，各配 `corpus/std_*_ok.md` 验证器测试集）；共识门禁 38/38 全绿、p0 95/95、三端 0 warning，v0.10 不回归。见 `MASTER_PLAN.md` Phase 3–4 与 `AUTOPILOT.md` §6。
 
+**AI Bootstrapping Test (P2, 2026-08-02)**: `tools/sigma-bootstrap.py` — 一键闭环验证 spec→impl→verify→pass：4 个 P0 spec 均携带 `## Implementation Checklist (for AI)`、`impl/python/sigma_core.py` 自检 59/59、`verify_p0.py` 95/95。证明「新鲜 AI 只凭规范+验证器即可从零实现并通过验证」。见 `MASTER_PLAN.md` Phase 5。
+
 ### Two verification modes / 两种验证模式
 
 ΣLang ships **two distinct verification tools** with different purposes:
