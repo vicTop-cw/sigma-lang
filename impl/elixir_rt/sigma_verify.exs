@@ -913,7 +913,7 @@ defmodule SigmaVerify do
           if length(cells) != length(vec) do
             {:error, "ShapeError"}
           else
-            {acc, _is_float} =
+            acc =
               Enum.zip(cells, vec)
               |> Enum.reduce_while({0, false}, fn {c, v}, {acc, is_float} ->
                    case {c, v} do

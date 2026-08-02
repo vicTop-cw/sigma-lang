@@ -45,8 +45,8 @@ It is a **contract between intelligences**.
 | §I I/O Boundary & Effects / I/O 边界与效应 | 25/25 | ✅ |
 | **Total / 总计** | **95/95** | **✅** |
 
-Verifier Consensus / 验证器共识: **33/33** corpus modules agree across Python / Rust / Elixir verifiers.
-33/33 语料库模块在 Python / Rust / Elixir 三个验证器上达成一致。
+Verifier Consensus / 验证器共识: **34/34** corpus modules agree across Python / Rust / Elixir verifiers.
+34/34 语料库模块在 Python / Rust / Elixir 三个验证器上达成一致。
 
 ### Two verification modes / 两种验证模式
 
@@ -55,7 +55,7 @@ Verifier Consensus / 验证器共识: **33/33** corpus modules agree across Pyth
 | Tool / 工具 | Mode / 模式 | What it checks / 检查内容 |
 |------------|------------|--------------------------|
 | `verify_p0.py` | **Algorithm correctness** / 算法正确性 | 95 tests over §T/§E/§C/§I module *algorithms* (Lamport clocks, Result monad, confidence ops, I/O effects) — proves the P0 semantics are implementable. Does NOT parse `.md` specs. |
-| `verify_consensus.py` | **Spec conformance** / 规范一致性 | Parses `.md` specs, applies Laws I–XVII + E-03/06/07/10 + §S/P-01 checks, and requires **33/33 corpus modules** to agree across Python / Rust / Elixir (Law XIII gate). |
+| `verify_consensus.py` | **Spec conformance** / 规范一致性 | Parses `.md` specs, applies Laws I–XVII + E-03/06/07/10 + §S/P-01 checks, and requires **34/34 corpus modules** to agree across Python / Rust / Elixir (Law XIII gate). |
 
 > These are complementary, not redundant: `verify_p0.py` proves the **semantics** are sound;
 > `verify_consensus.py` proves the **specs** conform and that independent implementations agree
@@ -93,7 +93,7 @@ sigma-lang/
 │   ├── spec.md                     # v0.1 Initial Draft (superseded by spec_p0_foundations.md)
 │   └── spec_p0_shadowing.md        # §S v0.2 (merged into spec_top_rules.md §S)
 │
-├── corpus/                         # Shared test corpus (18 modules) / 共享测试语料库
+├── corpus/                         # Shared test corpus (34 modules) / 共享测试语料库
 ├── examples/                       # Usage examples / 使用示例
 ├── impl/                           # Verifier implementations / 验证器实现
 │   ├── verifier/                   # Rust reference Verifier

@@ -29,6 +29,8 @@ erl_crash.dump
 
 # Rust
 Cargo.lock
+impl/verifier/target/
+impl/verifier/target
 
 # MoonBit
 .moon/

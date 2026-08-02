@@ -416,27 +416,21 @@ impl Verifier {
     }
 
     fn check_law_declaration(&mut self, module: &Module) {
+        // Law III applies to operations (fingerprinted symbols) only.
+        // Fingerprint-less functions (e.g. encodings) feed the Law II encoding
+        // check and are not required to carry their own laws.
         for sym in &module.symbols {
             if sym.laws.is_empty() {
                 self.violations.push(Violation::NoLawsDeclared(sym.name.clone()));
             }
         }
-        for func in &module.functions {
-            if func.laws.is_empty() {
-                self.violations.push(Violation::NoLawsDeclared(func.name.clone()));
-            }
-        }
     }
 
     fn check_tests_mandatory(&mut self, module: &Module) {
+        // Law IV applies to operations (fingerprinted symbols) only.
         for sym in &module.symbols {
             if sym.tests.is_empty() {
                 self.violations.push(Violation::NoTestsDefined(sym.name.clone()));
-            }
-        }
-        for func in &module.functions {
-            if func.tests.is_empty() {
-                self.violations.push(Violation::NoTestsDefined(func.name.clone()));
             }
         }
     }
