@@ -283,6 +283,24 @@ combine(ra, rb) ≝
 
 ---
 
+## Implementation Checklist (for AI)
+
+### To pass this module, implement exactly these
+
+1. `Ok(v)` / `Err(e)` — `bind(f)`, `map(f)`, `map_err(f)`, `unwrap_or(d)`; must satisfy the three monad laws (left identity, right identity, associativity)  [E-01]
+2. `flatten` — `ok(ok(v)) → ok(v)`, `ok(err(e)) → err(e)`, `err(e) → err(e)`  [E-02]
+3. `err_plus(e1, e2)` — error sum type: combine two error domains  [E-03]
+4. Do-notation is sugar over `bind`: every `←` is a bind, every `return` is `ok`, the first error stops the chain  [E-04]
+
+Reference implementation: `impl/python/sigma_core.py` (§E), self-check via `python3 impl/python/sigma_core.py`.
+
+### What NOT to implement
+- Do NOT catch exceptions implicitly — errors must flow through the `Result` type explicitly.
+- Do NOT add stack traces or exception causality — ΣLang errors are values.
+- Do NOT implement `or_else` by swallowing errors; composition must preserve the first error.
+
+---
+
 ## E.9 Verifier Rules for Error Module
 
 ```rust

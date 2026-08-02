@@ -49,6 +49,10 @@ This JSON is the **protocol handshake** between AI and spec.
 
 ### 2.1 For every spec module, add an IMPLEMENTATION section
 
+> ✅ **DONE 2026-08-02**: `## Implementation Checklist (for AI)` added to all 4 spec
+> modules (`spec_p0_time.md` §T / `spec_p0_error.md` §E / `spec_p0_confidence.md` §C /
+> `spec_p0_io.md` §I) — each lists the exact API to implement and what NOT to implement.
+
 ```markdown
 ## §T: Time & Causal Order
 
@@ -66,6 +70,9 @@ To pass this module, implement exactly these:
 ```
 
 ### 2.2 Minimal Reference Implementation
+
+> ✅ **DONE 2026-08-02**: `impl/python/sigma_core.py` (~540 lines incl. self-check,
+> stdlib only) implements ALL P0 modules; `python3 impl/python/sigma_core.py` → 59/59.
 
 Place a single-file reference impl in `impl/python/`:
 
@@ -222,10 +229,10 @@ This makes your App's business logic **mathematically auditable**.
 | P0 | **Law XVI — Compatibility Proof** | ✅ **PROMOTED 2026-08-01**: `## Compat Tests` in all 3 verifiers |
 | P0 | **v0.10 可用 (REACHED 2026-08-02)** | 数学符号（⊕ ⊗ ⊖ ⊘ ⊙ ≡ ≥ ≤ ∈）、基本操作（`index()`/`I₂`、矩阵运算）、常量包（§C `0xK0xx`/`0xQ0xx`，Opaque 不可遮蔽）三端求值器全部实现；`sigma-prove` PROVED (unsat)、`sigma-moonbit` 生成 `.mbtp`；consensus 35/35、p0 95/95、0 warning |
 | P0 | **v0.11 可用 (REACHED 2026-08-02)** | 包管理器 `tools/sigma-cli.py`（install/verify/list/search/fingerprint + `~/.sigma/registry.json` + Iron Law VII 无环依赖）；标准库 3 包 `std/math.base.md` / `std/data.transform.md` / `std/ai.confidence.md`（各 1 规范 + 1 验证器测试集 `corpus/std_*_ok.md`，三端共识覆盖）；v0.10 不回归；consensus 38/38、p0 95/95、0 warning |
-| P0 | AI Implementation Guide | 4 new IMPLEMENTATION sections in spec |
-| P0 | Minimal reference impl | impl/python/sigma_core.py (~200 lines) |
-| P1 | Package manager CLI | tools/sigma-cli.py |
-| P1 | 3 standard packages | std/math.base.md + tests |
+| P0 | **AI Implementation Guide (REACHED 2026-08-02)** | ✅ `## Implementation Checklist (for AI)` in all 4 spec modules (§T/§E/§C/§I) |
+| P0 | **Minimal reference impl (REACHED 2026-08-02)** | ✅ `impl/python/sigma_core.py` — stdlib-only core, self-check 59/59 |
+| P1 | Package manager CLI | ✅ v0.11: `tools/sigma-cli.py` (REACHED 2026-08-02) |
+| P1 | 3 standard packages | ✅ v0.11: `std/math.base.md` + tests (REACHED 2026-08-02) |
 | P2 | AI bootstrapping test | one clean run: AI→spec→impl→verify→pass |
 | P3 | Lang-Zong backend integration | lzc --target sigma |
 | P3 | SocketKit integration | spec-driven behavior contracts |

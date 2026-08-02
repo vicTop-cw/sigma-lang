@@ -438,6 +438,27 @@ safe_retry(op, n) ≝
 
 ---
 
+## Implementation Checklist (for AI)
+
+### To pass this module, implement exactly these
+
+1. `Effect` tags (`Pure`/`IO`/`Comm`/…) with `effect_plus` (Pure neutral, idempotent, sorted union) and `effect_le` (Pure ≤ Comm ≤ IO)  [I-01]
+2. In-memory `FS` — `write`/`read`/`delete`/`exists` with write-then-read, overwrite, delete-then-not-exists laws  [I-02]
+3. `Resource` lifecycle (`open`/`use`/`close`) — `DoubleClose` and `UseAfterClose` must error (Law XII linearity)  [I-03]
+4. `FFIDeclaration` / registry `register`/`check` — capability check before execution (Law XI); unknown FFI → `err(UnknownFFI)`  [I-04]
+5. `Capabilities` — `grant`/`revoke`/`has_cap` per agent  [I-05]
+6. `safe_retry_wrap(op, n)` — only idempotent ops (GET-style) may be retried; others → `err(UnsafeRetryAttempted)`  [I-06]
+7. `infer_effect(has_io)` — any I/O in the body ⇒ `IO`, else `Pure` (Law X)  [I-07]
+
+Reference implementation: `impl/python/sigma_core.py` (§I), self-check via `python3 impl/python/sigma_core.py`.
+
+### What NOT to implement
+- Do NOT touch a real file system or network in the reference core — an in-memory store is enough.
+- Do NOT implement real concurrent scheduling or threads.
+- Do NOT add performance features (caching, pooling) — linearity is the only law.
+
+---
+
 ## I.11 Verifier Rules for I/O Module
 
 ```rust

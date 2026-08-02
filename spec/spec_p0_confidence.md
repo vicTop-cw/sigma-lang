@@ -343,6 +343,28 @@ penalty(m) ≝
 
 ---
 
+## Implementation Checklist (for AI)
+
+### To pass this module, implement exactly these
+
+1. `conf_mul(c1, c2)` / `conf_add(c1, c2)` / `conf_not(c)` / `conf_min` / `conf_max` — bounded in [0,1], De Morgan holds  [C-01]
+2. `bernoulli(p, value)` — `P(X = value)` for `Bern(p)`  [C-02]
+3. `normal_pdf(x, mu, sigma)` — Gaussian density with `sigma > 0`  [C-03]
+4. `bayes(p_h, p_e_given_h, p_e)` — `P(E)·P(H|E) = P(E|H)·P(H)`; `0` when `P(E) = 0`  [C-04]
+5. `entropy_bernoulli(p)` — `0` at the extremes, `1.0` at `p = 0.5`  [C-05]
+6. `lift(f, v, c)` / `lift2(f, v1, c1, v2, c2)` — confidence propagates with `min`  [C-06]
+7. `kleene_and` / `kleene_or` / `kleene_not` — three-valued truth tables over `{⊤, ?, ⊥}`  [C-07]
+8. `weighted_consensus(messages)` — confidence-weighted mean + pooled confidence; `None` on zero total confidence  [C-08]
+
+Reference implementation: `impl/python/sigma_core.py` (§C), self-check via `python3 impl/python/sigma_core.py`.
+
+### What NOT to implement
+- Do NOT pick a specific PRNG algorithm — sampling is not part of the semantics.
+- Do NOT implement arbitrary-distribution sampling or statistical calibration training.
+- Do NOT let confidence escape the [0,1] bounds (Law IX).
+
+---
+
 ## C.12 Verifier Rules for Confidence Module
 
 ```rust

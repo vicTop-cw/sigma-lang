@@ -288,6 +288,27 @@ fn check_race_free(program: &Program) -> Result<(), RaceError> {
 
 ---
 
+## Implementation Checklist (for AI)
+
+### To pass this module, implement exactly these
+
+1. `LamportClock` — `tick() -> ℕ`, `send(msg) -> (msg, ℕ)`, `recv(msg, remote_t) -> msg` with `t := max(t, remote_t) + 1`  [T-01]
+2. `VectorClock` — `tick()`, `send() -> ℕⁿ`, `recv(remote_v)` with pointwise `max` then local increment; causal `<` and `concurrent(other)`  [T-02]
+3. `timeout(eff, deadline, actual) -> ok(v) | err(TimeoutErr)` — ok iff `actual ≤ deadline` (Law VIII)  [T-03]
+4. `retry(eff, max_attempts, fail_times)` — attempt `i` succeeds once `i ≥ fail_times`, else `err(ExhaustedRetries)`  [T-04]
+5. `race(results, times)` — pick the result of the fastest participant  [T-05]
+6. `happens_before(e1_time, e2_time, same_agent, msg_sent) -> bool` — same-agent order or message causality  [T-06]
+7. `has_cycle(graph) -> bool` — DFS cycle scan for deadlock detection  [T-07]
+
+Reference implementation: `impl/python/sigma_core.py` (§T), self-check via `python3 impl/python/sigma_core.py`.
+
+### What NOT to implement
+- Do NOT assume a monotonic wall clock; logical time is sufficient.
+- Do NOT implement wall-clock synchronization or a real scheduler.
+- Do NOT add performance heuristics — the module is about causal semantics only.
+
+---
+
 ## T.9 Iron Law for Time Module
 
 > **Law VIII (Temporal Determinism)**:  

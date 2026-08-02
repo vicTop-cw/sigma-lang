@@ -101,7 +101,8 @@ sigma-lang/
 ├── examples/                       # Usage examples / 使用示例
 ├── impl/                           # Verifier implementations / 验证器实现
 │   ├── verifier/                   # Rust reference Verifier
-│   └── elixir_rt/                  # Elixir/BEAM verifier + runtime
+│   ├── elixir_rt/                  # Elixir/BEAM verifier + runtime
+│   └── python/                     # sigma_core.py — minimal reference core
 ├── tools/                          # Tooling (sigma-prove, etc.) / 工具
 └── .github/workflows/              # CI: consensus gate
 ```
