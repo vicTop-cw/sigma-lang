@@ -30,7 +30,7 @@ python3 evolution/avatar_loop.py --status
 ```
 
 **两阶段完成闭环**（防「以为完成却还有遗漏」）：
-- 阶段 1：目标达成（测试全过 + 无 TODO）→ 仅标注 `completed_at` + `pending_verification`。
+- 阶段 1：目标达成（测试全过 + 无遗留项）→ 仅标注 `completed_at` + `pending_verification`。
 - 阶段 2（下一轮）：核验 git 变更中命中 `watch_patterns`（主项目源码）的文件——
   - 无改动 → 核验通过 → 归档 `history/` + 拟定下一目标 + 首轮提示词模板；
   - 有改动 → **取消完成标记**（移除 `completed_at`，保留 pending），日志列出未通过项，
