@@ -14,7 +14,7 @@
 
 - `spec/` — 规范（铁律 I–XVII、§S 遮蔽纪律、P-01 证明携带规范、常量目录）
 - `verify_consensus.py` / `impl/verifier` (Rust) / `impl/elixir_rt` (Elixir) — 三个独立验证器
-- `corpus/` — 共享语料（当前 33 个模块，PASS/FAIL × 3 验证器 = Law XIII 共识门禁）
+- `corpus/` — 共享语料（当前 34 个模块，PASS/FAIL × 3 验证器 = Law XIII 共识门禁）
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
@@ -65,7 +65,7 @@ SCAN → DECIDE → EXECUTE → VERIFY → (COMMIT) → 回到 SCAN
 
 ```sh
 # 1. 三方共识（Law XIII 门禁 —— 一切的前提）
-python3 verify_consensus.py          # 必须 33/33（或语料增长后的 N/N）全绿
+python3 verify_consensus.py          # 必须 34/34（或语料增长后的 N/N）全绿
 
 # 2. 算法正确性
 python3 verify_p0.py                 # 必须 95/95
@@ -112,7 +112,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 任何改动（哪怕一行）完成后，必须：
 
 1. 重新跑 §3 的全部命令。
-2. **33/33（或 N/N）三方一致必须保持全绿**；若为新增检查而增加语料，新语料必须三端一致。
+2. **34/34（或 N/N）三方一致必须保持全绿**；若为新增检查而增加语料，新语料必须三端一致。
 3. 三端编译 0 error / 0 warning。
 4. 不得通过删除/注释/`#[ignore]`/弱化测试来掩盖失败——修复根因。
 5. 改动规范时，验证器与语料必须同步（规范 → 检查 → 测试 三者一体）。

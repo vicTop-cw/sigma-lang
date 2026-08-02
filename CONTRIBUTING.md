@@ -20,7 +20,7 @@ formal spec plus three independent verifier implementations; the correctness gat
 
 ```sh
 # 1. Full test suite (must pass before and after your change)
-python3 verify_consensus.py     # 33/33 modules, 3 verifiers agree (Law XIII gate)
+python3 verify_consensus.py     # 34/34 modules, 3 verifiers agree (Law XIII gate)
 python3 verify_p0.py            # 95/95 algorithmic checks (P0 soundness)
 
 # 2. Proof backend (optional, requires z3 via pip install z3-solver)
@@ -46,7 +46,7 @@ cd impl/verifier && cargo build && cd ../..
 - [ ] Spec section updated (or RFC filed) for normative changes
 - [ ] All three verifiers implement the change
 - [ ] Corpus module added/updated with correct `# Expected:`
-- [ ] `verify_consensus.py` passes (33/33 agree)
+- [ ] `verify_consensus.py` passes (34/34 agree)
 - [ ] `verify_p0.py` passes (95/95)
 - [ ] No compiler warnings (Rust `cargo build`, Elixir script, `py_compile`)
 

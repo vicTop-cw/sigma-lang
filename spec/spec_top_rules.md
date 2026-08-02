@@ -38,7 +38,7 @@
 > (math-domain symbols cannot be shadowed), **R7-warning** (declared Free-class shadows
 > pass with a report warning). Corpus: `shadow_break.md`/`shadow_opaque_break.md` FAIL,
 > `shadow_free_ok.md` PASS (R7-warning), `shadow_escape_ok.md` PASS (R2 escape hatch),
-> **33/33 modules agree (Python == Rust == Elixir)**.
+> **34/34 modules agree (Python == Rust == Elixir)**.
 > Full §S semantics (R2 escape hatch, R4 propagation, R6 declarative domains) are v0.2 scope.
 
 ---
