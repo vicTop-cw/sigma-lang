@@ -41,6 +41,7 @@ evolution/autopilot.log
 
 # avatar runtime state (avatar.py)
 logs/
+history/
 
 # avatar_loop.py runtime state (统一入口)
 evolution/.avatar_loop.lock
