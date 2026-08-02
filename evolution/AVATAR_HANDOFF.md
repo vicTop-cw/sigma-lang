@@ -26,6 +26,13 @@ main()
 run_one_cycle()
 ├── SCAN:   git fetch → git status → run tests → 原生 Python 扫描 TODO
 ├── CHECK:  测试全过 + 无 TODO → GOAL COMPLETE（dry-run 只读，不落盘）
+│   └── 两阶段完成（防「以为完成却还有遗漏」）：
+│       阶段1/2：达成 → 仅标注 goal.completed_at + pending_verification=true，
+│                 不迁移、不拟定新目标
+│       阶段2/2：下一轮核验 —— 检查 git 变更中命中 watch_patterns（主项目源码）
+│                 的文件：
+│                 - 有源码改动 → 核验未通过，保持 pending，继续下一轮
+│                 - 无源码改动 → 核验通过，才 complete_goal()（迁移+新目标）
 ├── DECIDE: 测试失败 > TODO 列表 > git 变更 > 推进目标
 ├── GENERATE: 合并 goal + scan 结果 → 动态 prompt
 ├── DELEGATE: subprocess 调 AI agent (atomcode)，替换 {prompt}/{project_path}
@@ -33,7 +40,7 @@ run_one_cycle()
 ├── COMMIT:  git add -A && git commit && git push
 └── LOG:     写入 logs/<goal_id>/cycle_NN.log
 
-complete_goal()（目标达成后自动进入下一阶段）
+complete_goal()（核验通过后才调用）
 ├── 归档：history/<goal_id>/goal_snapshot.toml + prompt_template.txt
 ├── 快照：logs/<goal_id>/final_summary.md
 ├── 迁移：goal.current → goal.history
@@ -76,16 +83,29 @@ complete_goal()（目标达成后自动进入下一阶段）
 
 ## 四、端到端验证结果（Windows 原生 Python 3.13）
 
-临时项目 `_avatar_test/` 跑通完整闭环（验证后已删除）：
+临时项目 `_avatar_test/`（git 仓库，验证后已删除）：
 
+### 目标达成闭环（上一轮已验）
 1. 有 TODO（`src/legacy.py` 2 处）→ DECIDE `resolve_todos`，prompt 正确生成 ✅
-2. 清除 TODO 后 → 测试 PASS + 无 TODO → **GOAL COMPLETE** ✅
-3. `complete_goal` 自动：
-   - 归档 `history/test-goal-002/{goal_snapshot.toml, prompt_template.txt}` ✅
-   - 生成 `logs/<new_id>/next_goal_prompt.txt`（新目标首轮提示词，标题取自新目标）✅
-   - `avatar.toml` 的 `goal.current` 迁移为新目标 ✅
-4. 无 TODO 时新目标为「推进项目里程碑（无遗留 TODO）」；有 TODO 时聚焦
+2. 无 TODO 时新目标为「推进项目里程碑（无遗留 TODO）」；有 TODO 时聚焦
    TODO 最集中的文件并列出具体行 ✅
+
+### 两阶段完成闭环（本轮新增验证）
+**场景 A（核验通过）：**
+1. 第 1 轮：测试 PASS + 无 TODO → 阶段1/2，仅写 `completed_at` +
+   `pending_verification=true`，**不**迁移、**不**拟定新目标、无 history ✅
+2. 第 2 轮：git 变更中无命中 watch_patterns 的文件 → 阶段2/2 核验通过 →
+   `complete_goal()`：归档 `history/test-goal-003/`、拟定新目标
+   `20260802-061327-next`、生成 `next_goal_prompt.txt`、迁移 goal.current ✅
+
+**场景 B（核验失败——源码有改动）：**
+1. 第 1 轮：达成 → 仅标注 pending ✅
+2. 修改 `src/mod.py` 后第 2 轮：核验检出 `src/mod.py` 改动 →
+   **保持 pending**，不拟定新目标、不建 history，日志注明
+   「下一轮继续核验」✅
+
+### 既有回归
+- dry-run 只读：不落盘（avatar.toml 无 pending 字段、无 history）✅
 
 ---
 

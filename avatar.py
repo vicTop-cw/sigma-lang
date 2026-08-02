@@ -110,6 +110,10 @@ def save_config(project_root: str, config: dict):
     lines.append(gc.get('description', ''))
     lines.append('"""')
     lines.append(f'created_at = "{gc.get("created_at","")}"')
+    if gc.get('completed_at'):
+        lines.append(f'completed_at = "{gc.get("completed_at")}"')
+    if gc.get('pending_verification'):
+        lines.append('pending_verification = true')
     lines.append('')
     
     d = config.get('detect', {})
@@ -175,28 +179,30 @@ def run_git_pull(project_root: str) -> str:
     except Exception as e:
         return f"git fetch failed: {e}"
 
+def _matches_watch(rel: str, patterns: list) -> bool:
+    """判断相对路径是否命中 watch_patterns（目录前缀 / glob / basename glob）。
+    scan_todos 与完成核验共用同一套匹配规则。"""
+    import fnmatch
+    if not patterns:
+        return True
+    for p in patterns:
+        p = p.strip().rstrip('/')
+        if not p:
+            continue
+        if rel.startswith(p + '/') or fnmatch.fnmatch(rel, p) \
+           or fnmatch.fnmatch(os.path.basename(rel), p):
+            return True
+    return False
+
 def scan_todos(project_root: str, patterns: list) -> list:
     """扫描 watch_patterns 覆盖文件中的 TODO/FIXME/BUG/HACK。
     原生 Python 实现（不依赖 grep，跨平台无子进程卡死），跳过构建/缓存/隐藏目录。
     """
-    import fnmatch
     skip_dirs = {'.git', '.hg', '.svn', 'target', 'node_modules', '__pycache__',
                  '_build', 'deps', '.idea', '.vscode', '.moon', 'logs', 'history', 'archive'}
     text_exts = {'.py', '.md', '.toml', '.txt', '.rs', '.lz', '.exs', '.ex', '.mbt', '.json'}
     todo_re = re.compile(r'TODO|FIXME|BUG|HACK')
     results = []
-
-    def matches(rel: str) -> bool:
-        if not patterns:
-            return True
-        for p in patterns:
-            p = p.strip().rstrip('/')
-            if not p:
-                continue
-            if rel.startswith(p + '/') or fnmatch.fnmatch(rel, p) \
-               or fnmatch.fnmatch(os.path.basename(rel), p):
-                return True
-        return False
 
     for dirpath, dirnames, filenames in os.walk(project_root):
         dirnames[:] = [d for d in dirnames
@@ -204,7 +210,7 @@ def scan_todos(project_root: str, patterns: list) -> list:
         for fname in filenames:
             full = os.path.join(dirpath, fname)
             rel = os.path.relpath(full, project_root).replace('\\', '/')
-            if not matches(rel):
+            if not _matches_watch(rel, patterns):
                 continue
             if os.path.splitext(fname)[1].lower() not in text_exts:
                 continue
@@ -345,6 +351,28 @@ def git_commit_and_push(project_root: str, message: str, auto_push: bool) -> dic
 # ═══════════════════════════════════════════
 # GOAL COMPLETION
 # ═══════════════════════════════════════════
+
+def _git_status_changed_files(git_status: str) -> list:
+    """从 `git status --short` 输出解析变更文件路径（含 untracked/rename）。"""
+    files = []
+    for line in git_status.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        rest = line[2:].lstrip()          # 去掉前两位状态码与分隔空白
+        if ' -> ' in rest:                # rename: "old -> new" 取新路径
+            rest = rest.split(' -> ')[-1]
+        rest = rest.strip().strip('"')
+        if rest:
+            files.append(rest)
+    return files
+
+def _source_changes_in_watch(git_status: str, patterns: list) -> list:
+    """git 变更文件中命中 watch_patterns（主项目源码）的部分。
+    核验「目标是否真正完成」：主项目源码有改动 = 尚有未提交工作，不得拟定新目标。
+    """
+    return [f for f in _git_status_changed_files(git_status)
+            if _matches_watch(f, patterns)]
 
 def check_goal_complete(test_result: dict, todos: list) -> bool:
     return test_result['passed'] and len(todos) == 0
@@ -498,13 +526,36 @@ def run_one_cycle(project_root: str, dry_run: bool = False) -> Optional[str]:
         if dry_run:
             # dry-run 只读：不改 avatar.toml、不建 history/、不迁移目标
             with open(log_file, 'a', encoding='utf-8') as log:
-                log.write("   (dry-run: 跳过 complete_goal，不落盘)\n\n")
+                log.write("   (dry-run: 跳过完成流程，不落盘)\n\n")
         else:
-            # 生成完成态提示词存档（goal 已达成时的收尾提示词）
-            last_prompt = generate_prompt(
-                config, {'action': 'goal_complete', 'context': goal.get('description', '')},
-                goal.get('description', ''), todos, test_result, git_status)
-            complete_goal(project_root, config, cycle_num, log_file, last_prompt)
+            # 两阶段完成：首轮只标注，次轮核验源码无改动后才拟定新目标
+            pending = goal.get('pending_verification')
+            if not pending:
+                # ── 阶段 1：本轮达成 → 只标注完成，待下一轮核验 ──
+                goal['completed_at'] = datetime.now(timezone.utc).isoformat()
+                goal['pending_verification'] = True
+                save_config(project_root, config)
+                with open(log_file, 'a', encoding='utf-8') as log:
+                    log.write("   阶段1/2：目标达成，仅标注完成（pending_verification）。\n")
+                    log.write("   下一轮将核验主项目源码是否已无改动，通过后才拟定新目标。\n\n")
+            else:
+                # ── 阶段 2：核验 ──
+                source_changes = _source_changes_in_watch(
+                    git_status, detect.get('watch_patterns', []))
+                if source_changes:
+                    # 主项目源码仍有改动 → 未真正完成，保持 pending
+                    with open(log_file, 'a', encoding='utf-8') as log:
+                        log.write("   阶段2/2：核验未通过——主项目源码仍有改动：\n")
+                        for f in source_changes[:10]:
+                            log.write(f"     - {f}\n")
+                        log.write("   保持 pending，下一轮继续核验，暂不拟定新目标。\n\n")
+                else:
+                    # 核验通过 → 真正完成：归档 + 拟定新目标 + 提示词
+                    last_prompt = generate_prompt(
+                        config, {'action': 'goal_complete',
+                                 'context': goal.get('description', '')},
+                        goal.get('description', ''), todos, test_result, git_status)
+                    complete_goal(project_root, config, cycle_num, log_file, last_prompt)
         return log_file
     
     # ── DECIDE ──
