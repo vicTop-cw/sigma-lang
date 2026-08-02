@@ -14,7 +14,7 @@
 
 - `spec/` — 规范（铁律 I–XVII、§S 遮蔽纪律、P-01 证明携带规范、常量目录）
 - `verify_consensus.py` / `impl/verifier` (Rust) / `impl/elixir_rt` (Elixir) — 三个独立验证器
-- `corpus/` — 共享语料（当前 38 个模块，PASS/FAIL × 3 验证器 = Law XIII 共识门禁）
+- `corpus/` — 共享语料（当前 39 个模块，PASS/FAIL × 3 验证器 = Law XIII 共识门禁）
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
@@ -66,7 +66,7 @@ SCAN → DECIDE → EXECUTE → VERIFY → (COMMIT) → 回到 SCAN
 
 ```sh
 # 1. 三方共识（Law XIII 门禁 —— 一切的前提）
-python3 verify_consensus.py          # 必须 38/38（或语料增长后的 N/N）全绿
+python3 verify_consensus.py          # 必须 39/39（或语料增长后的 N/N）全绿
 
 # 2. 算法正确性
 python3 verify_p0.py                 # 必须 95/95
@@ -113,7 +113,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 任何改动（哪怕一行）完成后，必须：
 
 1. 重新跑 §3 的全部命令。
-2. **38/38（或 N/N）三方一致必须保持全绿**；若为新增检查而增加语料，新语料必须三端一致。
+2. **39/39（或 N/N）三方一致必须保持全绿**；若为新增检查而增加语料，新语料必须三端一致。
 3. 三端编译 0 error / 0 warning。
 4. 不得通过删除/注释/`#[ignore]`/弱化测试来掩盖失败——修复根因。
 5. 改动规范时，验证器与语料必须同步（规范 → 检查 → 测试 三者一体）。
@@ -147,13 +147,13 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > v0.11 = 「包管理器 + 标准库」：任何人 clone 后跑上述命令都能得到全绿结果，
 > `sigma-cli` 能安装/验证/检索标准包，3 个标准包在三个独立实现上行为一致。
 
-### v0.12 完成定义（Novel Spec Test，2026-08-02 立项）
+### v0.12 完成定义（Novel Spec Test，2026-08-02 立项 → 2026-08-02 达成）
 
-- [ ] **新域规格**: 新建 `corpus/novel_gene_ok.md`（DNA 对齐语义，ΣLang 格式）。
-- [ ] **三端一致**: Python/Rust/Elixir 验证器判定一致，`verify_consensus.py` 计入 N/N。
-- [ ] **完整闭环**: AI 读 spec → 写实现 → `verify_p0.py` 全绿 → `sigma-cli install` 发布。
-- [ ] **不回归**: v0.10/v0.11 全部保持全绿（consensus N/N、p0 95/95、三端 0 warning）。
-- [ ] **文档一致**: MASTER_PLAN 中该行标记 ✅ DONE（含日期）。
+- [x] **新域规格**: 新建 `corpus/novel_gene_ok.md`（DNA 对齐语义，ΣLang 格式）。
+- [x] **三端一致**: Python/Rust/Elixir 验证器判定一致，`verify_consensus.py` 计入 39/39。
+- [x] **完整闭环**: AI 读 spec → 写实现 → `verify_p0.py` 95/95 → `sigma-cli install` 发布。
+- [x] **不回归**: v0.10/v0.11 全部保持全绿（consensus 39/39、p0 95/95、三端 0 warning）。
+- [x] **文档一致**: MASTER_PLAN 中该行标记 ✅ DONE（含日期）。
 
 > v0.12 = 「新域自举验证」：证明 ΣLang 协议能承载 AI 从未见过的领域（生物信息学），
 > 且全流程（规格 → 三端验证 → 实现 → 发布）无需人工介入。达成后进入 Lang-Zong / SocketKit（P3）。

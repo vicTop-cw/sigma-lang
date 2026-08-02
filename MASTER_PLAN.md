@@ -16,10 +16,11 @@
   + **AI bootstrapping test**（`tools/sigma-bootstrap.py` 一次干净跑通 spec→impl→verify→pass）。
 - ✅ **REACHED**: Verifier format (json output) —— `verify_p0.py --json` 输出结构化 JSON（§1.2：
   spec/pass/modules/fingerprint），`sigma-cli verify --p0` 打通 CLI。
+- ✅ **REACHED v0.12 (2026-08-02)**: Novel Spec Test —— `corpus/novel_gene_ok.md`（DNA 对齐语义，
+  §5.2）三端验证器一致（consensus 39/39），跑通完整闭环；v0.10/v0.11 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
-  1. P2 — Novel Spec Test：`corpus/novel_gene_ok.md`（DNA 对齐语义，§5.2）。
-  2. P3 — Lang-Zong backend integration：`lzc --target sigma`（§6.1）。
-  3. P3 — SocketKit integration：spec 驱动行为契约（§6.2）。
+  1. P3 — Lang-Zong backend integration：`lzc --target sigma`（§6.1）。
+  2. P3 — SocketKit integration：spec 驱动行为契约（§6.2）。
 
 ---
 
@@ -209,9 +210,9 @@ The ultimate test: **give ΣLang to a fresh AI session and see if it can impleme
 
 ### 5.2 Novel Spec Test
 
-> ⏳ **待办（P2，一天内可达成）** — 验收标准：
+> ✅ **DONE 2026-08-02（v0.12）** — 验收标准已全部满足：
 > 1. 新建 `corpus/novel_gene_ok.md`（DNA 对齐语义，ΣLang 格式）；
-> 2. 三端验证器（Python/Rust/Elixir）判定一致，`verify_consensus.py` 计入 N/N；
+> 2. 三端验证器（Python/Rust/Elixir）判定一致，`verify_consensus.py` 计入 39/39；
 > 3. 跑通完整流程：AI 读 spec → 写实现 → `verify_p0.py` 全绿 → 发布。
 
 ```
@@ -283,7 +284,7 @@ This makes your App's business logic **mathematically auditable**.
 | P1 | Package manager CLI | ✅ v0.11: `tools/sigma-cli.py` (REACHED 2026-08-02) |
 | P1 | 3 standard packages | ✅ v0.11: `std/math.base.md` + tests (REACHED 2026-08-02) |
 | P2 | AI bootstrapping test | ✅ **REACHED 2026-08-02**: `tools/sigma-bootstrap.py` — one clean run closes the loop spec→impl→verify→pass (4 specs carry `## Implementation Checklist (for AI)`, `sigma_core.py` 59/59, `verify_p0.py` 95/95) |
-| P2 | **v0.12 Novel Spec Test (IN PROGRESS 2026-08-02)** | `corpus/novel_gene_ok.md`（DNA 对齐语义, §5.2）— 三端一致 + AI 闭环 |
+| P2 | **v0.12 Novel Spec Test (REACHED 2026-08-02)** | ✅ `corpus/novel_gene_ok.md`（DNA 对齐语义, §5.2）— consensus 39/39 三端一致 + AI 闭环 |
 | P3 | Lang-Zong backend integration | lzc --target sigma |
 | P3 | SocketKit integration | spec-driven behavior contracts |
 
