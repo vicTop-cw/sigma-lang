@@ -1,7 +1,7 @@
 # AUTOPILOT — ΣLang 自主维护提示词
 
 > **用途**: 交给任何 AI 编码代理（本项目的自主维护者），让它在**高度自主**模式下把 ΣLang
-> 推进到 **v0.12 可用**。核心原则：**我只关心结果，不关心过程。**
+> 推进到 **v0.13 可用**。核心原则：**我只关心结果，不关心过程。**
 >
 > **适用对象**: Claude / Codex / AtomCode / 任意能读写本仓库并执行命令的代理。
 > **加载方式**: 把本文档全文（或「启动指令」段）作为系统提示词的首段粘贴给代理。
@@ -18,9 +18,9 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.12 可用**——即：**Novel Spec Test 闭环**，
-在 v0.11（包管理器 + 标准库 3 包）达成的基础上，以全新领域（DNA 对齐语义）验证
-「AI 读 spec → 写实现 → 三端共识 → 发布」的完整自举流程。**我只关心这个结果。**
+**总目标**: 把项目推进到 **v0.13 可用**——即：**Lang-Zong 后端集成**，
+在 v0.12（Novel Spec Test 自举闭环）达成的基础上，打通 `lzc --target sigma`
+编译链路（ΣLang spec → Cython `.pyd` / Rust `.so` → 验证器加载）。**我只关心这个结果。**
 
 ---
 
@@ -157,6 +157,16 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 > v0.12 = 「新域自举验证」：证明 ΣLang 协议能承载 AI 从未见过的领域（生物信息学），
 > 且全流程（规格 → 三端验证 → 实现 → 发布）无需人工介入。达成后进入 Lang-Zong / SocketKit（P3）。
+
+### v0.13 完成定义（Lang-Zong backend，2026-08-02 立项）
+
+- [ ] **lzc 解析**: `lzc --target sigma` 能解析一份 ΣLang spec（如 `std/math.base.md`）。
+- [ ] **产物加载**: 输出产物（Cython `.pyd` 或 Rust `.so`）可被 Python/Rust 加载并跑通验证器。
+- [ ] **不回归**: 三端共识不回退（consensus 39/39、p0 95/95、三端 0 warning）。
+- [ ] **文档一致**: MASTER_PLAN 中该行标记 ✅ DONE（含日期）。
+
+> v0.13 = 「spec 定义 WHAT，编译器实现 HOW」：ΣLang spec → Lang-Zong → 原生
+> 扩展（.pyd / .so），验证器加载产物后行为一致。达成后进入 SocketKit（P3）。
 
 ---
 

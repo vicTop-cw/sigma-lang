@@ -228,7 +228,7 @@ The ultimate test: **give ΣLang to a fresh AI session and see if it can impleme
 
 ### 6.1 Lang-Zong as ΣLang Compiler
 
-> ⏳ **待办（P3，一天内可达成）** — 验收标准：
+> ⏳ **进行中（P3，v0.13 当前目标 2026-08-02）** — 验收标准：
 > 1. `lzc --target sigma` 能解析一份 ΣLang spec（如 `std/math.base.md`）；
 > 2. 输出产物（Cython `.pyd` 或 Rust `.so`）可被 Python/Rust 加载并跑通验证器；
 > 3. 三端共识不回退（consensus 保持 N/N）。
@@ -285,7 +285,7 @@ This makes your App's business logic **mathematically auditable**.
 | P1 | 3 standard packages | ✅ v0.11: `std/math.base.md` + tests (REACHED 2026-08-02) |
 | P2 | AI bootstrapping test | ✅ **REACHED 2026-08-02**: `tools/sigma-bootstrap.py` — one clean run closes the loop spec→impl→verify→pass (4 specs carry `## Implementation Checklist (for AI)`, `sigma_core.py` 59/59, `verify_p0.py` 95/95) |
 | P2 | **v0.12 Novel Spec Test (REACHED 2026-08-02)** | ✅ `corpus/novel_gene_ok.md`（DNA 对齐语义, §5.2）— consensus 39/39 三端一致 + AI 闭环 |
-| P3 | Lang-Zong backend integration | lzc --target sigma |
+| P3 | **v0.13 Lang-Zong backend integration (IN PROGRESS 2026-08-02)** | lzc --target sigma |
 | P3 | SocketKit integration | spec-driven behavior contracts |
 
 ---
