@@ -69,6 +69,7 @@ def run_cycle(project_root: str, dry_run: bool = False):
         f.write(f"Goal: {goal_id}\n\n")
 
     # ── SCAN ──
+    runner.log(f"SCAN: 目标 [{goal_id}] cycle {cycle_num} — git fetch/status、测试、TODO 扫描…")
     with open(log_file, 'a', encoding='utf-8') as f:
         f.write("── SCAN ──\n")
     try:
@@ -81,6 +82,9 @@ def run_cycle(project_root: str, dry_run: bool = False):
             f.write(f"SCAN ERROR: {e}\n")
         return log_file
 
+    runner.log(f"SCAN 完成: 测试 {'✅' if test_result['passed'] else '❌'} | "
+               f"TODO {len(todos)} 处 | git "
+               f"{'有变更' if git_status and git_status != '(clean)' else '干净'}")
     with open(log_file, 'a', encoding='utf-8') as f:
         f.write(f"git pull: {pull_output[:200]}\n")
         f.write(f"git status: {git_status}\n")
@@ -89,9 +93,11 @@ def run_cycle(project_root: str, dry_run: bool = False):
 
     # ── 两阶段完成 + 核验 ──
     if avatar.check_goal_complete(test_result, todos):
+        runner.log("GOAL COMPLETE: 测试全过且无 TODO，进入两阶段完成/核验")
         with open(log_file, 'a', encoding='utf-8') as f:
             f.write("── GOAL COMPLETE ──\n")
         if dry_run:
+            runner.log("GOAL COMPLETE (dry-run): 跳过完成流程，不落盘")
             with open(log_file, 'a', encoding='utf-8') as f:
                 f.write("   (dry-run: 跳过完成流程，不落盘)\n\n")
             return log_file
@@ -135,22 +141,31 @@ def run_cycle(project_root: str, dry_run: bool = False):
     # ── DECIDE ──
     goal_desc = goal.get('description', '')
     priority = avatar.decide_priority(goal_desc, test_result, todos, git_status)
+    runner.log(f"DECIDE: {priority['action']}")
     with open(log_file, 'a', encoding='utf-8') as f:
         f.write(f"── DECIDE: {priority['action']} ──\n\n")
 
     # ── GENERATE ──
     prompt = avatar.generate_prompt(config, priority, goal_desc, todos, test_result, git_status)
+    runner.log("GENERATE: 提示词已合成（完整内容见本轮 cycle 日志）")
     with open(log_file, 'a', encoding='utf-8') as f:
         f.write(f"── PROMPT ──\n{prompt[:1000]}\n...\n\n")
 
     # ── DELEGATE ──
     if dry_run:
+        runner.log(f"DELEGATE: SKIPPED (dry-run) — 将调 "
+                   f"{config.get('agent',{}).get('command','atomcode')}")
         with open(log_file, 'a', encoding='utf-8') as f:
             f.write(f"── DELEGATE: SKIPPED (dry-run) ──\n")
             f.write(f"Prompt would be sent to: {config.get('agent',{}).get('command','atomcode')}\n\n")
         return log_file
 
+    agent_cmd = config.get('agent', {}).get('command', 'atomcode')
+    runner.log(f"DELEGATE: 调用 {agent_cmd} 修复任务（最长 "
+               f"{config.get('agent',{}).get('timeout_seconds',600)}s）…")
     result = avatar.delegate_to_agent(config, prompt, log_file, project_root)
+    runner.log(f"DELEGATE 完成: {'✅ SUCCESS' if result['success'] else '❌ FAILED'} "
+               f"(rc={result['returncode']})")
     with open(log_file, 'a', encoding='utf-8') as f:
         f.write(f"── RESULT: {'SUCCESS' if result['success'] else 'FAILED'}({result['returncode']}) ──\n")
         f.write(f"{result['stdout'][:500]}\n")
@@ -158,12 +173,15 @@ def run_cycle(project_root: str, dry_run: bool = False):
     # ── RE-VERIFY + COMMIT ──
     if result['success']:
         test_result2 = avatar.run_tests(project_root, detect.get('test_command', 'echo no tests'))
+        runner.log(f"RE-VERIFY: {'✅ PASS' if test_result2['passed'] else '❌ FAIL'}")
         with open(log_file, 'a', encoding='utf-8') as f:
             f.write(f"── RE-VERIFY: {'PASS' if test_result2['passed'] else 'FAIL'} ──\n")
         if cycle_cfg.get('auto_commit'):
             summary = f"avatar: [{goal_id[:12]}] c{cycle_num} {priority['action']}"
             commit_result = avatar.git_commit_and_push(
                 project_root, summary, cycle_cfg.get('auto_push', False))
+            runner.log(f"COMMIT: {summary} → "
+                       f"{'✅ OK' if commit_result['committed'] else '⚠️ ' + commit_result['message'][:100]}")
             with open(log_file, 'a', encoding='utf-8') as f:
                 f.write(f"── COMMIT: {commit_result['message'][:200]}\n")
 
