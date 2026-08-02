@@ -162,7 +162,8 @@ def save_config(project_root: str, config: dict):
 def run_git_status(project_root: str) -> str:
     try:
         r = subprocess.run(['git', '-C', project_root, 'status', '--short'],
-                          capture_output=True, text=True, timeout=15)
+                          capture_output=True, text=True, timeout=15,
+                          encoding='utf-8', errors='replace')
         return r.stdout.strip() or "(clean)"
     except Exception as e:
         return f"git status failed: {e}"
@@ -172,7 +173,8 @@ def run_git_pull(project_root: str) -> str:
         env = os.environ.copy()
         env['GIT_TERMINAL_PROMPT'] = '0'
         r = subprocess.run(['git', '-C', project_root, 'fetch', '--no-tags', 'origin', 'main'],
-                          capture_output=True, text=True, timeout=5, env=env)
+                          capture_output=True, text=True, timeout=5, env=env,
+                          encoding='utf-8', errors='replace')
         return r.stdout.strip()[-200:] or r.stderr.strip()[-200:]
     except subprocess.TimeoutExpired:
         return "git fetch: timeout (network down?)"
@@ -235,7 +237,8 @@ def run_tests(project_root: str, test_cmd: str) -> dict:
     try:
         r = subprocess.run(
             parts,
-            capture_output=True, text=True, timeout=30, cwd=project_root
+            capture_output=True, text=True, timeout=30, cwd=project_root,
+            encoding='utf-8', errors='replace'
         )
         return {
             'returncode': r.returncode,
@@ -317,7 +320,8 @@ def delegate_to_agent(config: dict, prompt: str, cycle_log_file: str, project_ro
     
     try:
         r = subprocess.run(full_cmd, capture_output=True, text=True, 
-                          timeout=timeout, cwd=project_root)
+                          timeout=timeout, cwd=project_root,
+                          encoding='utf-8', errors='replace')
         return {
             'success': r.returncode == 0,
             'stdout': r.stdout[-1000:],
@@ -339,7 +343,8 @@ def git_commit_and_push(project_root: str, message: str, auto_push: bool) -> dic
         subprocess.run(['git', '-C', project_root, 'add', '-A'],
                       capture_output=True, timeout=10)
         r = subprocess.run(['git', '-C', project_root, 'commit', '-m', message],
-                          capture_output=True, text=True, timeout=10)
+                          capture_output=True, text=True, timeout=10,
+                          encoding='utf-8', errors='replace')
         if auto_push:
             subprocess.run(['git', '-C', project_root, 'push', 'origin', 'main'],
                           capture_output=True, timeout=30)

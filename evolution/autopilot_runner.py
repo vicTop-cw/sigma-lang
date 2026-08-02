@@ -109,7 +109,8 @@ def kill_previous():
     try:
         if os.name == "nt":
             subprocess.run(["taskkill", "/F", "/PID", str(pid)],
-                           capture_output=True, text=True)
+                           capture_output=True, text=True,
+                           encoding="utf-8", errors="replace")
         else:
             os.kill(pid, signal.SIGKILL)
     except OSError as e:
