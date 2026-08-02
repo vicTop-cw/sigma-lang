@@ -1,0 +1,39 @@
+# AVATAR config — auto-managed
+
+[project]
+name = "sigma-lang"
+path = "."
+
+[goal.current]
+id = "20260802-baseline"
+title = "Baseline: 95/95 测试通过，文档完整"
+description = """
+确保 verify_p0.py 全部 95 个测试通过。
+检查 spec 文档是否有 TODO/FIXME 遗留项。
+完成后再设置下一个目标。
+"""
+created_at = "2026-08-02T00:00:00"
+
+[detect]
+scan_todos = true
+scan_fixme = true
+run_tests = true
+test_command = "python3 verify_p0.py"
+watch_patterns = ["spec*.md", "verify*.py", "impl/", "tools/", "README.md"]
+
+[agent]
+command = "atomcode"
+args = ["-p", "{prompt}", "-C", "{project_path}"]
+timeout_seconds = 600
+max_delegated_per_cycle = 1
+
+[cycle]
+interval_seconds = 900
+auto_commit = true
+auto_push = true
+
+[[goal.history]]
+id = "example-completed"
+title = "示例：历史目标"
+completed_at = "2026-01-01T00:00:00"
+result = "success"

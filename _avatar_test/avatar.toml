@@ -1,0 +1,27 @@
+[project]
+name = "avatar-test"
+path = "."
+
+[goal.current]
+id = "test-goal-002"
+title = "第二验证目标"
+description = "测试有 TODO 分支的闭环。"
+created_at = "2026-08-02T00:00:00"
+
+[detect]
+scan_todos = true
+scan_fixme = true
+run_tests = true
+test_command = "python test_pass.py"
+watch_patterns = ["src/"]
+
+[agent]
+command = "atomcode"
+args = ["-p", "{prompt}", "-C", "{project_path}"]
+timeout_seconds = 60
+max_delegated_per_cycle = 1
+
+[cycle]
+interval_seconds = 900
+auto_commit = false
+auto_push = false

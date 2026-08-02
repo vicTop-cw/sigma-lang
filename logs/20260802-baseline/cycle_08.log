@@ -1,0 +1,23 @@
+Cycle 8
+action: resolve_todos
+你是 AVATAR 维护 Agent。当前目标: [20260802-baseline] Baseline: 95/95 测试通过，文档完整
+
+【目标描述】
+确保 verify_p0.py 全部 95 个测试通过。
+检查 spec 文档是否有 TODO/FIXME 遗留项。
+完成后再设置下一个目标。
+
+
+【项目状态】
+- git status: M .codebuddy/diagnosis_report.md
+ M LICENSE
+?? avatar.py
+?? avatar.toml
+?? evolution/AVATAR_DESIGN.md
+?? logs/
+- 测试: ✅ 全部通过
+- TODO 列表:
+avatar.py:173:                ['grep', '-rn', '-I', '-E', 'TODO|FIXME|BUG|HACK',
+avatar.py:227:- TODO 列表:
+avatar.py:350:        'title': 'Next Goal — from remaining TODOs',
+avatar.py:351:    
