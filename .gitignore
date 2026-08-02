@@ -39,6 +39,9 @@ impl/verifier/target
 evolution/.autopilot.lock
 evolution/autopilot.log
 
+# avatar runtime state (avatar.py)
+logs/
+
 # evolution/ ad-hoc console capture (--once 实测)
 evolution/_once_console.log
 evolution/_normal_console.log
