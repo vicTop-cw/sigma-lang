@@ -18,9 +18,12 @@
   spec/pass/modules/fingerprint），`sigma-cli verify --p0` 打通 CLI。
 - ✅ **REACHED v0.12 (2026-08-02)**: Novel Spec Test —— `corpus/novel_gene_ok.md`（DNA 对齐语义，
   §5.2）三端验证器一致（consensus 39/39），跑通完整闭环；v0.10/v0.11 不回归。
+- ✅ **REACHED v0.13 (2026-08-02)**: SocketKit Protocol —— `spec/spec_p0_socketkit.md`（§SK：
+  task_create / review_merge / contribution_score 的 ΣLang 语义）+ `corpus/socketkit_ok.md`
+  三端一致（consensus 40/40），走通 RFC → spec → 验证器 → 测试 晋升路径；v0.10–v0.12 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
-  1. P3 — SocketKit integration：spec 驱动行为契约（§6.2）。
-  2. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
+  1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
+  2. （无）— SocketKit 达成后 P3 待办已清空，进入新里程碑规划。
 
 ---
 
@@ -245,7 +248,7 @@ The spec defines WHAT; LZ compiles it to HOW.
 
 ### 6.2 SocketKit Protocol
 
-> ⏳ **进行中（P3，v0.13 当前目标 2026-08-02）** — 验收标准：
+> ✅ **DONE 2026-08-02（v0.13）** — 验收标准已全部满足：
 > 1. 在 spec 中定义 `task_create / review_merge / contribution_score` 的 ΣLang 语义；
 > 2. 每个行为配 1 个语料模块 + 验证器测试，三端判定一致；
 > 3. 走通 RFC → spec 章节 → 验证器检查 → 测试 的晋升路径（参考 Phase 7）。
@@ -287,7 +290,7 @@ This makes your App's business logic **mathematically auditable**.
 | P1 | 3 standard packages | ✅ v0.11: `std/math.base.md` + tests (REACHED 2026-08-02) |
 | P2 | AI bootstrapping test | ✅ **REACHED 2026-08-02**: `tools/sigma-bootstrap.py` — one clean run closes the loop spec→impl→verify→pass (4 specs carry `## Implementation Checklist (for AI)`, `sigma_core.py` 59/59, `verify_p0.py` 95/95) |
 | P2 | **v0.12 Novel Spec Test (REACHED 2026-08-02)** | ✅ `corpus/novel_gene_ok.md`（DNA 对齐语义, §5.2）— consensus 39/39 三端一致 + AI 闭环 |
-| P3 | **v0.13 SocketKit integration (IN PROGRESS 2026-08-02)** | spec-driven behavior contracts（§6.2） |
+| P3 | **v0.13 SocketKit integration (REACHED 2026-08-02)** | ✅ `spec/spec_p0_socketkit.md` + `corpus/socketkit_ok.md`（§6.2）— consensus 40/40 三端一致 |
 | P3 | Lang-Zone backend integration | ⏸️ **DEFERRED**：LZ 原型期，待自举稳定后融入（§6.1） |
 
 ---
