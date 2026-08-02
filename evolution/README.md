@@ -5,12 +5,38 @@
 
 | 文件 | 作用 |
 |------|------|
+| `avatar_loop.py` | **统一入口（推荐）**：复用 runner 调度 + avatar 目标循环，两阶段核验，核验失败自动取消完成标记 |
 | `autopilot_runner.py` | 守护脚本：锁文件防重入、PID 存活检查、`--kill` 强杀、`--interval` 循环 |
 | `run_autopilot.sh` | bash 便捷包装（透传参数） |
-| `.autopilot.lock` | 锁文件（运行时生成，含 PID 与启动时间，已 gitignore） |
-| `autopilot.log` | 每轮运行日志（已 gitignore） |
+| `avatar.py` / `avatar.toml` | 目标生命周期 Agent（配置驱动，被 avatar_loop 复用，勿手改） |
+| `.autopilot.lock` / `.avatar_loop.lock` | 锁文件（运行时生成，已 gitignore） |
+| `autopilot.log` / `avatar_loop.log` | 每轮运行日志（已 gitignore） |
 
-## 原理
+## 推荐用法（单文件入口 avatar_loop.py）
+
+```sh
+# 1) 只读试跑一轮（scan + 生成 prompt，不 delegate、不落盘）
+python3 evolution/avatar_loop.py --dry-run
+
+# 2) 正式跑一轮（会调 atomcode 修复任务）
+python3 evolution/avatar_loop.py --once
+
+# 3) 每 30 分钟一轮守护（Windows 任务计划器 / 手动常驻）
+python3 evolution/avatar_loop.py --interval 1800
+
+# 4) 强杀上次还在跑的轮次 / 查看状态
+python3 evolution/avatar_loop.py --kill
+python3 evolution/avatar_loop.py --status
+```
+
+**两阶段完成闭环**（防「以为完成却还有遗漏」）：
+- 阶段 1：目标达成（测试全过 + 无 TODO）→ 仅标注 `completed_at` + `pending_verification`。
+- 阶段 2（下一轮）：核验 git 变更中命中 `watch_patterns`（主项目源码）的文件——
+  - 无改动 → 核验通过 → 归档 `history/` + 拟定下一目标 + 首轮提示词模板；
+  - 有改动 → **取消完成标记**（移除 `completed_at`，保留 pending），日志列出未通过项，
+    下一轮继续核验，直至源码干净才拟定新目标。
+
+## 旧入口（仍可用，功能被 avatar_loop 覆盖）
 
 每轮执行：
 

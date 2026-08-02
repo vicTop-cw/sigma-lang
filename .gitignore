@@ -42,6 +42,10 @@ evolution/autopilot.log
 # avatar runtime state (avatar.py)
 logs/
 
+# avatar_loop.py runtime state (统一入口)
+evolution/.avatar_loop.lock
+evolution/avatar_loop.log
+
 # evolution/ ad-hoc console capture (--once 实测)
 evolution/_once_console.log
 evolution/_normal_console.log
