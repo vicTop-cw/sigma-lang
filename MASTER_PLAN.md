@@ -14,10 +14,12 @@
   （`std/math.base.md` / `std/data.transform.md` / `std/ai.confidence.md`）+ 三端共识覆盖。
 - ✅ **REACHED**: AI Implementation Guide（4 个 spec 模块） + 参考实现 `impl/python/sigma_core.py`（59/59）
   + **AI bootstrapping test**（`tools/sigma-bootstrap.py` 一次干净跑通 spec→impl→verify→pass）。
+- ✅ **REACHED**: Verifier format (json output) —— `verify_p0.py --json` 输出结构化 JSON（§1.2：
+  spec/pass/modules/fingerprint），`sigma-cli verify --p0` 打通 CLI。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
-  1. P0 — Verifier format (json output)：`verify_p0.py` 输出结构化 JSON（§1.2）。
-  2. P3 — Lang-Zong backend integration：`lzc --target sigma`（§6.1）。
-  3. P3 — SocketKit integration：spec 驱动行为契约（§6.2）。
+  1. P3 — Lang-Zong backend integration：`lzc --target sigma`（§6.1）。
+  2. P3 — SocketKit integration：spec 驱动行为契约（§6.2）。
+  3. P2 — Novel Spec Test：`corpus/novel_gene_ok.md`（DNA 对齐语义，§5.2）。
 
 ---
 
@@ -35,7 +37,8 @@ The verifier is the **only authority** on what ΣLang means. No human text overr
 > effect_transparency / capabilities)，三端（Python/Rust/Elixir）一致。
 
 Current: 95 tests covering Time/Error/Confidence/I/O.  
-Missing (剩余工作): `verify_p0.py` 输出结构化 JSON（见 §1.2 与 Priority Order P0）。
+✅ **DONE 2026-08-02**: `verify_p0.py --json` 输出结构化 JSON（§1.2：spec/pass/modules/total/
+fingerprint），`sigma-cli verify --p0` 打通 CLI（P0 队列）。
 
 ```
 verify_p0.py → validate_spec("your_spec.md")
@@ -112,7 +115,8 @@ No dependencies except stdlib. This is NOT the "official" implementation — it'
 
 > ✅ **REACHED 2026-08-02 (v0.11)**: `tools/sigma-cli.py` — `install / verify / list / search /
 > fingerprint` 五个命令，`~/.sigma/registry.json` 注册表，Iron Law VII 无环依赖。
-> 待办：`verify_p0.py` 输出结构化 JSON（§1.2）与 CLI 的 `verify` 子命令打通（P0 队列）。
+> ✅ **REACHED 2026-08-02**: `verify_p0.py --json` 输出结构化 JSON（§1.2）与 CLI 的
+> `verify --p0` 子命令打通（P0 队列）。
 
 ### 3.1 CLI Design
 
@@ -266,7 +270,7 @@ This makes your App's business logic **mathematically auditable**.
 
 | Priority | Milestone | Deliverable |
 |:---:|------|------|
-| P0 | Verifier format (json output) | modified verify_p0.py |
+| P0 | Verifier format (json output) | ✅ **REACHED 2026-08-02**: `verify_p0.py --json` (spec/pass/modules/total/fingerprint) + `sigma-cli verify --p0` |
 | P0 | Iron Laws automated check | ✅ `check_*` in `impl/verifier` (I–IV, XIII–XVII, E-03/E-06/E-10); 3 verifiers |
 | P0 | **Law XIII — Verifier Consensus** | ✅ **PROMOTED 2026-08-01**: `verify_consensus.py` + `corpus/` (38 modules × 3 verifiers Python/Rust/Elixir, 38/38 agree) |
 | P0 | **Law XIV — Negative Test Mandatory** | ✅ **PROMOTED 2026-08-01**: `NoNegativeTest` in all 3 verifiers |

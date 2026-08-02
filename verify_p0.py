@@ -7,9 +7,13 @@ Total: 95 tests across 4 modules
 Run:  python3 verify_p0.py
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
+import argparse
+import hashlib
+import json
 import math
+import os
 import random
 import sys
 from dataclasses import dataclass
@@ -700,10 +704,72 @@ def run_module_i():
 # Main
 # ============================================================
 
-def main():
-    """Run all P0 verification modules and print report."""
+# JSON module keys per MASTER_PLAN §1.2 (protocol handshake format)
+MODULE_JSON_KEYS = {"T": "time", "E": "error", "C": "confidence", "I": "io"}
+SPEC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "spec")
+
+
+def compute_fingerprint() -> str:
+    """sha256 over the four P0 spec files this verifier checks (§1.2)."""
+    h = hashlib.sha256()
+    for fname in ("spec_p0_time.md", "spec_p0_error.md",
+                  "spec_p0_confidence.md", "spec_p0_io.md"):
+        path = os.path.join(SPEC_DIR, fname)
+        if os.path.exists(path):
+            h.update(fname.encode("utf-8"))
+            with open(path, "rb") as f:
+                h.update(f.read())
+    return "sha256:" + h.hexdigest()
+
+
+def build_json_report(spec_name: str) -> dict:
+    """Structured JSON report — the protocol handshake between AI and spec."""
+    modules = {}
+    total_pass = 0
+    total_fail = 0
+    for mod in ("T", "E", "C", "I"):
+        mod_tests = [t for t in tests if t.module == mod]
+        mod_pass = sum(1 for t in mod_tests if t.result == TestResult.PASS)
+        mod_fail = len(mod_tests) - mod_pass
+        modules[MODULE_JSON_KEYS[mod]] = {"pass": mod_pass, "fail": mod_fail}
+        total_pass += mod_pass
+        total_fail += mod_fail
+    return {
+        "spec": spec_name,
+        "pass": total_fail == 0,
+        "modules": modules,
+        "total": {"pass": total_pass, "fail": total_fail},
+        "fingerprint": compute_fingerprint(),
+    }
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    """Run all P0 verification modules and print report (or JSON with --json)."""
     global tests
+    parser = argparse.ArgumentParser(
+        description="ΣLang P0 Foundations — Algorithmic Verification")
+    parser.add_argument("--json", action="store_true",
+                        help="emit structured JSON report (MASTER_PLAN §1.2)")
+    parser.add_argument("--spec", default="sigma.p0@0.3.0",
+                        help="spec identity in the JSON report (default: sigma.p0@0.3.0)")
+    args = parser.parse_args(argv)
+
     tests = []  # reset
+
+    if args.json:
+        # JSON is the machine-readable protocol handshake (§1.2): stdout must
+        # carry ONLY the JSON document. Human-readable module progress goes
+        # to stderr so it never pollutes the machine channel.
+        import contextlib
+        with contextlib.redirect_stdout(sys.stderr):
+            run_module_t()
+            run_module_e()
+            run_module_c()
+            run_module_i()
+        print(json.dumps(build_json_report(args.spec), ensure_ascii=False,
+                         indent=2))
+        total_fail = sum(1 for t in tests if t.result == TestResult.FAIL)
+        return 1 if total_fail else 0
 
     run_module_t()
     run_module_e()

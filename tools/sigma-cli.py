@@ -4,6 +4,7 @@
 Commands:
   install <pkg> | <spec.md>   install a package from std/ or a local spec file
   verify <pkg> | <file>       verify an installed package or any module file
+  verify --p0 [spec]          run the P0 foundations verifier (structured JSON)
   list                        list installed packages
   search <keyword>            search std/ and the local registry
   fingerprint <pkg> | <file>  show sha256 fingerprint of a package/module
@@ -18,6 +19,7 @@ Examples:
   python3 tools/sigma-cli.py install math.base@1.0
   python3 tools/sigma-cli.py install std/math.base.md
   python3 tools/sigma-cli.py verify math.base
+  python3 tools/sigma-cli.py verify --p0
   python3 tools/sigma-cli.py list
   python3 tools/sigma-cli.py search confidence
   python3 tools/sigma-cli.py fingerprint std/math.base.md
@@ -38,6 +40,7 @@ REPO_ROOT = os.path.dirname(TOOLS_DIR)
 STD_DIR = os.path.join(REPO_ROOT, "std")
 CORPUS_DIR = os.path.join(REPO_ROOT, "corpus")
 VERIFY_CONSENSUS = os.path.join(REPO_ROOT, "verify_consensus.py")
+VERIFY_P0 = os.path.join(REPO_ROOT, "verify_p0.py")
 SIGMA_HOME = os.environ.get("SIGMA_HOME", os.path.join(str(Path.home()), ".sigma"))
 REGISTRY_PATH = os.path.join(SIGMA_HOME, "registry.json")
 
@@ -227,7 +230,38 @@ def cmd_install(args):
     return 0
 
 
+def cmd_verify_p0(spec_arg):
+    """P0 mode: run verify_p0.py and surface its structured JSON (§1.2)."""
+    spec_name = spec_arg or "sigma.p0@0.3.0"
+    if spec_arg and os.path.exists(spec_arg):
+        spec_name = os.path.basename(spec_arg).replace(".md", "")
+    proc = subprocess.run([sys.executable, VERIFY_P0, "--json", "--spec", spec_name],
+                          capture_output=True, text=True, encoding="utf-8",
+                          errors="replace")
+    out = proc.stdout.strip()
+    if proc.returncode != 0 or not out:
+        print(proc.stderr.strip())
+        print("error: verify_p0.py did not emit a valid JSON report")
+        return 1
+    try:
+        report = json.loads(out)
+    except json.JSONDecodeError:
+        print(out)
+        print("error: verify_p0.py emitted malformed JSON")
+        return 1
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    if report.get("pass"):
+        t = report.get("total", {})
+        print(f"✅ {report['spec']} verified "
+              f"(P0 foundations {t.get('pass', '?')}/{t.get('pass', '?') + t.get('fail', 0)})")
+        return 0
+    print(f"❌ {report['spec']} failed P0 verification")
+    return 1
+
+
 def cmd_verify(args):
+    if getattr(args, "p0", False):
+        return cmd_verify_p0(args.p0)
     pkg_arg = args.pkg
     explicit_path = os.path.abspath(pkg_arg) if os.path.exists(pkg_arg) else None
     if explicit_path:
@@ -334,8 +368,11 @@ def main(argv=None):
     p_install.add_argument("pkg", help="package name (math.base@1.0) or path (std/math.base.md)")
     p_install.set_defaults(fn=cmd_install)
 
-    p_verify = sub.add_parser("verify", help="verify an installed package or module file")
-    p_verify.add_argument("pkg", help="installed package name (math.base) or file path")
+    p_verify = sub.add_parser("verify", help="verify an installed package, module file, or P0 foundations")
+    p_verify.add_argument("pkg", nargs="?", help="installed package name (math.base) or file path")
+    p_verify.add_argument("--p0", nargs="?", const="sigma.p0@0.3.0", metavar="SPEC",
+                          help="run the P0 foundations verifier (verify_p0.py) and print its "
+                               "structured JSON report (MASTER_PLAN §1.2)")
     p_verify.set_defaults(fn=cmd_verify)
 
     sub.add_parser("list", help="list installed packages").set_defaults(fn=cmd_list)
