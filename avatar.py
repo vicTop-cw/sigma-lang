@@ -391,13 +391,67 @@ def _source_changes_in_watch(git_status: str, patterns: list) -> list:
 def check_goal_complete(test_result: dict, todos: list) -> bool:
     return test_result['passed'] and len(todos) == 0
 
+def _parse_pending_milestones(project_root: str) -> list:
+    """解析 MASTER_PLAN.md 的 Priority Order 表，返回未完成里程碑。
+
+    每个里程碑 = 「一天内可达成」的目标单元：标题 + 交付物 + 优先级。
+    已完成的行（含 ✅ / REACHED / DONE / PROMOTED）跳过。
+    找不到 MASTER_PLAN.md 或解析失败 → 返回 []（调用方回退到 TODO 扫描）。
+    """
+    plan_path = os.path.join(project_root, 'MASTER_PLAN.md')
+    if not os.path.exists(plan_path):
+        return []
+    milestones = []
+    try:
+        with open(plan_path, 'r', encoding='utf-8', errors='replace') as f:
+            for line in f:
+                line = line.strip()
+                if not line.startswith('|'):
+                    continue
+                if any(mark in line for mark in ('✅', 'REACHED', 'DONE', 'PROMOTED')):
+                    continue  # 已完成
+                # 形如: | P0 | Verifier format (json output) | modified verify_p0.py |
+                parts = [p.strip() for p in line.strip('|').split('|')]
+                if len(parts) < 3:
+                    continue
+                prio, title, deliverable = parts[0], parts[1], parts[2]
+                if not re.match(r'^P\d$', prio) or not title or not deliverable:
+                    continue
+                if title in ('Priority', 'Milestone'):
+                    continue  # 表头
+                milestones.append({'prio': prio, 'title': title, 'deliverable': deliverable})
+    except OSError:
+        return []
+    return milestones
+
 def _generate_next_goal(project_root: str, config: dict) -> dict:
-    """扫描剩余 TODO/FIXME，自主定制下一轮目标（title + description）。"""
+    """自主定制下一轮目标：优先取 MASTER_PLAN 下一个未完成里程碑（一天内可达成）。
+
+    目标模板参照 AUTOPILOT.md 完成定义风格：标题 + 交付物 + 明确验收标准。
+    无未完成里程碑时回退到 TODO/FIXME 扫描。
+    """
     detect = config.get('detect', {})
     patterns = detect.get('watch_patterns') or ['spec*.md', 'verify*.py', 'impl/', 'tools/']
     todos = scan_todos(project_root, patterns)
     now = datetime.now(timezone.utc)
     new_id = now.strftime('%Y%m%d-%H%M%S') + '-next'
+
+    milestones = _parse_pending_milestones(project_root)
+    if milestones:
+        m = milestones[0]
+        title = f"[{m['prio']}] {m['title']}"
+        description = (
+            f"按 MASTER_PLAN 完成下一个未完成里程碑 [{m['prio']}] {m['title']}。\n"
+            f"交付物：{m['deliverable']}\n"
+            f"验收标准（全部满足才算达成）：\n"
+            f"1. 实现交付物（必要时同步 spec/语料/文档，规范→检查→测试三者一体）；\n"
+            f"2. 跑 AUTOPILOT.md §3 自检清单全绿（verify_consensus / verify_p0 / 三端编译 0 warning）；\n"
+            f"3. 更新 MASTER_PLAN.md 将该行标记 ✅ DONE（含日期），确保下一轮自动切换到下一个里程碑；\n"
+            f"4. 提交（Conventional Commits + Co-Authored-By 尾注）。"
+        )
+        return {'id': new_id, 'title': title, 'description': description,
+                'created_at': now.isoformat()}
+
     if todos:
         # 按文件分组，取 TODO 最集中的文件作为下一轮主战场
         from collections import Counter
@@ -412,8 +466,9 @@ def _generate_next_goal(project_root: str, config: dict) -> dict:
         description = '\n'.join(desc_lines)
     else:
         title = "推进项目里程碑（无遗留 TODO）"
-        description = ("当前无 TODO/FIXME 遗留。检查 README / MASTER_PLAN / spec 中标注的"
-                       "未完成项（如 v0.10 数学符号、包管理器、标准库），推进到 v0.10 可用。")
+        description = ("当前无 TODO/FIXME 遗留且 MASTER_PLAN 无未完成里程碑。"
+                       "检查 README / MASTER_PLAN / spec 是否有新阶段或文档过时项，"
+                       "提出并落实下一个可验证的小目标（一天内可达成）。")
     return {'id': new_id, 'title': title, 'description': description,
             'created_at': now.isoformat()}
 
