@@ -702,7 +702,12 @@ def eval_expr(s):
     if s == "I₂":
         return ("list", [("list", [("num", 1), ("num", 0)]),
                          ("list", [("num", 0), ("num", 1)])])
-    return parse_val(s)
+    v = parse_val(s)
+    if v is None:
+        # Unparseable literal (e.g. "+5", "1e3") → error string, mirroring
+        # Rust's Err("unparseable: …") and Elixir's {:error, "unparseable: …"}.
+        return f"unparseable: {s}"
+    return v
 
 
 def elemwise_add(a, b):

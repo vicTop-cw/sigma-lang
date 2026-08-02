@@ -888,7 +888,13 @@ defmodule SigmaVerify do
       Map.has_key?(@constants, t) ->
         {:ok, Map.fetch!(@constants, t)}
       true ->
-        parse_val(t)
+        # Unparseable literal (e.g. "+5", "1e3") must surface as a proper
+        # {:error, _} tuple — a bare :error atom would crash eval_test's
+        # case (CaseClauseError). Mirrors Rust's Err("unparseable: …").
+        case parse_val(t) do
+          {:ok, v} -> {:ok, v}
+          :error -> {:error, "unparseable: #{t}"}
+        end
     end
   end
 
