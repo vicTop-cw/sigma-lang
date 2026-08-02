@@ -97,7 +97,7 @@ sigma-lang/
 │   ├── spec.md                     # v0.1 Initial Draft (superseded by spec_p0_foundations.md)
 │   └── spec_p0_shadowing.md        # §S v0.2 (merged into spec_top_rules.md §S)
 │
-├── corpus/                         # Shared test corpus (35 modules) / 共享测试语料库
+├── corpus/                         # Shared test corpus (38 modules) / 共享测试语料库
 ├── examples/                       # Usage examples / 使用示例
 ├── impl/                           # Verifier implementations / 验证器实现
 │   ├── verifier/                   # Rust reference Verifier
