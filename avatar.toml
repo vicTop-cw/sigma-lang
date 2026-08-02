@@ -5,12 +5,12 @@ name = "sigma-lang"
 path = "."
 
 [goal.current]
-id = "20260802-064934-next"
+id = "20260802-071100-next"
 title = "推进项目里程碑（无遗留 TODO）"
 description = """
 当前无 TODO/FIXME 遗留。检查 README / MASTER_PLAN / spec 中标注的未完成项（如 v0.10 数学符号、包管理器、标准库），推进到 v0.10 可用。
 """
-created_at = "2026-08-02T06:49:34.074369+00:00"
+created_at = "2026-08-02T07:11:00.896707+00:00"
 
 [detect]
 scan_todos = true
@@ -52,4 +52,10 @@ result = "success"
 id = "20260802-064729-next"
 title = "推进项目里程碑（无遗留 TODO）"
 completed_at = "2026-08-02T06:49:34.075676+00:00"
+result = "success"
+
+[[goal.history]]
+id = "20260802-064934-next"
+title = "推进项目里程碑（无遗留 TODO）"
+completed_at = "2026-08-02T07:11:00.898189+00:00"
 result = "success"
