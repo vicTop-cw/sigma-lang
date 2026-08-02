@@ -1,7 +1,7 @@
 # AUTOPILOT — ΣLang 自主维护提示词
 
 > **用途**: 交给任何 AI 编码代理（本项目的自主维护者），让它在**高度自主**模式下把 ΣLang
-> 推进到 **v0.10 可用**。核心原则：**我只关心结果，不关心过程。**
+> 推进到 **v0.11 可用**。核心原则：**我只关心结果，不关心过程。**
 >
 > **适用对象**: Claude / Codex / AtomCode / 任意能读写本仓库并执行命令的代理。
 > **加载方式**: 把本文档全文（或「启动指令」段）作为系统提示词的首段粘贴给代理。
@@ -18,8 +18,9 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.10 可用**——即：**所有数学符号、基本操作和常量包真正可用**，
-任何规范中声明的语义都能被验证器正确判定、被证明工具消解、被语料覆盖。**我只关心这个结果。**
+**总目标**: 把项目推进到 **v0.11 可用**——即：**包管理器与标准库真正可用**，
+在 v0.10（数学符号、基本操作、常量包）达成的基础上，补齐包安装/验证/检索与
+3 个标准包（math.base / data.transform / ai.confidence）。**我只关心这个结果。**
 
 ---
 
@@ -32,7 +33,7 @@
 3. **自己确定改动范围** — 可以改规范、验证器、语料、工具、文档，只要最终结果成立。
 4. **自己提交与推进** — 完成一个可验证的里程碑后自行 `git commit`（需含
    `Co-Authored-By: AtomCode (deepseek-v4-flash) <noreply@atomgit.com>` 尾注）。
-5. **自己决定何时停止** — 当 v0.10 完成定义（§6）全部满足，或你被环境阻塞（如离线缺工具链）
+5. **自己决定何时停止** — 当 v0.11 完成定义（§6）全部满足，或你被环境阻塞（如离线缺工具链）
    时，给出**结果报告**并停止。
 
 **文件权限（最高优先级）**:
@@ -98,11 +99,11 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 1. **阻断性问题**（验证不通过、三端分歧、关键检查失效）→ 立即修复，优先于一切。
 2. **隐性 bug / 矛盾**（解析边界、跨端不一致、规范与实现脱节）→ 修复。
-3. **v0.10 缺口**（§6 中未满足的项）→ 补齐。
+3. **v0.11 缺口**（§6 中未满足的项）→ 补齐。
 4. **文档与数字过时** → 同步。
 5. 全部满足 → 无任务，输出完成报告。
 
-修 bug 与扩展功能的取舍：**阻断性 bug > v0.10 缺口 > 隐性矛盾 > 文档**。当两者都可行时，
+修 bug 与扩展功能的取舍：**阻断性 bug > v0.11 缺口 > 隐性矛盾 > 文档**。当两者都可行时，
 优先修 bug（正确性优先于功能面）。
 
 ---
@@ -119,21 +120,26 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ---
 
-## 6. v0.10 完成定义（结果 = 这些全部成立）
+## 6. v0.11 完成定义（结果 = 这些全部成立）
 
-- [ ] **数学符号可用**: `⊕ ⊗ ⊖ ⊘ ⊙ ≡ ≥ ≤ ∈` 等数学运算符在三个验证器求值器中全部实现，
-      并有语料覆盖（PASS 与 FAIL 两侧）。
-- [ ] **基本操作可用**: `index()/I₂` 及元素级/矩阵运算在求值器与 sigma-prove 翻译中可用。
-- [ ] **常量包可用**: `spec/spec_top_rules.md` §C 的数学常量（`0xK0xx`）与物理常量
-      （`0xQ0xx`）可按指纹解析，遮蔽纪律生效（Opaque 类不可遮蔽）。
-- [ ] **证明可消解**: `sigma-prove.py` 对至少 proof_ok/proof_max 义务 `PROVED (unsat)`；
-      `sigma-moonbit.py` 生成 `.mbtp` 且（装有求解器时）`moon prove` 通过。
+> v0.10 已于 2026-08-02 达成（REACHED）：数学符号（⊕ ⊗ ⊖ ⊘ ⊙ ≡ ≥ ≤ ∈）、基本操作
+> （`index()`/`I₂`、矩阵运算）、常量包（§C `0xK0xx`/`0xQ0xx`，Opaque 不可遮蔽）三端求值器
+> 全部实现并有语料覆盖；`sigma-prove` PROVED (unsat)、`sigma-moonbit` 生成 `.mbtp`；
+> consensus 35/35、p0 95/95、三端 0 warning。以下为 v0.11 新增要求。
+
+- [ ] **包管理器 CLI 可用**: `tools/sigma-cli.py` 实现 `install / verify / list / search /
+      fingerprint` 五个命令，`~/.sigma/registry.json` 注册表格式（版本/指纹/模块/依赖），
+      依赖解析遵循 Iron Law VII（无环）。
+- [ ] **标准库 3 包可用**: `std/math.base.md`、`std/data.transform.md`、`std/ai.confidence.md`
+      各含 1 个 `.md` 规范 + 1 套验证器测试，三端共识覆盖（新增语料进入 consensus N/N）。
+- [ ] **v0.10 不回归**: 数学符号/基本操作/常量包、sigma-prove PROVED、sigma-moonbit .mbtp
+      在 v0.11 全部保持全绿。
 - [ ] **共识门禁绿**: `verify_consensus.py` N/N 全绿、`verify_p0.py` 95/95、
       三端 0 warning。
 - [ ] **文档一致**: README / MASTER_PLAN / spec 中的模块数与状态与实现一致。
 
-> v0.10 = 「协议真正可用」：任何人 clone 后跑上述命令都能得到全绿结果，
-> 规范中承诺的符号与操作在三个独立实现上行为一致。
+> v0.11 = 「包管理器 + 标准库」：任何人 clone 后跑上述命令都能得到全绿结果，
+> `sigma-cli` 能安装/验证/检索标准包，3 个标准包在三个独立实现上行为一致。
 
 ---
 
@@ -145,7 +151,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ```text
 【ΣLang AUTOPILOT 结果】
-- 状态: ✅ v0.10 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
+- 状态: ✅ v0.11 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
 - 本轮完成: 修复 X · 新增 Y · 验证 N/N
 - 验证证据: verify_consensus N/N · verify_p0 95/95 · sigma-prove PROVED
 - 提交: <hash> <subject>
@@ -167,4 +173,4 @@ git add -A && git commit -m "fix: …"           # 提交（含 trailer）
 
 ---
 
-*End of AUTOPILOT — ΣLang 自主维护提示词 v1.0 (2026-08-01)*
+*End of AUTOPILOT — ΣLang 自主维护提示词 v1.1 (2026-08-02)*

@@ -1,7 +1,7 @@
 # evolution/ — ΣLang 自演化推进子系统
 
 自动拉起 **AtomCode headless 任务**，按 `sigma-autopilot` skill（`.atomcode/skills/`）
-周期性推进项目到 v0.10 可用。核心文件：
+周期性推进项目到 v0.11 可用（包管理器 + 标准库）。核心文件：
 
 | 文件 | 作用 |
 |------|------|
@@ -19,7 +19,7 @@ atomcode -p "<自主维护提示词>" -C <仓库根目录>
 ```
 
 - 提示词要求代理：先读 `AUTOPILOT.md` 与 `sigma-autopilot` skill，再按
-  SCAN→DECIDE→EXECUTE→VERIFY→COMMIT→REPORT 跑完整维护循环，推进 v0.10。
+  SCAN→DECIDE→EXECUTE→VERIFY→COMMIT→REPORT 跑完整维护循环，推进 v0.11。
 - 通过 `-C` 把工作目录固定在仓库根，让 `.atomcode.md` 与 skill 自动生效。
 
 ## 用法

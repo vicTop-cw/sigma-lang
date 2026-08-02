@@ -35,7 +35,7 @@ ATOMCODE = os.environ.get("ATOMCODE_BIN", "atomcode")
 PROMPT = (
     "你是 ΣLang 自主维护代理。先读 AUTOPILOT.md 与 .atomcode/skills/sigma-autopilot/SKILL.md，"
     "按其中流程执行一轮完整自主维护循环（SCAN→DECIDE→EXECUTE→VERIFY→COMMIT→REPORT），"
-    "推进项目到 v0.10 可用。项目内（仓库根目录之内）任何文件可读写创建删除，项目外任何路径"
+    "推进项目到 v0.11 可用（包管理器 tools/sigma-cli.py + 标准库 3 包，见 AUTOPILOT.md §6）。项目内（仓库根目录之内）任何文件可读写创建删除，项目外任何路径"
     "只读；高度自主，不要弹出任何询问，直接执行最合理的动作并交付结果。完成后按格式输出结果报告。"
 )
 

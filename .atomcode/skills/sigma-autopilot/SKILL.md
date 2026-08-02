@@ -1,6 +1,6 @@
 ---
 name: sigma-autopilot
-description: 运行 ΣLang 自主维护循环（AUTOPILOT.md）——自检 bug、按决策规则修 bug 或扩展功能、推进 v0.10 可用。触发词：autopilot、自主维护、自检、v0.10、sigma-autopilot、跑一轮自检。
+description: 运行 ΣLang 自主维护循环（AUTOPILOT.md）——自检 bug、按决策规则修 bug 或扩展功能、推进 v0.11 可用（包管理器 + 标准库）。触发词：autopilot、自主维护、自检、v0.11、sigma-autopilot、跑一轮自检。
 ---
 
 # ΣLang AUTOPILOT — 自主维护循环
@@ -27,14 +27,13 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ## 第 2 步：决策（DECIDE）
 
-优先级：**阻断性问题 > v0.10 缺口 > 隐性矛盾 > 文档过时**。
+优先级：**阻断性问题 > v0.11 缺口 > 隐性矛盾 > 文档过时**。
 修 bug 优先于扩展功能（正确性优先）。
 
-v0.10 完成定义（全部满足才算达成）：
-- 数学符号（⊕ ⊗ ⊖ ⊘ ⊙ ≡ ≥ ≤ ∈）三端求值器全部实现并有语料覆盖
-- 基本操作（index()/I₂、元素级/矩阵运算）在求值器与 sigma-prove 可用
-- 常量包（§C 0xK0xx 数学 / 0xQ0xx 物理）可按指纹解析、Opaque 类不可遮蔽
-- sigma-prove 对 proof_ok/proof_max 义务 PROVED (unsat)；sigma-moonbit 生成 .mbtp
+v0.11 完成定义（全部满足才算达成；v0.10 已于 2026-08-02 达成）：
+- 包管理器 CLI `tools/sigma-cli.py`：install/verify/list/search/fingerprint、registry 格式、Iron Law VII 无环依赖
+- 标准库 3 包：std/math.base.md、std/data.transform.md、std/ai.confidence.md（各 1 规范 + 1 测试集），三端共识覆盖
+- v0.10 不回归：数学符号/基本操作/常量包、sigma-prove PROVED、sigma-moonbit .mbtp 保持全绿
 - 共识门禁 N/N 全绿、verify_p0 95/95、三端 0 warning
 - README/MASTER_PLAN/spec 文档与实现一致
 
@@ -52,7 +51,7 @@ v0.10 完成定义（全部满足才算达成）：
 
 ```text
 【ΣLang AUTOPILOT 结果】
-- 状态: ✅ v0.10 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
+- 状态: ✅ v0.11 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
 - 本轮完成: 修复 X · 新增 Y · 验证 N/N
 - 验证证据: verify_consensus N/N · verify_p0 95/95 · sigma-prove PROVED
 - 提交: <hash> <subject>
