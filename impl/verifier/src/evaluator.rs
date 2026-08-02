@@ -349,6 +349,15 @@ pub fn normalize_minus(s: &str) -> String {
     s.replace(['−', '﹣', '－', '‐', '‑'], "-")
 }
 
+/// True if `s` is a plain integer literal `-?\d+`, matching the Python/Elixir
+/// parsers so integer handling agrees across implementations. Notably rejects
+/// a leading `+` (Rust's `parse::<i64>()` would otherwise accept `+5`, which
+/// Python's `-?\d+` and Elixir's `^-?\d+$` both reject).
+fn looks_like_int(s: &str) -> bool {
+    let digits = s.strip_prefix('-').unwrap_or(s);
+    !digits.is_empty() && digits.chars().all(|c| c.is_ascii_digit())
+}
+
 /// True if `s` is a plain decimal literal `-?\d+\.\d+` (no exponent), matching
 /// the Python/Elixir parsers so float handling agrees across implementations.
 fn looks_like_decimal(s: &str) -> bool {
@@ -370,8 +379,10 @@ fn looks_like_decimal(s: &str) -> bool {
 pub fn parse_val(s: &str) -> Option<TVal> {
     let s = normalize_minus(s);
     let s = s.trim();
-    if let Ok(n) = s.parse::<i64>() {
-        return Some(TVal::Num(n));
+    if looks_like_int(s) {
+        if let Ok(n) = s.parse::<i64>() {
+            return Some(TVal::Num(n));
+        }
     }
     if looks_like_decimal(s) {
         if let Ok(f) = s.parse::<f64>() {
