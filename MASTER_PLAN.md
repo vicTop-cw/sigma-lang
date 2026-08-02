@@ -12,12 +12,12 @@
   常量包（§C `0xK0xx`/`0xQ0xx`）三端求值器实现；consensus 35/35 → 38/38、p0 95/95。
 - ✅ **REACHED v0.11**: 包管理器 `tools/sigma-cli.py` + 标准库 3 包
   （`std/math.base.md` / `std/data.transform.md` / `std/ai.confidence.md`）+ 三端共识覆盖。
-- ✅ **REACHED**: AI Implementation Guide（4 个 spec 模块） + 参考实现 `impl/python/sigma_core.py`（59/59）。
+- ✅ **REACHED**: AI Implementation Guide（4 个 spec 模块） + 参考实现 `impl/python/sigma_core.py`（59/59）
+  + **AI bootstrapping test**（`tools/sigma-bootstrap.py` 一次干净跑通 spec→impl→verify→pass）。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. P0 — Verifier format (json output)：`verify_p0.py` 输出结构化 JSON（§1.2）。
-  2. P2 — AI bootstrapping test：一次干净跑通 AI→spec→impl→verify→pass（§5.1）。
-  3. P3 — Lang-Zong backend integration：`lzc --target sigma`（§6.1）。
-  4. P3 — SocketKit integration：spec 驱动行为契约（§6.2）。
+  2. P3 — Lang-Zong backend integration：`lzc --target sigma`（§6.1）。
+  3. P3 — SocketKit integration：spec 驱动行为契约（§6.2）。
 
 ---
 
@@ -110,6 +110,10 @@ No dependencies except stdlib. This is NOT the "official" implementation — it'
 
 ## Phase 3 — Package Manager (Week 2)
 
+> ✅ **REACHED 2026-08-02 (v0.11)**: `tools/sigma-cli.py` — `install / verify / list / search /
+> fingerprint` 五个命令，`~/.sigma/registry.json` 注册表，Iron Law VII 无环依赖。
+> 待办：`verify_p0.py` 输出结构化 JSON（§1.2）与 CLI 的 `verify` 子命令打通（P0 队列）。
+
 ### 3.1 CLI Design
 
 ```bash
@@ -151,6 +155,10 @@ def check_circular(pkg, visited=None):
 ---
 
 ## Phase 4 — Standard Library (Week 3)
+
+> ✅ **REACHED 2026-08-02 (v0.11)**: 3 个标准包已落地 —— `std/math.base.md` /
+> `std/data.transform.md` / `std/ai.confidence.md`，各配验证器测试集
+> `corpus/std_*_ok.md`，三端共识覆盖（consensus 38/38）。
 
 Ship with exactly 3 reference packages that prove the system works:
 
@@ -197,6 +205,11 @@ The ultimate test: **give ΣLang to a fresh AI session and see if it can impleme
 
 ### 5.2 Novel Spec Test
 
+> ⏳ **待办（P2，一天内可达成）** — 验收标准：
+> 1. 新建 `corpus/novel_gene_ok.md`（DNA 对齐语义，ΣLang 格式）；
+> 2. 三端验证器（Python/Rust/Elixir）判定一致，`verify_consensus.py` 计入 N/N；
+> 3. 跑通完整流程：AI 读 spec → 写实现 → `verify_p0.py` 全绿 → 发布。
+
 ```
 8. Human gives AI a new domain: "biomedical.gene@1.0 — DNA alignment semantics"
 9. AI writes the spec in ΣLang format
@@ -210,6 +223,11 @@ The ultimate test: **give ΣLang to a fresh AI session and see if it can impleme
 
 ### 6.1 Lang-Zong as ΣLang Compiler
 
+> ⏳ **待办（P3，一天内可达成）** — 验收标准：
+> 1. `lzc --target sigma` 能解析一份 ΣLang spec（如 `std/math.base.md`）；
+> 2. 输出产物（Cython `.pyd` 或 Rust `.so`）可被 Python/Rust 加载并跑通验证器；
+> 3. 三端共识不回退（consensus 保持 N/N）。
+
 ```
 ΣLang spec → Lang-Zone → Cython → .pyd
                           OR
@@ -219,6 +237,11 @@ The ultimate test: **give ΣLang to a fresh AI session and see if it can impleme
 The spec defines WHAT; LZ compiles it to HOW.
 
 ### 6.2 SocketKit Protocol
+
+> ⏳ **待办（P3，一天内可达成）** — 验收标准：
+> 1. 在 spec 中定义 `task_create / review_merge / contribution_score` 的 ΣLang 语义；
+> 2. 每个行为配 1 个语料模块 + 验证器测试，三端判定一致；
+> 3. 走通 RFC → spec 章节 → 验证器检查 → 测试 的晋升路径（参考 Phase 7）。
 
 ```
 来找茬 App behavior defined in ΣLang:
