@@ -11,9 +11,17 @@ __version__ = "0.3.0"
 
 import math
 import random
+import sys
 from dataclasses import dataclass
 from typing import Callable, Optional, Tuple, List, Any
 from enum import Enum
+
+# Force UTF-8 on stdout/stderr so emoji/Unicode output (⏰ ✅ ❌ 📊 …) survives
+# Windows consoles and redirection, where the locale codec may be GBK/cp936 and
+# would raise UnicodeEncodeError.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 # ============================================================
 # Test Framework
