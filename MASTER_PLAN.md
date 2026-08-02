@@ -19,8 +19,8 @@
 - ✅ **REACHED v0.12 (2026-08-02)**: Novel Spec Test —— `corpus/novel_gene_ok.md`（DNA 对齐语义，
   §5.2）三端验证器一致（consensus 39/39），跑通完整闭环；v0.10/v0.11 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
-  1. P3 — Lang-Zong backend integration：`lzc --target sigma`（§6.1）。
-  2. P3 — SocketKit integration：spec 驱动行为契约（§6.2）。
+  1. P3 — SocketKit integration：spec 驱动行为契约（§6.2）。
+  2. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
 
 ---
 
@@ -226,11 +226,13 @@ The ultimate test: **give ΣLang to a fresh AI session and see if it can impleme
 
 ## Phase 6 — Backend Integration (Week 5+)
 
-### 6.1 Lang-Zong as ΣLang Compiler
+### 6.1 Lang-Zone as ΣLang Compiler（⏸️ DEFERRED）
 
-> ⏳ **进行中（P3，v0.13 当前目标 2026-08-02）** — 验收标准：
-> 1. `lzc --target sigma` 能解析一份 ΣLang spec（如 `std/math.base.md`）；
-> 2. 输出产物（Cython `.pyd` 或 Rust `.so`）可被 Python/Rust 加载并跑通验证器；
+> ⏸️ **搁置（P3）**：Lang-Zone（`E:/IDEProjects/AI/lang-zone`）是 LZ 语言编译器
+> （`lzc`→Rust / `lzcyc`→Cython），CLI 无 `--target sigma` 参数，且 README 明示仍处
+> IR 路线迁移中（原型期）。**待 LZ 自举且稳定后再考虑融入**，届时验收标准：
+> 1. 用 `lzc`/`lzcyc` 将 ΣLang 语义实现（.lz）编译为原生产物（Cython `.pyd` 或 Rust `.so`）；
+> 2. 产物可被 Python/Rust 加载并跑通验证器；
 > 3. 三端共识不回退（consensus 保持 N/N）。
 
 ```
@@ -243,7 +245,7 @@ The spec defines WHAT; LZ compiles it to HOW.
 
 ### 6.2 SocketKit Protocol
 
-> ⏳ **待办（P3，一天内可达成）** — 验收标准：
+> ⏳ **进行中（P3，v0.13 当前目标 2026-08-02）** — 验收标准：
 > 1. 在 spec 中定义 `task_create / review_merge / contribution_score` 的 ΣLang 语义；
 > 2. 每个行为配 1 个语料模块 + 验证器测试，三端判定一致；
 > 3. 走通 RFC → spec 章节 → 验证器检查 → 测试 的晋升路径（参考 Phase 7）。
@@ -285,8 +287,8 @@ This makes your App's business logic **mathematically auditable**.
 | P1 | 3 standard packages | ✅ v0.11: `std/math.base.md` + tests (REACHED 2026-08-02) |
 | P2 | AI bootstrapping test | ✅ **REACHED 2026-08-02**: `tools/sigma-bootstrap.py` — one clean run closes the loop spec→impl→verify→pass (4 specs carry `## Implementation Checklist (for AI)`, `sigma_core.py` 59/59, `verify_p0.py` 95/95) |
 | P2 | **v0.12 Novel Spec Test (REACHED 2026-08-02)** | ✅ `corpus/novel_gene_ok.md`（DNA 对齐语义, §5.2）— consensus 39/39 三端一致 + AI 闭环 |
-| P3 | **v0.13 Lang-Zong backend integration (IN PROGRESS 2026-08-02)** | lzc --target sigma |
-| P3 | SocketKit integration | spec-driven behavior contracts |
+| P3 | **v0.13 SocketKit integration (IN PROGRESS 2026-08-02)** | spec-driven behavior contracts（§6.2） |
+| P3 | Lang-Zone backend integration | ⏸️ **DEFERRED**：LZ 原型期，待自举稳定后融入（§6.1） |
 
 ---
 

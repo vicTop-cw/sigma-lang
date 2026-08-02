@@ -6,18 +6,18 @@ path = "."
 
 [goal.current]
 id = "20260802-083859-next"
-title = "[P3] v0.13 Lang-Zong backend：lzc --target sigma"
+title = "[P3] v0.13 SocketKit integration：spec 驱动行为契约"
 description = """
-按 MASTER_PLAN 完成下一个未完成里程碑 [P3] Lang-Zong backend integration（§6.1）。
-交付物：lzc --target sigma 编译链路
+按 MASTER_PLAN 完成下一个未完成里程碑 [P3] SocketKit integration（§6.2）。
+交付物：task_create / review_merge / contribution_score 的 ΣLang 语义 + 语料模块
 验收标准（全部满足才算达成）：
-1. `lzc --target sigma` 能解析一份 ΣLang spec（如 std/math.base.md）；
-2. 输出产物（Cython .pyd 或 Rust .so）可被 Python/Rust 加载并跑通验证器；
-3. 三端共识不回退（verify_consensus.py 保持 39/39），必要时同步 spec/语料/文档（规范→检查→测试三者一体）；
+1. 在 spec 中定义 task_create / review_merge / contribution_score 的 ΣLang 语义（必要时同步 spec/语料/文档，规范→检查→测试三者一体）；
+2. 每个行为配 1 个语料模块 + 验证器测试，三端判定一致（verify_consensus.py 计入 N/N）；
+3. 走通 RFC → spec 章节 → 验证器检查 → 测试 的晋升路径（参考 Phase 7）；
 4. 更新 MASTER_PLAN.md 将该行标记 ✅ DONE（含日期），确保下一轮自动切换到下一个里程碑；
 5. 提交（Conventional Commits + Co-Authored-By 尾注）。
 """
-created_at = "2026-08-02T08:38:59.888304+00:00"
+created_at = "2026-08-02T08:46:21.887931+00:00"
 
 [detect]
 scan_todos = true

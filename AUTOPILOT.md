@@ -18,9 +18,10 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.13 可用**——即：**Lang-Zong 后端集成**，
-在 v0.12（Novel Spec Test 自举闭环）达成的基础上，打通 `lzc --target sigma`
-编译链路（ΣLang spec → Cython `.pyd` / Rust `.so` → 验证器加载）。**我只关心这个结果。**
+**总目标**: 把项目推进到 **v0.13 可用**——即：**SocketKit 协议集成**，
+在 v0.12（Novel Spec Test 自举闭环）达成的基础上，把「来找茬」App 的核心业务行为
+（task_create / review_merge / contribution_score）定义为可审计的 ΣLang 语义。
+**我只关心这个结果。**
 
 ---
 
@@ -156,17 +157,19 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 - [x] **文档一致**: MASTER_PLAN 中该行标记 ✅ DONE（含日期）。
 
 > v0.12 = 「新域自举验证」：证明 ΣLang 协议能承载 AI 从未见过的领域（生物信息学），
-> 且全流程（规格 → 三端验证 → 实现 → 发布）无需人工介入。达成后进入 Lang-Zong / SocketKit（P3）。
+> 且全流程（规格 → 三端验证 → 实现 → 发布）无需人工介入。达成后进入 SocketKit（P3）。
 
-### v0.13 完成定义（Lang-Zong backend，2026-08-02 立项）
+### v0.13 完成定义（SocketKit integration，2026-08-02 立项）
 
-- [ ] **lzc 解析**: `lzc --target sigma` 能解析一份 ΣLang spec（如 `std/math.base.md`）。
-- [ ] **产物加载**: 输出产物（Cython `.pyd` 或 Rust `.so`）可被 Python/Rust 加载并跑通验证器。
+- [ ] **语义定义**: 在 spec 中定义 `task_create / review_merge / contribution_score` 的 ΣLang 语义。
+- [ ] **语料覆盖**: 每个行为配 1 个语料模块 + 验证器测试，三端判定一致（verify_consensus.py 计入 N/N）。
+- [ ] **晋升路径**: 走通 RFC → spec 章节 → 验证器检查 → 测试 的晋升路径（参考 Phase 7）。
 - [ ] **不回归**: 三端共识不回退（consensus 39/39、p0 95/95、三端 0 warning）。
 - [ ] **文档一致**: MASTER_PLAN 中该行标记 ✅ DONE（含日期）。
 
-> v0.13 = 「spec 定义 WHAT，编译器实现 HOW」：ΣLang spec → Lang-Zong → 原生
-> 扩展（.pyd / .so），验证器加载产物后行为一致。达成后进入 SocketKit（P3）。
+> v0.13 = 「业务逻辑数学可审计」：App 的提交/评审/贡献行为全部由 ΣLang 语义
+> 承载，三端验证器判定一致。Lang-Zone（§6.1）因 LZ 原型期**已 DEFERRED**，待其
+> 自举稳定后再融入；SocketKit 达成后即无 P3 待办，进入新里程碑规划。
 
 ---
 
