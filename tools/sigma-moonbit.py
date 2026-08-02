@@ -77,39 +77,6 @@ def translate_expr(expr):
     return e
 
 
-def extract_proof_block(lines):
-    """Extract Model + Invariant text from the `## Proof` block."""
-    model, invariant = None, None
-    in_proof = in_model = in_inv = in_fence = False
-    buf = []
-    for raw in lines:
-        line = raw.strip()
-        if line == "## Proof":
-            in_proof = True
-            continue
-        if not in_proof:
-            continue
-        if line.startswith("## "):
-            break
-        if line == "### Model":
-            in_model, in_inv = True, False
-            buf = []
-            continue
-        if line == "### Invariant":
-            in_model, in_inv = False, True
-            buf = []
-            continue
-        if line.startswith("### "):
-            in_model = in_inv = False
-            continue
-        if line.startswith("```"):
-            in_fence = not in_fence
-            continue
-        if (in_model or in_inv) and not in_fence and line:
-            buf.append(line)
-    return "\n".join(buf) if (model := model) else None  # placeholder; fixed below
-
-
 def extract_proof_model_invariant(text):
     """Return (model_line, invariant_lines) from a `## Proof` block text."""
     model_line, inv_lines = None, []

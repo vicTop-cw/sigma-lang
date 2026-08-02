@@ -40,7 +40,9 @@ RELATIONS = {"≡": "=", "≥": ">=", "≤": "<=", ">": ">", "<": "<", "≠": "!
 CONNECTIVES = {"∧": "and", "∨": "or", "⇒": "=>", "→": "=>"}
 NEGATION = "¬"
 # Function calls translatable to SMT-LIB2 (z3: n-ary max/min, unary abs).
-FUNCS = {"max": "max", "min": "min", "abs": "abs"}
+# index(...) is kept as an uninterpreted function application (v0.10 basic
+# ops); gen_obligation declares it alongside the other operands.
+FUNCS = {"max": "max", "min": "min", "abs": "abs", "index": "index"}
 
 _TOKEN = re.compile(r"\s*(\d+|∀|∃|[a-zA-Z_][a-zA-Z_0-9]*|[⊕⊗⊖≡≥≤><≠∧∨⇒→¬(),]|[-+*])\s*")
 
@@ -178,6 +180,9 @@ def split_top_level(toks, sep):
 def translate_formula(s):
     """Translate a formula with connectives and optional ∀ quantifier to SMT-LIB2."""
     s = s.strip()
+    # I₂ (identity matrix) → ASCII SMT-LIB2 identifier (declared by
+    # gen_obligation); keeps the tokenizer simple and z3 happy.
+    s = s.replace("I₂", "I2")
     m = re.match(r"^∀\s*([a-zA-Z_](?:\s+[a-zA-Z_])*)\s*\.\s*(.+)$", s)
     vars_list, body = None, s
     if m:
@@ -246,6 +251,13 @@ def gen_obligation(module, op, law_texts):
     lines = ["(set-logic NIA)"]
     for v in names:
         lines.append(f"(declare-const {v} Int)")
+    # v0.10 basic ops: declare the uninterpreted symbols index()/I₂ when the
+    # contract or laws reference them (z3 requires explicit declarations).
+    joined = " ".join(law_texts) + " " + (pre or "") + " " + (post or "")
+    if "index(" in joined:
+        lines.append("(declare-fun index (Int Int) Int)")
+    if "I₂" in joined:
+        lines.append("(declare-const I2 Int)")
     # Law III — declared laws become axioms (premises) of the obligation.
     for law in law_texts:
         try:
