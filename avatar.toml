@@ -5,12 +5,19 @@ name = "sigma-lang"
 path = "."
 
 [goal.current]
-id = "20260802-071100-next"
-title = "推进项目里程碑（无遗留 TODO）"
+id = "20260802-081929-next"
+title = "[P2] v0.12 Novel Spec Test：DNA 对齐语义"
 description = """
-当前无 TODO/FIXME 遗留。检查 README / MASTER_PLAN / spec 中标注的未完成项（如 v0.10 数学符号、包管理器、标准库），推进到 v0.10 可用。
+按 MASTER_PLAN 完成下一个未完成里程碑 [P2] v0.12 Novel Spec Test（DNA 对齐语义，§5.2）。
+交付物：corpus/novel_gene_ok.md（DNA 对齐语义，ΣLang 格式）
+验收标准（全部满足才算达成）：
+1. 新建 corpus/novel_gene_ok.md（DNA 对齐语义，ΣLang 格式），必要时同步 spec/语料/文档（规范→检查→测试三者一体）；
+2. 三端验证器（Python/Rust/Elixir）判定一致，verify_consensus.py 计入 N/N；
+3. 跑通完整闭环：AI 读 spec → 写实现 → verify_p0.py 全绿 → 发布（sigma-cli install）；
+4. 更新 MASTER_PLAN.md 将该行标记 ✅ DONE（含日期），确保下一轮自动切换到下一个里程碑；
+5. 提交（Conventional Commits + Co-Authored-By 尾注）。
 """
-created_at = "2026-08-02T07:11:00.896707+00:00"
+created_at = "2026-08-02T08:19:29.835506+00:00"
 
 [detect]
 scan_todos = true
@@ -58,4 +65,10 @@ result = "success"
 id = "20260802-064934-next"
 title = "推进项目里程碑（无遗留 TODO）"
 completed_at = "2026-08-02T07:11:00.898189+00:00"
+result = "success"
+
+[[goal.history]]
+id = "20260802-071100-next"
+title = "推进项目里程碑（无遗留 TODO）"
+completed_at = "2026-08-02T08:19:29.835506+00:00"
 result = "success"

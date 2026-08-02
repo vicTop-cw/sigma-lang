@@ -17,9 +17,9 @@
 - ✅ **REACHED**: Verifier format (json output) —— `verify_p0.py --json` 输出结构化 JSON（§1.2：
   spec/pass/modules/fingerprint），`sigma-cli verify --p0` 打通 CLI。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
-  1. P3 — Lang-Zong backend integration：`lzc --target sigma`（§6.1）。
-  2. P3 — SocketKit integration：spec 驱动行为契约（§6.2）。
-  3. P2 — Novel Spec Test：`corpus/novel_gene_ok.md`（DNA 对齐语义，§5.2）。
+  1. P2 — Novel Spec Test：`corpus/novel_gene_ok.md`（DNA 对齐语义，§5.2）。
+  2. P3 — Lang-Zong backend integration：`lzc --target sigma`（§6.1）。
+  3. P3 — SocketKit integration：spec 驱动行为契约（§6.2）。
 
 ---
 
@@ -283,6 +283,7 @@ This makes your App's business logic **mathematically auditable**.
 | P1 | Package manager CLI | ✅ v0.11: `tools/sigma-cli.py` (REACHED 2026-08-02) |
 | P1 | 3 standard packages | ✅ v0.11: `std/math.base.md` + tests (REACHED 2026-08-02) |
 | P2 | AI bootstrapping test | ✅ **REACHED 2026-08-02**: `tools/sigma-bootstrap.py` — one clean run closes the loop spec→impl→verify→pass (4 specs carry `## Implementation Checklist (for AI)`, `sigma_core.py` 59/59, `verify_p0.py` 95/95) |
+| P2 | **v0.12 Novel Spec Test (IN PROGRESS 2026-08-02)** | `corpus/novel_gene_ok.md`（DNA 对齐语义, §5.2）— 三端一致 + AI 闭环 |
 | P3 | Lang-Zong backend integration | lzc --target sigma |
 | P3 | SocketKit integration | spec-driven behavior contracts |
 
