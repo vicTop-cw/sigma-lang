@@ -127,16 +127,22 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > 全部实现并有语料覆盖；`sigma-prove` PROVED (unsat)、`sigma-moonbit` 生成 `.mbtp`；
 > consensus 35/35、p0 95/95、三端 0 warning。以下为 v0.11 新增要求。
 
-- [ ] **包管理器 CLI 可用**: `tools/sigma-cli.py` 实现 `install / verify / list / search /
+> **v0.11 已于 2026-08-02 达成（REACHED）**：包管理器 `tools/sigma-cli.py`
+> （install/verify/list/search/fingerprint，`~/.sigma/registry.json` 注册表，Iron Law VII
+> 无环依赖）可用；标准库 3 包 `std/math.base.md` / `std/data.transform.md` /
+> `std/ai.confidence.md`（各配 `corpus/std_*_ok.md` 验证器测试集）三端共识覆盖；
+> consensus 38/38、p0 95/95、三端 0 warning，v0.10 不回归。下一里程碑见 MASTER_PLAN。
+
+- [x] **包管理器 CLI 可用**: `tools/sigma-cli.py` 实现 `install / verify / list / search /
       fingerprint` 五个命令，`~/.sigma/registry.json` 注册表格式（版本/指纹/模块/依赖），
       依赖解析遵循 Iron Law VII（无环）。
-- [ ] **标准库 3 包可用**: `std/math.base.md`、`std/data.transform.md`、`std/ai.confidence.md`
+- [x] **标准库 3 包可用**: `std/math.base.md`、`std/data.transform.md`、`std/ai.confidence.md`
       各含 1 个 `.md` 规范 + 1 套验证器测试，三端共识覆盖（新增语料进入 consensus N/N）。
-- [ ] **v0.10 不回归**: 数学符号/基本操作/常量包、sigma-prove PROVED、sigma-moonbit .mbtp
+- [x] **v0.10 不回归**: 数学符号/基本操作/常量包、sigma-prove PROVED、sigma-moonbit .mbtp
       在 v0.11 全部保持全绿。
-- [ ] **共识门禁绿**: `verify_consensus.py` N/N 全绿、`verify_p0.py` 95/95、
+- [x] **共识门禁绿**: `verify_consensus.py` N/N 全绿、`verify_p0.py` 95/95、
       三端 0 warning。
-- [ ] **文档一致**: README / MASTER_PLAN / spec 中的模块数与状态与实现一致。
+- [x] **文档一致**: README / MASTER_PLAN / spec 中的模块数与状态与实现一致。
 
 > v0.11 = 「包管理器 + 标准库」：任何人 clone 后跑上述命令都能得到全绿结果，
 > `sigma-cli` 能安装/验证/检索标准包，3 个标准包在三个独立实现上行为一致。

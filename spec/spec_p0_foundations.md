@@ -909,14 +909,15 @@ A Verifier implementation is "conforming" iff:
 2. Cross-implementation agreement: on the shared corpus (`corpus/`),
    every conforming Verifier yields the same pass/fail verdict per module
    as the reference set (Python / Rust / Elixir).
-3. Shared corpus: `corpus/*.md` (35 modules, covering `## Operation:` and
+3. Shared corpus: `corpus/*.md` (38 modules, covering `## Operation:` and
    `###` block styles, PASS/FAIL verdicts, §T/§E/§C semantics, Laws XIII–XVI).
 
 ## Verification record (2026-08-02)
-35/35 corpus modules agree across Python / Rust / Elixir:
-- PASS×20 (arith, capabilities, compat, conf, const, encoding, error, eval, float,
+38/38 corpus modules agree across Python / Rust / Elixir:
+- PASS×23 (arith, capabilities, compat, conf, const, encoding, error, eval, float,
   guarantee, math_ops, matrix_ops, proof_max, proof_ok, proof_ops, shadow_escape,
-  shadow_free, signature, time, timing) — all tests executed
+  shadow_free, signature, std_ai_confidence, std_data_transform, std_math_base,
+  time, timing) — all tests executed
 - FAIL×15 (missing_laws → Law III, missing_tests → Law IV, negative_missing → Law XIV,
   portability_break → E-03, proof_break → P-01, shadow_break → §S, shadow_opaque_break → §S R5,
   signature_break → E-08/S-01, signature_mismatch → E-06, compat_break → Law XVI,

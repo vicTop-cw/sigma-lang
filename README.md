@@ -45,12 +45,12 @@ It is a **contract between intelligences**.
 | §I I/O Boundary & Effects / I/O 边界与效应 | 25/25 | ✅ |
 | **Total / 总计** | **95/95** | **✅** |
 
-Verifier Consensus / 验证器共识: **35/35** corpus modules agree across Python / Rust / Elixir verifiers.
-35/35 语料库模块在 Python / Rust / Elixir 三个验证器上达成一致。
+Verifier Consensus / 验证器共识: **38/38** corpus modules agree across Python / Rust / Elixir verifiers.
+38/38 语料库模块在 Python / Rust / Elixir 三个验证器上达成一致。
 
 **v0.10 可用 (2026-08-02)**: 数学符号（⊕ ⊗ ⊖ ⊘ ⊙ ≡ ≥ ≤ ∈）、基本操作（`index()`/`I₂`、元素级/矩阵运算）、常量包（§C `0xK0xx`/`0xQ0xx` 按指纹解析，Opaque 类不可遮蔽）已在三个验证器求值器全部实现并有语料覆盖；`sigma-prove` 义务消解 `PROVED (unsat)`，`sigma-moonbit` 生成 `.mbtp`；共识门禁 35/35 全绿。
 
-**v0.11 进行中 (NEXT, 2026-08-02)**: 包管理器 `tools/sigma-cli.py`（install/verify/list/search/fingerprint）+ 标准库 3 包（`std/math.base.md` / `std/data.transform.md` / `std/ai.confidence.md`），见 `MASTER_PLAN.md` Phase 3–4 与 `AUTOPILOT.md` §6。
+**v0.11 可用 (2026-08-02)**: 包管理器 `tools/sigma-cli.py`（install/verify/list/search/fingerprint，`~/.sigma/registry.json` 注册表，Iron Law VII 无环依赖解析）+ 标准库 3 包（`std/math.base.md` / `std/data.transform.md` / `std/ai.confidence.md`，各配 `corpus/std_*_ok.md` 验证器测试集）；共识门禁 38/38 全绿、p0 95/95、三端 0 warning，v0.10 不回归。见 `MASTER_PLAN.md` Phase 3–4 与 `AUTOPILOT.md` §6。
 
 ### Two verification modes / 两种验证模式
 
@@ -59,7 +59,7 @@ Verifier Consensus / 验证器共识: **35/35** corpus modules agree across Pyth
 | Tool / 工具 | Mode / 模式 | What it checks / 检查内容 |
 |------------|------------|--------------------------|
 | `verify_p0.py` | **Algorithm correctness** / 算法正确性 | 95 tests over §T/§E/§C/§I module *algorithms* (Lamport clocks, Result monad, confidence ops, I/O effects) — proves the P0 semantics are implementable. Does NOT parse `.md` specs. |
-| `verify_consensus.py` | **Spec conformance** / 规范一致性 | Parses `.md` specs, applies Laws I–XVII + E-03/06/07/10 + §S/P-01 checks, and requires **35/35 corpus modules** to agree across Python / Rust / Elixir (Law XIII gate). |
+| `verify_consensus.py` | **Spec conformance** / 规范一致性 | Parses `.md` specs, applies Laws I–XVII + E-03/06/07/10 + §S/P-01 checks, and requires **38/38 corpus modules** to agree across Python / Rust / Elixir (Law XIII gate). |
 
 > These are complementary, not redundant: `verify_p0.py` proves the **semantics** are sound;
 > `verify_consensus.py` proves the **specs** conform and that independent implementations agree
@@ -271,7 +271,7 @@ The following files have been moved to `archive/` as they are superseded by newe
 
 ## Version / 版本
 
-- **Milestone / 里程碑**: **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿 · **v0.11 进行中 (NEXT)** — 包管理器 + 标准库 3 包
+- **Milestone / 里程碑**: **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
 - **Spec Version / 规范版本**: 0.3.0
 - **Date / 日期**: 2026-08-02
 - **License / 许可证**: MIT

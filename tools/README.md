@@ -24,11 +24,16 @@ sigma-test module.md
 Package manager for ΣLang.
 
 ```bash
-sigma-pkg install finance.base@1.0
-sigma-pkg publish my-pack.md
-sigma-pkg verify my-pack.md
-sigma-pkg deps my-project.md
+python3 tools/sigma-cli.py install math.base@1.0   # install std package
+python3 tools/sigma-cli.py verify math.base        # run its verifier test set
+python3 tools/sigma-cli.py list                     # list installed packages
+python3 tools/sigma-cli.py search confidence        # search std/ + registry
+python3 tools/sigma-cli.py fingerprint std/math.base.md  # show sha256
 ```
+
+- Registry: `~/.sigma/registry.json` (version / path / sha256 fingerprint /
+  exported modules / deps). Dependency resolution honors Iron Law VII —
+  circular deps are rejected at install time.
 
 ### `sigma-verify`
 The main Verifier binary.
@@ -62,6 +67,6 @@ python3 tools/sigma-prove.py corpus/proof_ok.md
 | `sigma-verify` | Elixir | ✅ `impl/elixir_rt/sigma_verify.exs` |
 | `sigma-prove` | Python | ✅ `sigma-prove.py` (SMT obligations; z3 optional) |
 | `sigma-moonbit` | Python | ✅ `sigma-moonbit.py` (Proof → `.mbtp` translation bridge, 2026-08-01) |
-| `sigma-pkg` | Elixir | 📋 Planned |
+| `sigma-pkg` | Python | ✅ `sigma-cli.py` (install/verify/list/search/fingerprint + registry + Iron Law VII, 2026-08-02) |
 | `sigma-fmt` | Rust | 📋 Planned |
 | `sigma-test` | Rust | 📋 Planned |

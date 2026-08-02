@@ -27,7 +27,7 @@ impl/
 | Test evaluator | Rust | ✅ `eval_test` (⊕, ⊗, index, I₂, ⊥) |
 | Verifier CLI | Rust | ✅ `sigma-verifier` (text/json output) |
 | Verifier | Elixir | ✅ `sigma_verify.exs` (same contract) |
-| Consensus gate | Python | ✅ `verify_consensus.py` (3 verifiers × 35 corpus modules, 35/35 agree) |
+| Consensus gate | Python | ✅ `verify_consensus.py` (3 verifiers × 38 corpus modules, 38/38 agree) |
 | Elixir runtime | Elixir | ✅ `Sigma` / `SigmaRT` (Result monad, confidence, clocks, I/O) |
 | Race detector | Rust | 📋 Planned |
 | Resource checker | Rust | 📋 Planned |
