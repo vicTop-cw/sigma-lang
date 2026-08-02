@@ -600,6 +600,10 @@ CONSTANTS = {
     "0xQ00A": ("fnum", 8.314462618),  # R
     "0xQ00B": ("fnum", 9.1093837015e-31),  # mₑ
     "0xQ00C": ("fnum", 1.67262192369e-27),  # mₚ
+    "0xQ00D": ("fnum", 7.2973525693e-3),  # α (fine-structure constant)
+    "0xQ00E": ("fnum", 5.670374419e-8),  # σ (Stefan–Boltzmann)
+    "0xQ00F": ("fnum", 9.80665),  # g₀ (standard gravity, exact SI)
+    "0xQ010": ("fnum", 10973731.568160),  # R_∞ (Rydberg constant)
 }
 
 

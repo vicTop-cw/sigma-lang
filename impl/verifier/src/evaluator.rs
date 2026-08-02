@@ -434,6 +434,10 @@ fn resolve_constant(s: &str) -> Option<TVal> {
         "0xQ00A" => TVal::FNum(8.314462618), // R
         "0xQ00B" => TVal::FNum(9.1093837015e-31), // mₑ
         "0xQ00C" => TVal::FNum(1.67262192369e-27), // mₚ
+        "0xQ00D" => TVal::FNum(7.2973525693e-3), // α (fine-structure constant)
+        "0xQ00E" => TVal::FNum(5.670374419e-8), // σ (Stefan–Boltzmann)
+        "0xQ00F" => TVal::FNum(9.80665), // g₀ (standard gravity, exact SI)
+        "0xQ010" => TVal::FNum(10973731.568160), // R_∞ (Rydberg constant)
         _ => return None,
     })
 }
