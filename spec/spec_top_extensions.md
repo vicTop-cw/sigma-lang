@@ -421,7 +421,7 @@ compat test breaks) added. Full run:
 | `compat_ok.md` | PASS | PASS | PASS (3) | PASS (3/3) | ✅ |
 | `compat_break.md` | FAIL (E-05) | FAIL | FAIL | FAIL | ✅ |
 
-**`🏆 Consensus: 12/12 modules agree (Python == Rust == Elixir == Expected)`**
+**`🏆 Consensus: 35/35 modules agree (Python == Rust == Elixir == Expected)`**
 
 Implementation notes (bugs found during promotion):
 

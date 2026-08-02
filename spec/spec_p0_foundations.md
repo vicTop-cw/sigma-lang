@@ -909,14 +909,19 @@ A Verifier implementation is "conforming" iff:
 2. Cross-implementation agreement: on the shared corpus (`corpus/`),
    every conforming Verifier yields the same pass/fail verdict per module
    as the reference set (Python / Rust / Elixir).
-3. Shared corpus: `corpus/*.md` (12 modules, covering `## Operation:` and
+3. Shared corpus: `corpus/*.md` (35 modules, covering `## Operation:` and
    `###` block styles, PASS/FAIL verdicts, §T/§E/§C semantics, Laws XIII–XVI).
 
-## Verification record (2026-08-01)
-12/12 corpus modules agree across Python / Rust / Elixir:
-- PASS×6 (arith, conf, encoding, error, time, compat_ok) — all tests executed
-- FAIL×6 (missing_laws → Law III, missing_tests → Law IV, negative_missing → Law XIV,
-  ghost_export → Law XV, hidden_export → Law XV, compat_break → Law XVI)
+## Verification record (2026-08-02)
+35/35 corpus modules agree across Python / Rust / Elixir:
+- PASS×20 (arith, capabilities, compat, conf, const, encoding, error, eval, float,
+  guarantee, math_ops, matrix_ops, proof_max, proof_ok, proof_ops, shadow_escape,
+  shadow_free, signature, time, timing) — all tests executed
+- FAIL×15 (missing_laws → Law III, missing_tests → Law IV, negative_missing → Law XIV,
+  portability_break → E-03, proof_break → P-01, shadow_break → §S, shadow_opaque_break → §S R5,
+  signature_break → E-08/S-01, signature_mismatch → E-06, compat_break → Law XVI,
+  const_shadow_break → §C Opaque, guarantee_break → E-10, eval_break → E-09,
+  ghost_export → Law XV, hidden_export → Law XV)
 
 ## Enforcement
 - New Verifier implementations must pass the corpus before being trusted.

@@ -124,7 +124,7 @@ Law — Compatibility Proof
 
 ### 推广记录（2026-08-01）
 
-E-05 现由全部三个验证器强制执行。`## Compat Tests` 块是 `--against pkg@old` 的内联形式。12/12 模块一致。
+E-05 现由全部三个验证器强制执行。`## Compat Tests` 块是 `--against pkg@old` 的内联形式。35/35 模块一致。
 
 ---
 
