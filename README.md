@@ -48,6 +48,8 @@ It is a **contract between intelligences**.
 Verifier Consensus / 验证器共识: **35/35** corpus modules agree across Python / Rust / Elixir verifiers.
 35/35 语料库模块在 Python / Rust / Elixir 三个验证器上达成一致。
 
+**v0.10 可用 (2026-08-02)**: 数学符号（⊕ ⊗ ⊖ ⊘ ⊙ ≡ ≥ ≤ ∈）、基本操作（`index()`/`I₂`、元素级/矩阵运算）、常量包（§C `0xK0xx`/`0xQ0xx` 按指纹解析，Opaque 类不可遮蔽）已在三个验证器求值器全部实现并有语料覆盖；`sigma-prove` 义务消解 `PROVED (unsat)`，`sigma-moonbit` 生成 `.mbtp`；共识门禁 35/35 全绿。
+
 ### Two verification modes / 两种验证模式
 
 ΣLang ships **two distinct verification tools** with different purposes:
@@ -267,8 +269,9 @@ The following files have been moved to `archive/` as they are superseded by newe
 
 ## Version / 版本
 
+- **Milestone / 里程碑**: **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
 - **Spec Version / 规范版本**: 0.3.0
-- **Date / 日期**: 2026-08-01
+- **Date / 日期**: 2026-08-02
 - **License / 许可证**: MIT
 
 ## Citation / 引用
