@@ -17,7 +17,7 @@ Runs canonical tests for a ΣLang module.
 
 ```bash
 sigma-test module.md
-# ✅ 12/12 tests passed
+# ✅ 7/7 tests passed
 ```
 
 ### `sigma-pkg`

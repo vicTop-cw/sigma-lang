@@ -256,7 +256,7 @@ e₁ →ᵢₒ e₂ →ᵢₒ e₃ →ᵢₒ e₄ →ᵢₒ e₅ →ᵢₒ e₆
 ✅ Causal ordering documented
 ✅ Parallel execution laws stated
 ✅ Resource lifecycle (spawn/join) annotated
-✅ Verifier: 12/12 checks pass
+✅ Verifier: 17/17 checks pass
 ```
 
 ## Non-Goals for this Module
