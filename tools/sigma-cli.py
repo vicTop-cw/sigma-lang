@@ -142,11 +142,21 @@ def resolve_pkg_path(spec):
     return name, None
 
 
+def _std_meta(dname):
+    """Resolve a dependency from std/ without installing it (for graph checks)."""
+    path = os.path.join(STD_DIR, dname + ".md")
+    if os.path.exists(path):
+        return parse_package(path)
+    return None
+
+
 def check_acyclic(name, pkg_meta, registry, visiting=None, seen=None):
     """Iron Law VII — no circular dependencies.
 
-    Returns list of dependency names in install order (topological), or
-    raises RuntimeError on a cycle.
+    Resolves the dependency graph over the registry plus std/-resolvable
+    packages (a std/ dependency need not be installed yet — cmd_install
+    fetches it after the graph check). Returns list of dependency names in
+    install order (topological), or raises RuntimeError on a cycle.
     """
     visiting = visiting or []
     seen = seen or set()
@@ -160,13 +170,18 @@ def check_acyclic(name, pkg_meta, registry, visiting=None, seen=None):
     deps = pkg_meta.get("deps") or []
     for d in deps:
         dname = re.sub(r"@[\w.]+$", "", d.strip())
-        dmeta = registry["packages"].get(dname) or {}
+        if dname in visiting:
+            cycle = " -> ".join(visiting[visiting.index(dname):] + [dname])
+            raise RuntimeError(f"Iron Law VII violation — circular dependency: {cycle}")
+        dmeta = registry["packages"].get(dname)
         if not dmeta:
-            # Dependency not installed and not resolvable from std/ — it
-            # must be a built-in (core) or still missing; core is implicit.
+            # Not installed — resolvable from std/ (auto-install) or a
+            # built-in (core is implicit).
             if dname == "core":
                 continue
-            raise RuntimeError(f"missing dependency: {dname} (required by {name})")
+            dmeta = _std_meta(dname)
+            if dmeta is None:
+                raise RuntimeError(f"missing dependency: {dname} (required by {name})")
         order.extend(check_acyclic(dname, dmeta, registry, visiting, seen))
     visiting.pop()
     seen.add(name)
@@ -225,7 +240,8 @@ def cmd_install(args):
     }
     registry["packages"][name] = entry
     save_registry(registry)
-    print(f"installed {name}@{entry['version']} (deps: {order})")
+    print(f"installed {name}@{entry['version']} "
+          f"(deps: {pkg.get('deps') or []})")
     print(f"  fingerprint: {entry['fingerprint']}")
     return 0
 
