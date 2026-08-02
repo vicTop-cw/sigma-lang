@@ -91,62 +91,71 @@ def run_cycle(project_root: str, dry_run: bool = False):
         f.write(f"tests: {'PASS' if test_result['passed'] else 'FAIL'}\n")
         f.write(f"todos: {len(todos)} items\n\n")
 
-    # ── 两阶段完成 + 核验 ──
-    if avatar.check_goal_complete(test_result, todos):
-        runner.log("GOAL COMPLETE: 测试全过且无 TODO，进入两阶段完成/核验")
-        with open(log_file, 'a', encoding='utf-8') as f:
-            f.write("── GOAL COMPLETE ──\n")
-        if dry_run:
-            runner.log("GOAL COMPLETE (dry-run): 跳过完成流程，不落盘")
-            with open(log_file, 'a', encoding='utf-8') as f:
-                f.write("   (dry-run: 跳过完成流程，不落盘)\n\n")
-            return log_file
-
-        pending = goal.get('pending_verification')
-        if not pending:
-            # 阶段1/2：本轮达成 → 仅标注完成，待下一轮核验
-            goal['completed_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-            goal['pending_verification'] = True
-            avatar.save_config(project_root, config)
-            with open(log_file, 'a', encoding='utf-8') as f:
-                f.write("   阶段1/2：目标达成，仅标注完成（pending_verification）。\n")
-                f.write("   下一轮将核验主项目源码是否已无改动，通过后才拟定新目标。\n\n")
-            runner.log(f"🎯 目标 [{goal_id}] 达成（阶段1/2 标注），待下一轮核验")
-        else:
-            # 阶段2/2：核验
-            source_changes = avatar._source_changes_in_watch(
-                git_status, detect.get('watch_patterns', []))
-            if source_changes:
-                # 核验未通过 → 取消完成标记（保留 pending，下一轮直接续核验）
-                goal.pop('completed_at', None)
-                avatar.save_config(project_root, config)
-                with open(log_file, 'a', encoding='utf-8') as f:
-                    f.write("   阶段2/2：核验未通过——已取消完成标记。\n")
-                    f.write("   未通过项（主项目源码仍有改动）：\n")
-                    for c in source_changes[:10]:
-                        f.write(f"     - {c}\n")
-                    f.write("   保持 pending，下一轮继续核验；修复并提交这些改动前，不拟定新目标。\n\n")
-                runner.log(f"❌ 目标 [{goal_id}] 核验未通过，已取消完成标记。"
-                           f"未通过项: {source_changes[:5]}")
-            else:
-                # 核验通过 → 真正完成：归档 + 拟定新目标 + 首轮提示词
-                last_prompt = avatar.generate_prompt(
-                    config, {'action': 'goal_complete',
-                             'context': goal.get('description', '')},
-                    goal.get('description', ''), todos, test_result, git_status)
-                avatar.complete_goal(project_root, config, cycle_num, log_file, last_prompt)
-                runner.log(f"✅ 目标 [{goal_id}] 核验通过，已拟定下一目标")
-        return log_file
-
-    # ── DECIDE ──
+    # ── DECIDE（提前计算：推进型目标不得因「测试过+无TODO」被误判完成）──
     goal_desc = goal.get('description', '')
     priority = avatar.decide_priority(goal_desc, test_result, todos, git_status)
+    is_advance = priority['action'] == 'advance_goal'
+    goal_reached = avatar.check_goal_complete(test_result, todos)
+    pending = bool(goal.get('pending_verification'))
     runner.log(f"DECIDE: {priority['action']}")
     with open(log_file, 'a', encoding='utf-8') as f:
         f.write(f"── DECIDE: {priority['action']} ──\n\n")
 
-    # ── GENERATE ──
+    # ── 两阶段完成（pending 优先核验；advance_goal 未 pending 时先推进再标注）──
+    if goal_reached and pending:
+        # 阶段2/2：核验（不论修复型还是推进型，标注后都先核验）
+        if dry_run:
+            runner.log("GOAL COMPLETE 核验 (dry-run): 将检查 watch_patterns 变更，不落盘")
+            with open(log_file, 'a', encoding='utf-8') as f:
+                f.write("   (dry-run: 跳过核验流程，不落盘)\n\n")
+            return log_file
+        source_changes = avatar._source_changes_in_watch(
+            git_status, detect.get('watch_patterns', []))
+        if source_changes:
+            # 核验未通过 → 取消完成标记（保留 pending，下一轮直接续核验）
+            goal.pop('completed_at', None)
+            avatar.save_config(project_root, config)
+            with open(log_file, 'a', encoding='utf-8') as f:
+                f.write("   阶段2/2：核验未通过——已取消完成标记。\n")
+                f.write("   未通过项（主项目源码仍有改动）：\n")
+                for c in source_changes[:10]:
+                    f.write(f"     - {c}\n")
+                f.write("   保持 pending，下一轮继续核验；修复并提交这些改动前，不拟定新目标。\n\n")
+            runner.log(f"❌ 目标 [{goal_id}] 核验未通过，已取消完成标记。"
+                       f"未通过项: {source_changes[:5]}")
+        else:
+            # 核验通过 → 真正完成：归档 + 拟定新目标 + 首轮提示词
+            last_prompt = avatar.generate_prompt(
+                config, {'action': 'goal_complete',
+                         'context': goal.get('description', '')},
+                goal.get('description', ''), todos, test_result, git_status)
+            avatar.complete_goal(project_root, config, cycle_num, log_file, last_prompt)
+            runner.log(f"✅ 目标 [{goal_id}] 核验通过，已拟定下一目标")
+        return log_file
+
+    if goal_reached and not is_advance and not pending and git_status == '(clean)':
+        # 阶段1/2：修复型目标达成且 git 干净 → 仅标注完成，待下一轮核验
+        # （git 有变更时 action=review_changes，应先审查提交，不得判完成）
+        if dry_run:
+            runner.log("GOAL COMPLETE (dry-run): 阶段1/2 标注将执行，不落盘")
+            with open(log_file, 'a', encoding='utf-8') as f:
+                f.write("   (dry-run: 跳过完成流程，不落盘)\n\n")
+            return log_file
+        goal['completed_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        goal['pending_verification'] = True
+        avatar.save_config(project_root, config)
+        with open(log_file, 'a', encoding='utf-8') as f:
+            f.write("   阶段1/2：目标达成，仅标注完成（pending_verification）。\n")
+            f.write("   下一轮将核验主项目源码是否已无改动，通过后才拟定新目标。\n\n")
+        runner.log(f"🎯 目标 [{goal_id}] 达成（阶段1/2 标注），待下一轮核验")
+        return log_file
+
+    # ── GENERATE（advance_goal 时 prompt 强调推进里程碑，而非无事可做）──
     prompt = avatar.generate_prompt(config, priority, goal_desc, todos, test_result, git_status)
+    if is_advance:
+        prompt += ("\n\n【推进指令】当前无紧急故障。你的任务是按【目标描述】主动推进项目里程碑"
+                   "（读 MASTER_PLAN / AUTOPILOT.md 找下一未完成阶段），做出实质改进并提交；"
+                   "若确无可推进项，说明原因。")
     runner.log("GENERATE: 提示词已合成（完整内容见本轮 cycle 日志）")
     with open(log_file, 'a', encoding='utf-8') as f:
         f.write(f"── PROMPT ──\n{prompt[:1000]}\n...\n\n")
@@ -184,6 +193,15 @@ def run_cycle(project_root: str, dry_run: bool = False):
                        f"{'✅ OK' if commit_result['committed'] else '⚠️ ' + commit_result['message'][:100]}")
             with open(log_file, 'a', encoding='utf-8') as f:
                 f.write(f"── COMMIT: {commit_result['message'][:200]}\n")
+
+        # ── 推进型目标：DELEGATE 成功且有实质产出 → 阶段1 标注，下一轮核验 ──
+        if is_advance and not goal.get('pending_verification'):
+            goal['completed_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            goal['pending_verification'] = True
+            avatar.save_config(project_root, config)
+            with open(log_file, 'a', encoding='utf-8') as f:
+                f.write("\n🎯 推进完成（advance_goal 产出），阶段1/2 标注，下一轮核验。\n\n")
+            runner.log(f"🎯 目标 [{goal_id}] 推进完成，阶段1/2 标注，待下一轮核验")
 
     return log_file
 
