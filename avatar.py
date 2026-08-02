@@ -345,12 +345,21 @@ def git_commit_and_push(project_root: str, message: str, auto_push: bool) -> dic
         r = subprocess.run(['git', '-C', project_root, 'commit', '-m', message],
                           capture_output=True, text=True, timeout=10,
                           encoding='utf-8', errors='replace')
+        if r.returncode != 0:
+            # 区分「无变更」与「提交失败」：nothing to commit 是正常空跑，不是成功
+            out = (r.stdout or '') + (r.stderr or '')
+            if 'nothing to commit' in out:
+                return {'committed': False, 'no_changes': True,
+                        'message': out.strip()[-200:]}
+            return {'committed': False, 'no_changes': False,
+                    'message': out.strip()[-200:]}
         if auto_push:
             subprocess.run(['git', '-C', project_root, 'push', 'origin', 'main'],
                           capture_output=True, timeout=30)
-        return {'committed': True, 'message': r.stdout.strip()[-200:]}
+        return {'committed': True, 'no_changes': False,
+                'message': r.stdout.strip()[-200:]}
     except Exception as e:
-        return {'committed': False, 'message': str(e)}
+        return {'committed': False, 'no_changes': False, 'message': str(e)}
 
 
 # ═══════════════════════════════════════════

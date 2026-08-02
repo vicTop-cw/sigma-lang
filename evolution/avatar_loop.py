@@ -180,6 +180,7 @@ def run_cycle(project_root: str, dry_run: bool = False):
         f.write(f"{result['stdout'][:500]}\n")
 
     # ── RE-VERIFY + COMMIT ──
+    commit_result = None
     if result['success']:
         test_result2 = avatar.run_tests(project_root, detect.get('test_command', 'echo no tests'))
         runner.log(f"RE-VERIFY: {'✅ PASS' if test_result2['passed'] else '❌ FAIL'}")
@@ -189,19 +190,33 @@ def run_cycle(project_root: str, dry_run: bool = False):
             summary = f"avatar: [{goal_id[:12]}] c{cycle_num} {priority['action']}"
             commit_result = avatar.git_commit_and_push(
                 project_root, summary, cycle_cfg.get('auto_push', False))
-            runner.log(f"COMMIT: {summary} → "
-                       f"{'✅ OK' if commit_result['committed'] else '⚠️ ' + commit_result['message'][:100]}")
+            if commit_result.get('no_changes'):
+                runner.log(f"COMMIT: {summary} → ⚠️ 无变更（nothing to commit，本轮空跑）")
+            else:
+                runner.log(f"COMMIT: {summary} → "
+                           f"{'✅ OK' if commit_result.get('committed') else '⚠️ ' + commit_result['message'][:100]}")
             with open(log_file, 'a', encoding='utf-8') as f:
                 f.write(f"── COMMIT: {commit_result['message'][:200]}\n")
 
-        # ── 推进型目标：DELEGATE 成功且有实质产出 → 阶段1 标注，下一轮核验 ──
+        # ── 推进型目标：DELEGATE 成功且有实质源码产出 → 阶段1 标注，下一轮核验 ──
         if is_advance and not goal.get('pending_verification'):
-            goal['completed_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-            goal['pending_verification'] = True
-            avatar.save_config(project_root, config)
-            with open(log_file, 'a', encoding='utf-8') as f:
-                f.write("\n🎯 推进完成（advance_goal 产出），阶段1/2 标注，下一轮核验。\n\n")
-            runner.log(f"🎯 目标 [{goal_id}] 推进完成，阶段1/2 标注，待下一轮核验")
+            if commit_result is not None:
+                produced = bool(commit_result.get('committed')) and not commit_result.get('no_changes')
+            else:
+                # 未开自动提交：本轮有 watch_patterns 内源码变更也算产出
+                produced = bool(avatar._source_changes_in_watch(
+                    avatar.run_git_status(project_root), detect.get('watch_patterns', [])))
+            if produced:
+                goal['completed_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+                goal['pending_verification'] = True
+                avatar.save_config(project_root, config)
+                with open(log_file, 'a', encoding='utf-8') as f:
+                    f.write("\n🎯 推进完成（advance_goal 产出），阶段1/2 标注，下一轮核验。\n\n")
+                runner.log(f"🎯 目标 [{goal_id}] 推进完成，阶段1/2 标注，待下一轮核验")
+            else:
+                with open(log_file, 'a', encoding='utf-8') as f:
+                    f.write("\n⚠️ 本轮 DELEGATE 成功但无实质源码产出（空跑），不标完成，继续推进。\n\n")
+                runner.log(f"⚠️ 目标 [{goal_id}] 本轮无实质产出（空跑），不标完成，继续推进")
 
     return log_file
 
