@@ -44,10 +44,15 @@ pub fn task_submit(task: &[i64]) -> Result<Vec<i64>, &'static str> {
 }
 
 /// Acceptance confirmation: status 2 → 3 (completed), hunter preserved.
-/// §SK.3.4 — 受茬人单人验收确认 (MVP); accepting a non-pending task is a StateError.
-pub fn task_accept(task: &[i64]) -> Result<Vec<i64>, &'static str> {
+/// §SK.3.4 — 受茬人单人验收确认 (MVP); accepting a non-pending task is a
+/// StateError. INV-4 (授权): only the author (caller ≡ task[0]) may accept
+/// their own task, otherwise AuthError.
+pub fn task_accept(task: &[i64], caller: i64) -> Result<Vec<i64>, &'static str> {
     if task[2] != STATUS_PENDING {
         return Err("StateError");
+    }
+    if caller != task[0] {
+        return Err("AuthError");
     }
     Ok(vec![task[0], task[1], STATUS_COMPLETED, task[3]])
 }
@@ -163,9 +168,10 @@ pub fn self_check() -> (usize, usize) {
     check!("task_submit_non_in_progress_rejected", task_submit(&t_open).is_err());
 
     // §SK.3.4 task_accept
-    check!("task_accept_completed", task_accept(&t_sub) == Ok(vec![7, 100, 3, 3]));
-    check!("task_accept_hunter_preserved", task_accept(&t_sub).map(|t| t[3]) == Ok(3));
-    check!("task_accept_non_pending_rejected", task_accept(&t_open).is_err());
+    check!("task_accept_completed", task_accept(&t_sub, 7) == Ok(vec![7, 100, 3, 3]));
+    check!("task_accept_hunter_preserved", task_accept(&t_sub, 7).map(|t| t[3]) == Ok(3));
+    check!("task_accept_non_author_rejected", task_accept(&t_sub, 9).is_err());
+    check!("task_accept_non_pending_rejected", task_accept(&t_open, 7).is_err());
 
     // §SK.3.6 review_merge
     let os_accept = vec![vec![1, 1, 3], vec![2, 1, 2]];

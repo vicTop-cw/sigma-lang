@@ -167,12 +167,22 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
     }
     if let Some(rest) = s.strip_prefix("task_accept(") {
         let inner = rest.strip_suffix(')').ok_or("bad task_accept call")?;
-        let vt = eval_expr(inner)?;
-        return match vt {
-            TVal::List(task) if task.len() == 4 => {
+        let (t, c) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad task_accept args: {}", inner))?;
+        let vt = eval_expr(t)?;
+        let vc = eval_expr(c)?;
+        return match (vt, vc) {
+            (TVal::List(task), TVal::Num(caller)) if task.len() == 4 => {
                 if task[2] != TVal::Num(2) {
                     // status 2 = pending_review
                     return Err("StateError".to_string());
+                }
+                if caller != match &task[0] {
+                    TVal::Num(a) => *a,
+                    _ => return Err("TypeError".to_string()),
+                } {
+                    // INV-4: only the author may accept their own task
+                    return Err("AuthError".to_string());
                 }
                 Ok(TVal::List(vec![
                     task[0].clone(),

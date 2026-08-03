@@ -107,24 +107,26 @@ Fingerprint: 0xF005
 ### Signature
 
 ```md
-task_accept : List⟨ℕ⟩ → List⟨ℕ⟩
+task_accept : List⟨ℕ⟩ × ℕ → List⟨ℕ⟩
 Fingerprint: 0xF006
 ```
 
 ### Laws
 
 ```md
-∀ t . index(t, 2) ≡ 2 ⇒ index(task_accept(t), 2) ≡ 3
-∀ t . index(t, 2) ≡ 2 ⇒ index(task_accept(t), 3) ≡ index(t, 3)
+∀ t c . index(t, 2) ≡ 2 ⇒ index(task_accept(t, c), 2) ≡ 3
+∀ t c . index(t, 2) ≡ 2 ⇒ index(task_accept(t, c), 3) ≡ index(t, 3)
+∀ t c . index(t, 2) ≡ 2 ∧ c ≢ index(t, 0) ⇒ task_accept(t, c) ≡ ⊥ AuthError
 ```
 
 ### Tests
 
 | Input | Output |
 |-------|--------|
-| task_accept(task_submit(accept_task(task_create(5, 50), 3))) | [5,50,3,3] |
-| task_accept(task_submit(accept_task(task_create(2, 0), 9))) | [2,0,3,9] |
-| task_accept(task_create(5, 50)) | ⊥ StateError |
+| task_accept(task_submit(accept_task(task_create(5, 50), 3)), 5) | [5,50,3,3] |
+| task_accept(task_submit(accept_task(task_create(2, 0), 9)), 2) | [2,0,3,9] |
+| task_accept(task_submit(accept_task(task_create(5, 50), 3)), 9) | ⊥ AuthError |
+| task_accept(task_create(5, 50), 5) | ⊥ StateError |
 
 ## Operation: review_merge (Review Resolution)
 

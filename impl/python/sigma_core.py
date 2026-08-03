@@ -459,13 +459,17 @@ def task_submit(task: List[int]) -> List[int]:
     return [task[0], task[1], STATUS_PENDING, task[3]]
 
 
-def task_accept(task: List[int]) -> List[int]:
+def task_accept(task: List[int], caller: int) -> List[int]:
     """Acceptance confirmation: status 2 → 3 (completed), hunter preserved.
 
-    §SK.3.4 — 受茬人单人验收确认 (MVP); accepting a non-pending task is a StateError.
+    §SK.3.4 — 受茬人单人验收确认 (MVP); accepting a non-pending task is a
+    StateError. INV-4 (授权): only the author (caller ≡ task[0]) may accept
+    their own task, otherwise AuthError.
     """
     if task[2] != STATUS_PENDING:
         raise ValueError("StateError")
+    if caller != task[0]:
+        raise ValueError("AuthError")
     return [task[0], task[1], STATUS_COMPLETED, task[3]]
 
 
@@ -680,11 +684,16 @@ def _main() -> int:
     except ValueError:
         check("SK.task_submit_non_in_progress_rejected", True)
     check("SK.task_accept_completed",
-          task_accept(task_submit(accept_task(task_create(5, 50), 3))) == [5, 50, 3, 3])
+          task_accept(task_submit(accept_task(task_create(5, 50), 3)), 5) == [5, 50, 3, 3])
     check("SK.task_accept_hunter_preserved",
-          task_accept(task_submit(accept_task(task_create(2, 0), 9)))[3] == 9)
+          task_accept(task_submit(accept_task(task_create(2, 0), 9)), 2)[3] == 9)
     try:
-        task_accept(task_create(5, 50))
+        task_accept(task_submit(accept_task(task_create(5, 50), 3)), 9)
+        check("SK.task_accept_non_author_rejected", False)
+    except ValueError:
+        check("SK.task_accept_non_author_rejected", True)
+    try:
+        task_accept(task_create(5, 50), 5)
         check("SK.task_accept_non_pending_rejected", False)
     except ValueError:
         check("SK.task_accept_non_pending_rejected", True)

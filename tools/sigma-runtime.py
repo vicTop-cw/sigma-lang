@@ -121,18 +121,18 @@ def run_trace(core):
         ])
 
     # --- SK.3.4 task_accept (验收确认) ----------------------------------------
-    done = core.task_accept(submitted)
-    record("task_accept", "SK.3.4", submitted, done, [
-        {"law": "index(t, 2) ≡ 2 ⇒ index(task_accept(t), 2) ≡ 3 — accept moves to completed",
+    done = core.task_accept(submitted, 7)  # caller 7 ≡ author (INV-4)
+    record("task_accept", "SK.3.4", [submitted, 7], done, [
+        {"law": "index(t, 2) ≡ 2 ⇒ index(task_accept(t, c), 2) ≡ 3 — accept moves to completed",
          "ok": done[2] == 3, "note": f"status={done[2]}"},
-        {"law": "index(t, 2) ≡ 2 ⇒ index(task_accept(t), 3) ≡ index(t, 3) — hunter preserved",
+        {"law": "index(t, 2) ≡ 2 ⇒ index(task_accept(t, c), 3) ≡ index(t, 3) — hunter preserved",
          "ok": done[3] == submitted[3], "note": f"hunter={done[3]}"},
     ])
 
     # Accepting a non-pending task is a StateError.
     try:
-        core.task_accept(task)
-        record("task_accept", "SK.3.4", task, "ACCEPTED(open)?", [
+        core.task_accept(task, 7)
+        record("task_accept", "SK.3.4", [task, 7], "ACCEPTED(open)?", [
             {"law": "accepting a non-pending task is a StateError",
              "ok": False, "note": "accept of open task accepted"},
         ])
@@ -198,6 +198,74 @@ def run_trace(core):
         {"law": "kind 1 (breach): ×0.7 per count — 违约 ×0.7",
          "ok": cred_breach == 70, "note": f"credit={cred_breach}"},
     ])
+
+    # --- §SK.3.8 Invariants (状态机不变量, v0.18) -------------------------------
+    # INV-1 状态单调: status 只前进不后退 (0 → 1 → 2 → 3).
+    record("INV-1", "§SK.3.8", [task, claimed, submitted, done], done, [
+        {"law": "INV-1 状态单调 — claim 0→1",
+         "ok": claimed[2] > task[2], "note": f"{task[2]}→{claimed[2]}"},
+        {"law": "INV-1 状态单调 — submit 1→2",
+         "ok": submitted[2] > claimed[2], "note": f"{claimed[2]}→{submitted[2]}"},
+        {"law": "INV-1 状态单调 — accept 2→3",
+         "ok": done[2] > submitted[2], "note": f"{submitted[2]}→{done[2]}"},
+    ])
+
+    # INV-2 终态不可变: completed 任务不可再被任何状态操作改变.
+    inv2_ok = True
+    try:
+        core.accept_task(done, 7)
+        inv2_ok = False
+    except ValueError:
+        pass
+    try:
+        core.task_submit(done)
+        inv2_ok = False
+    except ValueError:
+        pass
+    try:
+        core.task_accept(done, 7)
+        inv2_ok = False
+    except ValueError:
+        pass
+    record("INV-2", "§SK.3.8", done, "StateError×3", [
+        {"law": "INV-2 终态不可变 — completed 任务 claim/submit/accept 全部 StateError",
+         "ok": inv2_ok, "note": "所有状态操作被拒绝"},
+    ])
+
+    # INV-3 守恒: bounty 与 hunter 在状态流转中不变.
+    record("INV-3", "§SK.3.8", [task, claimed, submitted, done], done, [
+        {"law": "INV-3 守恒 — bounty 不变 (100)",
+         "ok": (claimed[1] == task[1] and submitted[1] == task[1]
+                and done[1] == task[1]),
+         "note": f"bounty={task[1]}"},
+        {"law": "INV-3 守恒 — hunter 一经记录不变 (3)",
+         "ok": (submitted[3] == claimed[3] and done[3] == claimed[3]),
+         "note": f"hunter={claimed[3]}"},
+    ])
+
+    # INV-4 作者授权: 只有受茬人本人可验收自己的单.
+    try:
+        core.task_accept(submitted, 9)  # 9 ≠ author 7
+        record("INV-4", "§SK.3.8", [submitted, 9], "ACCEPTED(9)?", [
+            {"law": "INV-4 作者授权 — 非作者 caller 验收被拒绝",
+             "ok": False, "note": "非作者验收成功"},
+        ])
+    except ValueError as e:
+        record("INV-4", "§SK.3.8", [submitted, 9], f"rejected ({e})", [
+            {"law": "INV-4 作者授权 — 非作者 caller 验收被拒绝",
+             "ok": True, "note": "AuthError 拒绝非作者 (caller 9 ≠ author 7)"},
+        ])
+    try:
+        core.task_accept(submitted, 7)  # 7 ≡ author
+        record("INV-4", "§SK.3.8", [submitted, 7], "ACCEPTED(7)", [
+            {"law": "INV-4 作者授权 — 作者本人验收成功",
+             "ok": True, "note": "caller 7 ≡ author 7 → completed"},
+        ])
+    except ValueError as e:
+        record("INV-4", "§SK.3.8", [submitted, 7], f"rejected ({e})", [
+            {"law": "INV-4 作者授权 — 作者本人验收成功",
+             "ok": False, "note": f"作者被拒绝: {e}"},
+        ])
 
     return events
 

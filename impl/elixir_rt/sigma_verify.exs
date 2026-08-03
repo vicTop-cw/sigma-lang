@@ -937,17 +937,27 @@ defmodule SigmaVerify do
         end
       String.starts_with?(t, "task_accept(") and String.ends_with?(t, ")") ->
         inner = String.slice(t, 12..-2//1)
-        with {:ok, {:list, task}} <- eval_expr(inner) do
-          if length(task) != 4 do
-            {:error, "TypeError"}
-          else
-            case task do
-              [a, b, {:num, 2}, h] -> {:ok, {:list, [a, b, {:num, 3}, h]}}
-              _ -> {:error, "StateError"}
+        case split_top_level(inner, ?,) do
+          {task_s, caller_s} ->
+            with {:ok, {:list, task}} <- eval_expr(task_s),
+                 {:ok, {:num, caller}} <- eval_expr(caller_s) do
+              if length(task) != 4 do
+                {:error, "TypeError"}
+              else
+                case task do
+                  [a, b, {:num, 2}, h] ->
+                    if caller == elem(a, 1) do
+                      {:ok, {:list, [a, b, {:num, 3}, h]}}
+                    else
+                      {:error, "AuthError"}
+                    end
+                  _ -> {:error, "StateError"}
+                end
+              end
+            else
+              _ -> {:error, "TypeError"}
             end
-          end
-        else
-          _ -> {:error, "TypeError"}
+          nil -> {:error, "bad task_accept args: #{inner}"}
         end
       String.starts_with?(t, "review_merge(") and String.ends_with?(t, ")") ->
         inner = String.slice(t, 13..-2//1)
@@ -1301,8 +1311,14 @@ defmodule SigmaVerify do
   def task_submit(_task), do: {:error, "StateError"}
 
   @doc "Acceptance confirmation: status 2 → 3 (completed), hunter preserved."
-  def task_accept([_a, _b, @status_pending, _h] = task), do: {:ok, List.replace_at(task, 2, @status_completed)}
-  def task_accept(_task), do: {:error, "StateError"}
+  def task_accept([_a, _b, @status_pending, _h] = task, caller) do
+    if caller == hd(task) do
+      {:ok, List.replace_at(task, 2, @status_completed)}
+    else
+      {:error, "AuthError"}
+    end
+  end
+  def task_accept(_task, _caller), do: {:error, "StateError"}
 
   @doc "Review resolution: opinions[] → decision (1 = accept, 0 = reject)."
   def review_merge(opinions) do
@@ -1359,8 +1375,8 @@ defmodule SigmaVerify do
     {:ok, claimed9} = accept_task(t0, 9)
     {:ok, submitted} = task_submit(claimed)
     {:ok, submitted9} = task_submit(claimed9)
-    {:ok, done} = task_accept(submitted)
-    {:ok, done9} = task_accept(submitted9)
+    {:ok, done} = task_accept(submitted, 7)
+    {:ok, done9} = task_accept(submitted9, 2)
 
     checks = [
       # §SK.3.1 task_create
@@ -1380,7 +1396,8 @@ defmodule SigmaVerify do
       # §SK.3.4 task_accept
       {"task_accept_completed", done == [7, 100, 3, 3]},
       {"task_accept_hunter_preserved", match?([_, _, _, 9], done9)},
-      {"task_accept_non_pending_rejected", task_accept(t50) == {:error, "StateError"}},
+      {"task_accept_non_author_rejected", task_accept(submitted, 9) == {:error, "AuthError"}},
+      {"task_accept_non_pending_rejected", task_accept(t50, 5) == {:error, "StateError"}},
       # §SK.3.6 review_merge
       {"review_merge_accept", review_merge([[1, 1, 3], [2, 1, 2]]) == 1},            # 5 ≥ 0
       {"review_merge_reject", review_merge([[1, 0, 3], [2, 1, 2]]) == 0},            # 2 < 3

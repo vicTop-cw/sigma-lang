@@ -18,12 +18,11 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.17 可用**——即：**§SK 对齐真实业务（MVP 语义扩展）**，
-在 v0.16（SocketKit 语料执行化）达成的基础上，用找茬真实需求文档
-（`D:\Desktop\来找茬_需求文档.md` v1.0）校准 §SK 语义：Task 4 元组 + 4 态状态机
-（发单→接单→提交→验收）、契分制 `credit_score`，修正 `review_merge` 定位，
-让「来找茬」MVP 全流程在 Python / Rust / Elixir 三端一致可执行、可证明、可审计。
-**我只关心这个结果。**
+**总目标**: 把项目推进到 **v0.18 可用**——即：**状态机不变量证明（业务规则固化）**，
+在 v0.17（§SK 对齐真实业务）达成的基础上，把「来找茬」核心业务约束固化为可证明的
+ΣLang 语义：`task_accept` 作者授权（只有受茬人本人可验收，否则 ⊥ AuthError）+
+§SK.3.8 状态机不变量（INV-1 状态单调 / INV-2 终态不可变 / INV-3 守恒 / INV-4 授权），
+三端一致执行、z3 可证明、语料进共识门禁。**我只关心这个结果。**
 
 ---
 
@@ -253,6 +252,29 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > 契分制规则全部成为 ΣLang 语义——三端一致执行、z3 可证明、语料进共识门禁。
 > App 开工时可直接按这份被验证过的语义实现。
 
+### v0.18 完成定义（状态机不变量证明，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **作者授权**: `task_accept` 增加 caller 参数，只有受茬人本人（caller ≡ author）
+      可验收自己的单，否则 ⊥ AuthError；spec / 三端执行层 / eval_expr / 语料同步。
+- [x] **不变量章节**: spec 新增 §SK.3.8——INV-1 状态单调（状态只前进不后退）、
+      INV-2 终态不可变（completed 不可再被任何状态操作改变）、INV-3 守恒
+      （bounty 与 hunter 在状态流转中不变）、INV-4 作者授权。
+- [x] **三端执行层同步**: `sigma_core.py` 92/92；Rust `sk.rs` / Elixir `sigma_verify.exs`
+      §SK 自检 33/33；三端 eval_expr 支持 `task_accept(task, caller)` 授权校验
+      （含 ⊥ AuthError / StateError），`cargo build` 0 error/0 warning。
+- [x] **语料**: `corpus/socketkit_ok.md` 增加 AuthError 负例（25/25 三端一致 PASS），
+      `socketkit_break.md` 保持 E-02 三端一致 FAIL。
+- [x] **证明**: `sigma-prove` 新增 6 项不变量义务（INV-1×3 / INV-2 / INV-3 / INV-4）
+      全部 `PROVED (unsat)`——§SK 义务共 23 项全绿；`sigma-runtime` 审计 trace
+      增加不变量逐条复核（31/31）。
+- [x] **不回归**: consensus 41/41、p0 109/109、三端 0 warning、py_compile 通过，
+      v0.10–v0.17 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
+
+> v0.18 = 「业务规则固化进可证明层」：找茬最关键的授权与状态约束不再只是代码里的
+> 约定——"只有作者能验收""完成后不可再改""赏金和找茬人不变"全部成为 z3 可证明的
+> 不变量，任何实现若违反都会被证明工具与审计 trace 当场抓住。
+
 ---
 
 ## 7. 提交与汇报约定
@@ -263,7 +285,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ```text
 【ΣLang AUTOPILOT 结果】
-- 状态: ✅ v0.17 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
+- 状态: ✅ v0.18 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
 - 本轮完成: 修复 X · 新增 Y · 验证 N/N
 - 验证证据: verify_consensus N/N · verify_p0 109/109 · sigma-prove PROVED
 - 提交: <hash> <subject>

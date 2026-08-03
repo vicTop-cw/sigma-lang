@@ -147,26 +147,29 @@ Definition: task_submit([a, b, 1, h]) ≡ [a, b, 2, h]
 ### SK.3.4 task_accept — Acceptance Confirmation (验收确认)
 
 ```md
-task_accept : List⟨ℕ⟩ → List⟨ℕ⟩            # task → Task
+task_accept : List⟨ℕ⟩ × ℕ → List⟨ℕ⟩            # (task, caller) → Task
 Fingerprint: 0xF006
-Definition: task_accept([a, b, 2, h]) ≡ [a, b, 3, h]
+Definition: task_accept([a, b, 2, h], c) ≡ [a, b, 3, h]  if c ≡ a
             # status 2 → 3 (completed) — 受茬人单人验收确认 (MVP)
+            # 授权约束 (INV-2): 只有受茬人本人 (c ≡ a) 可验收自己的单，否则 ⊥ AuthError
 ```
 
 **Laws**
 
 ```md
-∀ t . index(t, 2) ≡ 2 ⇒ index(task_accept(t), 2) ≡ 3     # accept moves to completed
-∀ t . index(t, 2) ≡ 2 ⇒ index(task_accept(t), 3) ≡ index(t, 3)   # hunter preserved
+∀ t c . index(t, 2) ≡ 2 ⇒ index(task_accept(t, c), 2) ≡ 3     # accept moves to completed
+∀ t c . index(t, 2) ≡ 2 ⇒ index(task_accept(t, c), 3) ≡ index(t, 3)   # hunter preserved
+∀ t c . index(t, 2) ≡ 2 ∧ c ≢ index(t, 0) ⇒ task_accept(t, c) ≡ ⊥ AuthError   # INV-2 授权
 ```
 
 **Tests**
 
 | Input | Output |
 |-------|--------|
-| task_accept(task_submit(accept_task(task_create(5, 50), 3))) | [5,50,3,3] |
-| task_accept(task_submit(accept_task(task_create(2, 0), 9))) | [2,0,3,9] |
-| task_accept(task_create(5, 50)) | ⊥ StateError |
+| task_accept(task_submit(accept_task(task_create(5, 50), 3)), 5) | [5,50,3,3] |
+| task_accept(task_submit(accept_task(task_create(2, 0), 9)), 2) | [2,0,3,9] |
+| task_accept(task_submit(accept_task(task_create(5, 50), 3)), 9) | ⊥ AuthError |
+| task_accept(task_create(5, 50), 5) | ⊥ StateError |
 
 ### SK.3.5 contribution_score — Contribution Calculation (贡献制)
 
@@ -246,6 +249,43 @@ credit_score([[1,1]]) ≡ 70                  # one breach: ×0.7 (100 → 70)
 | credit_score([[1,1],[0,1]]) | 75 |
 | credit_score([[1,2]]) | 49 |
 | credit_score(5) | ⊥ TypeError |
+
+### SK.3.8 Invariants — 状态机不变量（v0.18，业务规则固化）
+
+不变量是**所有可达状态**都必须成立的业务规则。`sigma-prove` 将其作为独立义务
+消解（PROVED = 定义满足不变量），`sigma-runtime` 在每次审计 trace 中逐条复核。
+
+**INV-1 — 状态单调（状态只前进，不可后退）**
+
+```md
+∀ t . index(t, 2) ∈ {0,1,2} ⇒ index(accept_task(t, h), 2) ≥ index(t, 2)
+∀ t . index(t, 2) ∈ {0,1,2} ⇒ index(task_submit(t), 2) ≥ index(t, 2)
+∀ t c . index(t, 2) ∈ {0,1,2} ⇒ index(task_accept(t, c), 2) ≥ index(t, 2)
+```
+
+**INV-2 — 终态不可变（completed 任务不可再被任何状态操作改变）**
+
+```md
+∀ t h . index(t, 2) ≡ 3 ⇒ accept_task(t, h) ≡ ⊥ StateError
+∀ t . index(t, 2) ≡ 3 ⇒ task_submit(t) ≡ ⊥ StateError
+∀ t c . index(t, 2) ≡ 3 ⇒ task_accept(t, c) ≡ ⊥ StateError
+```
+
+**INV-3 — 守恒（bounty 与 hunter 在状态流转中不变）**
+
+```md
+∀ t h . index(accept_task(t, h), 1) ≡ index(t, 1)      # bounty 不变
+∀ t . index(task_submit(t), 1) ≡ index(t, 1)           # bounty 不变
+∀ t c . index(task_accept(t, c), 1) ≡ index(t, 1)      # bounty 不变
+∀ t . index(task_submit(t), 3) ≡ index(t, 3)           # hunter 保留
+∀ t c . index(task_accept(t, c), 3) ≡ index(t, 3)      # hunter 保留
+```
+
+**INV-4 — 作者授权（只有受茬人本人可验收自己的单）**
+
+```md
+∀ t c . index(t, 2) ≡ 2 ∧ c ≢ index(t, 0) ⇒ task_accept(t, c) ≡ ⊥ AuthError
+```
 
 ---
 

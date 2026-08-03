@@ -752,14 +752,22 @@ def eval_expr(s):
         return ("list", [task[0], task[1], ("num", 2), task[3]])
     if s.startswith("task_accept(") and s.endswith(")"):
         inner = s[len("task_accept("):-1]
-        vt = eval_expr(inner.strip())
+        parts = split_top_level(inner, ",")
+        if parts is None or len(parts) < 2:
+            return f"bad task_accept args: {inner}"
+        vt = eval_expr(parts[0].strip())
+        vc = eval_expr(parts[1].strip())
         if isinstance(vt, str):
             return vt
-        if vt[0] != "list" or len(vt[1]) != 4:
+        if isinstance(vc, str):
+            return vc
+        if vt[0] != "list" or len(vt[1]) != 4 or vc[0] != "num":
             return "TypeError"
         task = vt[1]
         if task[2] != ("num", 2):  # status 2 = pending_review
             return "StateError"
+        if vc[1] != task[0][1]:  # INV-4: only the author may accept
+            return "AuthError"
         return ("list", [task[0], task[1], ("num", 3), task[3]])
     if s.startswith("review_merge(") and s.endswith(")"):
         inner = s[len("review_merge("):-1]

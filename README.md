@@ -67,6 +67,8 @@ Verifier Consensus / 验证器共识: **41/41** corpus modules agree across Pyth
 
 **v0.17 §SK 对齐真实业务 (2026-08-03)**: 依据找茬需求文档（`D:\Desktop\来找茬_需求文档.md` v1.0）校准 §SK——Task 扩展为 4 元组 `[author, bounty, status, hunter]` + 4 态状态机（待接单→进行中→待验收→已完成）；新增 `accept_task`（接单）/ `task_submit`（提交成果）/ `task_accept`（受茬人单人验收）/ `credit_score`（契分制：基础 100、完成 +5/单、违约 ×0.7）；`review_merge` 修正为增长期核验师场景。三端执行层同步（sigma_core 91/91、三端 §SK 自检 32/32、socketkit_ok 24/24 三端一致），sigma-prove 18 项 §SK 义务全部 PROVED (unsat)，sigma-runtime 完整 MVP 业务 trace 23/23；consensus 41/41、p0 109/109、三端 0 warning，v0.10–v0.16 不回归。
 
+**v0.18 状态机不变量证明 (2026-08-03)**: `task_accept` 增加作者授权参数（只有受茬人本人 caller ≡ author 可验收，否则 ⊥ AuthError），spec 新增 §SK.3.8 不变量章节——**INV-1 状态单调**（状态只前进不后退）、**INV-2 终态不可变**（completed 不可再被任何状态操作改变）、**INV-3 守恒**（bounty 与 hunter 流转中不变）、**INV-4 作者授权**。三端执行层与 eval_expr 同步授权校验（sigma_core 92/92、三端 §SK 自检 33/33、socketkit_ok 25/25 三端一致），sigma-prove 新增 6 项不变量义务全部 `PROVED (unsat)`（§SK 共 23 项），sigma-runtime 审计 trace 增加不变量逐条复核（31/31）；consensus 41/41、p0 109/109、三端 0 warning，v0.10–v0.17 不回归。
+
 ### Two verification modes / 两种验证模式
 
 ΣLang ships **two distinct verification tools** with different purposes:
@@ -288,7 +290,7 @@ The following files have been moved to `archive/` as they are superseded by newe
 
 ## Version / 版本
 
-- **Milestone / 里程碑**: **v0.17 §SK 对齐真实业务 (2026-08-03)** — Task 4 态状态机 + 契分制，MVP 全流程三端一致可执行可证明 · **v0.16 SocketKit 语料执行化 (2026-08-03)** — 业务语义进入 Law XIII 共识门禁 · **v0.15 三端 §SK 执行层 (2026-08-03)** — §SK 业务语义 Python/Rust/Elixir 三端一致可执行 · **v0.14 SocketKit Runtime (2026-08-03)** — §SK 参考实现 + 审计运行时 + z3 证明闭环，共识门禁 41/41 全绿 · **v0.13 SocketKit Protocol (2026-08-02)** — §SK 语义定义，共识门禁 40/40 全绿 · **v0.12 Novel Spec Test (2026-08-02)** — 新域自举闭环 · **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
+- **Milestone / 里程碑**: **v0.18 状态机不变量证明 (2026-08-03)** — 作者授权 + 4 项状态机不变量 z3 可证明 · **v0.17 §SK 对齐真实业务 (2026-08-03)** — Task 4 态状态机 + 契分制，MVP 全流程三端一致可执行可证明 · **v0.16 SocketKit 语料执行化 (2026-08-03)** — 业务语义进入 Law XIII 共识门禁 · **v0.15 三端 §SK 执行层 (2026-08-03)** — §SK 业务语义 Python/Rust/Elixir 三端一致可执行 · **v0.14 SocketKit Runtime (2026-08-03)** — §SK 参考实现 + 审计运行时 + z3 证明闭环，共识门禁 41/41 全绿 · **v0.13 SocketKit Protocol (2026-08-02)** — §SK 语义定义，共识门禁 40/40 全绿 · **v0.12 Novel Spec Test (2026-08-02)** — 新域自举闭环 · **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
 - **Spec Version / 规范版本**: 0.3.0
 - **Date / 日期**: 2026-08-03
 - **License / 许可证**: MIT
