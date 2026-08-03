@@ -1664,6 +1664,48 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ SK.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  @doc "Run the §SK.6 MVP story (spec_p0_socketkit.md) — 12 steps + INV-1/3/4,
+  mirroring sigma_app.py run_story and sigma-runtime --story (Law XIII)."
+  def sk_story do
+    {:ok, q0} = quota_new(50)
+    {:ok, task} = task_create(7, 100)
+    {:ok, q1} = quota_use(q0, 1)
+    p0 = points_hold(points_new(), 100)
+    {:ok, claimed} = accept_task(task, 3)
+    {:ok, submitted} = task_submit(claimed)
+    {:ok, done} = task_accept(submitted, 7)
+    {:ok, p1} = points_release(p0, 100)
+    {:ok, p2} = points_withdraw(p1, 100)
+    credit = credit_score([[0, 1]])
+    contribution = contribution_score([[3, 1, 10]])
+    badge = badge_level(105)
+
+    checks = [
+      # §SK.6.1–12 十二步
+      {"1 open_quota", q0 == [50, 50]},
+      {"2 task_create", task == [7, 100, 0, 0]},
+      {"3 quota_use", q1 == [50, 49]},
+      {"4 points_hold", p0 == [100, 0]},
+      {"5 accept_task", claimed == [7, 100, 1, 3]},
+      {"6 task_submit", submitted == [7, 100, 2, 3]},
+      {"7 task_accept", done == [7, 100, 3, 3]},
+      {"8 points_release", p1 == [0, 100]},
+      {"9 points_withdraw", p2 == [0, 0]},
+      {"10 credit_score", credit == 105},
+      {"11 contribution_score", contribution == 10},
+      {"12 badge_level", badge == 1},
+      # 剧本不变量 (spec §SK.6)
+      {"INV-1 monotonic", [Enum.at(task, 2), Enum.at(claimed, 2),
+                           Enum.at(submitted, 2), Enum.at(done, 2)] == [0, 1, 2, 3]},
+      {"INV-3 bounty conserved", Enum.at(done, 1) == 100},
+      {"INV-4 author accept", Enum.at(done, 0) == 7}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ SK.6.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -1674,6 +1716,11 @@ case System.argv() do
   ["--sk-self-check" | _] ->
     {passed, total} = SigmaVerify.sk_self_check()
     IO.puts("sigma_core self-check (§SK): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-story" | _] ->
+    {passed, total} = SigmaVerify.sk_story()
+    IO.puts("sigma_core story (§SK.6): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->
@@ -1690,6 +1737,6 @@ case System.argv() do
     end
 
   _ ->
-    IO.puts("usage: elixir sigma_verify.exs <module.md> | --sk-self-check")
+    IO.puts("usage: elixir sigma_verify.exs <module.md> | --sk-self-check | --sk-story")
     System.halt(2)
 end

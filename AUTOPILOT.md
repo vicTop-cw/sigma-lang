@@ -18,11 +18,11 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.23 可用**——即：**MVP 端到端 HTTP 冒烟测试**，
-在 v0.22（找茬 MVP 参考实现）达成的基础上，把参考实现"作为 HTTP 服务的可用性"
-用可重复执行的冒烟测试固化：`sigma_app.py --smoke` 起服务→HTTP 七步全链路
-（/quota → /post → /claim → /submit → /accept → /withdraw → /badge）→逐响应断言→
-关服务——App 开工的验收闭环完整。**我只关心这个结果。**
+**总目标**: 把项目推进到 **v0.24 可用**——即：**三端 §SK.6 story 一致性**，
+在 v0.23（MVP 端到端 HTTP 冒烟测试）达成的基础上，把 §SK.6 MVP 业务剧本从
+Python 单侧扩到三端：Rust `--sk-story`（15/15）、Elixir `--sk-story`（15/15）、
+Python `sigma_app.py`（15/15）审计**同一条业务故事线**——Law XIII 在"产品层"
+收官，三把独立的尺子对同一笔找茬交易给出同一个答案。**我只关心这个结果。**
 
 ---
 
@@ -372,6 +372,24 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > v0.23 = 「App 开工验收闭环」：参考实现从"能调用的类"到"可重复验收的 HTTP 服务"——
 > 一条命令跑完端到端冒烟，任何改动若破坏 MVP 业务流都会被当场抓住。
 
+### v0.24 完成定义（三端 §SK.6 story 一致性，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **Rust story**: `sk.rs` 新增 `story()`（§SK.6 十二步 + INV-1/3/4，15 项），
+      CLI 新增 `--sk-story`（15/15 通过），`cargo build` 0 error/0 warning。
+- [x] **Elixir story**: `sigma_verify.exs` 新增 `sk_story()` + `--sk-story`
+      （15/15 通过），常规验证路径 0 warning。
+- [x] **三端对账**: Python `sigma_app.py` 15/15 == Rust `--sk-story` 15/15 ==
+      Elixir `--sk-story` 15/15，同一 §SK.6 故事线三端逐项一致（Law XIII 产品层）。
+- [x] **不回归**: consensus 43/43、p0 109/109、sigma-prove 41 项 PROVED、
+      sigma-runtime 59/59（trace）+ 18/18（story）、sigma_app --smoke 13/13、
+      三端编译 0 warning、py_compile 通过，v0.10–v0.23 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
+
+> v0.24 = 「产品层三端同尺」：找茬 MVP 的整条业务故事线——开户、发单、扣额度、
+> 托管、接单、交成果、验收、释放、提现、加契分、加贡献、升勋章——现在 Python、
+> Rust、Elixir 三把尺子各跑一遍，逐项相同、结果一致；业务正确性在任何实现里
+> 都算出同一个答案。
+
 ---
 
 ## 7. 提交与汇报约定
@@ -382,7 +400,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ```text
 【ΣLang AUTOPILOT 结果】
-- 状态: ✅ v0.23 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
+- 状态: ✅ v0.24 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
 - 本轮完成: 修复 X · 新增 Y · 验证 N/N
 - 验证证据: verify_consensus N/N · verify_p0 109/109 · sigma-prove PROVED
 - 提交: <hash> <subject>

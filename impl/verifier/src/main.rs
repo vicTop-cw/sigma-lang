@@ -35,6 +35,10 @@ struct Cli {
     /// Run the §SK (SocketKit) reference-implementation self-check and exit
     #[arg(long)]
     sk_self_check: bool,
+
+    /// Run the §SK.6 MVP story (§SK.6, mirrors sigma-runtime --story) and exit
+    #[arg(long)]
+    sk_story: bool,
 }
 
 #[derive(Debug, Clone, ValueEnum)]
@@ -1174,6 +1178,14 @@ fn main() -> Result<()> {
     if cli.sk_self_check {
         let (passed, total) = sk::self_check();
         println!("sigma_core self-check (§SK): {passed}/{total} passed");
+        std::process::exit(if passed == total { 0 } else { 1 });
+    }
+
+    // §SK.6 MVP story — mirrors `python3 tools/sigma-runtime.py --story` so the
+    // three implementations audit the same story line (Law XIII).
+    if cli.sk_story {
+        let (passed, total) = sk::story();
+        println!("sigma_core story (§SK.6): {passed}/{total} passed");
         std::process::exit(if passed == total { 0 } else { 1 });
     }
 

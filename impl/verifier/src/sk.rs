@@ -323,3 +323,78 @@ pub fn self_check() -> (usize, usize) {
 
     (passed, total)
 }
+
+/// Run the §SK.6 MVP story (spec_p0_socketkit.md) — 12 steps + INV-1/3/4
+/// invariants, mirroring `sigma_app.py` run_story and `sigma-runtime --story`
+/// so the three implementations audit the same story line (Law XIII).
+/// Returns (passed, total).
+pub fn story() -> (usize, usize) {
+    let mut passed = 0usize;
+    let mut total = 0usize;
+
+    macro_rules! check {
+        ($name:expr, $cond:expr) => {{
+            total += 1;
+            if $cond {
+                passed += 1;
+            } else {
+                eprintln!("  ❌ SK.6.{}", $name);
+            }
+        }};
+    }
+
+    // 1. 开户额度      quota_new(50)                    → [50, 50]
+    let q0 = quota_new(50).unwrap();
+    check!("1 open_quota", q0 == vec![50, 50]);
+
+    // 2. 发布需求      task_create(7, 100)              → [7, 100, 0, 0]
+    let task = task_create(7, 100).unwrap();
+    check!("2 task_create", task == vec![7, 100, 0, 0]);
+
+    // 3. 扣减额度      quota_use([50, 50], 1)           → [50, 49]
+    let q1 = quota_use(&q0, 1).unwrap();
+    check!("3 quota_use", q1 == vec![50, 49]);
+
+    // 4. 赏金托管      points_hold(points_new(), 100)   → [100, 0]
+    let p0 = points_hold(&points_new(), 100);
+    check!("4 points_hold", p0 == vec![100, 0]);
+
+    // 5. 接单          accept_task(..., 3)              → [7, 100, 1, 3]
+    let claimed = accept_task(&task, 3).unwrap();
+    check!("5 accept_task", claimed == vec![7, 100, 1, 3]);
+
+    // 6. 提交成果      task_submit                      → [7, 100, 2, 3]
+    let submitted = task_submit(&claimed).unwrap();
+    check!("6 task_submit", submitted == vec![7, 100, 2, 3]);
+
+    // 7. 验收确认      task_accept(..., 7)              → [7, 100, 3, 3]
+    let done = task_accept(&submitted, 7).unwrap();
+    check!("7 task_accept", done == vec![7, 100, 3, 3]);
+
+    // 8. 释放赏金      points_release([100, 0], 100)    → [0, 100]
+    let p1 = points_release(&p0, 100).unwrap();
+    check!("8 points_release", p1 == vec![0, 100]);
+
+    // 9. 找茬人提现    points_withdraw([0, 100], 100)   → [0, 0]
+    let p2 = points_withdraw(&p1, 100).unwrap();
+    check!("9 points_withdraw", p2 == vec![0, 0]);
+
+    // 10. 契分奖励     credit_score([[0, 1]])           → 105
+    let credit = credit_score(&[vec![0, 1]]);
+    check!("10 credit_score", credit == 105);
+
+    // 11. 贡献累计     contribution_score               → 10
+    let contribution = contribution_score(&[vec![3, 1, 10]]);
+    check!("11 contribution_score", contribution == 10);
+
+    // 12. 勋章升级     badge_level(105)                 → 1
+    check!("12 badge_level", badge_level(105) == 1);
+
+    // 剧本不变量 (spec §SK.6)
+    check!("INV-1 monotonic",
+           [task[2], claimed[2], submitted[2], done[2]] == [0, 1, 2, 3]);
+    check!("INV-3 bounty conserved", done[1] == 100);
+    check!("INV-4 author accept", done[0] == 7);
+
+    (passed, total)
+}
