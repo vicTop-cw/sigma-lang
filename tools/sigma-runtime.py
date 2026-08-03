@@ -267,6 +267,88 @@ def run_trace(core):
              "ok": False, "note": f"作者被拒绝: {e}"},
         ])
 
+    # --- §PF Portfolio Protocol (spec_p0_portfolio.md) -------------------------
+    # 第二个自举新域：金融投资组合 — portfolio_new / buy / sell / value / risk.
+    pf0 = core.portfolio_new(100)
+    record("portfolio_new", "§PF.3.1", [100], pf0, [
+        {"law": "0 ≤ portfolio_new(c) — cash ≥ 0",
+         "ok": pf0[0] >= 0, "note": f"cash={pf0[0]}"},
+        {"law": "index(portfolio_new(c), 1) ≡ 0 — qtyA starts at 0",
+         "ok": pf0[1] == 0, "note": f"qtyA={pf0[1]}"},
+        {"law": "index(portfolio_new(c), 2) ≡ 0 — qtyB starts at 0",
+         "ok": pf0[2] == 0, "note": f"qtyB={pf0[2]}"},
+    ])
+
+    try:
+        core.portfolio_new(-5)
+        record("portfolio_new", "§PF.3.1", [-5], "ACCEPTED(-5)?", [
+            {"law": "Cash : Type ≝ ℕ — negative cash rejected",
+             "ok": False, "note": "negative cash accepted"},
+        ])
+    except ValueError as e:
+        record("portfolio_new", "§PF.3.1", [-5], f"rejected ({e})", [
+            {"law": "Cash : Type ≝ ℕ — negative cash rejected",
+             "ok": True, "note": "TypeError raised at boundary"},
+        ])
+
+    pf1 = core.buy(pf0, 0, 30)
+    record("buy", "§PF.3.2", [pf0, 0, 30], pf1, [
+        {"law": "index(p, 0) ≥ q ⇒ portfolio_value(buy(p, a, q)) ≡ portfolio_value(p) — 守恒",
+         "ok": core.portfolio_value(pf1) == core.portfolio_value(pf0),
+         "note": f"value {core.portfolio_value(pf0)} → {core.portfolio_value(pf1)}"},
+        {"law": "index(p, 0) ≥ q ⇒ index(buy(p, a, q), 0) ≥ 0 — cash never negative",
+         "ok": pf1[0] >= 0, "note": f"cash={pf1[0]}"},
+    ])
+
+    try:
+        core.buy(pf0, 0, 130)
+        record("buy", "§PF.3.2", [pf0, 0, 130], "BOUGHT(130)?", [
+            {"law": "insufficient cash → ⊥ InsufficientFunds",
+             "ok": False, "note": "bought more than cash"},
+        ])
+    except ValueError as e:
+        record("buy", "§PF.3.2", [pf0, 0, 130], f"rejected ({e})", [
+            {"law": "insufficient cash → ⊥ InsufficientFunds",
+             "ok": True, "note": "InsufficientFunds raised"},
+        ])
+
+    pf2 = core.sell(pf1, 0, 20)
+    record("sell", "§PF.3.3", [pf1, 0, 20], pf2, [
+        {"law": "index(p, a+1) ≥ q ⇒ portfolio_value(sell(p, a, q)) ≡ portfolio_value(p) — 守恒",
+         "ok": core.portfolio_value(pf2) == core.portfolio_value(pf1),
+         "note": f"value {core.portfolio_value(pf1)} → {core.portfolio_value(pf2)}"},
+        {"law": "index(p, a+1) ≥ q ⇒ index(sell(p, a, q), a+1) ≥ 0 — no naked shorts",
+         "ok": pf2[1] >= 0, "note": f"qtyA={pf2[1]}"},
+    ])
+
+    try:
+        core.sell(pf1, 0, 40)
+        record("sell", "§PF.3.3", [pf1, 0, 40], "SOLD(40)?", [
+            {"law": "insufficient position → ⊥ InsufficientShares",
+             "ok": False, "note": "sold more than held"},
+        ])
+    except ValueError as e:
+        record("sell", "§PF.3.3", [pf1, 0, 40], f"rejected ({e})", [
+            {"law": "insufficient position → ⊥ InsufficientShares",
+             "ok": True, "note": "InsufficientShares raised"},
+        ])
+
+    val = core.portfolio_value(pf2)
+    record("portfolio_value", "§PF.3.4", pf2, val, [
+        {"law": "0 ≤ portfolio_value(p) — never negative",
+         "ok": val >= 0, "note": f"value={val}"},
+        {"law": "conservation across buy+sell — value unchanged from open",
+         "ok": val == core.portfolio_value(pf0), "note": f"open={core.portfolio_value(pf0)}"},
+    ])
+
+    risk = core.risk_score(pf2)
+    record("risk_score", "§PF.3.5", pf2, risk, [
+        {"law": "0 ≤ risk_score(p) — never negative",
+         "ok": risk >= 0, "note": f"risk={risk}"},
+        {"law": "risk_score(p) ≤ portfolio_value(p) — exposure bounded by value",
+         "ok": risk <= val, "note": f"risk={risk} ≤ value={val}"},
+    ])
+
     return events
 
 

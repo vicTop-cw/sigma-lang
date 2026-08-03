@@ -281,6 +281,133 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
             _ => Err("TypeError".to_string()),
         };
     }
+    // §PF — Portfolio Protocol operations (spec_p0_portfolio.md §PF.3).
+    // Second novel domain: finance. Real function calls, mirrors
+    // verify_consensus.py so the consensus gate verifies investment semantics.
+    if let Some(rest) = s.strip_prefix("portfolio_new(") {
+        let inner = rest.strip_suffix(')').ok_or("bad portfolio_new call")?;
+        let vc = eval_expr(inner)?;
+        return match vc {
+            TVal::Num(cash) => {
+                if cash < 0 {
+                    // Cash : Type ≝ ℕ
+                    Err("TypeError".to_string())
+                } else {
+                    Ok(TVal::List(vec![TVal::Num(cash), TVal::Num(0), TVal::Num(0)]))
+                }
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("buy(") {
+        let inner = rest.strip_suffix(')').ok_or("bad buy call")?;
+        let (a, rest2) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad buy args: {}", inner))?;
+        let (b, c) = split_top_level(rest2, ',')
+            .ok_or_else(|| format!("bad buy args: {}", inner))?;
+        let vp = eval_expr(a)?;
+        let va = eval_expr(b)?;
+        let vq = eval_expr(c)?;
+        return match (vp, va, vq) {
+            (TVal::List(pf), TVal::Num(asset), TVal::Num(qty))
+                if pf.len() == 3 =>
+            {
+                if asset != 0 && asset != 1 {
+                    return Err("UnknownAsset".to_string());
+                }
+                let (cash, q_a, q_b) = match (&pf[0], &pf[1], &pf[2]) {
+                    (TVal::Num(c), TVal::Num(a), TVal::Num(b)) => (*c, *a, *b),
+                    _ => return Err("TypeError".to_string()),
+                };
+                if cash < qty {
+                    return Err("InsufficientFunds".to_string());
+                }
+                if asset == 0 {
+                    Ok(TVal::List(vec![
+                        TVal::Num(cash - qty),
+                        TVal::Num(q_a + qty),
+                        TVal::Num(q_b),
+                    ]))
+                } else {
+                    Ok(TVal::List(vec![
+                        TVal::Num(cash - qty),
+                        TVal::Num(q_a),
+                        TVal::Num(q_b + qty),
+                    ]))
+                }
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("sell(") {
+        let inner = rest.strip_suffix(')').ok_or("bad sell call")?;
+        let (a, rest2) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad sell args: {}", inner))?;
+        let (b, c) = split_top_level(rest2, ',')
+            .ok_or_else(|| format!("bad sell args: {}", inner))?;
+        let vp = eval_expr(a)?;
+        let va = eval_expr(b)?;
+        let vq = eval_expr(c)?;
+        return match (vp, va, vq) {
+            (TVal::List(pf), TVal::Num(asset), TVal::Num(qty))
+                if pf.len() == 3 =>
+            {
+                if asset != 0 && asset != 1 {
+                    return Err("UnknownAsset".to_string());
+                }
+                let (cash, q_a, q_b) = match (&pf[0], &pf[1], &pf[2]) {
+                    (TVal::Num(c), TVal::Num(a), TVal::Num(b)) => (*c, *a, *b),
+                    _ => return Err("TypeError".to_string()),
+                };
+                let held = if asset == 0 { q_a } else { q_b };
+                if qty > held {
+                    return Err("InsufficientShares".to_string());
+                }
+                if asset == 0 {
+                    Ok(TVal::List(vec![
+                        TVal::Num(cash + qty),
+                        TVal::Num(q_a - qty),
+                        TVal::Num(q_b),
+                    ]))
+                } else {
+                    Ok(TVal::List(vec![
+                        TVal::Num(cash + qty),
+                        TVal::Num(q_a),
+                        TVal::Num(q_b - qty),
+                    ]))
+                }
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("portfolio_value(") {
+        let inner = rest.strip_suffix(')').ok_or("bad portfolio_value call")?;
+        let vp = eval_expr(inner)?;
+        return match vp {
+            TVal::List(pf) if pf.len() == 3 => {
+                let (cash, q_a, q_b) = match (&pf[0], &pf[1], &pf[2]) {
+                    (TVal::Num(c), TVal::Num(a), TVal::Num(b)) => (*c, *a, *b),
+                    _ => return Err("TypeError".to_string()),
+                };
+                Ok(TVal::Num(cash + q_a + q_b))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("risk_score(") {
+        let inner = rest.strip_suffix(')').ok_or("bad risk_score call")?;
+        let vp = eval_expr(inner)?;
+        return match vp {
+            TVal::List(pf) if pf.len() == 3 => {
+                let (q_a, q_b) = match (&pf[1], &pf[2]) {
+                    (TVal::Num(a), TVal::Num(b)) => (*a, *b),
+                    _ => return Err("TypeError".to_string()),
+                };
+                Ok(TVal::Num(q_a + q_b))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
     if s == "I₂" {
         return Ok(TVal::List(vec![
             TVal::List(vec![TVal::Num(1), TVal::Num(0)]),

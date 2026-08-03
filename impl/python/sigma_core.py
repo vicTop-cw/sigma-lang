@@ -520,6 +520,70 @@ def _encode_list(xs: List[int], base: int = 1000) -> int:
     return n
 
 
+# ============================================================
+# §PF — Portfolio Protocol: Auditable Investment Semantics
+# (spec/spec_p0_portfolio.md — portfolio_new / buy / sell /
+#  portfolio_value / risk_score)
+# ============================================================
+
+def portfolio_new(cash: int) -> List[int]:
+    """Portfolio creation: cash → [cash, 0, 0] (empty positions).
+
+    §PF.3.1 — Cash : Type ≝ ℕ, so a negative cash is rejected.
+    """
+    if cash < 0:
+        raise ValueError("TypeError")
+    return [cash, 0, 0]
+
+
+def buy(portfolio: List[int], asset: int, qty: int) -> List[int]:
+    """Buy asset (unit price 1): spend cash for a position.
+
+    §PF.3.2 — insufficient cash → InsufficientFunds; unknown asset → UnknownAsset.
+    """
+    if asset not in (0, 1):
+        raise ValueError("UnknownAsset")
+    cash, qA, qB = portfolio
+    if cash < qty:
+        raise ValueError("InsufficientFunds")
+    if asset == 0:
+        return [cash - qty, qA + qty, qB]
+    return [cash - qty, qA, qB + qty]
+
+
+def sell(portfolio: List[int], asset: int, qty: int) -> List[int]:
+    """Sell asset (unit price 1): liquidate a position into cash.
+
+    §PF.3.3 — insufficient position → InsufficientShares; unknown asset → UnknownAsset.
+    """
+    if asset not in (0, 1):
+        raise ValueError("UnknownAsset")
+    cash, qA, qB = portfolio
+    held = qA if asset == 0 else qB
+    if qty > held:
+        raise ValueError("InsufficientShares")
+    if asset == 0:
+        return [cash + qty, qA - qty, qB]
+    return [cash + qty, qA, qB - qty]
+
+
+def portfolio_value(portfolio: List[int]) -> int:
+    """Total valuation: cash + qA + qB (unit price 1). §PF.3.4."""
+    cash, qA, qB = portfolio
+    return cash + qA + qB
+
+
+def risk_score(portfolio: List[int]) -> int:
+    """Position exposure: qA + qB. §PF.3.5."""
+    _, qA, qB = portfolio
+    return qA + qB
+
+
+def encode_portfolio(portfolio: List[int]) -> int:
+    """Law II — Portfolio → ℕ."""
+    return _encode_list(portfolio)
+
+
 def encode_task(task: List[int]) -> int:
     """Law II — Task → ℕ."""
     return _encode_list(task)
@@ -725,6 +789,51 @@ def _main() -> int:
     check("SK.encode_opinion_nat", encode_opinion([1, 1, 3]) >= 0)
     check("SK.encode_action_nat", encode_action([1, 1, 3]) >= 0)
     check("SK.encode_event_nat", encode_event([0, 1]) >= 0)
+
+    # §PF (Portfolio Protocol — spec_p0_portfolio.md)
+    check("PF.portfolio_new_shape", portfolio_new(100) == [100, 0, 0])
+    check("PF.portfolio_new_zero", portfolio_new(0) == [0, 0, 0])
+    try:
+        portfolio_new(-5)
+        check("PF.portfolio_new_neg_cash_rejected", False)
+    except ValueError:
+        check("PF.portfolio_new_neg_cash_rejected", True)
+    check("PF.buy_asset_a",
+          buy(portfolio_new(100), 0, 30) == [70, 30, 0])
+    check("PF.buy_asset_b",
+          buy(portfolio_new(100), 1, 25) == [75, 0, 25])
+    try:
+        buy(portfolio_new(10), 0, 30)
+        check("PF.buy_insufficient_funds_rejected", False)
+    except ValueError:
+        check("PF.buy_insufficient_funds_rejected", True)
+    try:
+        buy(portfolio_new(100), 2, 5)
+        check("PF.buy_unknown_asset_rejected", False)
+    except ValueError:
+        check("PF.buy_unknown_asset_rejected", True)
+    check("PF.sell_asset_a",
+          sell(buy(portfolio_new(100), 0, 30), 0, 20) == [90, 10, 0])
+    check("PF.sell_all",
+          sell([70, 30, 0], 0, 30) == [100, 0, 0])
+    try:
+        sell([70, 30, 0], 0, 40)
+        check("PF.sell_insufficient_shares_rejected", False)
+    except ValueError:
+        check("PF.sell_insufficient_shares_rejected", True)
+    try:
+        sell([70, 30, 0], 2, 5)
+        check("PF.sell_unknown_asset_rejected", False)
+    except ValueError:
+        check("PF.sell_unknown_asset_rejected", True)
+    check("PF.value_new", portfolio_value(portfolio_new(100)) == 100)
+    check("PF.value_positions", portfolio_value([70, 30, 0]) == 100)
+    check("PF.value_mixed", portfolio_value([50, 20, 30]) == 100)
+    check("PF.risk_new", risk_score(portfolio_new(100)) == 0)
+    check("PF.risk_exposure", risk_score([70, 30, 0]) == 30)
+    check("PF.risk_mixed", risk_score([50, 20, 30]) == 50)
+    check("PF.risk_le_value", risk_score([50, 20, 30]) <= portfolio_value([50, 20, 30]))
+    check("PF.encode_portfolio_nat", encode_portfolio([100, 0, 0]) >= 0)
 
     print(f"sigma_core self-check: {passed}/{passed + failed} passed")
     return 0 if failed == 0 else 1

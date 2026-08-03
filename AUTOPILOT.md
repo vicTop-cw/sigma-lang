@@ -18,11 +18,11 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.18 可用**——即：**状态机不变量证明（业务规则固化）**，
-在 v0.17（§SK 对齐真实业务）达成的基础上，把「来找茬」核心业务约束固化为可证明的
-ΣLang 语义：`task_accept` 作者授权（只有受茬人本人可验收，否则 ⊥ AuthError）+
-§SK.3.8 状态机不变量（INV-1 状态单调 / INV-2 终态不可变 / INV-3 守恒 / INV-4 授权），
-三端一致执行、z3 可证明、语料进共识门禁。**我只关心这个结果。**
+**总目标**: 把项目推进到 **v0.19 可用**——即：**第二个自举新域（金融 portfolio@1.0）**，
+在 v0.18（状态机不变量证明）达成的基础上，用第二个全新领域（金融投资组合）验证
+ΣLang 协议的**泛化性**：`spec/spec_p0_portfolio.md`（§PF：portfolio_new / buy / sell /
+portfolio_value / risk_score，单位价格 1 使守恒可证）+ 三端执行层 + 语料 + z3 证明，
+证明"换一个行业照样能用"。**我只关心这个结果。**
 
 ---
 
@@ -275,6 +275,27 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > 约定——"只有作者能验收""完成后不可再改""赏金和找茬人不变"全部成为 z3 可证明的
 > 不变量，任何实现若违反都会被证明工具与审计 trace 当场抓住。
 
+### v0.19 完成定义（第二个自举新域：金融 portfolio@1.0，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **新域 spec**: `spec/spec_p0_portfolio.md`（§PF）——portfolio_new / buy / sell /
+      portfolio_value / risk_score 五个操作，单位价格 1 使总资产守恒可证；
+      错误路径 ⊥ InsufficientFunds / InsufficientShares / UnknownAsset / TypeError。
+- [x] **三端执行层同步**: `sigma_core.py` 111/111；Rust `evaluator.rs` / Elixir
+      `sigma_verify.exs` eval_expr 支持新域真实调用（portfolio_ok 19/19 三端一致），
+      `cargo build` 0 error/0 warning。
+- [x] **语料**: `corpus/portfolio_ok.md`（19/19 三端一致 PASS）+ `corpus/portfolio_break.md`
+      （E-02 三端一致 FAIL）——consensus 41/41 → 43/43。
+- [x] **证明**: `sigma-prove` 新增 10 项 §PF 义务（portfolio_new×3 / buy×2 / sell×2 /
+      portfolio_value×1 / risk_score×2）全部 `PROVED (unsat)`——§SK+§PF 共 33 项全绿；
+      `sigma-runtime` 审计 trace 增加 §PF 段（45/45）。
+- [x] **不回归**: consensus 43/43、p0 109/109、三端 0 warning、py_compile 通过，
+      v0.10–v0.18 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
+
+> v0.19 = 「协议泛化性再验证」：DNA 对齐（v0.12）证明 ΣLang 能承载陌生科学域，
+> 金融 portfolio（v0.19）证明它能承载第二个完全不同的行业——同样的流程
+> （spec → 三端 → 语料 → 证明）原样跑通，无需改协议本身。
+
 ---
 
 ## 7. 提交与汇报约定
@@ -285,7 +306,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ```text
 【ΣLang AUTOPILOT 结果】
-- 状态: ✅ v0.18 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
+- 状态: ✅ v0.19 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
 - 本轮完成: 修复 X · 新增 Y · 验证 N/N
 - 验证证据: verify_consensus N/N · verify_p0 109/109 · sigma-prove PROVED
 - 提交: <hash> <subject>

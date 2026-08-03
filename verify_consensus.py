@@ -823,6 +823,88 @@ def eval_expr(s):
             else:
                 return "TypeError"
         return ("num", max(0, credit))
+    # §PF — Portfolio Protocol operations (spec_p0_portfolio.md §PF.3).
+    # Second novel domain: finance. Real function calls, mirrors
+    # sigma_core.py §PF so the consensus gate verifies investment semantics.
+    if s.startswith("portfolio_new(") and s.endswith(")"):
+        inner = s[len("portfolio_new("):-1]
+        vc = eval_expr(inner.strip())
+        if isinstance(vc, str):
+            return vc
+        if vc[0] != "num":
+            return "TypeError"
+        if vc[1] < 0:  # Cash : Type ≝ ℕ
+            return "TypeError"
+        return ("list", [("num", vc[1]), ("num", 0), ("num", 0)])
+    if s.startswith("buy(") and s.endswith(")"):
+        inner = s[len("buy("):-1]
+        parts = split_all_top_level(inner, ",")
+        if len(parts) < 3:
+            return f"bad buy args: {inner}"
+        vp = eval_expr(parts[0].strip())
+        va = eval_expr(parts[1].strip())
+        vq = eval_expr(parts[2].strip())
+        if isinstance(vp, str):
+            return vp
+        if isinstance(va, str):
+            return va
+        if isinstance(vq, str):
+            return vq
+        if vp[0] != "list" or len(vp[1]) != 3 or va[0] != "num" or vq[0] != "num":
+            return "TypeError"
+        asset, qty = va[1], vq[1]
+        if asset not in (0, 1):
+            return "UnknownAsset"
+        cash, qA, qB = vp[1]
+        if cash[1] < qty:
+            return "InsufficientFunds"
+        if asset == 0:
+            return ("list", [("num", cash[1] - qty), ("num", qA[1] + qty), qB])
+        return ("list", [("num", cash[1] - qty), qA, ("num", qB[1] + qty)])
+    if s.startswith("sell(") and s.endswith(")"):
+        inner = s[len("sell("):-1]
+        parts = split_all_top_level(inner, ",")
+        if len(parts) < 3:
+            return f"bad sell args: {inner}"
+        vp = eval_expr(parts[0].strip())
+        va = eval_expr(parts[1].strip())
+        vq = eval_expr(parts[2].strip())
+        if isinstance(vp, str):
+            return vp
+        if isinstance(va, str):
+            return va
+        if isinstance(vq, str):
+            return vq
+        if vp[0] != "list" or len(vp[1]) != 3 or va[0] != "num" or vq[0] != "num":
+            return "TypeError"
+        asset, qty = va[1], vq[1]
+        if asset not in (0, 1):
+            return "UnknownAsset"
+        cash, qA, qB = vp[1]
+        held = qA[1] if asset == 0 else qB[1]
+        if qty > held:
+            return "InsufficientShares"
+        if asset == 0:
+            return ("list", [("num", cash[1] + qty), ("num", qA[1] - qty), qB])
+        return ("list", [("num", cash[1] + qty), qA, ("num", qB[1] - qty)])
+    if s.startswith("portfolio_value(") and s.endswith(")"):
+        inner = s[len("portfolio_value("):-1]
+        vp = eval_expr(inner.strip())
+        if isinstance(vp, str):
+            return vp
+        if vp[0] != "list" or len(vp[1]) != 3:
+            return "TypeError"
+        cash, qA, qB = vp[1]
+        return ("num", cash[1] + qA[1] + qB[1])
+    if s.startswith("risk_score(") and s.endswith(")"):
+        inner = s[len("risk_score("):-1]
+        vp = eval_expr(inner.strip())
+        if isinstance(vp, str):
+            return vp
+        if vp[0] != "list" or len(vp[1]) != 3:
+            return "TypeError"
+        _, qA, qB = vp[1]
+        return ("num", qA[1] + qB[1])
     if s == "I₂":
         return ("list", [("list", [("num", 1), ("num", 0)]),
                          ("list", [("num", 0), ("num", 1)])])

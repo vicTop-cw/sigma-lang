@@ -520,6 +520,137 @@ def gen_sk_obligation(op):
         return _contribution_obligations()
     if name == "credit_score":
         return _credit_score_obligations()
+    return gen_pf_obligation(op)
+
+
+# ---------------------------------------------------------------------------
+# §PF obligation generation (spec_p0_portfolio.md — Portfolio Protocol)
+# ---------------------------------------------------------------------------
+
+PF_OPS = {"portfolio_new", "buy", "sell", "portfolio_value", "risk_score"}
+
+
+def _portfolio_new_obligations():
+    """§PF.3.1: portfolio_new(c) ≡ [c, 0, 0] — cash ≥ 0, empty positions."""
+    defn = """
+; Definition (§PF.3.1): portfolio_new(c) ≡ [c, 0, 0], encoded to ℕ (Law II).
+; index(p, 0)=c (cash), index(p, 1)=0 (qtyA), index(p, 2)=0 (qtyB)
+(declare-const c Int)
+(assert (>= c 0))
+(declare-const p Int)
+(assert (= (index p 0) c))
+(assert (= (index p 1) 0))
+(assert (= (index p 2) 0))
+"""
+    law1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + defn +
+            "(assert (not (and (>= (index p 0) 0) (>= (index p 1) 0) "
+            "(>= (index p 2) 0))))\n(check-sat)\n")
+    law2 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + defn +
+            "(assert (not (= (index p 1) 0)))\n(check-sat)\n")
+    law3 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + defn +
+            "(assert (not (= (index p 2) 0)))\n(check-sat)\n")
+    return [("portfolio_new/law1-cash-nonnegative", law1),
+            ("portfolio_new/law2-qtyA-zero", law2),
+            ("portfolio_new/law3-qtyB-zero", law3)]
+
+
+def _buy_obligations():
+    """§PF.3.2: buy(p, a, q) — conservation + cash ≥ 0 (unit price 1)."""
+    common = """
+; Definition (§PF.3.2): buy([c, qA, qB], a, q) with c ≥ q
+(declare-const c Int) (declare-const qa Int) (declare-const qb Int)
+(declare-const q Int) (declare-const a Int)
+(assert (>= c 0)) (assert (>= qa 0)) (assert (>= qb 0)) (assert (>= q 0))
+(assert (or (= a 0) (= a 1)))
+(assert (>= c q))
+(declare-const p Int) (declare-const p2 Int)
+(assert (= (index p 0) c)) (assert (= (index p 1) qa)) (assert (= (index p 2) qb))
+; buy: cash − q, position a + q
+(assert (= (index p2 0) (- c q)))
+(assert (= (index p2 1) (ite (= a 0) (+ qa q) qa)))
+(assert (= (index p2 2) (ite (= a 1) (+ qb q) qb)))
+"""
+    law1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + common +
+            "; conservation: value unchanged (cash + qA + qB)\n"
+            "(assert (not (= (+ (index p2 0) (index p2 1) (index p2 2))\n"
+            "                (+ c qa qb))))\n(check-sat)\n")
+    law2 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + common +
+            "; cash never negative after buy\n"
+            "(assert (not (>= (index p2 0) 0)))\n(check-sat)\n")
+    return [("buy/law1-conservation", law1),
+            ("buy/law2-cash-nonnegative", law2)]
+
+
+def _sell_obligations():
+    """§PF.3.3: sell(p, a, q) — conservation + no naked shorts (unit price 1)."""
+    common = """
+; Definition (§PF.3.3): sell([c, qA, qB], a, q) with q ≤ held(a)
+(declare-const c Int) (declare-const qa Int) (declare-const qb Int)
+(declare-const q Int) (declare-const a Int)
+(assert (>= c 0)) (assert (>= qa 0)) (assert (>= qb 0)) (assert (>= q 0))
+(assert (or (= a 0) (= a 1)))
+(assert (>= (ite (= a 0) qa qb) q))
+(declare-const p Int) (declare-const p2 Int)
+(assert (= (index p 0) c)) (assert (= (index p 1) qa)) (assert (= (index p 2) qb))
+; sell: cash + q, position a − q
+(assert (= (index p2 0) (+ c q)))
+(assert (= (index p2 1) (ite (= a 0) (- qa q) qa)))
+(assert (= (index p2 2) (ite (= a 1) (- qb q) qb)))
+"""
+    law1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + common +
+            "; conservation: value unchanged\n"
+            "(assert (not (= (+ (index p2 0) (index p2 1) (index p2 2))\n"
+            "                (+ c qa qb))))\n(check-sat)\n")
+    law2 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + common +
+            "; no naked shorts: position never negative after sell\n"
+            "(assert (not (>= (ite (= a 0) (index p2 1) (index p2 2)) 0)))\n(check-sat)\n")
+    return [("sell/law1-conservation", law1),
+            ("sell/law2-no-naked-shorts", law2)]
+
+
+def _portfolio_value_obligations():
+    """§PF.3.4: portfolio_value ≡ cash + qA + qB — never negative."""
+    law1 = ("(set-logic NIA)\n"
+            "(declare-const c Int) (declare-const qa Int) (declare-const qb Int)\n"
+            "(declare-const v Int)\n"
+            "(assert (>= c 0)) (assert (>= qa 0)) (assert (>= qb 0))\n"
+            "; Definition (§PF.3.4): portfolio_value ≡ c + qa + qb\n"
+            "(assert (= v (+ c qa qb)))\n"
+            "(assert (not (>= v 0)))\n(check-sat)\n")
+    return [("portfolio_value/law1-nonnegative", law1)]
+
+
+def _risk_score_obligations():
+    """§PF.3.5: risk_score ≡ qA + qB — never negative, ≤ portfolio_value."""
+    common = """
+(declare-const c Int) (declare-const qa Int) (declare-const qb Int)
+(declare-const r Int)
+(assert (>= c 0)) (assert (>= qa 0)) (assert (>= qb 0))
+; Definition (§PF.3.5): risk_score ≡ qa + qb
+(assert (= r (+ qa qb)))
+"""
+    law1 = "(set-logic NIA)\n" + common + \
+        "(assert (not (>= r 0)))\n(check-sat)\n"
+    law2 = "(set-logic NIA)\n" + common + \
+        "; exposure bounded by total value\n" \
+        "(assert (not (<= r (+ c qa qb))))\n(check-sat)\n"
+    return [("risk_score/law1-nonnegative", law1),
+            ("risk_score/law2-bounded-by-value", law2)]
+
+
+def gen_pf_obligation(op):
+    """Generate §PF obligations for one Portfolio operation (or [])."""
+    name = op["name"].strip()
+    if name == "portfolio_new":
+        return _portfolio_new_obligations()
+    if name == "buy":
+        return _buy_obligations()
+    if name == "sell":
+        return _sell_obligations()
+    if name == "portfolio_value":
+        return _portfolio_value_obligations()
+    if name == "risk_score":
+        return _risk_score_obligations()
     return []
 
 
@@ -650,7 +781,8 @@ def prove_module(path):
                   if v.startswith(("MissingModel", "MissingInvariant", "IncompleteContract"))]
     name = os.path.basename(path)
 
-    has_sk = any(op["name"].strip() in SK_OPS for op in module["ops"])
+    has_sk = any(op["name"].strip() in SK_OPS or op["name"].strip() in PF_OPS
+                 for op in module["ops"])
     if not module["proof_declared"] and not has_sk:
         print(f"  {name}: no `## Proof` block — skipped (structural: {ok})")
         return ok

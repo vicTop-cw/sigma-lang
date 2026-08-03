@@ -51,9 +51,17 @@
   自检 33/33、socketkit_ok 25/25 三端一致）；`sigma-prove` 新增 6 项不变量义务全部
   `PROVED (unsat)`（共 23 项 §SK 义务）；`sigma-runtime` 审计 trace 增加不变量逐条复核
   （31/31）；consensus 41/41、p0 109/109、三端 0 warning，v0.10–v0.17 不回归。
+- ✅ **REACHED v0.19 (2026-08-03)**: 第二个自举新域（金融 portfolio@1.0）——
+  `spec/spec_p0_portfolio.md`（§PF：portfolio_new / buy / sell / portfolio_value /
+  risk_score，单位价格 1 使守恒可证）+ `corpus/portfolio_ok.md`（19/19 三端一致 PASS）
+  与 `corpus/portfolio_break.md`（E-02 三端一致 FAIL）；三端执行层与 eval_expr 同步
+  新域真实调用（sigma_core 111/111、Rust/Elixir portfolio 19/19、0 warning）；
+  `sigma-prove` 新增 10 项 §PF 义务全部 `PROVED (unsat)`（共 33 项 §SK+§PF 义务）；
+  `sigma-runtime` 审计 trace 增加 §PF 段（45/45）；consensus 43/43、p0 109/109、
+  三端 0 warning，v0.10–v0.18 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.18 达成后 P3 待办已清空，进入新里程碑规划。
+  2. （无）— v0.19 达成后 P3 待办已清空，进入新里程碑规划。
 
 ---
 
@@ -327,6 +335,7 @@ This makes your App's business logic **mathematically auditable**.
 | P3 | **v0.16 SocketKit 语料执行化 (REACHED 2026-08-03)** | ✅ 三端求值器 eval_expr 支持 §SK 三操作真实调用；`corpus/socketkit_ok.md` Tests 升级为真实调用（含 ⊥ 错误路径），9/9 三端一致——Law XIII 直接验证业务语义；consensus 41/41、p0 109/109、0 warning |
 | P3 | **v0.17 §SK 对齐真实业务 (REACHED 2026-08-03)** | ✅ Task 4 元组 + 4 态状态机；新增 accept_task/task_submit/task_accept/credit_score；review_merge 修正为增长期定位；三端执行层同步（sigma_core 91/91、三端 §SK 32/32、socketkit_ok 24/24）；sigma-prove 18 项义务 PROVED；sigma-runtime 23/23；consensus 41/41、p0 109/109、0 warning |
 | P3 | **v0.18 状态机不变量证明 (REACHED 2026-08-03)** | ✅ task_accept 作者授权（⊥ AuthError）+ §SK.3.8 不变量（INV-1 状态单调/INV-2 终态不可变/INV-3 守恒/INV-4 授权）；三端执行层同步（sigma_core 92/92、三端 §SK 33/33、socketkit_ok 25/25）；sigma-prove 23 项义务全 PROVED；sigma-runtime 31/31；consensus 41/41、p0 109/109、0 warning |
+| P2 | **v0.19 第二个自举新域（金融 portfolio）(REACHED 2026-08-03)** | ✅ `spec/spec_p0_portfolio.md`（§PF 5 操作）+ `corpus/portfolio_ok.md`（19/19 三端一致）+ `portfolio_break.md`（E-02 FAIL）；三端 eval_expr 支持新域真实调用（sigma_core 111/111、0 warning）；sigma-prove 10 项 §PF 义务全 PROVED（共 33 项）；sigma-runtime 45/45；consensus 43/43、p0 109/109 |
 | P3 | Lang-Zone backend integration | ⏸️ **DEFERRED**：LZ 原型期，待自举稳定后融入（§6.1） |
 
 ---

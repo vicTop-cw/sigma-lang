@@ -1023,6 +1023,79 @@ defmodule SigmaVerify do
             end
           _ -> {:error, "TypeError"}
         end
+      # §PF — Portfolio Protocol operations (spec_p0_portfolio.md §PF.3).
+      # Second novel domain: finance. Real function calls, mirrors
+      # verify_consensus.py so the consensus gate verifies investment semantics.
+      String.starts_with?(t, "portfolio_new(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 14..-2//1)
+        case eval_expr(inner) do
+          {:ok, {:num, cash}} ->
+            if cash < 0 do
+              {:error, "TypeError"}
+            else
+              {:ok, {:list, [{:num, cash}, {:num, 0}, {:num, 0}]}}
+            end
+          _ -> {:error, "TypeError"}
+        end
+      String.starts_with?(t, "buy(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 4..-2//1)
+        case split_all_top_level(inner, ?,) do
+          [p_s, a_s, q_s] ->
+            with {:ok, {:list, [{:num, cash}, {:num, q_a}, {:num, q_b}]}} <- eval_expr(p_s),
+                 {:ok, {:num, asset}} <- eval_expr(a_s),
+                 {:ok, {:num, qty}} <- eval_expr(q_s) do
+              cond do
+                asset not in [0, 1] ->
+                  {:error, "UnknownAsset"}
+                cash < qty ->
+                  {:error, "InsufficientFunds"}
+                asset == 0 ->
+                  {:ok, {:list, [{:num, cash - qty}, {:num, q_a + qty}, {:num, q_b}]}}
+                true ->
+                  {:ok, {:list, [{:num, cash - qty}, {:num, q_a}, {:num, q_b + qty}]}}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          _ -> {:error, "bad buy args: #{inner}"}
+        end
+      String.starts_with?(t, "sell(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 5..-2//1)
+        case split_all_top_level(inner, ?,) do
+          [p_s, a_s, q_s] ->
+            with {:ok, {:list, [{:num, cash}, {:num, q_a}, {:num, q_b}]}} <- eval_expr(p_s),
+                 {:ok, {:num, asset}} <- eval_expr(a_s),
+                 {:ok, {:num, qty}} <- eval_expr(q_s) do
+              held = if asset == 0, do: q_a, else: q_b
+              cond do
+                asset not in [0, 1] ->
+                  {:error, "UnknownAsset"}
+                qty > held ->
+                  {:error, "InsufficientShares"}
+                asset == 0 ->
+                  {:ok, {:list, [{:num, cash + qty}, {:num, q_a - qty}, {:num, q_b}]}}
+                true ->
+                  {:ok, {:list, [{:num, cash + qty}, {:num, q_a}, {:num, q_b - qty}]}}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          _ -> {:error, "bad sell args: #{inner}"}
+        end
+      String.starts_with?(t, "portfolio_value(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 16..-2//1)
+        case eval_expr(inner) do
+          {:ok, {:list, [{:num, cash}, {:num, q_a}, {:num, q_b}]}} ->
+            {:ok, {:num, cash + q_a + q_b}}
+          _ -> {:error, "TypeError"}
+        end
+      String.starts_with?(t, "risk_score(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 11..-2//1)
+        case eval_expr(inner) do
+          {:ok, {:list, [_cash, {:num, q_a}, {:num, q_b}]}} ->
+            {:ok, {:num, q_a + q_b}}
+          _ -> {:error, "TypeError"}
+        end
       t == "I₂" ->
         {:ok, {:list, [{:list, [{:num, 1}, {:num, 0}]},
                        {:list, [{:num, 0}, {:num, 1}]}]}}
