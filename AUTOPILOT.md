@@ -253,6 +253,14 @@
       v0.10–v0.45 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.47 完成定义（README 新人上手 + 完整验证，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **新人上手**: README 新增「新人 30 分钟上手」章节——三域概览（§SK 找茬
+      业务 / §PF 金融 / §IN 供应链）、快速开始命令、验证清单。
+- [x] **完整验证**: consensus 47/47、p0 109/109、sigma_core 167/167、三域 story
+      35/35、冒烟 25/25、sigma-prove 全 PROVED、三端 0 warning，全部全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
