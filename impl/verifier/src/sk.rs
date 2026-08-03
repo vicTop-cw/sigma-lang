@@ -199,6 +199,16 @@ pub fn badge_level(score: i64) -> i64 {
     }
 }
 
+/// 核验师签发勋章: (v, u, s) → [v, u, badge_level(s)]. §SK.3.12 — only
+/// authorized verifiers (v ≥ 1000) may issue, otherwise ⊥ AuthError.
+pub fn badge_issue(verifier: i64, user: i64, score: i64)
+    -> Result<Vec<i64>, &'static str> {
+    if verifier < 1000 {
+        return Err("AuthError");
+    }
+    Ok(vec![verifier, user, badge_level(score)])
+}
+
 /// Law II — Quota → ℕ.
 pub fn encode_quota(quota: &[i64]) -> i64 {
     encode_list(quota, 1000)
@@ -313,6 +323,12 @@ pub fn self_check() -> (usize, usize) {
     check!("badge_monotonic", badge_level(100) <= badge_level(200));
     check!("encode_quota_nat", encode_quota(&[50, 30]) >= 0);
     check!("encode_points_nat", encode_points(&[0, 60]) >= 0);
+
+    // §SK.3.12 核验师签发勋章 badge_issue
+    check!("badge_issue_silver", badge_issue(1001, 3, 105) == Ok(vec![1001, 3, 1]));
+    check!("badge_issue_gold", badge_issue(1002, 3, 450) == Ok(vec![1002, 3, 2]));
+    check!("badge_issue_diamond", badge_issue(1001, 3, 900) == Ok(vec![1001, 3, 3]));
+    check!("badge_issue_unauthorized_rejected", badge_issue(999, 3, 105).is_err());
 
     // §SK.4 encodings (Law II)
     check!("encode_task_nat", encode_task(&[1, 2, 0, 0]) >= 0);

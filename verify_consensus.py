@@ -1010,6 +1010,35 @@ def eval_expr(s):
         if score < 600:
             return ("num", 2)
         return ("num", 3)
+    # §SK.3.12 核验师签发勋章 badge_issue — v ≥ 1000 授权核验师.
+    if s.startswith("badge_issue(") and s.endswith(")"):
+        inner = s[len("badge_issue("):-1]
+        parts = split_all_top_level(inner, ",")
+        if len(parts) < 3:
+            return f"bad badge_issue args: {inner}"
+        vv = eval_expr(parts[0].strip())
+        vu = eval_expr(parts[1].strip())
+        vsc = eval_expr(parts[2].strip())
+        if isinstance(vv, str):
+            return vv
+        if isinstance(vu, str):
+            return vu
+        if isinstance(vsc, str):
+            return vsc
+        if vv[0] != "num" or vu[0] != "num" or vsc[0] != "num":
+            return "TypeError"
+        if vv[1] < 1000:  # 授权核验师编号段
+            return "AuthError"
+        score = vsc[1]
+        if score < 100:
+            lvl = 0
+        elif score < 300:
+            lvl = 1
+        elif score < 600:
+            lvl = 2
+        else:
+            lvl = 3
+        return ("list", [("num", vv[1]), ("num", vu[1]), ("num", lvl)])
     if s == "I₂":
         return ("list", [("list", [("num", 1), ("num", 0)]),
                          ("list", [("num", 0), ("num", 1)])])

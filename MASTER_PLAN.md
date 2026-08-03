@@ -107,9 +107,14 @@
   `sigma_app.py --smoke`（13/13）**双端逐项一致**——HTTP 层也同尺；
   `cargo build` 0 error/0 warning；consensus 43/43、p0 109/109，v0.10–v0.25
   不回归。
+- ✅ **REACHED v0.27 (2026-08-03)**: 增长期语义①核验师—— §SK.3.12 `badge_issue`
+  （核验师签发勋章，需求文档 §八）：(v, u, s) → [v, u, badge_level(s)]，只有授权
+  核验师（v ≥ 1000）可签发否则 ⊥ AuthError；三端执行层 + eval_expr 同步
+  （sigma_core 134/134、Rust/Elixir §SK 自检 56/56、socketkit_ok 53/53 三端一致、
+  0 warning）；consensus 43/43、p0 109/109，v0.10–v0.26 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.26 达成后 P3 待办已清空，进入新里程碑规划。
+  2. （无）— v0.27 达成后 P3 待办已清空，进入新里程碑规划（v0.28–v0.50 连续推进）。
 
 ---
 

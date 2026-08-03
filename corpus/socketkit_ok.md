@@ -35,6 +35,7 @@ points_hold
 points_release
 points_withdraw
 badge_level
+badge_issue
 ```
 
 ## Operation: task_create (Task Posting)
@@ -398,6 +399,31 @@ Fingerprint: 0xF00F
 | badge_level(450) | 2 |
 | badge_level(900) | 3 |
 | badge_level([5]) | ⊥ TypeError |
+
+## Operation: badge_issue (Badge Issue)
+
+### Signature
+
+```md
+badge_issue : ℕ × ℕ × ℕ → List⟨ℕ⟩
+Fingerprint: 0xF010
+```
+
+### Laws
+
+```md
+∀ v u s . v ≥ 1000 ⇒ index(badge_issue(v, u, s), 2) ≡ badge_level(s)
+∀ v u s . v ≥ 1000 ⇒ 0 ≤ index(badge_issue(v, u, s), 2) ≤ 3
+∀ v u s . v < 1000 ⇒ badge_issue(v, u, s) ≡ ⊥ AuthError
+```
+
+### Tests
+
+| Input | Output |
+|-------|--------|
+| badge_issue(1001, 3, 105) | [1001,3,1] |
+| badge_issue(1002, 3, 450) | [1002,3,2] |
+| badge_issue(999, 3, 105) | ⊥ AuthError |
 
 ## Functions
 

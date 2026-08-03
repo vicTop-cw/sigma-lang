@@ -1191,6 +1191,31 @@ defmodule SigmaVerify do
             end
           _ -> {:error, "TypeError"}
         end
+      # §SK.3.12 核验师签发勋章 badge_issue — v ≥ 1000 授权核验师.
+      String.starts_with?(t, "badge_issue(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 12..-2//1)
+        case split_all_top_level(inner, ?,) do
+          [v_s, u_s, s_s] ->
+            with {:ok, {:num, verifier}} <- eval_expr(v_s),
+                 {:ok, {:num, user}} <- eval_expr(u_s),
+                 {:ok, {:num, score}} <- eval_expr(s_s) do
+              if verifier < 1000 do
+                {:error, "AuthError"}
+              else
+                level =
+                  cond do
+                    score < 100 -> 0
+                    score < 300 -> 1
+                    score < 600 -> 2
+                    true -> 3
+                  end
+                {:ok, {:list, [{:num, verifier}, {:num, user}, {:num, level}]}}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          _ -> {:error, "bad badge_issue args: #{inner}"}
+        end
       t == "I₂" ->
         {:ok, {:list, [{:list, [{:num, 1}, {:num, 0}]},
                        {:list, [{:num, 0}, {:num, 1}]}]}}
@@ -1568,6 +1593,10 @@ defmodule SigmaVerify do
   def badge_level(score) when score < 600, do: 2
   def badge_level(_score), do: 3
 
+  @doc "核验师签发勋章: (v, u, s) → [v, u, badge_level(s)]. §SK.3.12 — v ≥ 1000 授权核验师."
+  def badge_issue(verifier, user, score) when verifier >= 1000, do: {:ok, [verifier, user, badge_level(score)]}
+  def badge_issue(_verifier, _user, _score), do: {:error, "AuthError"}
+
   @doc "Law II — Quota → ℕ."
   def encode_quota(quota), do: encode_list(quota)
 
@@ -1652,6 +1681,11 @@ defmodule SigmaVerify do
       {"badge_monotonic", badge_level(100) <= badge_level(200)},
       {"encode_quota_nat", encode_quota([50, 30]) >= 0},
       {"encode_points_nat", encode_points([0, 60]) >= 0},
+      # §SK.3.12 核验师签发勋章 badge_issue
+      {"badge_issue_silver", badge_issue(1001, 3, 105) == {:ok, [1001, 3, 1]}},
+      {"badge_issue_gold", badge_issue(1002, 3, 450) == {:ok, [1002, 3, 2]}},
+      {"badge_issue_diamond", badge_issue(1001, 3, 900) == {:ok, [1001, 3, 3]}},
+      {"badge_issue_unauthorized_rejected", badge_issue(999, 3, 105) == {:error, "AuthError"}},
       # §SK.4 encodings (Law II)
       {"encode_task_nat", encode_task([1, 2, 0, 0]) >= 0},
       {"encode_distinct", encode_task([1, 2, 0, 0]) != encode_task([1, 3, 0, 0])},

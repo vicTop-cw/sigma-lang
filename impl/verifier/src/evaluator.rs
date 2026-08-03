@@ -538,6 +538,36 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
             _ => Err("TypeError".to_string()),
         };
     }
+    // §SK.3.12 核验师签发勋章 badge_issue — v ≥ 1000 授权核验师.
+    if let Some(rest) = s.strip_prefix("badge_issue(") {
+        let inner = rest.strip_suffix(')').ok_or("bad badge_issue call")?;
+        let (v, rest2) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad badge_issue args: {}", inner))?;
+        let (u, sc) = split_top_level(rest2, ',')
+            .ok_or_else(|| format!("bad badge_issue args: {}", inner))?;
+        let vv = eval_expr(v)?;
+        let vu = eval_expr(u)?;
+        let vsc = eval_expr(sc)?;
+        return match (vv, vu, vsc) {
+            (TVal::Num(verifier), TVal::Num(user), TVal::Num(score)) => {
+                if verifier < 1000 {
+                    // 授权核验师编号段
+                    return Err("AuthError".to_string());
+                }
+                let level = if score < 100 {
+                    0
+                } else if score < 300 {
+                    1
+                } else if score < 600 {
+                    2
+                } else {
+                    3
+                };
+                Ok(TVal::List(vec![TVal::Num(verifier), TVal::Num(user), TVal::Num(level)]))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
     if s == "I₂" {
         return Ok(TVal::List(vec![
             TVal::List(vec![TVal::Num(1), TVal::Num(0)]),

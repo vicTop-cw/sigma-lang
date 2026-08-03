@@ -668,6 +668,17 @@ def badge_level(score: int) -> int:
     return 3
 
 
+def badge_issue(verifier: int, user: int, score: int) -> List[int]:
+    """核验师签发勋章: (v, u, s) → [v, u, badge_level(s)].
+
+    §SK.3.12 — only authorized verifiers (v ≥ 1000, 内部员工/签约核验师
+    编号段) may issue, otherwise ⊥ AuthError.
+    """
+    if verifier < 1000:
+        raise ValueError("AuthError")
+    return [verifier, user, badge_level(score)]
+
+
 def encode_quota(quota: List[int]) -> int:
     """Law II — Quota → ℕ."""
     return _encode_list(quota)
@@ -947,6 +958,16 @@ def _main() -> int:
     check("B.badge_monotonic", badge_level(100) <= badge_level(200))
     check("B.encode_quota_nat", encode_quota([50, 30]) >= 0)
     check("B.encode_points_nat", encode_points([0, 60]) >= 0)
+
+    # §SK.3.12 核验师签发勋章 badge_issue
+    check("BI.badge_issue_silver", badge_issue(1001, 3, 105) == [1001, 3, 1])
+    check("BI.badge_issue_gold", badge_issue(1002, 3, 450) == [1002, 3, 2])
+    check("BI.badge_issue_diamond", badge_issue(1001, 3, 900) == [1001, 3, 3])
+    try:
+        badge_issue(999, 3, 105)
+        check("BI.badge_issue_unauthorized_rejected", False)
+    except ValueError:
+        check("BI.badge_issue_unauthorized_rejected", True)
 
     print(f"sigma_core self-check: {passed}/{passed + failed} passed")
     return 0 if failed == 0 else 1

@@ -395,6 +395,36 @@ badge_level(0) ≡ 0                                # 起始铜牌
 | badge_level(450) | 2 |
 | badge_level(900) | 3 |
 
+### SK.3.12 badge_issue — 核验师签发勋章 (需求文档 §八)
+
+核验师（内部/外部）验证技能后为用户签发勋章，用于企业人才推荐。等级复用
+`badge_level`（SK.3.11 铜银金钻四级）。只有授权核验师（verifier ≥ 1000，
+内部员工/签约核验师编号段）可签发，否则 ⊥ AuthError。
+
+```md
+Badge     : List⟨ℕ⟩        # [verifier, user, level]
+badge_issue : ℕ × ℕ × ℕ → List⟨ℕ⟩   # (verifier, user, score) → Badge
+Fingerprint: 0xF010
+Definition: badge_issue(v, u, s) ≡ [v, u, badge_level(s)]  if v ≥ 1000
+            # 授权核验师按契分 s 为用户 u 签发勋章；否则 ⊥ AuthError
+```
+
+**Laws**
+
+```md
+∀ v u s . v ≥ 1000 ⇒ index(badge_issue(v, u, s), 2) ≡ badge_level(s)   # 等级正确
+∀ v u s . v ≥ 1000 ⇒ 0 ≤ index(badge_issue(v, u, s), 2) ≤ 3           # 四级有界
+∀ v u s . v < 1000 ⇒ badge_issue(v, u, s) ≡ ⊥ AuthError               # 授权核验师
+```
+
+**Tests**
+
+| Input | Output |
+|-------|--------|
+| badge_issue(1001, 3, 105) | [1001,3,1] |
+| badge_issue(1002, 3, 450) | [1002,3,2] |
+| badge_issue(999, 3, 105) | ⊥ AuthError |
+
 ---
 
 ## SK.4 Encodings (Law II — encoding to ℕ for non-numeric returns)

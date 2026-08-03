@@ -18,12 +18,28 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.26 可用**——即：**Rust HTTP 服务 + 冒烟对账**，
-在 v0.25（Rust 参考实现）达成的基础上，把 Rust 版参考后端补上 stdlib-only HTTP
-服务（`--app-serve`，端点与 Python `sigma_app.py --serve` 一致）与 `--app-smoke`
-冒烟测试（HTTP 七步全链路 13/13）——与 Python `sigma_app.py --smoke`（13/13）
-双端逐项一致，**HTTP 层也同尺**：找茬的开工验收在任何语言形态下都完整。
+**总目标**: 把项目推进到 **v0.50 可用**——即：**找茬业务蓝图完整 + 协议三域验证**，
+在 v0.26（Rust HTTP 服务 + 冒烟对账）达成的基础上，从 v0.27 起连续推进
+（每次 +0.01）：补齐找茬增长期语义（核验师/督导/团机制/额度预支/积分可追溯）、
+三端增长期对账与双端 HTTP 扩展、第三个自举新域（供应链）、三域协议巩固与收官
+验收——让找茬从 MVP 到完整业务蓝图全部成为三端一致、z3 可证明的 ΣLang 语义。
 **我只关心这个结果。**
+
+### v0.27 完成定义（增长期语义①核验师，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **语义**: §SK.3.12 `badge_issue`（核验师签发勋章）——(v, u, s) →
+      [v, u, badge_level(s)]，只有授权核验师（v ≥ 1000）可签发否则 ⊥ AuthError；
+      Laws：等级正确 / 四级有界 / 授权核验师。
+- [x] **三端执行层**: sigma_core 134/134、Rust sk.rs / Elixir sigma_verify.exs
+      参考实现 + eval_expr + 自检 56/56，`cargo build` 0 error/0 warning。
+- [x] **语料**: `corpus/socketkit_ok.md` 增 badge_issue（53/53 三端一致 PASS），
+      consensus 43/43 全绿。
+- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 +
+      18/18、双端冒烟 13/13、三端 0 warning，v0.10–v0.26 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+> v0.27–v0.50 = 「找茬完整业务蓝图 + 三域验证」连续推进：每版本一个语义增量，
+> 三端一致、可证明、进共识门禁。
 
 ---
 
