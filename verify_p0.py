@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 ΣLang P0 Foundations — Algorithmic Verification
-Verifies all P0 modules: Time (§T), Error (§E), Confidence (§C), I/O (§I)
-Total: 95 tests across 4 modules
+Verifies all P0 modules: Time (§T), Error (§E), Confidence (§C), I/O (§I),
+SocketKit Protocol (§SK)
+Total: 109 tests across 5 modules
 
 Run:  python3 verify_p0.py
 """
@@ -701,19 +702,89 @@ def run_module_i():
 
 
 # ============================================================
+# MODULE SK: SocketKit Protocol (spec_p0_socketkit.md §SK)
+# ============================================================
+
+def run_module_sk():
+    print("\n📋 MODULE SK: SocketKit Protocol (auditable app behavior)")
+    print("-" * 50)
+
+    # --- SK.1 task_create — Task Submission (§SK.3.1) ---
+    def task_create(author, bounty):
+        if bounty < 0:
+            raise ValueError("BountyErr")
+        return [author, bounty, 0]
+
+    check("SK", "task_create_shape", task_create(7, 100) == [7, 100, 0])
+    check("SK", "task_create_open", task_create(5, 50)[2] == 0)
+    check("SK", "task_create_bounty_ge0", task_create(2, 0) == [2, 0, 0])
+    try:
+        task_create(1, -5)
+        check("SK", "task_create_neg_bounty_rejected", False, "accepted -5")
+    except ValueError:
+        check("SK", "task_create_neg_bounty_rejected", True)
+
+    # --- SK.2 review_merge — Review Resolution (§SK.3.2) ---
+    def review_merge(opinions):
+        w_accept = sum(w for _, vote, w in opinions if vote == 1)
+        w_reject = sum(w for _, vote, w in opinions if vote == 0)
+        return 1 if w_accept >= w_reject else 0
+
+    check("SK", "review_merge_accept",
+          review_merge([[1, 1, 3], [2, 1, 2]]) == 1)          # 5 ≥ 0
+    check("SK", "review_merge_reject",
+          review_merge([[1, 0, 3], [2, 1, 2]]) == 0)          # 2 < 3
+    check("SK", "review_merge_tie_accept",
+          review_merge([[1, 0, 3], [2, 1, 3]]) == 1)          # 3 ≥ 3
+    check("SK", "review_merge_binary",
+          review_merge([[1, 1, 1], [2, 0, 1]]) in (0, 1))
+    check("SK", "review_merge_order_indep",
+          review_merge([[1, 1, 3], [2, 0, 2], [3, 1, 1]]) ==
+          review_merge([[3, 1, 1], [1, 1, 3], [2, 0, 2]]))
+
+    # --- SK.3 contribution_score — Contribution Calculation (§SK.3.3) ---
+    def contribution_score(actions):
+        return max(0, sum(delta for _, _, delta in actions))
+
+    check("SK", "contribution_fold",
+          contribution_score([[1, 1, 3], [2, 2, 4]]) == 7)
+    check("SK", "contribution_floor_at_0",
+          contribution_score([[1, 1, -5], [2, 2, 3]]) == 0)   # -2 floored
+    check("SK", "contribution_zero_neutral",
+          contribution_score([[1, 1, 3]]) ==
+          contribution_score([[1, 1, 3], [9, 0, 0]]))
+
+    # --- SK.4 Encodings (Law II — List⟨ℕ⟩ → ℕ) ---
+    def encode_list(xs):
+        n = 0
+        for i, x in enumerate(xs):
+            n += x * (1000 ** i)
+        return n
+
+    check("SK", "encode_task_nat", encode_list([1, 2, 0]) >= 0)
+    check("SK", "encode_distinct", encode_list([1, 2, 0]) != encode_list([1, 3, 0]))
+
+    passed = sum(1 for t in tests if t.module == 'SK' and t.result == TestResult.PASS)
+    total = sum(1 for t in tests if t.module == 'SK')
+    print(f"  📊 Module SK: {passed}/{total} passed")
+
+
+# ============================================================
 # Main
 # ============================================================
 
 # JSON module keys per MASTER_PLAN §1.2 (protocol handshake format)
-MODULE_JSON_KEYS = {"T": "time", "E": "error", "C": "confidence", "I": "io"}
+MODULE_JSON_KEYS = {"T": "time", "E": "error", "C": "confidence", "I": "io",
+                    "SK": "socketkit"}
 SPEC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "spec")
 
 
 def compute_fingerprint() -> str:
-    """sha256 over the four P0 spec files this verifier checks (§1.2)."""
+    """sha256 over the five P0 spec files this verifier checks (§1.2)."""
     h = hashlib.sha256()
     for fname in ("spec_p0_time.md", "spec_p0_error.md",
-                  "spec_p0_confidence.md", "spec_p0_io.md"):
+                  "spec_p0_confidence.md", "spec_p0_io.md",
+                  "spec_p0_socketkit.md"):
         path = os.path.join(SPEC_DIR, fname)
         if os.path.exists(path):
             h.update(fname.encode("utf-8"))
@@ -766,6 +837,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             run_module_e()
             run_module_c()
             run_module_i()
+            run_module_sk()
         print(json.dumps(build_json_report(args.spec), ensure_ascii=False,
                          indent=2))
         total_fail = sum(1 for t in tests if t.result == TestResult.FAIL)
@@ -775,13 +847,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     run_module_e()
     run_module_c()
     run_module_i()
+    run_module_sk()
 
     # Final report
     print("\n" + "=" * 60)
     print("📋 FINAL REPORT — ΣLang P0 Foundations")
     print("=" * 60)
 
-    modules = ["T", "E", "C", "I"]
+    modules = ["T", "E", "C", "I", "SK"]
     total_pass = 0
     total_tests = 0
 

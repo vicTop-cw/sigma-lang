@@ -318,6 +318,103 @@ def discharge(smt2_text):
 # Main
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# §SK obligation generation (spec_p0_socketkit.md — SocketKit Protocol)
+# ---------------------------------------------------------------------------
+
+SK_OPS = {"task_create", "review_merge", "contribution_score"}
+
+
+def _task_create_obligations():
+    """§SK.3.1: task_create(a, b) ≡ [a, b, 0] — bounty ≥ 0, status 0 = open."""
+    defn = """
+; Definition (§SK.3.1): task_create(a, b) ≡ [a, b, 0], encoded to ℕ (Law II).
+; index(t, 0)=a, index(t, 1)=b, index(t, 2)=0
+(declare-const a Int)
+(declare-const b Int)
+(assert (>= a 0))
+(assert (>= b 0))
+(declare-const t Int)
+(assert (= (index t 0) a))
+(assert (= (index t 1) b))
+(assert (= (index t 2) 0))
+"""
+    law1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + defn +
+            "(assert (not (and (>= (index t 0) 0) (>= (index t 1) 0) "
+            "(>= (index t 2) 0))))\n(check-sat)\n")
+    law2 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + defn +
+            "(assert (not (= (index t 2) 0)))\n(check-sat)\n")
+    return [("task_create/law1-bounty-nonnegative", law1),
+            ("task_create/law2-fresh-task-open", law2)]
+
+
+def _review_merge_obligations():
+    """§SK.3.2: review_merge ≡ 1 if weighted_accept ≥ weighted_reject else 0."""
+    common = """
+(declare-const v1 Int) (declare-const v2 Int) (declare-const v3 Int)
+(declare-const w1 Int) (declare-const w2 Int) (declare-const w3 Int)
+(assert (or (= v1 0) (= v1 1)))
+(assert (or (= v2 0) (= v2 1)))
+(assert (or (= v3 0) (= v3 1)))
+(assert (>= w1 0)) (assert (>= w2 0)) (assert (>= w3 0))
+; Definition (§SK.3.2): weighted_accept ≥ weighted_reject ⇒ 1, else 0
+(declare-const wa Int) (declare-const wr Int)
+(assert (= wa (+ (* v1 w1) (* v2 w2) (* v3 w3))))
+(assert (= wr (+ (* (- 1 v1) w1) (* (- 1 v2) w2) (* (- 1 v3) w3))))
+(declare-const d Int)
+(assert (= d (ite (>= wa wr) 1 0)))
+"""
+    law1 = "(set-logic NIA)\n" + common + \
+        "(assert (not (or (= d 0) (= d 1))))\n(check-sat)\n"
+    law2 = ("(set-logic NIA)\n" + common + """
+; reverse(o) preserves the weighted sums (addition is commutative)
+(declare-const wa_rev Int) (declare-const wr_rev Int)
+(assert (= wa_rev (+ (* v3 w3) (* v2 w2) (* v1 w1))))
+(assert (= wr_rev (+ (* (- 1 v3) w3) (* (- 1 v2) w2) (* (- 1 v1) w1))))
+(declare-const d_rev Int)
+(assert (= d_rev (ite (>= wa_rev wr_rev) 1 0)))
+(assert (not (= d d_rev)))
+(check-sat)
+""")
+    return [("review_merge/law1-decision-binary", law1),
+            ("review_merge/law2-order-independent", law2)]
+
+
+def _contribution_obligations():
+    """§SK.3.3: contribution_score ≡ max(0, Σ deltas) — never negative."""
+    common = """
+(declare-const d1 Int) (declare-const d2 Int) (declare-const d3 Int)
+(declare-const total Int)
+(assert (= total (+ d1 d2 d3)))
+; Definition (§SK.3.3): contribution_score ≡ max(0, Σ deltas)
+(declare-const p Int)
+(assert (= p (ite (> total 0) total 0)))
+"""
+    law1 = "(set-logic NIA)\n" + common + \
+        "(assert (not (>= p 0)))\n(check-sat)\n"
+    law2 = ("(set-logic NIA)\n" + common + """
+; appending a zero delta is neutral
+(declare-const p2 Int)
+(assert (= p2 (ite (> (+ total 0) 0) (+ total 0) 0)))
+(assert (not (= p p2)))
+(check-sat)
+""")
+    return [("contribution_score/law1-points-nonnegative", law1),
+            ("contribution_score/law2-zero-delta-neutral", law2)]
+
+
+def gen_sk_obligation(op):
+    """Generate §SK obligations for one SocketKit operation (or [])."""
+    name = op["name"].strip()
+    if name == "task_create":
+        return _task_create_obligations()
+    if name == "review_merge":
+        return _review_merge_obligations()
+    if name == "contribution_score":
+        return _contribution_obligations()
+    return []
+
+
 def prove_module(path):
     module = vc.parse_module(path)
     ok, violations = vc.check_python(module)  # includes P-01 structural checks
@@ -325,7 +422,8 @@ def prove_module(path):
                   if v.startswith(("MissingModel", "MissingInvariant", "IncompleteContract"))]
     name = os.path.basename(path)
 
-    if not module["proof_declared"]:
+    has_sk = any(op["name"].strip() in SK_OPS for op in module["ops"])
+    if not module["proof_declared"] and not has_sk:
         print(f"  {name}: no `## Proof` block — skipped (structural: {ok})")
         return ok
 
@@ -336,8 +434,11 @@ def prove_module(path):
     os.makedirs(OUT_DIR, exist_ok=True)
     obligations = []
     for op in module["ops"]:
-        laws = [f"∀ a b . {op['name']} result is checked by contract" ]
-        # Build law text list from block laws (translate each ∀ law).
+        # §SK operations carry their own laws (§SK.3) — no Pre/Post needed.
+        sk_obs = gen_sk_obligation(op)
+        if sk_obs:
+            obligations.extend(sk_obs)
+            continue
         law_texts = [l for l in op.get("laws", [])]
         ob = gen_obligation(module, op, law_texts)
         if ob:
@@ -345,7 +446,7 @@ def prove_module(path):
 
     if not structural and obligations:
         for oname, ob in obligations:
-            fname = f"{name.replace('.md', '')}__{oname}.smt2"
+            fname = f"{name.replace('.md', '')}__{oname.replace('/', '_')}.smt2"
             fpath = os.path.join(OUT_DIR, fname)
             with open(fpath, "w", encoding="utf-8") as f:
                 f.write(ob)

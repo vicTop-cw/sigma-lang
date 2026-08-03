@@ -18,9 +18,10 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.13 可用**——即：**SocketKit 协议集成**，
-在 v0.12（Novel Spec Test 自举闭环）达成的基础上，把「来找茬」App 的核心业务行为
-（task_create / review_merge / contribution_score）定义为可审计的 ΣLang 语义。
+**总目标**: 把项目推进到 **v0.14 可用**——即：**SocketKit 参考运行时 + 审计闭环**，
+在 v0.13（SocketKit 协议集成，§SK 语义定义）达成的基础上，让「来找茬」App 的核心业务行为
+（task_create / review_merge / contribution_score）真正**可执行、可证明、可审计**：
+参考实现 + 审计运行时 + z3 义务消解 + 负例语料 + p0 集成。
 **我只关心这个结果。**
 
 ---
@@ -67,10 +68,10 @@ SCAN → DECIDE → EXECUTE → VERIFY → (COMMIT) → 回到 SCAN
 
 ```sh
 # 1. 三方共识（Law XIII 门禁 —— 一切的前提）
-python3 verify_consensus.py          # 必须 40/40（或语料增长后的 N/N）全绿
+python3 verify_consensus.py          # 必须 41/41（或语料增长后的 N/N）全绿
 
 # 2. 算法正确性
-python3 verify_p0.py                 # 必须 95/95
+python3 verify_p0.py                 # 必须 109/109
 
 # 3. 证明后端（需 z3: pip install z3-solver；离线则跳过并记录）
 python3 tools/sigma-prove.py corpus/proof_ok.md corpus/proof_max.md
@@ -114,7 +115,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 任何改动（哪怕一行）完成后，必须：
 
 1. 重新跑 §3 的全部命令。
-2. **40/40（或 N/N）三方一致必须保持全绿**；若为新增检查而增加语料，新语料必须三端一致。
+2. **41/41（或 N/N）三方一致必须保持全绿**；若为新增检查而增加语料，新语料必须三端一致。
 3. 三端编译 0 error / 0 warning。
 4. 不得通过删除/注释/`#[ignore]`/弱化测试来掩盖失败——修复根因。
 5. 改动规范时，验证器与语料必须同步（规范 → 检查 → 测试 三者一体）。
@@ -171,6 +172,28 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > 承载，三端验证器判定一致。Lang-Zone（§6.1）因 LZ 原型期**已 DEFERRED**，待其
 > 自举稳定后再融入；SocketKit 达成后即无 P3 待办，进入新里程碑规划。
 
+### v0.14 完成定义（SocketKit Runtime，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **参考实现**: `impl/python/sigma_core.py` 实现 `task_create / review_merge /
+      contribution_score` 及 Law II 编码（`encode_task/encode_opinion/encode_action`），
+      自检 59/59 → 73/73。
+- [x] **审计运行时**: `tools/sigma-runtime.py` 跑完整业务 trace（提交→评审→贡献），
+      逐事件输出 ΣLang obligation 日志（--json 机器可读），10/10 义务满足、退出码 0。
+- [x] **证明闭环**: `tools/sigma-prove.py` 新增 §SK 义务生成（gen_sk_obligation，
+      无需 Pre/Post），六条定律（task_create×2 / review_merge×2 / contribution_score×2）
+      z3 消解全部 `PROVED (unsat)`。
+- [x] **负例语料**: `corpus/socketkit_break.md`（E-02 缺负例测试）三端一致 FAIL，
+      verify_consensus.py 计入 41/41。
+- [x] **p0 集成**: §SK 行为测试进 `verify_p0.py`（新增 §SK 模块 14 项），95/95 → 109/109；
+      fingerprint 纳入 spec_p0_socketkit.md。
+- [x] **不回归**: 三端共识不回退（consensus 41/41、p0 109/109、三端 0 warning），
+      v0.10–v0.13 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
+
+> v0.14 = 「业务逻辑可执行 + 可证明」：§SK 语义从纸面定义变成参考实现、审计日志与
+> z3 证明义务，任何提交/评审/贡献行为都可逐事件复核。达成后 P3 待办清空，
+> 进入新里程碑规划（Lang-Zone 仍 DEFERRED，待 LZ 自举稳定）。
+
 ---
 
 ## 7. 提交与汇报约定
@@ -181,9 +204,9 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ```text
 【ΣLang AUTOPILOT 结果】
-- 状态: ✅ v0.11 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
+- 状态: ✅ v0.14 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
 - 本轮完成: 修复 X · 新增 Y · 验证 N/N
-- 验证证据: verify_consensus N/N · verify_p0 95/95 · sigma-prove PROVED
+- 验证证据: verify_consensus N/N · verify_p0 109/109 · sigma-prove PROVED
 - 提交: <hash> <subject>
 ```
 
@@ -194,7 +217,9 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 ```sh
 python3 verify_consensus.py                    # 三方共识
 python3 verify_p0.py                           # 算法检查
+python3 tools/sigma-runtime.py                 # SocketKit 审计 trace（obligation 日志）
 python3 tools/sigma-prove.py corpus/proof_max.md   # 证明消解
+python3 tools/sigma-prove.py corpus/socketkit_ok.md  # §SK 六定律义务消解
 python3 tools/sigma-moonbit.py corpus/proof_max.md # MoonBit 翻译
 cd impl/verifier && cargo build                # Rust 构建
 cd impl/elixir_rt && elixir sigma_verify.exs ../../corpus/arith_ok.md  # Elixir 单测

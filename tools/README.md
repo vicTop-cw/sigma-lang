@@ -56,7 +56,23 @@ python3 tools/sigma-prove.py corpus/proof_ok.md
 
 - Runs the P-01 structural check (Model/Invariant/Pre/Post) and emits SMT-LIB2
   obligations for each contract. Discharges via z3 when installed; degrades to
-  "obligation generated (unverified)" otherwise.
+  "obligation generated (unverified)" otherwise. §SK operations (task_create /
+  review_merge / contribution_score) get their own law obligations
+  (`gen_sk_obligation`) — no Pre/Post needed.
+
+### `sigma-runtime`
+SocketKit audit runtime — runs the canonical business trace (task_create →
+review_merge → contribution_score) against the §SK reference implementation and
+emits a per-event ΣLang obligation log.
+
+```bash
+python3 tools/sigma-runtime.py          # human-readable audit log
+python3 tools/sigma-runtime.py --json   # machine-readable audit log
+# Audit: 10/10 obligations satisfied — trace is ΣLang-auditable
+```
+
+- Every event output is checked against the §SK laws from
+  `spec/spec_p0_socketkit.md`; exit code 0 = all obligations satisfied.
 
 ## Implementation Status
 
@@ -69,5 +85,6 @@ python3 tools/sigma-prove.py corpus/proof_ok.md
 | `sigma-moonbit` | Python | ✅ `sigma-moonbit.py` (Proof → `.mbtp` translation bridge, 2026-08-01) |
 | `sigma-pkg` | Python | ✅ `sigma-cli.py` (install/verify/list/search/fingerprint + registry + Iron Law VII, 2026-08-02) |
 | `sigma-bootstrap` | Python | ✅ `sigma-bootstrap.py` (AI bootstrapping loop test: spec→impl→verify→pass, 2026-08-02) |
+| `sigma-runtime` | Python | ✅ `sigma-runtime.py` (SocketKit audit trace → ΣLang obligation log, 2026-08-03) |
 | `sigma-fmt` | Rust | 📋 Planned |
 | `sigma-test` | Rust | 📋 Planned |

@@ -43,10 +43,11 @@ It is a **contract between intelligences**.
 | §E Error Algebra / 错误代数 | 16/16 | ✅ |
 | §C Confidence & Probabilistic Logic / 置信度与概率逻辑 | 37/37 | ✅ |
 | §I I/O Boundary & Effects / I/O 边界与效应 | 25/25 | ✅ |
-| **Total / 总计** | **95/95** | **✅** |
+| §SK SocketKit Protocol / SocketKit 协议 | 14/14 | ✅ |
+| **Total / 总计** | **109/109** | **✅** |
 
-Verifier Consensus / 验证器共识: **38/38** corpus modules agree across Python / Rust / Elixir verifiers.
-38/38 语料库模块在 Python / Rust / Elixir 三个验证器上达成一致。
+Verifier Consensus / 验证器共识: **41/41** corpus modules agree across Python / Rust / Elixir verifiers.
+41/41 语料库模块在 Python / Rust / Elixir 三个验证器上达成一致。
 
 **v0.10 可用 (2026-08-02)**: 数学符号（⊕ ⊗ ⊖ ⊘ ⊙ ≡ ≥ ≤ ∈）、基本操作（`index()`/`I₂`、元素级/矩阵运算）、常量包（§C `0xK0xx`/`0xQ0xx` 按指纹解析，Opaque 类不可遮蔽）已在三个验证器求值器全部实现并有语料覆盖；`sigma-prove` 义务消解 `PROVED (unsat)`，`sigma-moonbit` 生成 `.mbtp`；共识门禁 35/35 全绿。
 
@@ -54,14 +55,20 @@ Verifier Consensus / 验证器共识: **38/38** corpus modules agree across Pyth
 
 **AI Bootstrapping Test (P2, 2026-08-02)**: `tools/sigma-bootstrap.py` — 一键闭环验证 spec→impl→verify→pass：4 个 P0 spec 均携带 `## Implementation Checklist (for AI)`、`impl/python/sigma_core.py` 自检 59/59、`verify_p0.py` 95/95。证明「新鲜 AI 只凭规范+验证器即可从零实现并通过验证」。见 `MASTER_PLAN.md` Phase 5。
 
+**v0.12 Novel Spec Test (2026-08-02)**: `corpus/novel_gene_ok.md`（DNA 对齐语义）三端验证器一致（consensus 39/39），跑通 AI 读 spec → 写实现 → 验证 → 发布的完整闭环。见 `MASTER_PLAN.md` Phase 5.2。
+
+**v0.13 SocketKit Protocol (2026-08-02)**: `spec/spec_p0_socketkit.md`（§SK：task_create / review_merge / contribution_score 的 ΣLang 语义）+ `corpus/socketkit_ok.md` 三端一致（consensus 40/40），走通 RFC → spec → 验证器 → 测试 晋升路径。见 `MASTER_PLAN.md` §6.2。
+
+**v0.14 SocketKit Runtime (2026-08-03)**: §SK 参考实现进入 `impl/python/sigma_core.py`（自检 73/73）· 审计运行时 `tools/sigma-runtime.py`（业务 trace → ΣLang obligation 日志，10/10 满足）· `sigma-prove` 对 §SK 六条定律义务消解全部 `PROVED (unsat)` · 负例 `corpus/socketkit_break.md`（E-02，三端一致 FAIL）· §SK 行为测试进 `verify_p0.py`（109/109）；共识门禁 41/41 全绿、三端 0 warning，v0.10–v0.13 不回归。
+
 ### Two verification modes / 两种验证模式
 
 ΣLang ships **two distinct verification tools** with different purposes:
 
 | Tool / 工具 | Mode / 模式 | What it checks / 检查内容 |
 |------------|------------|--------------------------|
-| `verify_p0.py` | **Algorithm correctness** / 算法正确性 | 95 tests over §T/§E/§C/§I module *algorithms* (Lamport clocks, Result monad, confidence ops, I/O effects) — proves the P0 semantics are implementable. Does NOT parse `.md` specs. |
-| `verify_consensus.py` | **Spec conformance** / 规范一致性 | Parses `.md` specs, applies Laws I–XVII + E-03/06/07/10 + §S/P-01 checks, and requires **38/38 corpus modules** to agree across Python / Rust / Elixir (Law XIII gate). |
+| `verify_p0.py` | **Algorithm correctness** / 算法正确性 | 109 tests over §T/§E/§C/§I/§SK module *algorithms* (Lamport clocks, Result monad, confidence ops, I/O effects, SocketKit app behavior) — proves the P0 semantics are implementable. Does NOT parse `.md` specs. |
+| `verify_consensus.py` | **Spec conformance** / 规范一致性 | Parses `.md` specs, applies Laws I–XVII + E-03/06/07/10 + §S/P-01 checks, and requires **41/41 corpus modules** to agree across Python / Rust / Elixir (Law XIII gate). |
 
 > These are complementary, not redundant: `verify_p0.py` proves the **semantics** are sound;
 > `verify_consensus.py` proves the **specs** conform and that independent implementations agree
@@ -77,7 +84,7 @@ sigma-lang/
 ├── README.md                       # Project entry (this file) / 项目入口（本文件）
 ├── LICENSE                         # MIT
 ├── MASTER_PLAN.md                  # Development roadmap / 开发路线图
-├── verify_p0.py                    # Algorithmic verification (95 tests) / 算法验证
+├── verify_p0.py                    # Algorithmic verification (109 tests) / 算法验证
 ├── verify_consensus.py             # Three-verifier consensus check / 三验证器共识检查
 │
 ├── spec/                           # English specifications (normative) / 英文规范（规范性）
@@ -165,8 +172,9 @@ Expected output / 预期输出:
 ⚠️  MODULE E: 16/16 passed
 🎲 MODULE C: 37/37 passed
 🔌 MODULE I: 25/25 passed
+📋 MODULE SK: 14/14 passed
 
-  🎯 TOTAL: 95/95 tests passed
+  🎯 TOTAL: 109/109 tests passed
   🏆 ALL P0 FOUNDATIONS VERIFIED — ΣLang is sound!
 ```
 
@@ -274,9 +282,9 @@ The following files have been moved to `archive/` as they are superseded by newe
 
 ## Version / 版本
 
-- **Milestone / 里程碑**: **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
+- **Milestone / 里程碑**: **v0.14 SocketKit Runtime (2026-08-03)** — §SK 参考实现 + 审计运行时 + z3 证明闭环，共识门禁 41/41 全绿 · **v0.13 SocketKit Protocol (2026-08-02)** — §SK 语义定义，共识门禁 40/40 全绿 · **v0.12 Novel Spec Test (2026-08-02)** — 新域自举闭环 · **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
 - **Spec Version / 规范版本**: 0.3.0
-- **Date / 日期**: 2026-08-02
+- **Date / 日期**: 2026-08-03
 - **License / 许可证**: MIT
 
 ## Citation / 引用

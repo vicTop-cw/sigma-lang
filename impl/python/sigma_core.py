@@ -420,6 +420,65 @@ def infer_effect(func_body_has_io: bool) -> str:
 
 
 # ============================================================
+# §SK — SocketKit Protocol: Auditable App Behavior
+# (spec/spec_p0_socketkit.md — task_create / review_merge / contribution_score)
+# ============================================================
+
+def task_create(author: int, bounty: int) -> List[int]:
+    """Task submission: (author, bounty) → [author, bounty, 0] (status 0 = open).
+
+    §SK.3.1 — Bounty : Type ≝ ℕ, so a negative bounty is rejected.
+    """
+    if bounty < 0:
+        raise ValueError("BountyErr")
+    return [author, bounty, 0]
+
+
+def review_merge(opinions: List[List[int]]) -> int:
+    """Review resolution: opinions[] → decision (1 = accept, 0 = reject).
+
+    §SK.3.2 — decision ≡ 1 if weighted_accept(os) ≥ weighted_reject(os) else 0.
+    Each opinion is [reviewer_id, vote, weight]; order-independent by construction.
+    """
+    w_accept = sum(w for _, vote, w in opinions if vote == 1)
+    w_reject = sum(w for _, vote, w in opinions if vote == 0)
+    return 1 if w_accept >= w_reject else 0
+
+
+def contribution_score(actions: List[List[int]]) -> int:
+    """Contribution scoring: actions[] → points, fold ⊕ over deltas floored at 0.
+
+    §SK.3.3 — points : Type ≝ ℕ, so the running total never goes below 0.
+    Each action is [actor_id, kind, delta].
+    """
+    total = sum(delta for _, _, delta in actions)
+    return max(0, total)
+
+
+def _encode_list(xs: List[int], base: int = 1000) -> int:
+    """Law II — encode a List⟨ℕ⟩ to a single ℕ (deterministic, injective-ish)."""
+    n = 0
+    for i, x in enumerate(xs):
+        n += x * (base ** i)
+    return n
+
+
+def encode_task(task: List[int]) -> int:
+    """Law II — Task → ℕ."""
+    return _encode_list(task)
+
+
+def encode_opinion(opinion: List[int]) -> int:
+    """Law II — Opinion → ℕ."""
+    return _encode_list(opinion)
+
+
+def encode_action(action: List[int]) -> int:
+    """Law II — Action → ℕ."""
+    return _encode_list(action)
+
+
+# ============================================================
 # Self-check: canonical tests for every module (Law IV)
 # ============================================================
 
@@ -533,6 +592,35 @@ def _main() -> int:
     check("I.safe_retry_get", safe_retry_wrap("http_get", 3)[0] == "ok")
     check("I.unsafe_retry_post", safe_retry_wrap("http_post", 3) == ("err", "UnsafeRetryAttempted"))
     check("I.infer_effect", infer_effect(True) == Effect.IO and infer_effect(False) == Effect.PURE)
+
+    # §SK (SocketKit Protocol — spec_p0_socketkit.md)
+    check("SK.task_create_shape", task_create(1, 100) == [1, 100, 0])
+    check("SK.task_create_open", task_create(5, 50)[2] == 0)
+    check("SK.task_create_bounty_ge0", task_create(2, 0) == [2, 0, 0])
+    try:
+        task_create(1, -5)
+        check("SK.task_create_neg_bounty_rejected", False)
+    except ValueError:
+        check("SK.task_create_neg_bounty_rejected", True)
+    check("SK.review_merge_accept",
+          review_merge([[1, 1, 3], [2, 1, 2]]) == 1)                      # 5 ≥ 0
+    check("SK.review_merge_reject",
+          review_merge([[1, 0, 3], [2, 1, 2]]) == 0)                      # 2 < 3
+    check("SK.review_merge_tie_accept",
+          review_merge([[1, 0, 3], [2, 1, 3]]) == 1)                      # 3 ≥ 3
+    check("SK.review_merge_binary",
+          review_merge([[1, 1, 1], [2, 0, 1]]) in (0, 1))
+    check("SK.review_merge_order_indep",
+          review_merge([[1, 1, 3], [2, 0, 2], [3, 1, 1]]) ==
+          review_merge([[3, 1, 1], [1, 1, 3], [2, 0, 2]]))
+    check("SK.contribution_fold",
+          contribution_score([[1, 1, 3], [2, 2, 4]]) == 7)
+    check("SK.contribution_floor_at_0",
+          contribution_score([[1, 1, -5], [2, 2, 3]]) == 0)              # -2 floored
+    check("SK.contribution_zero_neutral",
+          contribution_score([[1, 1, 3]]) == contribution_score([[1, 1, 3], [9, 0, 0]]))
+    check("SK.encode_task_nat", encode_task([1, 2, 0]) >= 0)
+    check("SK.encode_distinct", encode_task([1, 2, 0]) != encode_task([1, 3, 0]))
 
     print(f"sigma_core self-check: {passed}/{passed + failed} passed")
     return 0 if failed == 0 else 1

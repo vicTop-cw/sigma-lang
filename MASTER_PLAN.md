@@ -21,9 +21,14 @@
 - ✅ **REACHED v0.13 (2026-08-02)**: SocketKit Protocol —— `spec/spec_p0_socketkit.md`（§SK：
   task_create / review_merge / contribution_score 的 ΣLang 语义）+ `corpus/socketkit_ok.md`
   三端一致（consensus 40/40），走通 RFC → spec → 验证器 → 测试 晋升路径；v0.10–v0.12 不回归。
+- ✅ **REACHED v0.14 (2026-08-03)**: SocketKit Runtime（审计闭环）—— §SK 参考实现进入
+  `impl/python/sigma_core.py`（自检 73/73）· 审计运行时 `tools/sigma-runtime.py`（业务 trace →
+  逐事件 ΣLang obligation 日志，10/10 满足）· `sigma-prove` 新增 §SK 六条定律义务全部
+  `PROVED (unsat)` · 负例 `corpus/socketkit_break.md`（E-02，三端一致 FAIL，consensus 41/41）·
+  §SK 行为测试进 `verify_p0.py`（109/109）；v0.10–v0.13 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— SocketKit 达成后 P3 待办已清空，进入新里程碑规划。
+  2. （无）— v0.14 达成后 P3 待办已清空，进入新里程碑规划。
 
 ---
 
@@ -40,7 +45,7 @@ The verifier is the **only authority** on what ΣLang means. No human text overr
 > calibration / shadowing / no_implementation / dependencies / timing_contract /
 > effect_transparency / capabilities)，三端（Python/Rust/Elixir）一致。
 
-Current: 95 tests covering Time/Error/Confidence/I/O.  
+Current: 109 tests covering Time/Error/Confidence/I/O/SocketKit.  
 ✅ **DONE 2026-08-02**: `verify_p0.py --json` 输出结构化 JSON（§1.2：spec/pass/modules/total/
 fingerprint），`sigma-cli verify --p0` 打通 CLI（P0 队列）。
 
@@ -50,6 +55,7 @@ verify_p0.py → validate_spec("your_spec.md")
                ├── §E Error         16/16
                ├── §C Confidence    37/37
                ├── §I I/O           25/25
+               ├── §SK SocketKit    14/14
                └── §L Iron Laws     ✅ done (check_* in impl/verifier)
 ```
 
@@ -291,6 +297,7 @@ This makes your App's business logic **mathematically auditable**.
 | P2 | AI bootstrapping test | ✅ **REACHED 2026-08-02**: `tools/sigma-bootstrap.py` — one clean run closes the loop spec→impl→verify→pass (4 specs carry `## Implementation Checklist (for AI)`, `sigma_core.py` 59/59, `verify_p0.py` 95/95) |
 | P2 | **v0.12 Novel Spec Test (REACHED 2026-08-02)** | ✅ `corpus/novel_gene_ok.md`（DNA 对齐语义, §5.2）— consensus 39/39 三端一致 + AI 闭环 |
 | P3 | **v0.13 SocketKit integration (REACHED 2026-08-02)** | ✅ `spec/spec_p0_socketkit.md` + `corpus/socketkit_ok.md`（§6.2）— consensus 40/40 三端一致 |
+| P3 | **v0.14 SocketKit Runtime (REACHED 2026-08-03)** | ✅ §SK 参考实现（`sigma_core.py` 73/73）+ 审计运行时（`tools/sigma-runtime.py`，obligation 日志 10/10）+ `sigma-prove` §SK 六定律 PROVED (unsat) + 负例 `corpus/socketkit_break.md`（consensus 41/41）+ §SK 进 `verify_p0.py`（109/109） |
 | P3 | Lang-Zone backend integration | ⏸️ **DEFERRED**：LZ 原型期，待自举稳定后融入（§6.1） |
 
 ---
