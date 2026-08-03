@@ -18,11 +18,11 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.24 可用**——即：**三端 §SK.6 story 一致性**，
-在 v0.23（MVP 端到端 HTTP 冒烟测试）达成的基础上，把 §SK.6 MVP 业务剧本从
-Python 单侧扩到三端：Rust `--sk-story`（15/15）、Elixir `--sk-story`（15/15）、
-Python `sigma_app.py`（15/15）审计**同一条业务故事线**——Law XIII 在"产品层"
-收官，三把独立的尺子对同一笔找茬交易给出同一个答案。**我只关心这个结果。**
+**总目标**: 把项目推进到 **v0.25 可用**——即：**Rust 参考实现（贴近生产部署）**，
+在 v0.24（三端 §SK.6 story 一致性）达成的基础上，把找茬 MVP 参考后端用 Rust
+实现一遍（`impl/verifier/src/app.rs`，业务方法**全部委托** sk.rs §SK），与 Python
+`sigma_app.py` 四端逐项一致——业务代码进入"生产级语言"形态，同时保持对 §SK
+语义的完全委托。**我只关心这个结果。**
 
 ---
 
@@ -390,6 +390,26 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > Rust、Elixir 三把尺子各跑一遍，逐项相同、结果一致；业务正确性在任何实现里
 > 都算出同一个答案。
 
+### v0.25 完成定义（Rust 参考实现，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **Rust 参考实现**: `impl/verifier/src/app.rs`（MVPApp 的 Rust 版）——内存
+      状态（tasks / quotas / points / credit_events / contribution_actions），
+      业务方法**全部委托** sk.rs §SK（task_create / quota_use / points_hold /
+      accept_task / task_submit / task_accept / points_release / points_withdraw /
+      credit_score / contribution_score / badge_level），App 层零业务规则重写；
+      CLI 新增 `--app-self-check`（15/15 通过），`cargo build` 0 error/0 warning。
+- [x] **四端对账**: Rust `--app-self-check` 15/15 == Python `sigma_app.py` 15/15 ==
+      Rust `--sk-story` 15/15 == Elixir `--sk-story` 15/15——同一 §SK.6 故事线在
+      Python 参考后端与 Rust 生产级实现上逐项一致（Law XIII 产品层）。
+- [x] **不回归**: consensus 43/43、p0 109/109、sigma-prove 41 项 PROVED、
+      sigma-runtime 59/59（trace）+ 18/18（story）、sigma_app --smoke 13/13、
+      三端编译 0 warning、py_compile 通过，v0.10–v0.24 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
+
+> v0.25 = 「生产级参考实现」：找茬 MVP 后端有了 Rust 版——同样的业务故事线，
+> 同样的 §SK 委托，四端逐项一致；从"能跑的 Python 参考"到"贴近部署的 Rust
+> 实现"，业务代码形态升级，语义正确性分毫未动。
+
 ---
 
 ## 7. 提交与汇报约定
@@ -400,7 +420,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ```text
 【ΣLang AUTOPILOT 结果】
-- 状态: ✅ v0.24 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
+- 状态: ✅ v0.25 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
 - 本轮完成: 修复 X · 新增 Y · 验证 N/N
 - 验证证据: verify_consensus N/N · verify_p0 109/109 · sigma-prove PROVED
 - 提交: <hash> <subject>

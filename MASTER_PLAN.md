@@ -92,9 +92,16 @@
   `sigma_app.py` 15/15 逐项一致——三把独立的尺子审计**同一条业务故事线**
   （Law XIII 在"产品层"收官）；consensus 43/43、p0 109/109、三端 0 warning，
   v0.10–v0.23 不回归。
+- ✅ **REACHED v0.25 (2026-08-03)**: Rust 参考实现（贴近生产部署）——
+  `impl/verifier/src/app.rs`（MVPApp 的 Rust 版：内存状态 + 业务方法**全部委托**
+  sk.rs §SK，App 层零业务规则重写），CLI 新增 `--app-self-check`；自检跑通
+  §SK.6 十二步剧本（15/15），与 Python `sigma_app.py`（15/15）、Rust `--sk-story`
+  （15/15）、Elixir `--sk-story`（15/15）**四端逐项一致**——同一业务故事线在
+  Python 参考后端与 Rust 生产级实现上算出同一个答案；`cargo build` 0 error/0
+  warning；consensus 43/43、p0 109/109，v0.10–v0.24 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.24 达成后 P3 待办已清空，进入新里程碑规划。
+  2. （无）— v0.25 达成后 P3 待办已清空，进入新里程碑规划。
 
 ---
 
@@ -374,6 +381,7 @@ This makes your App's business logic **mathematically auditable**.
 | P3 | **v0.22 找茬 MVP 参考实现 (REACHED 2026-08-03)** | ✅ `impl/python/sigma_app.py`（MVPApp 业务方法全部委托 sigma_core §SK + stdlib HTTP `--serve` API）；自检跑通 §SK.6 剧本 15/15，与 `sigma-runtime --story` 步骤一一对应；consensus 43/43、p0 109/109、三端 0 warning、v0.10–v0.21 不回归 |
 | P3 | **v0.23 MVP 端到端 HTTP 冒烟测试 (REACHED 2026-08-03)** | ✅ `sigma_app.py` 增 `/quota` 端点 + `--smoke`（HTTP 七步全链路 /quota→/post→/claim→/submit→/accept→/withdraw→/badge，13/13 通过）——参考实现 HTTP 服务可用性被可重复冒烟固化；consensus 43/43、p0 109/109、三端 0 warning、v0.10–v0.22 不回归 |
 | P3 | **v0.24 三端 §SK.6 story 一致性 (REACHED 2026-08-03)** | ✅ §SK.6 剧本扩到三端：Rust `sk.rs story()` + `--sk-story`（15/15）、Elixir `sk_story()` + `--sk-story`（15/15），与 Python `sigma_app.py` 15/15 逐项一致——三把尺子审计同一故事线；consensus 43/43、p0 109/109、三端 0 warning、v0.10–v0.23 不回归 |
+| P3 | **v0.25 Rust 参考实现 (REACHED 2026-08-03)** | ✅ `impl/verifier/src/app.rs`（MVPApp Rust 版，业务全部委托 sk.rs §SK）+ `--app-self-check`（15/15）；与 Python `sigma_app.py` / Rust `--sk-story` / Elixir `--sk-story` 四端逐项一致；`cargo build` 0 error/0 warning；consensus 43/43、p0 109/109、v0.10–v0.24 不回归 |
 | P3 | Lang-Zone backend integration | ⏸️ **DEFERRED**：LZ 原型期，待自举稳定后融入（§6.1） |
 
 ---

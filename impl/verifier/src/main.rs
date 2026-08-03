@@ -10,6 +10,7 @@ use sha2::{Digest, Sha256};
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 
+mod app;
 mod evaluator;
 mod sk;
 use evaluator::{eval_test, parse_val, TVal};
@@ -39,6 +40,11 @@ struct Cli {
     /// Run the §SK.6 MVP story (§SK.6, mirrors sigma-runtime --story) and exit
     #[arg(long)]
     sk_story: bool,
+
+    /// Run the 找茬 MVP reference implementation self-check (§SK.6 through
+    /// the App layer, mirrors sigma_app.py) and exit
+    #[arg(long)]
+    app_self_check: bool,
 }
 
 #[derive(Debug, Clone, ValueEnum)]
@@ -1186,6 +1192,16 @@ fn main() -> Result<()> {
     if cli.sk_story {
         let (passed, total) = sk::story();
         println!("sigma_core story (§SK.6): {passed}/{total} passed");
+        std::process::exit(if passed == total { 0 } else { 1 });
+    }
+
+    // 找茬 MVP reference implementation — mirrors `python3 impl/python/
+    // sigma_app.py` (business methods delegate §SK; the App layer only holds
+    // state), so the §SK.6 story passes through the App layer identically.
+    if cli.app_self_check {
+        let mut mvapp = app::MVPApp::new();
+        let (passed, total) = app::run_story(&mut mvapp);
+        println!("sigma_app MVP story (§SK.6): {passed}/{total} passed");
         std::process::exit(if passed == total { 0 } else { 1 });
     }
 
