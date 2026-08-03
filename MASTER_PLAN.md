@@ -186,9 +186,14 @@
   stock_level / fill_rate，库存非负、不超卖 ⊥ InsufficientStock、履约率 0..1
   可证）——协议泛化性第三次验证（生物→业务→金融→供应链）；consensus 45/45、
   p0 109/109、三端 0 warning，v0.10–v0.39 不回归。
+- ✅ **REACHED v0.41 (2026-08-03)**: 三端供应链执行层—— §IN 五操作在
+  Python `sigma_core.py` / Rust `sk.rs`+`evaluator.rs` / Elixir `sigma_verify.exs`
+  全部实现（参考实现 + eval_expr + 自检：sigma_core 167/167、Rust/Elixir §SK 自检
+  74/74 + §IN 88/88）；fill_rate 返回 ℚ（fnum）三端一致；`cargo build` 0 error/0
+  warning；consensus 45/45、p0 109/109，v0.10–v0.40 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.40 达成后 P3 待办已清空，进入新里程碑规划（v0.41–v0.50 连续推进）。
+  2. （无）— v0.41 达成后 P3 待办已清空，进入新里程碑规划（v0.42–v0.50 连续推进）。
 
 ---
 

@@ -272,6 +272,65 @@ pub fn points_ledger(entries: &[Vec<i64>]) -> Result<Vec<Vec<i64>>, &'static str
     Ok(ledger)
 }
 
+// ============================================================
+// §IN — Inventory Protocol (spec_p0_inventory.md, v0.41)
+// ============================================================
+
+/// 开仓: (qtyA, qtyB) → [qtyA, qtyB]. §IN.3.1 — 库存 ≥ 0.
+pub fn inventory_new(qty_a: i64, qty_b: i64) -> Result<Vec<i64>, &'static str> {
+    if qty_a < 0 || qty_b < 0 {
+        return Err("TypeError");
+    }
+    Ok(vec![qty_a, qty_b])
+}
+
+/// 入库: 加库存（可加性）. §IN.3.2 — item 0/1 否则 UnknownItem.
+pub fn receive_stock(inventory: &[i64], item: i64, qty: i64)
+    -> Result<Vec<i64>, &'static str> {
+    if item != 0 && item != 1 {
+        return Err("UnknownItem");
+    }
+    if qty < 0 {
+        return Err("TypeError");
+    }
+    let mut inv = inventory.to_vec();
+    inv[item as usize] += qty;
+    Ok(inv)
+}
+
+/// 出库: 扣库存，不超卖. §IN.3.3 — qty ≤ held 否则 InsufficientStock.
+pub fn ship_stock(inventory: &[i64], item: i64, qty: i64)
+    -> Result<Vec<i64>, &'static str> {
+    if item != 0 && item != 1 {
+        return Err("UnknownItem");
+    }
+    if qty < 0 {
+        return Err("TypeError");
+    }
+    if qty > inventory[item as usize] {
+        return Err("InsufficientStock");
+    }
+    let mut inv = inventory.to_vec();
+    inv[item as usize] -= qty;
+    Ok(inv)
+}
+
+/// 库存水位: inventory[item]. §IN.3.4 — item 0/1 否则 TypeError.
+pub fn stock_level(inventory: &[i64], item: i64) -> Result<i64, &'static str> {
+    if item != 0 && item != 1 {
+        return Err("TypeError");
+    }
+    Ok(inventory[item as usize])
+}
+
+/// 履约率: shipped / demanded. §IN.3.5 — demanded = 0 → DivByZero.
+pub fn fill_rate(shipped: i64, demanded: i64) -> Result<f64, &'static str> {
+    if demanded == 0 {
+        return Err("DivByZero");
+    }
+    Ok(shipped as f64 / demanded as f64)
+}
+
 /// Law II — Quota → ℕ.
 pub fn encode_quota(quota: &[i64]) -> i64 {
     encode_list(quota, 1000)
@@ -562,6 +621,29 @@ pub fn growth_story() -> (usize, usize) {
            points_ledger(&[vec![0, 100, 1]]) == Ok(vec![vec![1, 1, 100]]));
     check!("points_ledger_untraceable",
            points_ledger(&[vec![0, 100, 0]]).is_err());
+
+    // §IN — Inventory Protocol (spec_p0_inventory.md)
+    check!("inventory_new_shape", inventory_new(10, 20) == Ok(vec![10, 20]));
+    check!("inventory_new_zero", inventory_new(0, 0) == Ok(vec![0, 0]));
+    check!("inventory_new_neg_rejected", inventory_new(-5, 10).is_err());
+    check!("receive_a",
+           receive_stock(&inventory_new(10, 20).unwrap(), 0, 5) == Ok(vec![15, 20]));
+    check!("receive_b",
+           receive_stock(&inventory_new(10, 20).unwrap(), 1, 3) == Ok(vec![10, 23]));
+    check!("receive_unknown_item_rejected",
+           receive_stock(&inventory_new(10, 20).unwrap(), 2, 5).is_err());
+    check!("ship_a",
+           ship_stock(&inventory_new(10, 20).unwrap(), 0, 4) == Ok(vec![6, 20]));
+    check!("ship_all",
+           ship_stock(&inventory_new(10, 20).unwrap(), 1, 20) == Ok(vec![10, 0]));
+    check!("ship_insufficient_rejected",
+           ship_stock(&inventory_new(10, 20).unwrap(), 0, 11).is_err());
+    check!("stock_level_a", stock_level(&inventory_new(10, 20).unwrap(), 0) == Ok(10));
+    check!("stock_level_b", stock_level(&inventory_new(10, 20).unwrap(), 1) == Ok(20));
+    check!("stock_level_type_rejected", stock_level(&vec![5, 5], 2).is_err());
+    check!("fill_rate", fill_rate(6, 10) == Ok(0.6));
+    check!("fill_rate_full", fill_rate(10, 10) == Ok(1.0));
+    check!("fill_rate_zero_demand_rejected", fill_rate(6, 0).is_err());
 
     (passed, total)
 }

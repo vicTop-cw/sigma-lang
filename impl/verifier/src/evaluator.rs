@@ -729,6 +729,116 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
             _ => Err("TypeError".to_string()),
         };
     }
+    // §IN — Inventory Protocol operations (spec_p0_inventory.md §IN.3).
+    // Third novel domain: supply chain. Real function calls, mirrors
+    // verify_consensus.py so the consensus gate verifies inventory semantics.
+    if let Some(rest) = s.strip_prefix("inventory_new(") {
+        let inner = rest.strip_suffix(')').ok_or("bad inventory_new call")?;
+        let (a, b) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad inventory_new args: {}", inner))?;
+        let va = eval_expr(a)?;
+        let vb = eval_expr(b)?;
+        return match (va, vb) {
+            (TVal::Num(qa), TVal::Num(qb)) => {
+                if qa < 0 || qb < 0 {
+                    return Err("TypeError".to_string());
+                }
+                Ok(TVal::List(vec![TVal::Num(qa), TVal::Num(qb)]))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("receive_stock(") {
+        let inner = rest.strip_suffix(')').ok_or("bad receive_stock call")?;
+        let (i, rest2) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad receive_stock args: {}", inner))?;
+        let (x, q) = split_top_level(rest2, ',')
+            .ok_or_else(|| format!("bad receive_stock args: {}", inner))?;
+        let vi = eval_expr(i)?;
+        let vx = eval_expr(x)?;
+        let vq = eval_expr(q)?;
+        return match (vi, vx, vq) {
+            (TVal::List(inv), TVal::Num(item), TVal::Num(qty)) if inv.len() == 2 => {
+                if item != 0 && item != 1 {
+                    return Err("UnknownItem".to_string());
+                }
+                if qty < 0 {
+                    return Err("TypeError".to_string());
+                }
+                let held = match &inv[item as usize] {
+                    TVal::Num(h) => *h,
+                    _ => return Err("TypeError".to_string()),
+                };
+                let mut items = inv.clone();
+                items[item as usize] = TVal::Num(held + qty);
+                Ok(TVal::List(items))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("ship_stock(") {
+        let inner = rest.strip_suffix(')').ok_or("bad ship_stock call")?;
+        let (i, rest2) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad ship_stock args: {}", inner))?;
+        let (x, q) = split_top_level(rest2, ',')
+            .ok_or_else(|| format!("bad ship_stock args: {}", inner))?;
+        let vi = eval_expr(i)?;
+        let vx = eval_expr(x)?;
+        let vq = eval_expr(q)?;
+        return match (vi, vx, vq) {
+            (TVal::List(inv), TVal::Num(item), TVal::Num(qty)) if inv.len() == 2 => {
+                if item != 0 && item != 1 {
+                    return Err("UnknownItem".to_string());
+                }
+                if qty < 0 {
+                    return Err("TypeError".to_string());
+                }
+                let held = match &inv[item as usize] {
+                    TVal::Num(h) => *h,
+                    _ => return Err("TypeError".to_string()),
+                };
+                if qty > held {
+                    return Err("InsufficientStock".to_string());
+                }
+                let mut items = inv.clone();
+                items[item as usize] = TVal::Num(held - qty);
+                Ok(TVal::List(items))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("stock_level(") {
+        let inner = rest.strip_suffix(')').ok_or("bad stock_level call")?;
+        let (i, x) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad stock_level args: {}", inner))?;
+        let vi = eval_expr(i)?;
+        let vx = eval_expr(x)?;
+        return match (vi, vx) {
+            (TVal::List(inv), TVal::Num(item)) if inv.len() == 2 => {
+                if item != 0 && item != 1 {
+                    return Err("TypeError".to_string());
+                }
+                Ok(inv[item as usize].clone())
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("fill_rate(") {
+        let inner = rest.strip_suffix(')').ok_or("bad fill_rate call")?;
+        let (sh, de) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad fill_rate args: {}", inner))?;
+        let vs = eval_expr(sh)?;
+        let vd = eval_expr(de)?;
+        return match (vs, vd) {
+            (TVal::Num(shipped), TVal::Num(demanded)) => {
+                if demanded == 0 {
+                    return Err("DivByZero".to_string());
+                }
+                Ok(TVal::FNum(shipped as f64 / demanded as f64))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
     if s == "I₂" {
         return Ok(TVal::List(vec![
             TVal::List(vec![TVal::Num(1), TVal::Num(0)]),

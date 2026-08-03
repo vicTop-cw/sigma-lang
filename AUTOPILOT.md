@@ -189,6 +189,16 @@
       v0.10–v0.39 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.41 完成定义（三端供应链执行层，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **三端执行层**: §IN 五操作（inventory_new / receive_stock / ship_stock /
+      stock_level / fill_rate）在 Python / Rust / Elixir 全部实现（参考实现 +
+      eval_expr + 自检）；fill_rate 返回 ℚ（fnum）三端一致；0 error/0 warning。
+- [x] **不回归**: sigma_core 167/167、Rust/Elixir §SK 自检 88/88、consensus
+      45/45、p0 109/109、sigma-prove 48 项 PROVED、sigma-runtime 59/59 + 29/29、
+      双端冒烟 20/20，v0.10–v0.40 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

@@ -1157,6 +1157,106 @@ def eval_expr(s):
                 return "TypeError"
             ledger.append(("list", [("num", i), source, amount]))
         return ("list", ledger)
+    # §IN — Inventory Protocol operations (spec_p0_inventory.md §IN.3).
+    # Third novel domain: supply chain. Real function calls, mirrors
+    # sigma_core.py §IN so the consensus gate verifies inventory semantics.
+    if s.startswith("inventory_new(") and s.endswith(")"):
+        inner = s[len("inventory_new("):-1]
+        parts = split_all_top_level(inner, ",")
+        if len(parts) < 2:
+            return f"bad inventory_new args: {inner}"
+        va = eval_expr(parts[0].strip())
+        vb = eval_expr(parts[1].strip())
+        if isinstance(va, str):
+            return va
+        if isinstance(vb, str):
+            return vb
+        if va[0] != "num" or vb[0] != "num":
+            return "TypeError"
+        if va[1] < 0 or vb[1] < 0:
+            return "TypeError"
+        return ("list", [("num", va[1]), ("num", vb[1])])
+    if s.startswith("receive_stock(") and s.endswith(")"):
+        inner = s[len("receive_stock("):-1]
+        parts = split_all_top_level(inner, ",")
+        if len(parts) < 3:
+            return f"bad receive_stock args: {inner}"
+        vi = eval_expr(parts[0].strip())
+        vx = eval_expr(parts[1].strip())
+        vq = eval_expr(parts[2].strip())
+        if isinstance(vi, str):
+            return vi
+        if isinstance(vx, str):
+            return vx
+        if isinstance(vq, str):
+            return vq
+        if vi[0] != "list" or len(vi[1]) != 2 or vx[0] != "num" or vq[0] != "num":
+            return "TypeError"
+        if vx[1] not in (0, 1):
+            return "UnknownItem"
+        if vq[1] < 0:
+            return "TypeError"
+        inv = list(vi[1])
+        inv[vx[1]] = ("num", inv[vx[1]][1] + vq[1])
+        return ("list", inv)
+    if s.startswith("ship_stock(") and s.endswith(")"):
+        inner = s[len("ship_stock("):-1]
+        parts = split_all_top_level(inner, ",")
+        if len(parts) < 3:
+            return f"bad ship_stock args: {inner}"
+        vi = eval_expr(parts[0].strip())
+        vx = eval_expr(parts[1].strip())
+        vq = eval_expr(parts[2].strip())
+        if isinstance(vi, str):
+            return vi
+        if isinstance(vx, str):
+            return vx
+        if isinstance(vq, str):
+            return vq
+        if vi[0] != "list" or len(vi[1]) != 2 or vx[0] != "num" or vq[0] != "num":
+            return "TypeError"
+        if vx[1] not in (0, 1):
+            return "UnknownItem"
+        if vq[1] < 0:
+            return "TypeError"
+        held = vi[1][vx[1]][1]
+        if vq[1] > held:
+            return "InsufficientStock"
+        inv = list(vi[1])
+        inv[vx[1]] = ("num", held - vq[1])
+        return ("list", inv)
+    if s.startswith("stock_level(") and s.endswith(")"):
+        inner = s[len("stock_level("):-1]
+        parts = split_top_level(inner, ",")
+        if parts is None or len(parts) < 2:
+            return f"bad stock_level args: {inner}"
+        vi = eval_expr(parts[0].strip())
+        vx = eval_expr(parts[1].strip())
+        if isinstance(vi, str):
+            return vi
+        if isinstance(vx, str):
+            return vx
+        if vi[0] != "list" or len(vi[1]) != 2 or vx[0] != "num":
+            return "TypeError"
+        if vx[1] not in (0, 1):
+            return "TypeError"
+        return vi[1][vx[1]]
+    if s.startswith("fill_rate(") and s.endswith(")"):
+        inner = s[len("fill_rate("):-1]
+        parts = split_top_level(inner, ",")
+        if parts is None or len(parts) < 2:
+            return f"bad fill_rate args: {inner}"
+        vs = eval_expr(parts[0].strip())
+        vd = eval_expr(parts[1].strip())
+        if isinstance(vs, str):
+            return vs
+        if isinstance(vd, str):
+            return vd
+        if vs[0] != "num" or vd[0] != "num":
+            return "TypeError"
+        if vd[1] == 0:
+            return "DivByZero"
+        return ("fnum", vs[1] / vd[1])
     if s == "I₂":
         return ("list", [("list", [("num", 1), ("num", 0)]),
                          ("list", [("num", 0), ("num", 1)])])

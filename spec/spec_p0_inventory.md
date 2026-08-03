@@ -170,7 +170,7 @@ Definition: fill_rate(s, d) ≡ s / d   if d > 0
 | Input | Output |
 |-------|--------|
 | fill_rate(6, 10) | 0.6 |
-| fill_rate(10, 10) | 1 |
+| fill_rate(10, 10) | 1.0 |
 | fill_rate(6, 0) | ⊥ DivByZero |
 
 ---

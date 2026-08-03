@@ -741,6 +741,59 @@ def points_ledger(entries: List[List[int]]) -> List[List[int]]:
     return ledger
 
 
+# ============================================================
+# §IN — Inventory Protocol: Auditable Supply-Chain Semantics
+# (spec/spec_p0_inventory.md — inventory_new / receive_stock /
+#  ship_stock / stock_level / fill_rate)
+# ============================================================
+
+def inventory_new(qty_a: int, qty_b: int) -> List[int]:
+    """开仓: (qtyA, qtyB) → [qtyA, qtyB]. §IN.3.1 — 库存 ≥ 0."""
+    if qty_a < 0 or qty_b < 0:
+        raise ValueError("TypeError")
+    return [qty_a, qty_b]
+
+
+def receive_stock(inventory: List[int], item: int, qty: int) -> List[int]:
+    """入库: 加库存（可加性）. §IN.3.2 — item 0/1 否则 UnknownItem."""
+    if item not in (0, 1):
+        raise ValueError("UnknownItem")
+    if qty < 0:
+        raise ValueError("TypeError")
+    inv = list(inventory)
+    inv[item] += qty
+    return inv
+
+
+def ship_stock(inventory: List[int], item: int, qty: int) -> List[int]:
+    """出库: 扣库存，不超卖. §IN.3.3 — qty ≤ held 否则 InsufficientStock."""
+    if item not in (0, 1):
+        raise ValueError("UnknownItem")
+    if qty < 0:
+        raise ValueError("TypeError")
+    if qty > inventory[item]:
+        raise ValueError("InsufficientStock")
+    inv = list(inventory)
+    inv[item] -= qty
+    return inv
+
+
+def stock_level(inventory: List[int], item: int) -> int:
+    """库存水位: inventory[item]. §IN.3.4 — item 0/1 否则 TypeError."""
+    if not isinstance(inventory, list) or len(inventory) != 2:
+        raise ValueError("TypeError")
+    if item not in (0, 1):
+        raise ValueError("TypeError")
+    return inventory[item]
+
+
+def fill_rate(shipped: int, demanded: int) -> float:
+    """履约率: shipped / demanded. §IN.3.5 — demanded = 0 → DivByZero."""
+    if demanded == 0:
+        raise ValueError("DivByZero")
+    return shipped / demanded
+
+
 def encode_quota(quota: List[int]) -> int:
     """Law II — Quota → ℕ."""
     return _encode_list(quota)
@@ -1081,6 +1134,43 @@ def _main() -> int:
         check("PL.points_ledger_untraceable_rejected", False)
     except ValueError:
         check("PL.points_ledger_untraceable_rejected", True)
+
+    # §IN (Inventory Protocol — spec_p0_inventory.md)
+    check("IN.inventory_new_shape", inventory_new(10, 20) == [10, 20])
+    check("IN.inventory_new_zero", inventory_new(0, 0) == [0, 0])
+    try:
+        inventory_new(-5, 10)
+        check("IN.inventory_new_neg_rejected", False)
+    except ValueError:
+        check("IN.inventory_new_neg_rejected", True)
+    check("IN.receive_a", receive_stock(inventory_new(10, 20), 0, 5) == [15, 20])
+    check("IN.receive_b", receive_stock(inventory_new(10, 20), 1, 3) == [10, 23])
+    try:
+        receive_stock(inventory_new(10, 20), 2, 5)
+        check("IN.receive_unknown_item_rejected", False)
+    except ValueError:
+        check("IN.receive_unknown_item_rejected", True)
+    check("IN.ship_a", ship_stock(inventory_new(10, 20), 0, 4) == [6, 20])
+    check("IN.ship_all", ship_stock(inventory_new(10, 20), 1, 20) == [10, 0])
+    try:
+        ship_stock(inventory_new(10, 20), 0, 11)
+        check("IN.ship_insufficient_rejected", False)
+    except ValueError:
+        check("IN.ship_insufficient_rejected", True)
+    check("IN.stock_level_a", stock_level(inventory_new(10, 20), 0) == 10)
+    check("IN.stock_level_b", stock_level(inventory_new(10, 20), 1) == 20)
+    try:
+        stock_level(5, 0)
+        check("IN.stock_level_type_rejected", False)
+    except ValueError:
+        check("IN.stock_level_type_rejected", True)
+    check("IN.fill_rate", approx(fill_rate(6, 10), 0.6))
+    check("IN.fill_rate_full", approx(fill_rate(10, 10), 1.0))
+    try:
+        fill_rate(6, 0)
+        check("IN.fill_rate_zero_demand_rejected", False)
+    except ValueError:
+        check("IN.fill_rate_zero_demand_rejected", True)
 
     print(f"sigma_core self-check: {passed}/{passed + failed} passed")
     return 0 if failed == 0 else 1

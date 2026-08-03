@@ -1333,6 +1333,92 @@ defmodule SigmaVerify do
             end
           _ -> {:error, "TypeError"}
         end
+      # §IN — Inventory Protocol operations (spec_p0_inventory.md §IN.3).
+      String.starts_with?(t, "inventory_new(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 14..-2//1)
+        case split_all_top_level(inner, ?,) do
+          [a_s, b_s] ->
+            with {:ok, {:num, qa}} <- eval_expr(a_s), {:ok, {:num, qb}} <- eval_expr(b_s) do
+              if qa < 0 or qb < 0 do
+                {:error, "TypeError"}
+              else
+                {:ok, {:list, [{:num, qa}, {:num, qb}]}}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          _ -> {:error, "bad inventory_new args: #{inner}"}
+        end
+      String.starts_with?(t, "receive_stock(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 15..-2//1)
+        case split_all_top_level(inner, ?,) do
+          [i_s, x_s, q_s] ->
+            with {:ok, {:list, [{:num, a}, {:num, b}]}} <- eval_expr(i_s),
+                 {:ok, {:num, item}} <- eval_expr(x_s),
+                 {:ok, {:num, qty}} <- eval_expr(q_s) do
+              cond do
+                item not in [0, 1] -> {:error, "UnknownItem"}
+                qty < 0 -> {:error, "TypeError"}
+                item == 0 -> {:ok, {:list, [{:num, a + qty}, {:num, b}]}}
+                true -> {:ok, {:list, [{:num, a}, {:num, b + qty}]}}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          _ -> {:error, "bad receive_stock args: #{inner}"}
+        end
+      String.starts_with?(t, "ship_stock(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 11..-2//1)
+        case split_all_top_level(inner, ?,) do
+          [i_s, x_s, q_s] ->
+            with {:ok, {:list, [{:num, a}, {:num, b}]}} <- eval_expr(i_s),
+                 {:ok, {:num, item}} <- eval_expr(x_s),
+                 {:ok, {:num, qty}} <- eval_expr(q_s) do
+              held = if item == 0, do: a, else: b
+              cond do
+                item not in [0, 1] -> {:error, "UnknownItem"}
+                qty < 0 -> {:error, "TypeError"}
+                qty > held -> {:error, "InsufficientStock"}
+                item == 0 -> {:ok, {:list, [{:num, a - qty}, {:num, b}]}}
+                true -> {:ok, {:list, [{:num, a}, {:num, b - qty}]}}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          _ -> {:error, "bad ship_stock args: #{inner}"}
+        end
+      String.starts_with?(t, "stock_level(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 12..-2//1)
+        case split_top_level(inner, ?,) do
+          {i_s, x_s} ->
+            with {:ok, {:list, [{:num, a}, {:num, b}]}} <- eval_expr(i_s),
+                 {:ok, {:num, item}} <- eval_expr(x_s) do
+              cond do
+                item == 0 -> {:ok, {:num, a}}
+                item == 1 -> {:ok, {:num, b}}
+                true -> {:error, "TypeError"}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          nil -> {:error, "bad stock_level args: #{inner}"}
+        end
+      String.starts_with?(t, "fill_rate(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 10..-2//1)
+        case split_top_level(inner, ?,) do
+          {s_s, d_s} ->
+            with {:ok, {:num, shipped}} <- eval_expr(s_s),
+                 {:ok, {:num, demanded}} <- eval_expr(d_s) do
+              if demanded == 0 do
+                {:error, "DivByZero"}
+              else
+                {:ok, {:fnum, shipped / demanded}}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          nil -> {:error, "bad fill_rate args: #{inner}"}
+        end
       t == "I₂" ->
         {:ok, {:list, [{:list, [{:num, 1}, {:num, 0}]},
                        {:list, [{:num, 0}, {:num, 1}]}]}}
@@ -1758,6 +1844,35 @@ defmodule SigmaVerify do
     end
   end
 
+  # ============================================================
+  # §IN — Inventory Protocol (spec_p0_inventory.md, v0.41)
+  # ============================================================
+
+  @doc "开仓: (qtyA, qtyB) → [qtyA, qtyB]. §IN.3.1 — 库存 ≥ 0."
+  def inventory_new(qty_a, qty_b) when qty_a >= 0 and qty_b >= 0, do: {:ok, [qty_a, qty_b]}
+  def inventory_new(_qa, _qb), do: {:error, "TypeError"}
+
+  @doc "入库: 加库存（可加性）. §IN.3.2 — item 0/1 否则 UnknownItem."
+  def receive_stock([a, b], 0, qty) when qty >= 0, do: {:ok, [a + qty, b]}
+  def receive_stock([a, b], 1, qty) when qty >= 0, do: {:ok, [a, b + qty]}
+  def receive_stock(_inv, item, _qty) when item in [0, 1], do: {:error, "TypeError"}
+  def receive_stock(_inv, _item, _qty), do: {:error, "UnknownItem"}
+
+  @doc "出库: 扣库存，不超卖. §IN.3.3 — qty ≤ held 否则 InsufficientStock."
+  def ship_stock([a, b], 0, qty) when qty >= 0 and qty <= a, do: {:ok, [a - qty, b]}
+  def ship_stock([a, b], 1, qty) when qty >= 0 and qty <= b, do: {:ok, [a, b - qty]}
+  def ship_stock(_inv, item, _qty) when item in [0, 1], do: {:error, "InsufficientStock"}
+  def ship_stock(_inv, _item, _qty), do: {:error, "UnknownItem"}
+
+  @doc "库存水位: inventory[item]. §IN.3.4 — item 0/1 否则 TypeError."
+  def stock_level(inv, 0), do: {:ok, Enum.at(inv, 0)}
+  def stock_level(inv, 1), do: {:ok, Enum.at(inv, 1)}
+  def stock_level(_inv, _item), do: {:error, "TypeError"}
+
+  @doc "履约率: shipped / demanded. §IN.3.5 — demanded = 0 → DivByZero."
+  def fill_rate(_shipped, 0), do: {:error, "DivByZero"}
+  def fill_rate(shipped, demanded), do: {:ok, shipped / demanded}
+
   @doc "Law II — Quota → ℕ."
   def encode_quota(quota), do: encode_list(quota)
 
@@ -1872,6 +1987,21 @@ defmodule SigmaVerify do
       {"points_ledger_single", points_ledger([[0, 100, 1]]) == {:ok, [[1, 1, 100]]}},
       {"points_ledger_multi", points_ledger([[0, 50, 2], [1, 30, 3]]) == {:ok, [[1, 2, 50], [2, 3, 30]]}},
       {"points_ledger_untraceable_rejected", points_ledger([[0, 100, 0]]) == {:error, "NotTraceable"}},
+      # §IN — Inventory Protocol (spec_p0_inventory.md)
+      {"inventory_new_shape", inventory_new(10, 20) == {:ok, [10, 20]}},
+      {"inventory_new_zero", inventory_new(0, 0) == {:ok, [0, 0]}},
+      {"inventory_new_neg_rejected", inventory_new(-5, 10) == {:error, "TypeError"}},
+      {"receive_a", receive_stock([10, 20], 0, 5) == {:ok, [15, 20]}},
+      {"receive_b", receive_stock([10, 20], 1, 3) == {:ok, [10, 23]}},
+      {"receive_unknown_item_rejected", receive_stock([10, 20], 2, 5) == {:error, "UnknownItem"}},
+      {"ship_a", ship_stock([10, 20], 0, 4) == {:ok, [6, 20]}},
+      {"ship_all", ship_stock([10, 20], 1, 20) == {:ok, [10, 0]}},
+      {"ship_insufficient_rejected", ship_stock([10, 20], 0, 11) == {:error, "InsufficientStock"}},
+      {"stock_level_a", stock_level([10, 20], 0) == {:ok, 10}},
+      {"stock_level_b", stock_level([10, 20], 1) == {:ok, 20}},
+      {"fill_rate", fill_rate(6, 10) == {:ok, 0.6}},
+      {"fill_rate_full", fill_rate(10, 10) == {:ok, 1.0}},
+      {"fill_rate_zero_demand_rejected", fill_rate(6, 0) == {:error, "DivByZero"}},
       # §SK.4 encodings (Law II)
       {"encode_task_nat", encode_task([1, 2, 0, 0]) >= 0},
       {"encode_distinct", encode_task([1, 2, 0, 0]) != encode_task([1, 3, 0, 0])},
