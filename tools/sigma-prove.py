@@ -520,7 +520,70 @@ def gen_sk_obligation(op):
         return _contribution_obligations()
     if name == "credit_score":
         return _credit_score_obligations()
-    return gen_pf_obligation(op) or gen_growth_obligation(op)
+    return gen_pf_obligation(op) or gen_growth_obligation(op) or gen_inventory_obligation(op)
+
+
+# ---------------------------------------------------------------------------
+# §IN obligation generation (spec_p0_inventory.md — 供应链, v0.43)
+# ---------------------------------------------------------------------------
+
+INV_OPS = {"inventory_new", "receive_stock", "ship_stock", "stock_level",
+           "fill_rate"}
+
+
+def gen_inventory_obligation(op):
+    """Generate §IN obligations for one inventory operation (or [])."""
+    name = op["name"].strip()
+    if name == "inventory_new":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const a Int) (declare-const b Int) (declare-const inv Int)\n"
+               "(assert (>= a 0)) (assert (>= b 0))\n"
+               "; Definition (§IN.3.1): inventory_new(a,b) = [a, b]\n"
+               "(assert (= (index inv 0) a)) (assert (= (index inv 1) b))\n"
+               "; Law: stock levels ≥ 0\n"
+               "(assert (not (and (>= (index inv 0) 0) (>= (index inv 1) 0))))\n(check-sat)\n")
+        return [("inventory_new/law-nonnegative", law)]
+    if name == "receive_stock":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const a Int) (declare-const b Int) (declare-const q Int)\n"
+               "(declare-const inv Int) (declare-const inv2 Int)\n"
+               "(assert (>= a 0)) (assert (>= b 0)) (assert (>= q 0))\n"
+               "(assert (= (index inv 0) a)) (assert (= (index inv 1) b))\n"
+               "; Definition (§IN.3.2): receive_stock([a,b], 0, q) = [a+q, b]\n"
+               "(assert (= (index inv2 0) (+ a q))) (assert (= (index inv2 1) b))\n"
+               "; Law: additive inbound\n"
+               "(assert (not (= (index inv2 0) (+ (index inv 0) q))))\n(check-sat)\n")
+        return [("receive_stock/law-additive", law)]
+    if name == "ship_stock":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const a Int) (declare-const b Int) (declare-const q Int)\n"
+               "(declare-const inv Int) (declare-const inv2 Int)\n"
+               "(assert (>= a 0)) (assert (>= b 0)) (assert (>= q 0))\n"
+               "(assert (= (index inv 0) a)) (assert (= (index inv 1) b))\n"
+               "; Definition (§IN.3.3): ship_stock([a,b], 0, q) = [a−q, b] when q ≤ a\n"
+               "(assert (<= q a))\n"
+               "(assert (= (index inv2 0) (- a q))) (assert (= (index inv2 1) b))\n"
+               "; Law: no negative stock\n"
+               "(assert (not (>= (index inv2 0) 0)))\n(check-sat)\n")
+        return [("ship_stock/law-no-negative-stock", law)]
+    if name == "stock_level":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const a Int) (declare-const b Int) (declare-const inv Int)\n"
+               "(assert (>= a 0)) (assert (>= b 0))\n"
+               "(assert (= (index inv 0) a)) (assert (= (index inv 1) b))\n"
+               "; Law: total preserved\n"
+               "(assert (not (<= (+ (index inv 0) (index inv 1)) (+ a b))))\n(check-sat)\n")
+        return [("stock_level/law-total-preserved", law)]
+    if name == "fill_rate":
+        law = ("(set-logic NIA)\n"
+               "(declare-const s Int) (declare-const d Int) (declare-const fr Int)\n"
+               "(assert (>= s 0)) (assert (> d 0)) (assert (<= s d))\n"
+               "; Definition (§IN.3.5): fill_rate = s/d bounded 0..1 (scaled)\n"
+               "(assert (= fr (div (* 100 s) d)))\n"
+               "; Law: rate bounded 0..100 (0..1)\n"
+               "(assert (not (and (>= fr 0) (<= fr 100))))\n(check-sat)\n")
+        return [("fill_rate/law-bounded", law)]
+    return []
 
 
 # ---------------------------------------------------------------------------
@@ -1017,7 +1080,7 @@ def prove_module(path):
     name = os.path.basename(path)
 
     has_sk = any(op["name"].strip() in SK_OPS or op["name"].strip() in PF_OPS
-                 or op["name"].strip() in GROWTH_OPS
+                 or op["name"].strip() in GROWTH_OPS or op["name"].strip() in INV_OPS
                  for op in module["ops"])
     if not module["proof_declared"] and not has_sk:
         print(f"  {name}: no `## Proof` block — skipped (structural: {ok})")

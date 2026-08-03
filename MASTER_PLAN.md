@@ -195,9 +195,15 @@
   （§IN 五操作真实调用，16/16 三端一致 PASS）+ `inventory_break.md`（E-02 三端
   一致 FAIL）；consensus 45/45 → 47/47 全绿、p0 109/109、三端 0 warning，
   v0.10–v0.41 不回归。
+- ✅ **REACHED v0.43 (2026-08-03)**: 供应链证明 + runtime—— `sigma-prove` 新增
+  gen_inventory_obligation（§IN 五操作定律义务：库存非负 / 入库可加 / 不超卖 /
+  总量守恒 / 履约率有界），全部 `PROVED (unsat)`——§SK+§PF+增长期+§IN 共 53 项
+  义务全绿；`sigma-runtime --inventory`（run_inventory_story）审计供应链故事线
+  （开仓→入库→出库→水位→履约率），6/6 义务满足；consensus 47/47、p0 109/109，
+  v0.10–v0.42 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.42 达成后 P3 待办已清空，进入新里程碑规划（v0.43–v0.50 连续推进）。
+  2. （无）— v0.43 达成后 P3 待办已清空，进入新里程碑规划（v0.44–v0.50 连续推进）。
 
 ---
 

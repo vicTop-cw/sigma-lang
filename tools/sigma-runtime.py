@@ -666,6 +666,69 @@ def run_growth_story(core):
     return events
 
 
+# ---------------------------------------------------------------------------
+# §IN 供应链审计故事线 (spec_p0_inventory.md, v0.43)
+# ---------------------------------------------------------------------------
+
+def run_inventory_story(core):
+    """Run the supply-chain audit story (open → receive → ship → level →
+    fill-rate); returns per-event audit records."""
+    events = []
+
+    def record(event, op, inp, out, obligations):
+        events.append({
+            "event": event,
+            "op": op,
+            "input": inp,
+            "output": out,
+            "obligations": obligations,
+        })
+
+    # §IN.3.1 开仓
+    inv = core.inventory_new(10, 20)
+    record("inventory_new", "IN.3.1", [10, 20], inv, [
+        {"law": "inventory_new(10, 20) ≡ [10, 20] — 库存非负",
+         "ok": inv == [10, 20], "note": f"inv={inv}"},
+    ])
+    # §IN.3.2 入库（可加性）
+    inv_r = core.receive_stock(inv, 0, 5)
+    record("receive_stock", "IN.3.2", [inv, 0, 5], inv_r, [
+        {"law": "receive_stock([10,20], 0, 5) ≡ [15, 20] — 入库可加",
+         "ok": inv_r == [15, 20], "note": f"inv={inv_r}"},
+    ])
+    # §IN.3.3 出库（不超卖）
+    inv_s = core.ship_stock(inv_r, 0, 4)
+    record("ship_stock", "IN.3.3", [inv_r, 0, 4], inv_s, [
+        {"law": "ship_stock([15,20], 0, 4) ≡ [11, 20] — 扣减正确",
+         "ok": inv_s == [11, 20], "note": f"inv={inv_s}"},
+    ])
+    try:
+        core.ship_stock(inv_r, 0, 20)
+        record("ship_stock", "IN.3.3", [inv_r, 0, 20], "SHIPPED(20)?", [
+            {"law": "qty > held ⇒ ⊥ InsufficientStock — 不超卖",
+             "ok": False, "note": "超卖被接受"},
+        ])
+    except ValueError as e:
+        record("ship_stock", "IN.3.3", [inv_r, 0, 20], f"rejected ({e})", [
+            {"law": "qty > held ⇒ ⊥ InsufficientStock — 不超卖",
+             "ok": True, "note": "InsufficientStock 拒绝超卖"},
+        ])
+    # §IN.3.4 库存水位
+    lvl = core.stock_level(inv_s, 0)
+    record("stock_level", "IN.3.4", [inv_s, 0], lvl, [
+        {"law": "stock_level([11,20], 0) ≡ 11 — 水位非负",
+         "ok": lvl == 11, "note": f"level={lvl}"},
+    ])
+    # §IN.3.5 履约率
+    rate = core.fill_rate(6, 10)
+    record("fill_rate", "IN.3.5", [6, 10], rate, [
+        {"law": "fill_rate(6, 10) ≡ 0.6 — 履约率 0..1",
+         "ok": abs(rate - 0.6) < 1e-9, "note": f"rate={rate}"},
+    ])
+
+    return events
+
+
 def render_human(events):
     lines = []
     lines.append("ΣLang Audit Runtime — SocketKit trace (spec_p0_socketkit.md §SK)")
@@ -715,9 +778,12 @@ def main(argv=None):
     as_story = "--story" in argv
     as_growth = "--growth" in argv
     as_all = "--all" in argv
+    as_inventory = "--inventory" in argv
 
     core = load_core()
-    if as_all:
+    if as_inventory:
+        events = run_inventory_story(core)
+    elif as_all:
         # §SK.6 MVP + §SK.3.12–3.17 增长期 —— 完整业务验收剧本
         events = run_mvp_story(core) + run_growth_story(core)
     elif as_story:
@@ -729,7 +795,8 @@ def main(argv=None):
     total, failed = audit(events)
 
     if as_json:
-        spec = ("spec_p0_socketkit.md §SK.6+§SK.3.12–3.17 (full story)" if as_all
+        spec = ("spec_p0_inventory.md §IN (inventory story)" if as_inventory
+                else "spec_p0_socketkit.md §SK.6+§SK.3.12–3.17 (full story)" if as_all
                 else "spec_p0_socketkit.md §SK.6 (MVP story)" if as_story
                 else "spec_p0_socketkit.md §SK.3.12–3.17 (growth story)"
                 if as_growth else "spec_p0_socketkit.md §SK")
@@ -742,7 +809,7 @@ def main(argv=None):
             "auditable": failed == 0,
         }, indent=2, ensure_ascii=False))
     else:
-        if as_story or as_growth or as_all:
+        if as_story or as_growth or as_all or as_inventory:
             print(render_story(events))
         else:
             print(render_human(events))

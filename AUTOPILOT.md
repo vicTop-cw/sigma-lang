@@ -208,6 +208,17 @@
       v0.10–v0.41 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.43 完成定义（供应链证明 + runtime，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **义务证明**: `sigma-prove` 新增 `gen_inventory_obligation`——§IN 五操作
+      定律义务（库存非负 / 入库可加 / 不超卖 / 总量守恒 / 履约率有界）全部
+      `PROVED (unsat)`（§SK+§PF+增长期+§IN 共 53 项）。
+- [x] **审计故事线**: `sigma-runtime --inventory`（run_inventory_story）审计
+      供应链故事线（开仓→入库→出库→水位→履约率），6/6 义务满足。
+- [x] **不回归**: consensus 47/47、p0 109/109、sigma-runtime 59/59 + 29/29、
+      双端冒烟 20/20、三端 0 warning，v0.10–v0.42 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
