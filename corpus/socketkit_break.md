@@ -20,7 +20,7 @@ import math.base
 task_create
 ```
 
-## Operation: task_create (Task Create)
+## Operation: task_create (Task Posting)
 
 ### Signature
 
@@ -34,14 +34,15 @@ Fingerprint: 0xF001
 ```md
 ∀ a b . 0 ≤ task_create(a, b)
 ∀ a b . index(task_create(a, b), 2) ≡ 0
+∀ a b . index(task_create(a, b), 3) ≡ 0
 ```
 
 ### Tests
 
 | Input | Output |
 |-------|--------|
-| [1,2] ⊕ [3,4] | [4,6] |
-| [1,2,3] ⊕ [4,5,6] | [5,7,9] |
+| task_create(7, 100) | [7,100,0,0] |
+| task_create(2, 0) | [2,0,0,0] |
 
 > E-02: no ⊥ (error-path) test present — a negative test is mandatory.
 

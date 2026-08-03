@@ -322,14 +322,15 @@ def discharge(smt2_text):
 # §SK obligation generation (spec_p0_socketkit.md — SocketKit Protocol)
 # ---------------------------------------------------------------------------
 
-SK_OPS = {"task_create", "review_merge", "contribution_score"}
+SK_OPS = {"task_create", "accept_task", "task_submit", "task_accept",
+          "review_merge", "contribution_score", "credit_score"}
 
 
 def _task_create_obligations():
-    """§SK.3.1: task_create(a, b) ≡ [a, b, 0] — bounty ≥ 0, status 0 = open."""
+    """§SK.3.1: task_create(a, b) ≡ [a, b, 0, 0] — bounty ≥ 0, open, unclaimed."""
     defn = """
-; Definition (§SK.3.1): task_create(a, b) ≡ [a, b, 0], encoded to ℕ (Law II).
-; index(t, 0)=a, index(t, 1)=b, index(t, 2)=0
+; Definition (§SK.3.1): task_create(a, b) ≡ [a, b, 0, 0], encoded to ℕ (Law II).
+; index(t, 0)=a, index(t, 1)=b, index(t, 2)=0 (open), index(t, 3)=0 (unclaimed)
 (declare-const a Int)
 (declare-const b Int)
 (assert (>= a 0))
@@ -338,18 +339,82 @@ def _task_create_obligations():
 (assert (= (index t 0) a))
 (assert (= (index t 1) b))
 (assert (= (index t 2) 0))
+(assert (= (index t 3) 0))
 """
     law1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + defn +
             "(assert (not (and (>= (index t 0) 0) (>= (index t 1) 0) "
-            "(>= (index t 2) 0))))\n(check-sat)\n")
+            "(>= (index t 2) 0) (>= (index t 3) 0))))\n(check-sat)\n")
     law2 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + defn +
             "(assert (not (= (index t 2) 0)))\n(check-sat)\n")
+    law3 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + defn +
+            "(assert (not (= (index t 3) 0)))\n(check-sat)\n")
     return [("task_create/law1-bounty-nonnegative", law1),
-            ("task_create/law2-fresh-task-open", law2)]
+            ("task_create/law2-fresh-task-open", law2),
+            ("task_create/law3-fresh-task-unclaimed", law3)]
+
+
+def _accept_task_obligations():
+    """§SK.3.2: accept_task(t, h) — open → in_progress, hunter recorded."""
+    common = """
+; Definition (§SK.3.2): accept_task([a, b, 0, 0], h) ≡ [a, b, 1, h]
+(declare-const a Int) (declare-const b Int) (declare-const h Int)
+(assert (>= a 0)) (assert (>= b 0)) (assert (>= h 0))
+(declare-const t Int) (declare-const t2 Int)
+(assert (= (index t 0) a)) (assert (= (index t 1) b))
+(assert (= (index t 2) 0)) (assert (= (index t 3) 0))
+(assert (= (index t2 0) a)) (assert (= (index t2 1) b))
+(assert (= (index t2 2) 1)) (assert (= (index t2 3) h))
+"""
+    law1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + common +
+            "(assert (not (= (index t2 2) 1)))\n(check-sat)\n")
+    law2 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + common +
+            "(assert (not (= (index t2 3) h)))\n(check-sat)\n")
+    return [("accept_task/law1-claim-in-progress", law1),
+            ("accept_task/law2-hunter-recorded", law2)]
+
+
+def _task_submit_obligations():
+    """§SK.3.3: task_submit(t) — in_progress → pending_review, hunter preserved."""
+    common = """
+; Definition (§SK.3.3): task_submit([a, b, 1, h]) ≡ [a, b, 2, h]
+(declare-const a Int) (declare-const b Int) (declare-const h Int)
+(assert (>= a 0)) (assert (>= b 0)) (assert (>= h 0))
+(declare-const t Int) (declare-const t2 Int)
+(assert (= (index t 0) a)) (assert (= (index t 1) b))
+(assert (= (index t 2) 1)) (assert (= (index t 3) h))
+(assert (= (index t2 0) a)) (assert (= (index t2 1) b))
+(assert (= (index t2 2) 2)) (assert (= (index t2 3) h))
+"""
+    law1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + common +
+            "(assert (not (= (index t2 2) 2)))\n(check-sat)\n")
+    law2 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + common +
+            "(assert (not (= (index t2 3) (index t 3))))\n(check-sat)\n")
+    return [("task_submit/law1-pending-review", law1),
+            ("task_submit/law2-hunter-preserved", law2)]
+
+
+def _task_accept_obligations():
+    """§SK.3.4: task_accept(t) — pending_review → completed, hunter preserved."""
+    common = """
+; Definition (§SK.3.4): task_accept([a, b, 2, h]) ≡ [a, b, 3, h]
+(declare-const a Int) (declare-const b Int) (declare-const h Int)
+(assert (>= a 0)) (assert (>= b 0)) (assert (>= h 0))
+(declare-const t Int) (declare-const t2 Int)
+(assert (= (index t 0) a)) (assert (= (index t 1) b))
+(assert (= (index t 2) 2)) (assert (= (index t 3) h))
+(assert (= (index t2 0) a)) (assert (= (index t2 1) b))
+(assert (= (index t2 2) 3)) (assert (= (index t2 3) h))
+"""
+    law1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + common +
+            "(assert (not (= (index t2 2) 3)))\n(check-sat)\n")
+    law2 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n" + common +
+            "(assert (not (= (index t2 3) (index t 3))))\n(check-sat)\n")
+    return [("task_accept/law1-completed", law1),
+            ("task_accept/law2-hunter-preserved", law2)]
 
 
 def _review_merge_obligations():
-    """§SK.3.2: review_merge ≡ 1 if weighted_accept ≥ weighted_reject else 0."""
+    """§SK.3.6: review_merge ≡ 1 if weighted_accept ≥ weighted_reject else 0."""
     common = """
 (declare-const v1 Int) (declare-const v2 Int) (declare-const v3 Int)
 (declare-const w1 Int) (declare-const w2 Int) (declare-const w3 Int)
@@ -357,7 +422,7 @@ def _review_merge_obligations():
 (assert (or (= v2 0) (= v2 1)))
 (assert (or (= v3 0) (= v3 1)))
 (assert (>= w1 0)) (assert (>= w2 0)) (assert (>= w3 0))
-; Definition (§SK.3.2): weighted_accept ≥ weighted_reject ⇒ 1, else 0
+; Definition (§SK.3.6): weighted_accept ≥ weighted_reject ⇒ 1, else 0
 (declare-const wa Int) (declare-const wr Int)
 (assert (= wa (+ (* v1 w1) (* v2 w2) (* v3 w3))))
 (assert (= wr (+ (* (- 1 v1) w1) (* (- 1 v2) w2) (* (- 1 v3) w3))))
@@ -381,12 +446,12 @@ def _review_merge_obligations():
 
 
 def _contribution_obligations():
-    """§SK.3.3: contribution_score ≡ max(0, Σ deltas) — never negative."""
+    """§SK.3.5: contribution_score ≡ max(0, Σ deltas) — never negative."""
     common = """
 (declare-const d1 Int) (declare-const d2 Int) (declare-const d3 Int)
 (declare-const total Int)
 (assert (= total (+ d1 d2 d3)))
-; Definition (§SK.3.3): contribution_score ≡ max(0, Σ deltas)
+; Definition (§SK.3.5): contribution_score ≡ max(0, Σ deltas)
 (declare-const p Int)
 (assert (= p (ite (> total 0) total 0)))
 """
@@ -403,15 +468,58 @@ def _contribution_obligations():
             ("contribution_score/law2-zero-delta-neutral", law2)]
 
 
+def _credit_score_obligations():
+    """§SK.3.7: credit_score — base 100, +5 per complete, breach ×0.7 (×7 ÷10 floor)."""
+    common = """
+(declare-const e1 Int) (declare-const e2 Int)
+(declare-const c Int)
+; Definition (§SK.3.7): credit_score ≡ max(0, fold from 100)
+(declare-const credit Int)
+(assert (= credit (ite (> c 0) c 0)))
+"""
+    law1 = "(set-logic NIA)\n" + common + \
+        "(assert (not (>= credit 0)))\n(check-sat)\n"
+    law2 = "(set-logic NIA)\n" + common + """
+; base credit: credit_score([]) ≡ 100 (no events → c = 100)
+(assert (= c 100))
+(assert (not (= credit 100)))
+(check-sat)
+"""
+    law3 = "(set-logic NIA)\n" + common + """
+; one completion: +5 → 105 (event kind 0, count 1)
+(assert (= c 105))
+(assert (not (= credit 105)))
+(check-sat)
+"""
+    law4 = "(set-logic NIA)\n" + common + """
+; one breach: ×0.7 → 70 (event kind 1, count 1: 100×7÷10)
+(assert (= c 70))
+(assert (not (= credit 70)))
+(check-sat)
+"""
+    return [("credit_score/law1-credit-nonnegative", law1),
+            ("credit_score/law2-base-credit", law2),
+            ("credit_score/law3-completion-plus5", law3),
+            ("credit_score/law4-breach-times07", law4)]
+
+
 def gen_sk_obligation(op):
     """Generate §SK obligations for one SocketKit operation (or [])."""
     name = op["name"].strip()
     if name == "task_create":
         return _task_create_obligations()
+    if name == "accept_task":
+        return _accept_task_obligations()
+    if name == "task_submit":
+        return _task_submit_obligations()
+    if name == "task_accept":
+        return _task_accept_obligations()
     if name == "review_merge":
         return _review_merge_obligations()
     if name == "contribution_score":
         return _contribution_obligations()
+    if name == "credit_score":
+        return _credit_score_obligations()
     return []
 
 

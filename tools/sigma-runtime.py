@@ -52,13 +52,15 @@ def run_trace(core):
             "obligations": obligations,
         })
 
-    # --- SK.3.1 task_create -------------------------------------------------
+    # --- SK.3.1 task_create (发布需求) ---------------------------------------
     task = core.task_create(7, 100)
     record("task_create", "SK.3.1", [7, 100], task, [
         {"law": "0 ≤ task_create(a, b) — bounty ≥ 0",
          "ok": task[1] >= 0, "note": f"bounty={task[1]}"},
         {"law": "index(task_create(a, b), 2) ≡ 0 — freshly created task is open",
          "ok": task[2] == 0, "note": f"status={task[2]}"},
+        {"law": "index(task_create(a, b), 3) ≡ 0 — freshly created task is unclaimed",
+         "ok": task[3] == 0, "note": f"hunter={task[3]}"},
     ])
 
     # Negative bounty is rejected at the type boundary (Bounty : Type ≝ ℕ).
@@ -74,11 +76,77 @@ def run_trace(core):
              "ok": True, "note": "BountyErr raised at boundary"},
         ])
 
-    # --- SK.3.2 review_merge ------------------------------------------------
+    # --- SK.3.2 accept_task (接单) --------------------------------------------
+    claimed = core.accept_task(task, 3)
+    record("accept_task", "SK.3.2", [task, 3], claimed, [
+        {"law": "index(t, 2) ≡ 0 ⇒ index(accept_task(t, h), 2) ≡ 1 — claim moves to in_progress",
+         "ok": claimed[2] == 1, "note": f"status={claimed[2]}"},
+        {"law": "index(t, 2) ≡ 0 ⇒ index(accept_task(t, h), 3) ≡ h — hunter recorded",
+         "ok": claimed[3] == 3, "note": f"hunter={claimed[3]}"},
+    ])
+
+    # Claiming a non-open task is a StateError (状态机前置).
+    try:
+        core.accept_task(claimed, 5)
+        record("accept_task", "SK.3.2", [claimed, 5], "ACCEPTED(claimed)?", [
+            {"law": "claiming a non-open task is a StateError",
+             "ok": False, "note": "re-claim of in-progress task accepted"},
+        ])
+    except ValueError as e:
+        record("accept_task", "SK.3.2", [claimed, 5], f"rejected ({e})", [
+            {"law": "claiming a non-open task is a StateError",
+             "ok": True, "note": "StateError raised on re-claim"},
+        ])
+
+    # --- SK.3.3 task_submit (提交成果) ----------------------------------------
+    submitted = core.task_submit(claimed)
+    record("task_submit", "SK.3.3", claimed, submitted, [
+        {"law": "index(t, 2) ≡ 1 ⇒ index(task_submit(t), 2) ≡ 2 — submit moves to pending_review",
+         "ok": submitted[2] == 2, "note": f"status={submitted[2]}"},
+        {"law": "index(t, 2) ≡ 1 ⇒ index(task_submit(t), 3) ≡ index(t, 3) — hunter preserved",
+         "ok": submitted[3] == claimed[3], "note": f"hunter={submitted[3]}"},
+    ])
+
+    # Submitting a non-in-progress task is a StateError.
+    try:
+        core.task_submit(task)
+        record("task_submit", "SK.3.3", task, "SUBMITTED(open)?", [
+            {"law": "submitting a non-in-progress task is a StateError",
+             "ok": False, "note": "submit of open task accepted"},
+        ])
+    except ValueError as e:
+        record("task_submit", "SK.3.3", task, f"rejected ({e})", [
+            {"law": "submitting a non-in-progress task is a StateError",
+             "ok": True, "note": "StateError raised on open-task submit"},
+        ])
+
+    # --- SK.3.4 task_accept (验收确认) ----------------------------------------
+    done = core.task_accept(submitted)
+    record("task_accept", "SK.3.4", submitted, done, [
+        {"law": "index(t, 2) ≡ 2 ⇒ index(task_accept(t), 2) ≡ 3 — accept moves to completed",
+         "ok": done[2] == 3, "note": f"status={done[2]}"},
+        {"law": "index(t, 2) ≡ 2 ⇒ index(task_accept(t), 3) ≡ index(t, 3) — hunter preserved",
+         "ok": done[3] == submitted[3], "note": f"hunter={done[3]}"},
+    ])
+
+    # Accepting a non-pending task is a StateError.
+    try:
+        core.task_accept(task)
+        record("task_accept", "SK.3.4", task, "ACCEPTED(open)?", [
+            {"law": "accepting a non-pending task is a StateError",
+             "ok": False, "note": "accept of open task accepted"},
+        ])
+    except ValueError as e:
+        record("task_accept", "SK.3.4", task, f"rejected ({e})", [
+            {"law": "accepting a non-pending task is a StateError",
+             "ok": True, "note": "StateError raised on open-task accept"},
+        ])
+
+    # --- SK.3.6 review_merge (增长期评审) --------------------------------------
     os_accept = [[1, 1, 3], [2, 1, 2]]          # accept 5 ≥ reject 0
     d1 = core.review_merge(os_accept)
     d1_rev = core.review_merge(list(reversed(os_accept)))
-    record("review_merge", "SK.3.2", os_accept, d1, [
+    record("review_merge", "SK.3.6", os_accept, d1, [
         {"law": "review_merge(o) ≡ 0 ∨ review_merge(o) ≡ 1 — decision is binary",
          "ok": d1 in (0, 1), "note": f"decision={d1}"},
         {"law": "review_merge(o) ≡ review_merge(reverse(o)) — order-independent",
@@ -87,17 +155,17 @@ def run_trace(core):
 
     os_reject = [[1, 0, 5], [2, 1, 2]]          # accept 2 < reject 5
     d2 = core.review_merge(os_reject)
-    record("review_merge", "SK.3.2", os_reject, d2, [
+    record("review_merge", "SK.3.6", os_reject, d2, [
         {"law": "review_merge(o) ≡ 0 ∨ review_merge(o) ≡ 1 — decision is binary",
          "ok": d2 in (0, 1), "note": f"decision={d2}"},
         {"law": "weighted majority — accept iff weighted_accept ≥ weighted_reject",
          "ok": d2 == 0, "note": "accept 2 < reject 5 → reject"},
     ])
 
-    # --- SK.3.3 contribution_score ------------------------------------------
+    # --- SK.3.5 contribution_score (贡献制) ------------------------------------
     acts = [[1, 1, 10], [2, 2, -4], [3, 1, 5]]  # fold → 11
     pts = core.contribution_score(acts)
-    record("contribution_score", "SK.3.3", acts, pts, [
+    record("contribution_score", "SK.3.5", acts, pts, [
         {"law": "0 ≤ contribution_score(a) — points never negative",
          "ok": pts >= 0, "note": f"points={pts}"},
         {"law": "contribution_score(a) ≡ contribution_score(a ⊕ [0]) — zero delta neutral",
@@ -107,9 +175,28 @@ def run_trace(core):
 
     acts_floor = [[1, 1, -5], [2, 2, 3]]        # fold → -2, floored at 0
     pts2 = core.contribution_score(acts_floor)
-    record("contribution_score", "SK.3.3", acts_floor, pts2, [
+    record("contribution_score", "SK.3.5", acts_floor, pts2, [
         {"law": "0 ≤ contribution_score(a) — points never negative",
          "ok": pts2 >= 0, "note": f"points={pts2} (folded -2, floored at 0)"},
+    ])
+
+    # --- SK.3.7 credit_score (契分制) ------------------------------------------
+    cred = core.credit_score([])
+    record("credit_score", "SK.3.7", [], cred, [
+        {"law": "credit_score([]) ≡ 100 — base credit",
+         "ok": cred == 100, "note": f"credit={cred}"},
+    ])
+
+    cred_done = core.credit_score([[0, 1], [0, 1]])  # two completions: 100+5+5
+    record("credit_score", "SK.3.7", [[0, 1], [0, 1]], cred_done, [
+        {"law": "kind 0 (complete): +5 per count — 每完成 1 单 +5",
+         "ok": cred_done == 110, "note": f"credit={cred_done}"},
+    ])
+
+    cred_breach = core.credit_score([[1, 1]])  # one breach: 100×0.7
+    record("credit_score", "SK.3.7", [[1, 1]], cred_breach, [
+        {"law": "kind 1 (breach): ×0.7 per count — 违约 ×0.7",
+         "ok": cred_breach == 70, "note": f"credit={cred_breach}"},
     ])
 
     return events

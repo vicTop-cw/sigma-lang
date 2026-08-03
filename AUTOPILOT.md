@@ -18,11 +18,11 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.16 可用**——即：**SocketKit 语料执行化**，
-在 v0.15（三端 §SK 语义执行层）达成的基础上，让「来找茬」App 的核心业务行为
-（task_create / review_merge / contribution_score）的**语料测试直接调用三端 §SK 执行层**
-（而非规范表达式别名），使 **Law XIII 共识门禁直接验证业务语义本身**——
-业务行为从此进入每日共识检查，任何实现偏差都会被三端一致性检查当场抓住。
+**总目标**: 把项目推进到 **v0.17 可用**——即：**§SK 对齐真实业务（MVP 语义扩展）**，
+在 v0.16（SocketKit 语料执行化）达成的基础上，用找茬真实需求文档
+（`D:\Desktop\来找茬_需求文档.md` v1.0）校准 §SK 语义：Task 4 元组 + 4 态状态机
+（发单→接单→提交→验收）、契分制 `credit_score`，修正 `review_merge` 定位，
+让「来找茬」MVP 全流程在 Python / Rust / Elixir 三端一致可执行、可证明、可审计。
 **我只关心这个结果。**
 
 ---
@@ -229,6 +229,30 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > 找茬 App 的提交/评审/贡献行为都作为真实函数调用被三把独立的尺子逐一复核——
 > 语义偏差不再可能悄悄溜进发布。
 
+### v0.17 完成定义（§SK 对齐真实业务，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **语义校准**: 依据 `D:\Desktop\来找茬_需求文档.md` v1.0 校准 §SK——Task 扩展为
+      4 元组 `[author, bounty, status, hunter]` + 4 态状态机（0=待接单 → 1=进行中 →
+      2=待验收 → 3=已完成），对齐 MVP 状态流「待接单 → 进行中 → 待验收 → 已完成」。
+- [x] **新操作**: `accept_task`（接单，0→1 记录找茬人）、`task_submit`（提交成果，1→2）、
+      `task_accept`（受茬人单人验收确认，2→3）、`credit_score`（契分制：基础 100、
+      完成 +5/单、违约 ×0.7 取整）；`review_merge` 修正定位为增长期核验师多人评审场景。
+- [x] **三端执行层同步**: `sigma_core.py` 91/91；Rust `sk.rs` / Elixir `sigma_verify.exs`
+      §SK 自检 32/32；三端 eval_expr 支持新操作真实调用（含 ⊥ BountyErr / StateError /
+      TypeError / ShapeError），`cargo build` 0 error/0 warning。
+- [x] **语料**: `corpus/socketkit_ok.md` 覆盖全部 7 操作真实调用（24/24 三端一致 PASS），
+      `socketkit_break.md` 保持 E-02 三端一致 FAIL。
+- [x] **证明**: `sigma-prove` §SK 义务从 6 项扩到 18 项（task_create×3 / accept_task×2 /
+      task_submit×2 / task_accept×2 / review_merge×2 / contribution×2 / credit×4），
+      全部 `PROVED (unsat)`；`sigma-runtime` 完整 MVP 业务 trace 23/23 义务满足。
+- [x] **不回归**: consensus 41/41、p0 109/109、三端 0 warning、py_compile 通过，
+      v0.10–v0.16 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
+
+> v0.17 = 「业务语义与真实产品对齐」：找茬 MVP 的发单/接单/提交/验收状态流和
+> 契分制规则全部成为 ΣLang 语义——三端一致执行、z3 可证明、语料进共识门禁。
+> App 开工时可直接按这份被验证过的语义实现。
+
 ---
 
 ## 7. 提交与汇报约定
@@ -239,7 +263,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ```text
 【ΣLang AUTOPILOT 结果】
-- 状态: ✅ v0.16 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
+- 状态: ✅ v0.17 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
 - 本轮完成: 修复 X · 新增 Y · 验证 N/N
 - 验证证据: verify_consensus N/N · verify_p0 109/109 · sigma-prove PROVED
 - 提交: <hash> <subject>

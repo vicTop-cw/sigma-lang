@@ -889,21 +889,69 @@ defmodule SigmaVerify do
         inner = String.slice(t, 12..-2//1)
         case split_top_level(inner, ?,) do
           {a, b} ->
-            with {:ok, {:num, author}} <- parse_val(a),
-                 {:ok, {:num, bounty}} <- parse_val(b) do
+            with {:ok, {:num, author}} <- eval_expr(a),
+                 {:ok, {:num, bounty}} <- eval_expr(b) do
               if bounty < 0 do
                 {:error, "BountyErr"}
               else
-                {:ok, {:list, [{:num, author}, {:num, bounty}, {:num, 0}]}}
+                {:ok, {:list, [{:num, author}, {:num, bounty}, {:num, 0}, {:num, 0}]}}
               end
             else
               _ -> {:error, "TypeError"}
             end
           nil -> {:error, "bad task_create args: #{inner}"}
         end
+      String.starts_with?(t, "accept_task(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 12..-2//1)
+        case split_top_level(inner, ?,) do
+          {task_s, hunter_s} ->
+            with {:ok, {:list, task}} <- eval_expr(task_s),
+                 {:ok, {:num, hunter}} <- eval_expr(hunter_s) do
+              if length(task) != 4 do
+                {:error, "TypeError"}
+              else
+                case task do
+                  [a, b, {:num, 0}, {:num, 0}] ->
+                    {:ok, {:list, [a, b, {:num, 1}, {:num, hunter}]}}
+                  _ -> {:error, "StateError"}
+                end
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          nil -> {:error, "bad accept_task args: #{inner}"}
+        end
+      String.starts_with?(t, "task_submit(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 12..-2//1)
+        with {:ok, {:list, task}} <- eval_expr(inner) do
+          if length(task) != 4 do
+            {:error, "TypeError"}
+          else
+            case task do
+              [a, b, {:num, 1}, h] -> {:ok, {:list, [a, b, {:num, 2}, h]}}
+              _ -> {:error, "StateError"}
+            end
+          end
+        else
+          _ -> {:error, "TypeError"}
+        end
+      String.starts_with?(t, "task_accept(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 12..-2//1)
+        with {:ok, {:list, task}} <- eval_expr(inner) do
+          if length(task) != 4 do
+            {:error, "TypeError"}
+          else
+            case task do
+              [a, b, {:num, 2}, h] -> {:ok, {:list, [a, b, {:num, 3}, h]}}
+              _ -> {:error, "StateError"}
+            end
+          end
+        else
+          _ -> {:error, "TypeError"}
+        end
       String.starts_with?(t, "review_merge(") and String.ends_with?(t, ")") ->
         inner = String.slice(t, 13..-2//1)
-        case parse_val(inner) do
+        case eval_expr(inner) do
           {:ok, {:list, opinions}} ->
             result =
               Enum.reduce_while(opinions, {0, 0}, fn o, {wa, wr} ->
@@ -926,7 +974,7 @@ defmodule SigmaVerify do
         end
       String.starts_with?(t, "contribution_score(") and String.ends_with?(t, ")") ->
         inner = String.slice(t, 19..-2//1)
-        case parse_val(inner) do
+        case eval_expr(inner) do
           {:ok, {:list, actions}} ->
             result =
               Enum.reduce_while(actions, 0, fn a, acc ->
@@ -938,6 +986,29 @@ defmodule SigmaVerify do
               end)
             case result do
               total when is_integer(total) -> {:ok, {:num, max(total, 0)}}
+              :shape_error -> {:error, "ShapeError"}
+            end
+          _ -> {:error, "TypeError"}
+        end
+      String.starts_with?(t, "credit_score(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 13..-2//1)
+        case eval_expr(inner) do
+          {:ok, {:list, events}} ->
+            result =
+              Enum.reduce_while(events, 100, fn e, acc ->
+                case e do
+                  {:list, [{:num, kind}, {:num, count}]} ->
+                    cond do
+                      kind == 0 -> {:cont, acc + 5 * count}
+                      kind == 1 -> {:cont, Enum.reduce(1..count//1, acc, fn _, c -> div(c * 7, 10) end)}
+                      true -> {:halt, :type_error}
+                    end
+                  _ -> {:halt, :shape_error}
+                end
+              end)
+            case result do
+              credit when is_integer(credit) -> {:ok, {:num, max(credit, 0)}}
+              :type_error -> {:error, "TypeError"}
               :shape_error -> {:error, "ShapeError"}
             end
           _ -> {:error, "TypeError"}
@@ -1211,9 +1282,27 @@ defmodule SigmaVerify do
   # (spec/spec_p0_socketkit.md — mirrors impl/python/sigma_core.py §SK)
   # ============================================================
 
-  @doc "Task submission: (author, bounty) → [author, bounty, 0] (status 0 = open)."
-  def task_create(author, bounty) when bounty >= 0, do: {:ok, [author, bounty, 0]}
+  # Task 状态机 (需求文档 §五): 0=open 1=in_progress 2=pending_review 3=completed
+  @status_open 0
+  @status_in_progress 1
+  @status_pending 2
+  @status_completed 3
+
+  @doc "Task posting: (author, bounty) → [author, bounty, 0, 0] (open, unclaimed)."
+  def task_create(author, bounty) when bounty >= 0, do: {:ok, [author, bounty, @status_open, 0]}
   def task_create(_author, bounty) when bounty < 0, do: {:error, "BountyErr"}
+
+  @doc "Task claiming: status 0 → 1 (in_progress), hunter recorded."
+  def accept_task([_a, _b, @status_open, 0] = task, hunter), do: {:ok, List.replace_at(List.replace_at(task, 2, @status_in_progress), 3, hunter)}
+  def accept_task(_task, _hunter), do: {:error, "StateError"}
+
+  @doc "Work submission: status 1 → 2 (pending_review), hunter preserved."
+  def task_submit([_a, _b, @status_in_progress, _h] = task), do: {:ok, List.replace_at(task, 2, @status_pending)}
+  def task_submit(_task), do: {:error, "StateError"}
+
+  @doc "Acceptance confirmation: status 2 → 3 (completed), hunter preserved."
+  def task_accept([_a, _b, @status_pending, _h] = task), do: {:ok, List.replace_at(task, 2, @status_completed)}
+  def task_accept(_task), do: {:error, "StateError"}
 
   @doc "Review resolution: opinions[] → decision (1 = accept, 0 = reject)."
   def review_merge(opinions) do
@@ -1230,6 +1319,19 @@ defmodule SigmaVerify do
     max(total, 0)
   end
 
+  @doc "Credit scoring: events[] → credit (契分制). base 100; +5 per complete; breach ×0.7 (×7 ÷10, floor)."
+  def credit_score(events) do
+    credit = Enum.reduce(events, 100, fn e, acc ->
+      [kind, count] = e
+      case kind do
+        0 -> acc + 5 * count
+        1 -> Enum.reduce(1..count//1, acc, fn _, c -> div(c * 7, 10) end)
+        _ -> acc
+      end
+    end)
+    max(credit, 0)
+  end
+
   defp encode_list(xs), do: encode_list(xs, 0)
   defp encode_list([], _), do: 0
   defp encode_list([x | rest], i), do: x * round(:math.pow(1000, i)) + encode_list(rest, i + 1)
@@ -1243,13 +1345,43 @@ defmodule SigmaVerify do
   @doc "Law II — Action → ℕ."
   def encode_action(action), do: encode_list(action)
 
+  @doc "Law II — Event → ℕ."
+  def encode_event(event), do: encode_list(event)
+
   @doc "Run the §SK self-check (mirrors sigma_core.py §SK block); returns {passed, total}."
   def sk_self_check do
+    # task_create returns {:ok, task}; unwrap once so accept_task/submit/accept
+    # receive the bare task list (they take the state-machine form directly).
+    {:ok, t100} = task_create(7, 100)
+    {:ok, t50} = task_create(5, 50)
+    {:ok, t0} = task_create(2, 0)
+    {:ok, claimed} = accept_task(t100, 3)
+    {:ok, claimed9} = accept_task(t0, 9)
+    {:ok, submitted} = task_submit(claimed)
+    {:ok, submitted9} = task_submit(claimed9)
+    {:ok, done} = task_accept(submitted)
+    {:ok, done9} = task_accept(submitted9)
+
     checks = [
-      {"task_create_shape", task_create(1, 100) == {:ok, [1, 100, 0]}},
-      {"task_create_open", match?({:ok, [_, _, 0]}, task_create(5, 50))},
-      {"task_create_bounty_ge0", task_create(2, 0) == {:ok, [2, 0, 0]}},
+      # §SK.3.1 task_create
+      {"task_create_shape", task_create(1, 100) == {:ok, [1, 100, 0, 0]}},
+      {"task_create_open", match?({:ok, [_, _, 0, _]}, task_create(5, 50))},
+      {"task_create_unclaimed", match?({:ok, [_, _, _, 0]}, task_create(5, 50))},
+      {"task_create_bounty_ge0", task_create(2, 0) == {:ok, [2, 0, 0, 0]}},
       {"task_create_neg_bounty_rejected", task_create(1, -5) == {:error, "BountyErr"}},
+      # §SK.3.2 accept_task
+      {"accept_task_claim", claimed == [7, 100, 1, 3]},
+      {"accept_task_in_progress", match?([_, _, 1, _], claimed9)},
+      {"accept_task_non_open_rejected", accept_task([7, 100, 1, 3], 5) == {:error, "StateError"}},
+      # §SK.3.3 task_submit
+      {"task_submit_pending", submitted == [7, 100, 2, 3]},
+      {"task_submit_hunter_preserved", match?([_, _, _, 9], submitted9)},
+      {"task_submit_non_in_progress_rejected", task_submit(t50) == {:error, "StateError"}},
+      # §SK.3.4 task_accept
+      {"task_accept_completed", done == [7, 100, 3, 3]},
+      {"task_accept_hunter_preserved", match?([_, _, _, 9], done9)},
+      {"task_accept_non_pending_rejected", task_accept(t50) == {:error, "StateError"}},
+      # §SK.3.6 review_merge
       {"review_merge_accept", review_merge([[1, 1, 3], [2, 1, 2]]) == 1},            # 5 ≥ 0
       {"review_merge_reject", review_merge([[1, 0, 3], [2, 1, 2]]) == 0},            # 2 < 3
       {"review_merge_tie_accept", review_merge([[1, 0, 3], [2, 1, 3]]) == 1},        # 3 ≥ 3
@@ -1257,14 +1389,23 @@ defmodule SigmaVerify do
       {"review_merge_order_indep",
        review_merge([[1, 1, 3], [2, 0, 2], [3, 1, 1]]) ==
        review_merge([[3, 1, 1], [1, 1, 3], [2, 0, 2]])},
+      # §SK.3.5 contribution_score
       {"contribution_fold", contribution_score([[1, 1, 3], [2, 2, 4]]) == 7},
       {"contribution_floor_at_0", contribution_score([[1, 1, -5], [2, 2, 3]]) == 0}, # -2 floored
       {"contribution_zero_neutral",
        contribution_score([[1, 1, 3]]) == contribution_score([[1, 1, 3], [9, 0, 0]])},
-      {"encode_task_nat", encode_task([1, 2, 0]) >= 0},
-      {"encode_distinct", encode_task([1, 2, 0]) != encode_task([1, 3, 0])},
+      # §SK.3.7 credit_score
+      {"credit_base", credit_score([]) == 100},
+      {"credit_complete", credit_score([[0, 1]]) == 105},
+      {"credit_breach", credit_score([[1, 1]]) == 70},                              # 100×0.7
+      {"credit_breach_then_complete", credit_score([[1, 1], [0, 1]]) == 75},        # 70+5
+      {"credit_double_breach", credit_score([[1, 2]]) == 49},                       # 70×0.7
+      # §SK.4 encodings (Law II)
+      {"encode_task_nat", encode_task([1, 2, 0, 0]) >= 0},
+      {"encode_distinct", encode_task([1, 2, 0, 0]) != encode_task([1, 3, 0, 0])},
       {"encode_opinion_nat", encode_opinion([1, 1, 3]) >= 0},
-      {"encode_action_nat", encode_action([1, 1, 3]) >= 0}
+      {"encode_action_nat", encode_action([1, 1, 3]) >= 0},
+      {"encode_event_nat", encode_event([0, 1]) >= 0}
     ]
 
     failed = Enum.filter(checks, fn {_name, ok} -> not ok end)

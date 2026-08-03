@@ -104,17 +104,19 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
         let inner = rest.strip_suffix(')').ok_or("bad task_create call")?;
         let (a, b) = split_top_level(inner, ',')
             .ok_or_else(|| format!("bad task_create args: {}", inner))?;
-        let va = parse_val(a).ok_or_else(|| format!("bad task_create author: {}", a))?;
-        let vb = parse_val(b).ok_or_else(|| format!("bad task_create bounty: {}", b))?;
+        let va = eval_expr(a)?;
+        let vb = eval_expr(b)?;
         return match (va, vb) {
             (TVal::Num(author), TVal::Num(bounty)) => {
                 if bounty < 0 {
                     // Bounty : Type ≝ ℕ
                     Err("BountyErr".to_string())
                 } else {
+                    // [author, bounty, 0=open, 0=unclaimed]
                     Ok(TVal::List(vec![
                         TVal::Num(author),
                         TVal::Num(bounty),
+                        TVal::Num(0),
                         TVal::Num(0),
                     ]))
                 }
@@ -122,9 +124,69 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
             _ => Err("TypeError".to_string()),
         };
     }
+    if let Some(rest) = s.strip_prefix("accept_task(") {
+        let inner = rest.strip_suffix(')').ok_or("bad accept_task call")?;
+        let (t, h) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad accept_task args: {}", inner))?;
+        let vt = eval_expr(t)?;
+        let vh = eval_expr(h)?;
+        return match (vt, vh) {
+            (TVal::List(task), TVal::Num(hunter)) if task.len() == 4 => {
+                if task[2] != TVal::Num(0) {
+                    // status 0 = open
+                    return Err("StateError".to_string());
+                }
+                Ok(TVal::List(vec![
+                    task[0].clone(),
+                    task[1].clone(),
+                    TVal::Num(1),
+                    TVal::Num(hunter),
+                ]))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("task_submit(") {
+        let inner = rest.strip_suffix(')').ok_or("bad task_submit call")?;
+        let vt = eval_expr(inner)?;
+        return match vt {
+            TVal::List(task) if task.len() == 4 => {
+                if task[2] != TVal::Num(1) {
+                    // status 1 = in_progress
+                    return Err("StateError".to_string());
+                }
+                Ok(TVal::List(vec![
+                    task[0].clone(),
+                    task[1].clone(),
+                    TVal::Num(2),
+                    task[3].clone(),
+                ]))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("task_accept(") {
+        let inner = rest.strip_suffix(')').ok_or("bad task_accept call")?;
+        let vt = eval_expr(inner)?;
+        return match vt {
+            TVal::List(task) if task.len() == 4 => {
+                if task[2] != TVal::Num(2) {
+                    // status 2 = pending_review
+                    return Err("StateError".to_string());
+                }
+                Ok(TVal::List(vec![
+                    task[0].clone(),
+                    task[1].clone(),
+                    TVal::Num(3),
+                    task[3].clone(),
+                ]))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
     if let Some(rest) = s.strip_prefix("review_merge(") {
         let inner = rest.strip_suffix(')').ok_or("bad review_merge call")?;
-        let v = parse_val(inner).ok_or_else(|| format!("bad review_merge: {}", inner))?;
+        let v = eval_expr(inner)?;
         return match v {
             TVal::List(opinions) => {
                 let mut w_accept = 0i64;
@@ -155,7 +217,7 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
     }
     if let Some(rest) = s.strip_prefix("contribution_score(") {
         let inner = rest.strip_suffix(')').ok_or("bad contribution_score call")?;
-        let v = parse_val(inner).ok_or_else(|| format!("bad contribution_score: {}", inner))?;
+        let v = eval_expr(inner)?;
         return match v {
             TVal::List(actions) => {
                 let mut total = 0i64;
@@ -171,6 +233,40 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
                     }
                 }
                 Ok(TVal::Num(total.max(0)))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("credit_score(") {
+        let inner = rest.strip_suffix(')').ok_or("bad credit_score call")?;
+        let v = eval_expr(inner)?;
+        return match v {
+            TVal::List(events) => {
+                let mut credit = 100i64;
+                for e in &events {
+                    match e {
+                        TVal::List(fields) if fields.len() == 2 => {
+                            match (&fields[0], &fields[1]) {
+                                (TVal::Num(kind), TVal::Num(count)) => {
+                                    if *kind == 0 {
+                                        // complete: +5 per count
+                                        credit += 5 * count;
+                                    } else if *kind == 1 {
+                                        // breach: ×0.7 per count (×7 ÷10, floor)
+                                        for _ in 0..*count {
+                                            credit = (credit * 7) / 10;
+                                        }
+                                    } else {
+                                        return Err("TypeError".to_string());
+                                    }
+                                }
+                                _ => return Err("TypeError".to_string()),
+                            }
+                        }
+                        _ => return Err("ShapeError".to_string()),
+                    }
+                }
+                Ok(TVal::Num(credit.max(0)))
             }
             _ => Err("TypeError".to_string()),
         };

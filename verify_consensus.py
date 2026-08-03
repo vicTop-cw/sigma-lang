@@ -701,25 +701,72 @@ def eval_expr(s):
         return index_into(tv, iv)
     # §SK — SocketKit Protocol operations (spec_p0_socketkit.md §SK.3).
     # Real function calls, not spec-expression aliases: the corpus tests now
-    # exercise the same task_create/review_merge/contribution_score semantics
-    # the reference implementations (sigma_core.py / sk.rs / sigma_verify.exs)
-    # provide, so the consensus gate verifies app behavior itself.
+    # exercise the same task_create/accept_task/task_submit/task_accept/
+    # review_merge/contribution_score/credit_score semantics the reference
+    # implementations (sigma_core.py / sk.rs / sigma_verify.exs) provide, so
+    # the consensus gate verifies app behavior itself.
     if s.startswith("task_create(") and s.endswith(")"):
         inner = s[len("task_create("):-1]
         parts = split_top_level(inner, ",")
         if parts is None or len(parts) < 2:
             return f"bad task_create args: {inner}"
-        va = parse_val(parts[0].strip())
-        vb = parse_val(parts[1].strip())
-        if va is None or vb is None or va[0] != "num" or vb[0] != "num":
+        va = eval_expr(parts[0].strip())
+        vb = eval_expr(parts[1].strip())
+        if isinstance(va, str):
+            return va
+        if isinstance(vb, str):
+            return vb
+        if va[0] != "num" or vb[0] != "num":
             return "TypeError"
         if vb[1] < 0:  # Bounty : Type ≝ ℕ
             return "BountyErr"
-        return ("list", [("num", va[1]), ("num", vb[1]), ("num", 0)])
+        # [author, bounty, 0=open, 0=unclaimed]
+        return ("list", [("num", va[1]), ("num", vb[1]), ("num", 0), ("num", 0)])
+    if s.startswith("accept_task(") and s.endswith(")"):
+        inner = s[len("accept_task("):-1]
+        parts = split_top_level(inner, ",")
+        if parts is None or len(parts) < 2:
+            return f"bad accept_task args: {inner}"
+        vt = eval_expr(parts[0].strip())
+        vh = eval_expr(parts[1].strip())
+        if isinstance(vt, str):
+            return vt
+        if isinstance(vh, str):
+            return vh
+        if vt[0] != "list" or len(vt[1]) != 4 or vh[0] != "num":
+            return "TypeError"
+        task = vt[1]
+        if task[2] != ("num", 0):  # status 0 = open
+            return "StateError"
+        return ("list", [task[0], task[1], ("num", 1), ("num", vh[1])])
+    if s.startswith("task_submit(") and s.endswith(")"):
+        inner = s[len("task_submit("):-1]
+        vt = eval_expr(inner.strip())
+        if isinstance(vt, str):
+            return vt
+        if vt[0] != "list" or len(vt[1]) != 4:
+            return "TypeError"
+        task = vt[1]
+        if task[2] != ("num", 1):  # status 1 = in_progress
+            return "StateError"
+        return ("list", [task[0], task[1], ("num", 2), task[3]])
+    if s.startswith("task_accept(") and s.endswith(")"):
+        inner = s[len("task_accept("):-1]
+        vt = eval_expr(inner.strip())
+        if isinstance(vt, str):
+            return vt
+        if vt[0] != "list" or len(vt[1]) != 4:
+            return "TypeError"
+        task = vt[1]
+        if task[2] != ("num", 2):  # status 2 = pending_review
+            return "StateError"
+        return ("list", [task[0], task[1], ("num", 3), task[3]])
     if s.startswith("review_merge(") and s.endswith(")"):
         inner = s[len("review_merge("):-1]
-        v = parse_val(inner.strip())
-        if v is None or v[0] != "list":
+        v = eval_expr(inner.strip())
+        if isinstance(v, str):
+            return v
+        if v[0] != "list":
             return "TypeError"
         w_accept = w_reject = 0
         for o in v[1]:
@@ -736,8 +783,10 @@ def eval_expr(s):
         return ("num", 1 if w_accept >= w_reject else 0)
     if s.startswith("contribution_score(") and s.endswith(")"):
         inner = s[len("contribution_score("):-1]
-        v = parse_val(inner.strip())
-        if v is None or v[0] != "list":
+        v = eval_expr(inner.strip())
+        if isinstance(v, str):
+            return v
+        if v[0] != "list":
             return "TypeError"
         total = 0
         for a in v[1]:
@@ -745,6 +794,27 @@ def eval_expr(s):
                 return "ShapeError"
             total += a[1][2][1]
         return ("num", max(0, total))
+    if s.startswith("credit_score(") and s.endswith(")"):
+        inner = s[len("credit_score("):-1]
+        v = eval_expr(inner.strip())
+        if isinstance(v, str):
+            return v
+        if v[0] != "list":
+            return "TypeError"
+        credit = 100
+        for e in v[1]:
+            if e[0] != "list" or len(e[1]) != 2:
+                return "ShapeError"
+            kind = e[1][0][1]
+            count = e[1][1][1]
+            if kind == 0:  # complete: +5 per count
+                credit += 5 * count
+            elif kind == 1:  # breach: ×0.7 per count (×7 ÷10, floor)
+                for _ in range(count):
+                    credit = (credit * 7) // 10
+            else:
+                return "TypeError"
+        return ("num", max(0, credit))
     if s == "I₂":
         return ("list", [("list", [("num", 1), ("num", 0)]),
                          ("list", [("num", 0), ("num", 1)])])

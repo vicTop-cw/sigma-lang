@@ -421,24 +421,60 @@ def infer_effect(func_body_has_io: bool) -> str:
 
 # ============================================================
 # §SK — SocketKit Protocol: Auditable App Behavior
-# (spec/spec_p0_socketkit.md — task_create / review_merge / contribution_score)
+# (spec/spec_p0_socketkit.md — task_create / accept_task / task_submit /
+#  task_accept / review_merge / contribution_score / credit_score)
 # ============================================================
 
+# Task 状态机 (需求文档 §五): 0=open 1=in_progress 2=pending_review 3=completed
+STATUS_OPEN, STATUS_IN_PROGRESS, STATUS_PENDING, STATUS_COMPLETED = 0, 1, 2, 3
+
+
 def task_create(author: int, bounty: int) -> List[int]:
-    """Task submission: (author, bounty) → [author, bounty, 0] (status 0 = open).
+    """Task posting: (author, bounty) → [author, bounty, 0, 0] (open, unclaimed).
 
     §SK.3.1 — Bounty : Type ≝ ℕ, so a negative bounty is rejected.
     """
     if bounty < 0:
         raise ValueError("BountyErr")
-    return [author, bounty, 0]
+    return [author, bounty, STATUS_OPEN, 0]
+
+
+def accept_task(task: List[int], hunter: int) -> List[int]:
+    """Task claiming: status 0 → 1 (in_progress), hunter recorded.
+
+    §SK.3.2 — claiming a non-open task is a StateError.
+    """
+    if task[2] != STATUS_OPEN:
+        raise ValueError("StateError")
+    return [task[0], task[1], STATUS_IN_PROGRESS, hunter]
+
+
+def task_submit(task: List[int]) -> List[int]:
+    """Work submission: status 1 → 2 (pending_review), hunter preserved.
+
+    §SK.3.3 — submitting a non-in-progress task is a StateError.
+    """
+    if task[2] != STATUS_IN_PROGRESS:
+        raise ValueError("StateError")
+    return [task[0], task[1], STATUS_PENDING, task[3]]
+
+
+def task_accept(task: List[int]) -> List[int]:
+    """Acceptance confirmation: status 2 → 3 (completed), hunter preserved.
+
+    §SK.3.4 — 受茬人单人验收确认 (MVP); accepting a non-pending task is a StateError.
+    """
+    if task[2] != STATUS_PENDING:
+        raise ValueError("StateError")
+    return [task[0], task[1], STATUS_COMPLETED, task[3]]
 
 
 def review_merge(opinions: List[List[int]]) -> int:
     """Review resolution: opinions[] → decision (1 = accept, 0 = reject).
 
-    §SK.3.2 — decision ≡ 1 if weighted_accept(os) ≥ weighted_reject(os) else 0.
-    Each opinion is [reviewer_id, vote, weight]; order-independent by construction.
+    §SK.3.6 — growth-phase 核验师多人评审; decision ≡ 1 if weighted_accept(os)
+    ≥ weighted_reject(os) else 0. Each opinion is [reviewer_id, vote, weight];
+    order-independent by construction.
     """
     w_accept = sum(w for _, vote, w in opinions if vote == 1)
     w_reject = sum(w for _, vote, w in opinions if vote == 0)
@@ -448,11 +484,28 @@ def review_merge(opinions: List[List[int]]) -> int:
 def contribution_score(actions: List[List[int]]) -> int:
     """Contribution scoring: actions[] → points, fold ⊕ over deltas floored at 0.
 
-    §SK.3.3 — points : Type ≝ ℕ, so the running total never goes below 0.
-    Each action is [actor_id, kind, delta].
+    §SK.3.5 — 贡献值终身累计，负数不参与分红. Each action is [actor_id, kind, delta].
     """
     total = sum(delta for _, _, delta in actions)
     return max(0, total)
+
+
+def credit_score(events: List[List[int]]) -> int:
+    """Credit scoring: events[] → credit (契分制).
+
+    §SK.3.7 — base 100; kind 0 (complete) +5 per count; kind 1 (breach) ×0.7
+    per count (integer ×7 ÷10, floor); floored at 0. Each event is [kind, count].
+    """
+    credit = 100
+    for kind, count in events:
+        if kind == 0:  # complete
+            credit += 5 * count
+        elif kind == 1:  # breach
+            for _ in range(count):
+                credit = (credit * 7) // 10
+        else:
+            raise ValueError("TypeError")
+    return max(0, credit)
 
 
 def _encode_list(xs: List[int], base: int = 1000) -> int:
@@ -476,6 +529,11 @@ def encode_opinion(opinion: List[int]) -> int:
 def encode_action(action: List[int]) -> int:
     """Law II — Action → ℕ."""
     return _encode_list(action)
+
+
+def encode_event(event: List[int]) -> int:
+    """Law II — Event → ℕ."""
+    return _encode_list(event)
 
 
 # ============================================================
@@ -594,14 +652,42 @@ def _main() -> int:
     check("I.infer_effect", infer_effect(True) == Effect.IO and infer_effect(False) == Effect.PURE)
 
     # §SK (SocketKit Protocol — spec_p0_socketkit.md)
-    check("SK.task_create_shape", task_create(1, 100) == [1, 100, 0])
+    check("SK.task_create_shape", task_create(1, 100) == [1, 100, 0, 0])
     check("SK.task_create_open", task_create(5, 50)[2] == 0)
-    check("SK.task_create_bounty_ge0", task_create(2, 0) == [2, 0, 0])
+    check("SK.task_create_unclaimed", task_create(5, 50)[3] == 0)
+    check("SK.task_create_bounty_ge0", task_create(2, 0) == [2, 0, 0, 0])
     try:
         task_create(1, -5)
         check("SK.task_create_neg_bounty_rejected", False)
     except ValueError:
         check("SK.task_create_neg_bounty_rejected", True)
+    check("SK.accept_task_claim",
+          accept_task(task_create(7, 100), 3) == [7, 100, 1, 3])
+    check("SK.accept_task_in_progress",
+          accept_task(task_create(2, 0), 9)[2] == 1)
+    try:
+        accept_task([7, 100, 1, 3], 5)
+        check("SK.accept_task_non_open_rejected", False)
+    except ValueError:
+        check("SK.accept_task_non_open_rejected", True)
+    check("SK.task_submit_pending",
+          task_submit(accept_task(task_create(5, 50), 3)) == [5, 50, 2, 3])
+    check("SK.task_submit_hunter_preserved",
+          task_submit(accept_task(task_create(2, 0), 9))[3] == 9)
+    try:
+        task_submit(task_create(5, 50))
+        check("SK.task_submit_non_in_progress_rejected", False)
+    except ValueError:
+        check("SK.task_submit_non_in_progress_rejected", True)
+    check("SK.task_accept_completed",
+          task_accept(task_submit(accept_task(task_create(5, 50), 3))) == [5, 50, 3, 3])
+    check("SK.task_accept_hunter_preserved",
+          task_accept(task_submit(accept_task(task_create(2, 0), 9)))[3] == 9)
+    try:
+        task_accept(task_create(5, 50))
+        check("SK.task_accept_non_pending_rejected", False)
+    except ValueError:
+        check("SK.task_accept_non_pending_rejected", True)
     check("SK.review_merge_accept",
           review_merge([[1, 1, 3], [2, 1, 2]]) == 1)                      # 5 ≥ 0
     check("SK.review_merge_reject",
@@ -619,10 +705,17 @@ def _main() -> int:
           contribution_score([[1, 1, -5], [2, 2, 3]]) == 0)              # -2 floored
     check("SK.contribution_zero_neutral",
           contribution_score([[1, 1, 3]]) == contribution_score([[1, 1, 3], [9, 0, 0]]))
-    check("SK.encode_task_nat", encode_task([1, 2, 0]) >= 0)
-    check("SK.encode_distinct", encode_task([1, 2, 0]) != encode_task([1, 3, 0]))
+    check("SK.credit_base", credit_score([]) == 100)
+    check("SK.credit_complete", credit_score([[0, 1]]) == 105)
+    check("SK.credit_breach", credit_score([[1, 1]]) == 70)              # 100×0.7
+    check("SK.credit_breach_then_complete",
+          credit_score([[1, 1], [0, 1]]) == 75)                          # 70+5
+    check("SK.credit_double_breach", credit_score([[1, 2]]) == 49)       # 70×0.7
+    check("SK.encode_task_nat", encode_task([1, 2, 0, 0]) >= 0)
+    check("SK.encode_distinct", encode_task([1, 2, 0, 0]) != encode_task([1, 3, 0, 0]))
     check("SK.encode_opinion_nat", encode_opinion([1, 1, 3]) >= 0)
     check("SK.encode_action_nat", encode_action([1, 1, 3]) >= 0)
+    check("SK.encode_event_nat", encode_event([0, 1]) >= 0)
 
     print(f"sigma_core self-check: {passed}/{passed + failed} passed")
     return 0 if failed == 0 else 1
