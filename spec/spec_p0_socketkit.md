@@ -287,6 +287,114 @@ credit_score([[1,1]]) ≡ 70                  # one breach: ×0.7 (100 → 70)
 ∀ t c . index(t, 2) ≡ 2 ∧ c ≢ index(t, 0) ⇒ task_accept(t, c) ≡ ⊥ AuthError
 ```
 
+### SK.3.9 quota — 额度制 (需求文档 §四.1)
+
+每人每月固定额度（发单 + 接单分开计算），月底清零不累计；可预支下月额度但必须
+隔月才能再预支。额度 = 基础值 × 契分系数 × 活跃系数 × 违规惩罚。
+
+```md
+Quota    : List⟨ℕ⟩        # [monthly_limit, remaining]
+quota_new   : ℕ → List⟨ℕ⟩     # monthly → Quota
+Fingerprint: 0xF008
+Definition: quota_new(m) ≡ [m, m]            # 本月额度 = 剩余额度
+quota_use   : List⟨ℕ⟩ × ℕ → List⟨ℕ⟩   # (quota, amount) → Quota
+Fingerprint: 0xF009
+Definition: quota_use([m, r], a) ≡ [m, r−a]  if a ≤ r，否则 ⊥ QuotaExhausted
+quota_reset : List⟨ℕ⟩ → List⟨ℕ⟩       # quota → Quota（月底清零，恢复满额）
+Fingerprint: 0xF00A
+Definition: quota_reset([m, r]) ≡ [m, m]
+```
+
+**Laws**
+
+```md
+∀ q a . index(q, 1) ≥ a ⇒ index(quota_use(q, a), 1) ≡ index(q, 1) − a   # 扣减正确
+∀ q . 0 ≤ index(q, 1) ≤ index(q, 0)                                    # 剩余 ∈ [0, 月额]
+∀ q . quota_reset(q) ≡ [index(q, 0), index(q, 0)]                      # 月底清零恢复
+```
+
+**Tests**
+
+| Input | Output |
+|-------|--------|
+| quota_new(50) | [50,50] |
+| quota_use(quota_new(50), 20) | [50,30] |
+| quota_reset(quota_use(quota_new(50), 20)) | [50,50] |
+| quota_use(quota_new(50), 60) | ⊥ QuotaExhausted |
+
+### SK.3.10 points — 积分制 (需求文档 §四.2)
+
+1 积分 = ¥1，不可充值；积分状态：托管中（冻结）/ 可用（可提现）；每笔积分来源可追溯。
+
+```md
+Points    : List⟨ℕ⟩        # [escrow, available]
+points_new   : → List⟨ℕ⟩            # → Points
+Fingerprint: 0xF00B
+Definition: points_new() ≡ [0, 0]             # 无托管、无可用
+points_hold  : List⟨ℕ⟩ × ℕ → List⟨ℕ⟩  # (points, amount) → Points
+Fingerprint: 0xF00C
+Definition: points_hold([e, a], x) ≡ [e+x, a]           # 冻结（托管中）
+points_release : List⟨ℕ⟩ × ℕ → List⟨ℕ⟩  # (points, amount) → Points
+Fingerprint: 0xF00D
+Definition: points_release([e, a], x) ≡ [e−x, a+x]  if x ≤ e，否则 ⊥ InsufficientEscrow
+points_withdraw : List⟨ℕ⟩ × ℕ → List⟨ℕ⟩  # (points, amount) → Points
+Fingerprint: 0xF00E
+Definition: points_withdraw([e, a], x) ≡ [e, a−x]  if x ≤ a，否则 ⊥ InsufficientPoints
+```
+
+**Laws**
+
+```md
+∀ p x . index(points_hold(p, x), 0) ≡ index(p, 0) + x          # 托管增加（冻结进 escrow）
+∀ p x . index(points_hold(p, x), 1) ≡ index(p, 1)              # 可用不变（hold 不动 available）
+∀ p x . index(p, 0) ≥ x ⇒ index(points_release(p, x), 1) ≡ index(p, 1) + x   # 释放入可用
+∀ p . 0 ≤ index(p, 0) ∧ 0 ≤ index(p, 1)                       # 托管/可用非负
+∀ p x . index(points_release(p, x), 0) + index(points_release(p, x), 1) ≡
+        index(p, 0) + index(p, 1)                             # 释放守恒（escrow→available 总额不变）
+```
+
+**Tests**
+
+| Input | Output |
+|-------|--------|
+| points_new() | [0,0] |
+| points_hold(points_new(), 100) | [100,0] |
+| points_release(points_hold(points_new(), 100), 100) | [0,100] |
+| points_withdraw(points_release(points_hold(points_new(), 100), 100), 40) | [0,60] |
+| points_release(points_new(), 10) | ⊥ InsufficientEscrow |
+| points_withdraw(points_new(), 10) | ⊥ InsufficientPoints |
+
+### SK.3.11 badge_level — 勋章制 (需求文档 §四.5)
+
+铜→银→金→钻石四级，核验师签发，用于企业人才推荐。
+
+```md
+badge_level : ℕ → ℕ            # accumulated_score → badge (0=铜 1=银 2=金 3=钻石)
+Fingerprint: 0xF00F
+Definition: badge_level(s) ≡ 0  if s < 100
+            badge_level(s) ≡ 1  if 100 ≤ s < 300
+            badge_level(s) ≡ 2  if 300 ≤ s < 600
+            badge_level(s) ≡ 3  if s ≥ 600
+```
+
+**Laws**
+
+```md
+∀ s . 0 ≤ badge_level(s) ≤ 3                      # 四级有界
+∀ s . badge_level(s) ≤ badge_level(s + 100)       # 单调（分数越高勋章不降）
+badge_level(0) ≡ 0                                # 起始铜牌
+```
+
+**Tests**
+
+| Input | Output |
+|-------|--------|
+| badge_level(0) | 0 |
+| badge_level(50) | 0 |
+| badge_level(150) | 1 |
+| badge_level(450) | 2 |
+| badge_level(900) | 3 |
+
 ---
 
 ## SK.4 Encodings (Law II — encoding to ℕ for non-numeric returns)
@@ -296,6 +404,8 @@ encode_task   : List⟨ℕ⟩ → ℕ     # Task → ℕ (Law II)
 encode_opinion: List⟨ℕ⟩ → ℕ     # Opinion → ℕ (Law II)
 encode_action : List⟨ℕ⟩ → ℕ     # Action → ℕ (Law II)
 encode_event  : List⟨ℕ⟩ → ℕ     # Event → ℕ (Law II)
+encode_quota  : List⟨ℕ⟩ → ℕ     # Quota → ℕ (Law II)
+encode_points : List⟨ℕ⟩ → ℕ     # Points → ℕ (Law II)
 ```
 
 ---

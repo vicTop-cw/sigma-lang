@@ -905,6 +905,111 @@ def eval_expr(s):
             return "TypeError"
         _, qA, qB = vp[1]
         return ("num", qA[1] + qB[1])
+    # §SK.3.9 额度制 quota — 每月额度 / 扣减 / 月底清零.
+    if s.startswith("quota_new(") and s.endswith(")"):
+        inner = s[len("quota_new("):-1]
+        vm = eval_expr(inner.strip())
+        if isinstance(vm, str):
+            return vm
+        if vm[0] != "num":
+            return "TypeError"
+        if vm[1] < 0:
+            return "TypeError"
+        return ("list", [("num", vm[1]), ("num", vm[1])])
+    if s.startswith("quota_use(") and s.endswith(")"):
+        inner = s[len("quota_use("):-1]
+        parts = split_top_level(inner, ",")
+        if parts is None or len(parts) < 2:
+            return f"bad quota_use args: {inner}"
+        vq = eval_expr(parts[0].strip())
+        va = eval_expr(parts[1].strip())
+        if isinstance(vq, str):
+            return vq
+        if isinstance(va, str):
+            return va
+        if vq[0] != "list" or len(vq[1]) != 2 or va[0] != "num":
+            return "TypeError"
+        monthly, remaining = vq[1]
+        if va[1] > remaining[1]:
+            return "QuotaExhausted"
+        return ("list", [monthly, ("num", remaining[1] - va[1])])
+    if s.startswith("quota_reset(") and s.endswith(")"):
+        inner = s[len("quota_reset("):-1]
+        vq = eval_expr(inner.strip())
+        if isinstance(vq, str):
+            return vq
+        if vq[0] != "list" or len(vq[1]) != 2:
+            return "TypeError"
+        monthly, _ = vq[1]
+        return ("list", [monthly, monthly])
+    # §SK.3.10 积分制 points — 托管 / 释放 / 提现.
+    if s == "points_new()":
+        return ("list", [("num", 0), ("num", 0)])
+    if s.startswith("points_hold(") and s.endswith(")"):
+        inner = s[len("points_hold("):-1]
+        parts = split_top_level(inner, ",")
+        if parts is None or len(parts) < 2:
+            return f"bad points_hold args: {inner}"
+        vp = eval_expr(parts[0].strip())
+        vx = eval_expr(parts[1].strip())
+        if isinstance(vp, str):
+            return vp
+        if isinstance(vx, str):
+            return vx
+        if vp[0] != "list" or len(vp[1]) != 2 or vx[0] != "num":
+            return "TypeError"
+        escrow, available = vp[1]
+        return ("list", [("num", escrow[1] + vx[1]), available])
+    if s.startswith("points_release(") and s.endswith(")"):
+        inner = s[len("points_release("):-1]
+        parts = split_top_level(inner, ",")
+        if parts is None or len(parts) < 2:
+            return f"bad points_release args: {inner}"
+        vp = eval_expr(parts[0].strip())
+        vx = eval_expr(parts[1].strip())
+        if isinstance(vp, str):
+            return vp
+        if isinstance(vx, str):
+            return vx
+        if vp[0] != "list" or len(vp[1]) != 2 or vx[0] != "num":
+            return "TypeError"
+        escrow, available = vp[1]
+        if vx[1] > escrow[1]:
+            return "InsufficientEscrow"
+        return ("list", [("num", escrow[1] - vx[1]), ("num", available[1] + vx[1])])
+    if s.startswith("points_withdraw(") and s.endswith(")"):
+        inner = s[len("points_withdraw("):-1]
+        parts = split_top_level(inner, ",")
+        if parts is None or len(parts) < 2:
+            return f"bad points_withdraw args: {inner}"
+        vp = eval_expr(parts[0].strip())
+        vx = eval_expr(parts[1].strip())
+        if isinstance(vp, str):
+            return vp
+        if isinstance(vx, str):
+            return vx
+        if vp[0] != "list" or len(vp[1]) != 2 or vx[0] != "num":
+            return "TypeError"
+        escrow, available = vp[1]
+        if vx[1] > available[1]:
+            return "InsufficientPoints"
+        return ("list", [escrow, ("num", available[1] - vx[1])])
+    # §SK.3.11 勋章制 badge_level — 0=铜 1=银 2=金 3=钻石.
+    if s.startswith("badge_level(") and s.endswith(")"):
+        inner = s[len("badge_level("):-1]
+        vs = eval_expr(inner.strip())
+        if isinstance(vs, str):
+            return vs
+        if vs[0] != "num":
+            return "TypeError"
+        score = vs[1]
+        if score < 100:
+            return ("num", 0)
+        if score < 300:
+            return ("num", 1)
+        if score < 600:
+            return ("num", 2)
+        return ("num", 3)
     if s == "I₂":
         return ("list", [("list", [("num", 1), ("num", 0)]),
                          ("list", [("num", 0), ("num", 1)])])

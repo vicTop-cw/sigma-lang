@@ -605,6 +605,80 @@ def encode_event(event: List[int]) -> int:
 
 
 # ============================================================
+# §SK.3.9–3.11 — 找茬五大制度补齐（v0.20，需求文档 §四）
+# 额度制 quota / 积分制 points / 勋章制 badge_level
+# ============================================================
+
+def quota_new(monthly: int) -> List[int]:
+    """额度制: 本月额度 = 剩余额度。§SK.3.9 — monthly ≥ 0."""
+    if monthly < 0:
+        raise ValueError("TypeError")
+    return [monthly, monthly]
+
+
+def quota_use(quota: List[int], amount: int) -> List[int]:
+    """额度制: 扣减额度，不足则 ⊥ QuotaExhausted。§SK.3.9."""
+    monthly, remaining = quota
+    if amount > remaining:
+        raise ValueError("QuotaExhausted")
+    return [monthly, remaining - amount]
+
+
+def quota_reset(quota: List[int]) -> List[int]:
+    """额度制: 月底清零，恢复满额。§SK.3.9."""
+    monthly, _ = quota
+    return [monthly, monthly]
+
+
+def points_new() -> List[int]:
+    """积分制: 无托管、无可用。§SK.3.10."""
+    return [0, 0]
+
+
+def points_hold(points: List[int], amount: int) -> List[int]:
+    """积分制: 冻结（托管中）。§SK.3.10."""
+    escrow, available = points
+    return [escrow + amount, available]
+
+
+def points_release(points: List[int], amount: int) -> List[int]:
+    """积分制: 释放入可用，不足托管则 ⊥ InsufficientEscrow。§SK.3.10."""
+    escrow, available = points
+    if amount > escrow:
+        raise ValueError("InsufficientEscrow")
+    return [escrow - amount, available + amount]
+
+
+def points_withdraw(points: List[int], amount: int) -> List[int]:
+    """积分制: 提现，不足可用则 ⊥ InsufficientPoints。§SK.3.10."""
+    escrow, available = points
+    if amount > available:
+        raise ValueError("InsufficientPoints")
+    return [escrow, available - amount]
+
+
+def badge_level(score: int) -> int:
+    """勋章制: 0=铜 1=银 2=金 3=钻石。§SK.3.11."""
+    if score < 100:
+        return 0
+    if score < 300:
+        return 1
+    if score < 600:
+        return 2
+    return 3
+
+
+def encode_quota(quota: List[int]) -> int:
+    """Law II — Quota → ℕ."""
+    return _encode_list(quota)
+
+
+def encode_points(points: List[int]) -> int:
+    """Law II — Points → ℕ."""
+    return _encode_list(points)
+
+
+# ============================================================
 # Self-check: canonical tests for every module (Law IV)
 # ============================================================
 
@@ -834,6 +908,45 @@ def _main() -> int:
     check("PF.risk_mixed", risk_score([50, 20, 30]) == 50)
     check("PF.risk_le_value", risk_score([50, 20, 30]) <= portfolio_value([50, 20, 30]))
     check("PF.encode_portfolio_nat", encode_portfolio([100, 0, 0]) >= 0)
+
+    # §SK.3.9 额度制 quota
+    check("Q.quota_new_shape", quota_new(50) == [50, 50])
+    check("Q.quota_use", quota_use(quota_new(50), 20) == [50, 30])
+    check("Q.quota_reset", quota_reset(quota_use(quota_new(50), 20)) == [50, 50])
+    try:
+        quota_use(quota_new(50), 60)
+        check("Q.quota_use_exhausted_rejected", False)
+    except ValueError:
+        check("Q.quota_use_exhausted_rejected", True)
+
+    # §SK.3.10 积分制 points
+    check("P.points_new_shape", points_new() == [0, 0])
+    check("P.points_hold", points_hold(points_new(), 100) == [100, 0])
+    check("P.points_release",
+          points_release(points_hold(points_new(), 100), 100) == [0, 100])
+    check("P.points_withdraw",
+          points_withdraw(points_release(points_hold(points_new(), 100), 100), 40) == [0, 60])
+    try:
+        points_release(points_new(), 10)
+        check("P.points_release_insufficient_escrow_rejected", False)
+    except ValueError:
+        check("P.points_release_insufficient_escrow_rejected", True)
+    try:
+        points_withdraw(points_new(), 10)
+        check("P.points_withdraw_insufficient_available_rejected", False)
+    except ValueError:
+        check("P.points_withdraw_insufficient_available_rejected", True)
+
+    # §SK.3.11 勋章制 badge_level
+    check("B.badge_zero", badge_level(0) == 0)
+    check("B.badge_bronze", badge_level(50) == 0)
+    check("B.badge_silver", badge_level(150) == 1)
+    check("B.badge_gold", badge_level(450) == 2)
+    check("B.badge_diamond", badge_level(900) == 3)
+    check("B.badge_bounded", 0 <= badge_level(12345) <= 3)
+    check("B.badge_monotonic", badge_level(100) <= badge_level(200))
+    check("B.encode_quota_nat", encode_quota([50, 30]) >= 0)
+    check("B.encode_points_nat", encode_points([0, 60]) >= 0)
 
     print(f"sigma_core self-check: {passed}/{passed + failed} passed")
     return 0 if failed == 0 else 1

@@ -651,6 +651,139 @@ def gen_pf_obligation(op):
         return _portfolio_value_obligations()
     if name == "risk_score":
         return _risk_score_obligations()
+    return gen_system_obligation(op)
+
+
+# ---------------------------------------------------------------------------
+# §SK.3.9–3.11 obligation generation (spec_p0_socketkit.md — 五大制度, v0.20)
+# ---------------------------------------------------------------------------
+
+SYS_OPS = {"quota_new", "quota_use", "quota_reset",
+           "points_new", "points_hold", "points_release", "points_withdraw",
+           "badge_level"}
+
+
+def _quota_obligations(op):
+    """§SK.3.9 额度制: quota_new ≡ [m, m]; quota_use 扣减; quota_reset 清零."""
+    name = op["name"].strip()
+    if name == "quota_new":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const m Int) (declare-const q Int)\n"
+               "(assert (>= m 0))\n"
+               "; Definition (§SK.3.9): quota_new(m) ≡ [m, m]\n"
+               "(assert (= (index q 0) m)) (assert (= (index q 1) m))\n"
+               "; Law: 0 ≤ remaining ≤ monthly\n"
+               "(assert (not (and (>= (index q 1) 0) (<= (index q 1) (index q 0)))))\n"
+               "(check-sat)\n")
+        return [("quota_new/law-remaining-in-range", law)]
+    if name == "quota_use":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const m Int) (declare-const r Int) (declare-const a Int)\n"
+               "(declare-const q Int) (declare-const q2 Int)\n"
+               "(assert (>= m 0)) (assert (>= r 0)) (assert (>= a 0))\n"
+               "; t is a valid quota [m, r], amount a ≤ remaining\n"
+               "(assert (= (index q 0) m)) (assert (= (index q 1) r))\n"
+               "(assert (<= a r))\n"
+               "; Definition (§SK.3.9): quota_use(q, a) ≡ [m, r−a]\n"
+               "(assert (= (index q2 0) m)) (assert (= (index q2 1) (- r a)))\n"
+               "; Law: remaining decreases by exactly a\n"
+               "(assert (not (= (index q2 1) (- (index q 1) a))))\n"
+               "(check-sat)\n")
+        return [("quota_use/law-decrement", law)]
+    if name == "quota_reset":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const m Int) (declare-const r Int)\n"
+               "(declare-const q Int) (declare-const q2 Int)\n"
+               "(assert (>= m 0)) (assert (>= r 0))\n"
+               "(assert (= (index q 0) m)) (assert (= (index q 1) r))\n"
+               "; Definition (§SK.3.9): quota_reset(q) ≡ [m, m]\n"
+               "(assert (= (index q2 0) m)) (assert (= (index q2 1) m))\n"
+               "; Law: reset restores full monthly quota\n"
+               "(assert (not (and (= (index q2 0) (index q 0))\n"
+               "                 (= (index q2 1) (index q 0)))))\n"
+               "(check-sat)\n")
+        return [("quota_reset/law-restore", law)]
+    return []
+
+
+def _points_obligations(op):
+    """§SK.3.10 积分制: hold 冻结 / release 释放 / withdraw 提现 (守恒)."""
+    name = op["name"].strip()
+    if name == "points_new":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const p Int)\n"
+               "; Definition (§SK.3.10): points_new() ≡ [0, 0]\n"
+               "(assert (= (index p 0) 0)) (assert (= (index p 1) 0))\n"
+               "; Law: no escrow, no available\n"
+               "(assert (not (and (= (index p 0) 0) (= (index p 1) 0))))\n"
+               "(check-sat)\n")
+        return [("points_new/law-empty", law)]
+    if name == "points_hold":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const e Int) (declare-const a Int) (declare-const x Int)\n"
+               "(declare-const p Int) (declare-const p2 Int)\n"
+               "(assert (>= e 0)) (assert (>= a 0)) (assert (>= x 0))\n"
+               "(assert (= (index p 0) e)) (assert (= (index p 1) a))\n"
+               "; Definition (§SK.3.10): points_hold(p, x) ≡ [e+x, a]\n"
+               "(assert (= (index p2 0) (+ e x))) (assert (= (index p2 1) a))\n"
+               "; Law: escrow increases by x, available unchanged\n"
+               "(assert (not (and (= (index p2 0) (+ (index p 0) x))\n"
+               "                 (= (index p2 1) (index p 1)))))\n"
+               "(check-sat)\n")
+        return [("points_hold/law-escrow-increase", law)]
+    if name == "points_release":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const e Int) (declare-const a Int) (declare-const x Int)\n"
+               "(declare-const p Int) (declare-const p2 Int)\n"
+               "(assert (>= e 0)) (assert (>= a 0)) (assert (>= x 0))\n"
+               "(assert (= (index p 0) e)) (assert (= (index p 1) a))\n"
+               "; Definition (§SK.3.10): points_release(p, x) ≡ [e−x, a+x] (x ≤ e)\n"
+               "(assert (<= x e))\n"
+               "(assert (= (index p2 0) (- e x))) (assert (= (index p2 1) (+ a x)))\n"
+               "; Law: release moves x from escrow to available (total conserved)\n"
+               "(assert (not (= (+ (index p2 0) (index p2 1)) (+ (index p 0) (index p 1)))))\n"
+               "(check-sat)\n")
+        return [("points_release/law-conservation", law)]
+    if name == "points_withdraw":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const e Int) (declare-const a Int) (declare-const x Int)\n"
+               "(declare-const p Int) (declare-const p2 Int)\n"
+               "(assert (>= e 0)) (assert (>= a 0)) (assert (>= x 0))\n"
+               "(assert (= (index p 0) e)) (assert (= (index p 1) a))\n"
+               "; Definition (§SK.3.10): points_withdraw(p, x) ≡ [e, a−x] (x ≤ a)\n"
+               "(assert (<= x a))\n"
+               "(assert (= (index p2 0) e)) (assert (= (index p2 1) (- a x)))\n"
+               "; Law: available decreases by x\n"
+               "(assert (not (= (index p2 1) (- (index p 1) x))))\n"
+               "(check-sat)\n")
+        return [("points_withdraw/law-decrement", law)]
+    return []
+
+
+def _badge_obligations(op):
+    """§SK.3.11 勋章制: badge_level ∈ {0,1,2,3}，单调."""
+    law = ("(set-logic NIA)\n"
+           "(declare-const s Int) (declare-const b Int)\n"
+           "(assert (>= s 0))\n"
+           "; Definition (§SK.3.11): 0=铜 1=银 2=金 3=钻石\n"
+           "(assert (= b (ite (< s 100) 0\n"
+           "                 (ite (< s 300) 1\n"
+           "                      (ite (< s 600) 2 3)))))\n"
+           "; Law: badge bounded 0..3\n"
+           "(assert (not (and (>= b 0) (<= b 3))))\n"
+           "(check-sat)\n")
+    return [("badge_level/law-bounded", law)]
+
+
+def gen_system_obligation(op):
+    """Generate §SK.3.9–3.11 obligations for one system operation (or [])."""
+    name = op["name"].strip()
+    if name in ("quota_new", "quota_use", "quota_reset"):
+        return _quota_obligations(op)
+    if name in ("points_new", "points_hold", "points_release", "points_withdraw"):
+        return _points_obligations(op)
+    if name == "badge_level":
+        return _badge_obligations(op)
     return []
 
 

@@ -349,6 +349,103 @@ def run_trace(core):
          "ok": risk <= val, "note": f"risk={risk} ≤ value={val}"},
     ])
 
+    # --- §SK.3.9 额度制 quota (需求文档 §四.1) ----------------------------------
+    q0 = core.quota_new(50)
+    record("quota_new", "§SK.3.9", [50], q0, [
+        {"law": "0 ≤ index(q, 1) ≤ index(q, 0) — 剩余 ∈ [0, 月额]",
+         "ok": 0 <= q0[1] <= q0[0], "note": f"monthly={q0[0]}, remaining={q0[1]}"},
+    ])
+
+    q1 = core.quota_use(q0, 20)
+    record("quota_use", "§SK.3.9", [q0, 20], q1, [
+        {"law": "index(q, 1) ≥ a ⇒ index(quota_use(q, a), 1) ≡ index(q, 1) − a — 扣减正确",
+         "ok": q1[1] == q0[1] - 20, "note": f"remaining {q0[1]} → {q1[1]}"},
+    ])
+
+    try:
+        core.quota_use(q0, 60)
+        record("quota_use", "§SK.3.9", [q0, 60], "USED(60)?", [
+            {"law": "额度不足 → ⊥ QuotaExhausted",
+             "ok": False, "note": "超额度使用被接受"},
+        ])
+    except ValueError as e:
+        record("quota_use", "§SK.3.9", [q0, 60], f"rejected ({e})", [
+            {"law": "额度不足 → ⊥ QuotaExhausted",
+             "ok": True, "note": "QuotaExhausted 拒绝超额度"},
+        ])
+
+    qr = core.quota_reset(q1)
+    record("quota_reset", "§SK.3.9", q1, qr, [
+        {"law": "quota_reset(q) ≡ [index(q, 0), index(q, 0)] — 月底清零恢复满额",
+         "ok": qr == [q1[0], q1[0]], "note": f"reset → {qr}"},
+    ])
+
+    # --- §SK.3.10 积分制 points (需求文档 §四.2) -------------------------------
+    p0 = core.points_new()
+    record("points_new", "§SK.3.10", [], p0, [
+        {"law": "points_new() ≡ [0, 0] — 无托管、无可用",
+         "ok": p0 == [0, 0], "note": f"points={p0}"},
+    ])
+
+    p1 = core.points_hold(p0, 100)
+    record("points_hold", "§SK.3.10", [p0, 100], p1, [
+        {"law": "index(points_hold(p, x), 0) ≡ index(p, 0) + x — 托管增加（冻结）",
+         "ok": p1[0] == p0[0] + 100, "note": f"escrow {p0[0]} → {p1[0]}"},
+        {"law": "index(points_hold(p, x), 1) ≡ index(p, 1) — 可用不变",
+         "ok": p1[1] == p0[1], "note": f"available={p1[1]}"},
+    ])
+
+    p2 = core.points_release(p1, 100)
+    record("points_release", "§SK.3.10", [p1, 100], p2, [
+        {"law": "index(p, 0) ≥ x ⇒ index(points_release(p, x), 1) ≡ index(p, 1) + x — 释放入可用",
+         "ok": p2[1] == p1[1] + 100, "note": f"available {p1[1]} → {p2[1]}"},
+        {"law": "释放守恒 — escrow→available 总额不变",
+         "ok": p2[0] + p2[1] == p1[0] + p1[1], "note": f"total={p2[0] + p2[1]}"},
+    ])
+
+    try:
+        core.points_release(p0, 10)
+        record("points_release", "§SK.3.10", [p0, 10], "RELEASED(10)?", [
+            {"law": "托管不足 → ⊥ InsufficientEscrow",
+             "ok": False, "note": "空 escrow 释放被接受"},
+        ])
+    except ValueError as e:
+        record("points_release", "§SK.3.10", [p0, 10], f"rejected ({e})", [
+            {"law": "托管不足 → ⊥ InsufficientEscrow",
+             "ok": True, "note": "InsufficientEscrow 拒绝空 escrow 释放"},
+        ])
+
+    p3 = core.points_withdraw(p2, 40)
+    record("points_withdraw", "§SK.3.10", [p2, 40], p3, [
+        {"law": "index(p, 1) ≥ x ⇒ index(points_withdraw(p, x), 1) ≡ index(p, 1) − x — 提现扣减",
+         "ok": p3[1] == p2[1] - 40, "note": f"available {p2[1]} → {p3[1]}"},
+    ])
+
+    try:
+        core.points_withdraw(p0, 10)
+        record("points_withdraw", "§SK.3.10", [p0, 10], "WITHDRAWN(10)?", [
+            {"law": "可用不足 → ⊥ InsufficientPoints",
+             "ok": False, "note": "空 available 提现被接受"},
+        ])
+    except ValueError as e:
+        record("points_withdraw", "§SK.3.10", [p0, 10], f"rejected ({e})", [
+            {"law": "可用不足 → ⊥ InsufficientPoints",
+             "ok": True, "note": "InsufficientPoints 拒绝空 available 提现"},
+        ])
+
+    # --- §SK.3.11 勋章制 badge_level (需求文档 §四.5) ---------------------------
+    b0, b1, b2, b3 = (core.badge_level(0), core.badge_level(150),
+                      core.badge_level(450), core.badge_level(900))
+    record("badge_level", "§SK.3.11", [0, 150, 450, 900], [b0, b1, b2, b3], [
+        {"law": "0 ≤ badge_level(s) ≤ 3 — 铜/银/金/钻四级有界",
+         "ok": all(0 <= b <= 3 for b in (b0, b1, b2, b3)),
+         "note": f"0→{b0}, 150→{b1}, 450→{b2}, 900→{b3}"},
+        {"law": "badge_level(s) ≤ badge_level(s + 100) — 单调不降",
+         "ok": (core.badge_level(100) <= core.badge_level(200)
+                and core.badge_level(400) <= core.badge_level(500)),
+         "note": "分数越高勋章不降"},
+    ])
+
     return events
 
 

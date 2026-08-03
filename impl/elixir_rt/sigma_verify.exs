@@ -1096,6 +1096,101 @@ defmodule SigmaVerify do
             {:ok, {:num, q_a + q_b}}
           _ -> {:error, "TypeError"}
         end
+      # §SK.3.9 额度制 quota — 每月额度 / 扣减 / 月底清零.
+      String.starts_with?(t, "quota_new(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 10..-2//1)
+        case eval_expr(inner) do
+          {:ok, {:num, monthly}} ->
+            if monthly < 0 do
+              {:error, "TypeError"}
+            else
+              {:ok, {:list, [{:num, monthly}, {:num, monthly}]}}
+            end
+          _ -> {:error, "TypeError"}
+        end
+      String.starts_with?(t, "quota_use(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 10..-2//1)
+        case split_top_level(inner, ?,) do
+          {q_s, a_s} ->
+            with {:ok, {:list, [{:num, monthly}, {:num, remaining}]}} <- eval_expr(q_s),
+                 {:ok, {:num, amount}} <- eval_expr(a_s) do
+              if amount > remaining do
+                {:error, "QuotaExhausted"}
+              else
+                {:ok, {:list, [{:num, monthly}, {:num, remaining - amount}]}}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          nil -> {:error, "bad quota_use args: #{inner}"}
+        end
+      String.starts_with?(t, "quota_reset(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 12..-2//1)
+        case eval_expr(inner) do
+          {:ok, {:list, [{:num, monthly}, _remaining]}} ->
+            {:ok, {:list, [{:num, monthly}, {:num, monthly}]}}
+          _ -> {:error, "TypeError"}
+        end
+      # §SK.3.10 积分制 points — 托管 / 释放 / 提现.
+      t == "points_new()" ->
+        {:ok, {:list, [{:num, 0}, {:num, 0}]}}
+      String.starts_with?(t, "points_hold(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 12..-2//1)
+        case split_top_level(inner, ?,) do
+          {p_s, x_s} ->
+            with {:ok, {:list, [{:num, escrow}, {:num, available}]}} <- eval_expr(p_s),
+                 {:ok, {:num, amount}} <- eval_expr(x_s) do
+              {:ok, {:list, [{:num, escrow + amount}, {:num, available}]}}
+            else
+              _ -> {:error, "TypeError"}
+            end
+          nil -> {:error, "bad points_hold args: #{inner}"}
+        end
+      String.starts_with?(t, "points_release(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 15..-2//1)
+        case split_top_level(inner, ?,) do
+          {p_s, x_s} ->
+            with {:ok, {:list, [{:num, escrow}, {:num, available}]}} <- eval_expr(p_s),
+                 {:ok, {:num, amount}} <- eval_expr(x_s) do
+              if amount > escrow do
+                {:error, "InsufficientEscrow"}
+              else
+                {:ok, {:list, [{:num, escrow - amount}, {:num, available + amount}]}}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          nil -> {:error, "bad points_release args: #{inner}"}
+        end
+      String.starts_with?(t, "points_withdraw(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 16..-2//1)
+        case split_top_level(inner, ?,) do
+          {p_s, x_s} ->
+            with {:ok, {:list, [{:num, escrow}, {:num, available}]}} <- eval_expr(p_s),
+                 {:ok, {:num, amount}} <- eval_expr(x_s) do
+              if amount > available do
+                {:error, "InsufficientPoints"}
+              else
+                {:ok, {:list, [{:num, escrow}, {:num, available - amount}]}}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          nil -> {:error, "bad points_withdraw args: #{inner}"}
+        end
+      # §SK.3.11 勋章制 badge_level — 0=铜 1=银 2=金 3=钻石.
+      String.starts_with?(t, "badge_level(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 12..-2//1)
+        case eval_expr(inner) do
+          {:ok, {:num, score}} ->
+            cond do
+              score < 100 -> {:ok, {:num, 0}}
+              score < 300 -> {:ok, {:num, 1}}
+              score < 600 -> {:ok, {:num, 2}}
+              true -> {:ok, {:num, 3}}
+            end
+          _ -> {:error, "TypeError"}
+        end
       t == "I₂" ->
         {:ok, {:list, [{:list, [{:num, 1}, {:num, 0}]},
                        {:list, [{:num, 0}, {:num, 1}]}]}}
@@ -1437,6 +1532,48 @@ defmodule SigmaVerify do
   @doc "Law II — Event → ℕ."
   def encode_event(event), do: encode_list(event)
 
+  # ============================================================
+  # §SK.3.9–3.11 — 找茬五大制度补齐 (v0.20, 需求文档 §四)
+  # 额度制 quota / 积分制 points / 勋章制 badge_level
+  # ============================================================
+
+  @doc "额度制: 本月额度 = 剩余额度. §SK.3.9 — monthly ≥ 0."
+  def quota_new(monthly) when monthly >= 0, do: {:ok, [monthly, monthly]}
+  def quota_new(_monthly), do: {:error, "TypeError"}
+
+  @doc "额度制: 扣减额度，不足则 ⊥ QuotaExhausted. §SK.3.9."
+  def quota_use([monthly, remaining], amount) when amount <= remaining, do: {:ok, [monthly, remaining - amount]}
+  def quota_use(_quota, _amount), do: {:error, "QuotaExhausted"}
+
+  @doc "额度制: 月底清零，恢复满额. §SK.3.9."
+  def quota_reset([monthly, _remaining]), do: [monthly, monthly]
+
+  @doc "积分制: 无托管、无可用. §SK.3.10."
+  def points_new(), do: [0, 0]
+
+  @doc "积分制: 冻结（托管中）. §SK.3.10."
+  def points_hold([escrow, available], amount), do: [escrow + amount, available]
+
+  @doc "积分制: 释放入可用，不足托管则 ⊥ InsufficientEscrow. §SK.3.10."
+  def points_release([escrow, available], amount) when amount <= escrow, do: {:ok, [escrow - amount, available + amount]}
+  def points_release(_points, _amount), do: {:error, "InsufficientEscrow"}
+
+  @doc "积分制: 提现，不足可用则 ⊥ InsufficientPoints. §SK.3.10."
+  def points_withdraw([escrow, available], amount) when amount <= available, do: {:ok, [escrow, available - amount]}
+  def points_withdraw(_points, _amount), do: {:error, "InsufficientPoints"}
+
+  @doc "勋章制: 0=铜 1=银 2=金 3=钻石. §SK.3.11."
+  def badge_level(score) when score < 100, do: 0
+  def badge_level(score) when score < 300, do: 1
+  def badge_level(score) when score < 600, do: 2
+  def badge_level(_score), do: 3
+
+  @doc "Law II — Quota → ℕ."
+  def encode_quota(quota), do: encode_list(quota)
+
+  @doc "Law II — Points → ℕ."
+  def encode_points(points), do: encode_list(points)
+
   @doc "Run the §SK self-check (mirrors sigma_core.py §SK block); returns {passed, total}."
   def sk_self_check do
     # task_create returns {:ok, task}; unwrap once so accept_task/submit/accept
@@ -1490,6 +1627,31 @@ defmodule SigmaVerify do
       {"credit_breach", credit_score([[1, 1]]) == 70},                              # 100×0.7
       {"credit_breach_then_complete", credit_score([[1, 1], [0, 1]]) == 75},        # 70+5
       {"credit_double_breach", credit_score([[1, 2]]) == 49},                       # 70×0.7
+      # §SK.3.9 额度制 quota
+      {"quota_new_shape", quota_new(50) == {:ok, [50, 50]}},
+      {"quota_use", quota_use([50, 50], 20) == {:ok, [50, 30]}},
+      {"quota_reset", quota_reset([50, 30]) == [50, 50]},
+      {"quota_use_exhausted_rejected", quota_use([50, 50], 60) == {:error, "QuotaExhausted"}},
+      # §SK.3.10 积分制 points
+      {"points_new_shape", points_new() == [0, 0]},
+      {"points_hold", points_hold(points_new(), 100) == [100, 0]},
+      {"points_release", points_release(points_hold(points_new(), 100), 100) == {:ok, [0, 100]}},
+      {"points_withdraw",
+       points_withdraw(elem(points_release(points_hold(points_new(), 100), 100), 1), 40) == {:ok, [0, 60]}},
+      {"points_release_insufficient_escrow_rejected",
+       points_release(points_new(), 10) == {:error, "InsufficientEscrow"}},
+      {"points_withdraw_insufficient_available_rejected",
+       points_withdraw(points_new(), 10) == {:error, "InsufficientPoints"}},
+      # §SK.3.11 勋章制 badge_level
+      {"badge_zero", badge_level(0) == 0},
+      {"badge_bronze", badge_level(50) == 0},
+      {"badge_silver", badge_level(150) == 1},
+      {"badge_gold", badge_level(450) == 2},
+      {"badge_diamond", badge_level(900) == 3},
+      {"badge_bounded", badge_level(12345) in [0, 1, 2, 3]},
+      {"badge_monotonic", badge_level(100) <= badge_level(200)},
+      {"encode_quota_nat", encode_quota([50, 30]) >= 0},
+      {"encode_points_nat", encode_points([0, 60]) >= 0},
       # §SK.4 encodings (Law II)
       {"encode_task_nat", encode_task([1, 2, 0, 0]) >= 0},
       {"encode_distinct", encode_task([1, 2, 0, 0]) != encode_task([1, 3, 0, 0])},

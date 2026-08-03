@@ -18,11 +18,12 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.19 可用**——即：**第二个自举新域（金融 portfolio@1.0）**，
-在 v0.18（状态机不变量证明）达成的基础上，用第二个全新领域（金融投资组合）验证
-ΣLang 协议的**泛化性**：`spec/spec_p0_portfolio.md`（§PF：portfolio_new / buy / sell /
-portfolio_value / risk_score，单位价格 1 使守恒可证）+ 三端执行层 + 语料 + z3 证明，
-证明"换一个行业照样能用"。**我只关心这个结果。**
+**总目标**: 把项目推进到 **v0.20 可用**——即：**找茬五大制度补齐**，
+在 v0.19（第二个自举新域）达成的基础上，依据 `D:\Desktop\来找茬_需求文档.md` §四
+把剩余三制度纳入 §SK：SK.3.9 额度制（quota_new/quota_use/quota_reset）、
+SK.3.10 积分制（points_hold/points_release/points_withdraw）、SK.3.11 勋章制
+（badge_level）——五大制度全部成为三端一致、z3 可证明的 ΣLang 语义，
+App 开工时整份业务规则都有被验证过的语义可直接落地。**我只关心这个结果。**
 
 ---
 
@@ -296,6 +297,29 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > 金融 portfolio（v0.19）证明它能承载第二个完全不同的行业——同样的流程
 > （spec → 三端 → 语料 → 证明）原样跑通，无需改协议本身。
 
+### v0.20 完成定义（找茬五大制度补齐，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **三制度 spec**: §SK 新增 SK.3.9 额度制（`quota_new/quota_use/quota_reset`，
+      月额/扣减/月底清零）、SK.3.10 积分制（`points_new/points_hold/points_release/
+      points_withdraw`，托管冻结/释放/提现）、SK.3.11 勋章制（`badge_level`，
+      铜银金钻四级）；错误路径 ⊥ QuotaExhausted / InsufficientEscrow /
+      InsufficientPoints / TypeError；SK.4 补 encode_quota / encode_points。
+- [x] **三端执行层同步**: `sigma_core.py` 130/130；Rust `sk.rs`+`evaluator.rs` /
+      Elixir `sigma_verify.exs` 支持三制度（参考实现 + eval_expr + 自检 52/52），
+      `cargo build` 0 error/0 warning。
+- [x] **语料**: `corpus/socketkit_ok.md` 增三制度真实调用测试（50/50 三端一致 PASS），
+      每操作含 ⊥ 负例满足 E-02；consensus 43/43 全绿。
+- [x] **证明**: `sigma-prove` 新增 8 项三制度义务（quota×3 / points×4 / badge×1）
+      全部 `PROVED (unsat)`——§SK+§PF+三制度共 41 项全绿；`sigma-runtime` 审计
+      trace 增加三制度段（59/59）。
+- [x] **不回归**: consensus 43/43、p0 109/109、三端 0 warning、py_compile 通过，
+      v0.10–v0.19 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
+
+> v0.20 = 「五大制度语义齐备」：找茬的额度制/积分制/贡献制/契分制/勋章制全部成为
+> ΣLang 语义——发单扣额度、赏金托管冻结、验收释放、完成 +5 契分、勋章升级，
+> 整条业务规则链三端一致可执行、z3 可证明、语料进共识门禁。
+
 ---
 
 ## 7. 提交与汇报约定
@@ -306,7 +330,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ```text
 【ΣLang AUTOPILOT 结果】
-- 状态: ✅ v0.19 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
+- 状态: ✅ v0.20 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
 - 本轮完成: 修复 X · 新增 Y · 验证 N/N
 - 验证证据: verify_consensus N/N · verify_p0 109/109 · sigma-prove PROVED
 - 提交: <hash> <subject>

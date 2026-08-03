@@ -408,6 +408,136 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
             _ => Err("TypeError".to_string()),
         };
     }
+    // §SK.3.9 额度制 quota — 每月额度 / 扣减 / 月底清零.
+    if let Some(rest) = s.strip_prefix("quota_new(") {
+        let inner = rest.strip_suffix(')').ok_or("bad quota_new call")?;
+        let vm = eval_expr(inner)?;
+        return match vm {
+            TVal::Num(monthly) => {
+                if monthly < 0 {
+                    Err("TypeError".to_string())
+                } else {
+                    Ok(TVal::List(vec![TVal::Num(monthly), TVal::Num(monthly)]))
+                }
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("quota_use(") {
+        let inner = rest.strip_suffix(')').ok_or("bad quota_use call")?;
+        let (q, a) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad quota_use args: {}", inner))?;
+        let vq = eval_expr(q)?;
+        let va = eval_expr(a)?;
+        return match (vq, va) {
+            (TVal::List(quota), TVal::Num(amount)) if quota.len() == 2 => {
+                let (monthly, remaining) = match (&quota[0], &quota[1]) {
+                    (TVal::Num(m), TVal::Num(r)) => (*m, *r),
+                    _ => return Err("TypeError".to_string()),
+                };
+                if amount > remaining {
+                    return Err("QuotaExhausted".to_string());
+                }
+                Ok(TVal::List(vec![TVal::Num(monthly), TVal::Num(remaining - amount)]))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("quota_reset(") {
+        let inner = rest.strip_suffix(')').ok_or("bad quota_reset call")?;
+        let vq = eval_expr(inner)?;
+        return match vq {
+            TVal::List(quota) if quota.len() == 2 => {
+                let monthly = match &quota[0] {
+                    TVal::Num(m) => *m,
+                    _ => return Err("TypeError".to_string()),
+                };
+                Ok(TVal::List(vec![TVal::Num(monthly), TVal::Num(monthly)]))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    // §SK.3.10 积分制 points — 托管 / 释放 / 提现.
+    if s == "points_new()" {
+        return Ok(TVal::List(vec![TVal::Num(0), TVal::Num(0)]));
+    }
+    if let Some(rest) = s.strip_prefix("points_hold(") {
+        let inner = rest.strip_suffix(')').ok_or("bad points_hold call")?;
+        let (p, x) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad points_hold args: {}", inner))?;
+        let vp = eval_expr(p)?;
+        let vx = eval_expr(x)?;
+        return match (vp, vx) {
+            (TVal::List(points), TVal::Num(amount)) if points.len() == 2 => {
+                let (escrow, available) = match (&points[0], &points[1]) {
+                    (TVal::Num(e), TVal::Num(a)) => (*e, *a),
+                    _ => return Err("TypeError".to_string()),
+                };
+                Ok(TVal::List(vec![TVal::Num(escrow + amount), TVal::Num(available)]))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("points_release(") {
+        let inner = rest.strip_suffix(')').ok_or("bad points_release call")?;
+        let (p, x) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad points_release args: {}", inner))?;
+        let vp = eval_expr(p)?;
+        let vx = eval_expr(x)?;
+        return match (vp, vx) {
+            (TVal::List(points), TVal::Num(amount)) if points.len() == 2 => {
+                let (escrow, available) = match (&points[0], &points[1]) {
+                    (TVal::Num(e), TVal::Num(a)) => (*e, *a),
+                    _ => return Err("TypeError".to_string()),
+                };
+                if amount > escrow {
+                    return Err("InsufficientEscrow".to_string());
+                }
+                Ok(TVal::List(vec![TVal::Num(escrow - amount), TVal::Num(available + amount)]))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("points_withdraw(") {
+        let inner = rest.strip_suffix(')').ok_or("bad points_withdraw call")?;
+        let (p, x) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad points_withdraw args: {}", inner))?;
+        let vp = eval_expr(p)?;
+        let vx = eval_expr(x)?;
+        return match (vp, vx) {
+            (TVal::List(points), TVal::Num(amount)) if points.len() == 2 => {
+                let (escrow, available) = match (&points[0], &points[1]) {
+                    (TVal::Num(e), TVal::Num(a)) => (*e, *a),
+                    _ => return Err("TypeError".to_string()),
+                };
+                if amount > available {
+                    return Err("InsufficientPoints".to_string());
+                }
+                Ok(TVal::List(vec![TVal::Num(escrow), TVal::Num(available - amount)]))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    // §SK.3.11 勋章制 badge_level — 0=铜 1=银 2=金 3=钻石.
+    if let Some(rest) = s.strip_prefix("badge_level(") {
+        let inner = rest.strip_suffix(')').ok_or("bad badge_level call")?;
+        let vs = eval_expr(inner)?;
+        return match vs {
+            TVal::Num(score) => {
+                let badge = if score < 100 {
+                    0
+                } else if score < 300 {
+                    1
+                } else if score < 600 {
+                    2
+                } else {
+                    3
+                };
+                Ok(TVal::Num(badge))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
     if s == "I₂" {
         return Ok(TVal::List(vec![
             TVal::List(vec![TVal::Num(1), TVal::Num(0)]),

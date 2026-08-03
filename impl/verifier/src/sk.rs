@@ -129,6 +129,86 @@ pub fn encode_event(event: &[i64]) -> i64 {
     encode_list(event, 1000)
 }
 
+// ============================================================
+// §SK.3.9–3.11 — 找茬五大制度补齐 (v0.20, 需求文档 §四)
+// 额度制 quota / 积分制 points / 勋章制 badge_level
+// ============================================================
+
+/// 额度制: 本月额度 = 剩余额度. §SK.3.9 — monthly ≥ 0.
+pub fn quota_new(monthly: i64) -> Result<Vec<i64>, &'static str> {
+    if monthly < 0 {
+        return Err("TypeError");
+    }
+    Ok(vec![monthly, monthly])
+}
+
+/// 额度制: 扣减额度，不足则 ⊥ QuotaExhausted. §SK.3.9.
+pub fn quota_use(quota: &[i64], amount: i64) -> Result<Vec<i64>, &'static str> {
+    let (monthly, remaining) = (quota[0], quota[1]);
+    if amount > remaining {
+        return Err("QuotaExhausted");
+    }
+    Ok(vec![monthly, remaining - amount])
+}
+
+/// 额度制: 月底清零，恢复满额. §SK.3.9.
+pub fn quota_reset(quota: &[i64]) -> Vec<i64> {
+    let monthly = quota[0];
+    vec![monthly, monthly]
+}
+
+/// 积分制: 无托管、无可用. §SK.3.10.
+pub fn points_new() -> Vec<i64> {
+    vec![0, 0]
+}
+
+/// 积分制: 冻结（托管中）. §SK.3.10.
+pub fn points_hold(points: &[i64], amount: i64) -> Vec<i64> {
+    let (escrow, available) = (points[0], points[1]);
+    vec![escrow + amount, available]
+}
+
+/// 积分制: 释放入可用，不足托管则 ⊥ InsufficientEscrow. §SK.3.10.
+pub fn points_release(points: &[i64], amount: i64) -> Result<Vec<i64>, &'static str> {
+    let (escrow, available) = (points[0], points[1]);
+    if amount > escrow {
+        return Err("InsufficientEscrow");
+    }
+    Ok(vec![escrow - amount, available + amount])
+}
+
+/// 积分制: 提现，不足可用则 ⊥ InsufficientPoints. §SK.3.10.
+pub fn points_withdraw(points: &[i64], amount: i64) -> Result<Vec<i64>, &'static str> {
+    let (escrow, available) = (points[0], points[1]);
+    if amount > available {
+        return Err("InsufficientPoints");
+    }
+    Ok(vec![escrow, available - amount])
+}
+
+/// 勋章制: 0=铜 1=银 2=金 3=钻石. §SK.3.11.
+pub fn badge_level(score: i64) -> i64 {
+    if score < 100 {
+        0
+    } else if score < 300 {
+        1
+    } else if score < 600 {
+        2
+    } else {
+        3
+    }
+}
+
+/// Law II — Quota → ℕ.
+pub fn encode_quota(quota: &[i64]) -> i64 {
+    encode_list(quota, 1000)
+}
+
+/// Law II — Points → ℕ.
+pub fn encode_points(points: &[i64]) -> i64 {
+    encode_list(points, 1000)
+}
+
 /// Run the §SK self-check (mirrors `sigma_core.py` §SK block); returns
 /// (passed, total).
 pub fn self_check() -> (usize, usize) {
@@ -202,6 +282,37 @@ pub fn self_check() -> (usize, usize) {
     check!("credit_breach_then_complete",
            credit_score(&[vec![1, 1], vec![0, 1]]) == 75); // 70+5
     check!("credit_double_breach", credit_score(&[vec![1, 2]]) == 49); // 70×0.7
+
+    // §SK.3.9 额度制 quota
+    check!("quota_new_shape", quota_new(50) == Ok(vec![50, 50]));
+    check!("quota_use", quota_use(&quota_new(50).unwrap(), 20) == Ok(vec![50, 30]));
+    check!("quota_reset",
+           quota_reset(&quota_use(&quota_new(50).unwrap(), 20).unwrap()) == vec![50, 50]);
+    check!("quota_use_exhausted_rejected", quota_use(&quota_new(50).unwrap(), 60).is_err());
+
+    // §SK.3.10 积分制 points
+    check!("points_new_shape", points_new() == vec![0, 0]);
+    check!("points_hold", points_hold(&points_new(), 100) == vec![100, 0]);
+    check!("points_release",
+           points_release(&points_hold(&points_new(), 100), 100) == Ok(vec![0, 100]));
+    check!("points_withdraw",
+           points_withdraw(&points_release(&points_hold(&points_new(), 100), 100).unwrap(), 40)
+               == Ok(vec![0, 60]));
+    check!("points_release_insufficient_escrow_rejected",
+           points_release(&points_new(), 10).is_err());
+    check!("points_withdraw_insufficient_available_rejected",
+           points_withdraw(&points_new(), 10).is_err());
+
+    // §SK.3.11 勋章制 badge_level
+    check!("badge_zero", badge_level(0) == 0);
+    check!("badge_bronze", badge_level(50) == 0);
+    check!("badge_silver", badge_level(150) == 1);
+    check!("badge_gold", badge_level(450) == 2);
+    check!("badge_diamond", badge_level(900) == 3);
+    check!("badge_bounded", (0..=3).contains(&badge_level(12345)));
+    check!("badge_monotonic", badge_level(100) <= badge_level(200));
+    check!("encode_quota_nat", encode_quota(&[50, 30]) >= 0);
+    check!("encode_points_nat", encode_points(&[0, 60]) >= 0);
 
     // §SK.4 encodings (Law II)
     check!("encode_task_nat", encode_task(&[1, 2, 0, 0]) >= 0);
