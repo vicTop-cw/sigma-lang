@@ -18,11 +18,12 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.21 可用**——即：**找茬 MVP 全链路审计剧本**，
-在 v0.20（五大制度补齐）达成的基础上，把找茬完整业务流串成一条端到端「验收剧本」：
-spec §SK.6 定义 12 步 MVP 业务故事线（开户额度→发布需求→扣减额度→赏金托管→接单→
-提交成果→验收确认→释放赏金→提现→契分→贡献→勋章），`sigma-runtime --story`
-一次跑通全流程并逐事件复核不变量——App 开工时照此验收。**我只关心这个结果。**
+**总目标**: 把项目推进到 **v0.22 可用**——即：**找茬 MVP 参考实现**，
+在 v0.21（MVP 全链路审计剧本）达成的基础上，把 §SK.6 验收剧本实现为可运行的
+App 后端：`impl/python/sigma_app.py`（MVPApp）——业务方法**全部委托** sigma_core
+§SK 语义，App 层只管状态、不重写业务规则；stdlib-only HTTP API 暴露
+`/post /claim /submit /accept /withdraw /badge`，自检跑通 §SK.6 剧本——
+从「协议」到「产品」的临门一脚。**我只关心这个结果。**
 
 ---
 
@@ -336,6 +337,26 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > 一条可审计的 ΣLang 调用序列——开工时任何实现只要按 §SK.6 剧本走，每一步
 > 都被三端验证过、不变量可复核，业务正确性有据可依。
 
+### v0.22 完成定义（找茬 MVP 参考实现，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **参考实现**: `impl/python/sigma_app.py`（MVPApp）——内存存储（tasks / quotas /
+      points / credit_events / contribution_actions），业务方法**全部委托** sigma_core
+      §SK（task_create / quota_use / points_hold / accept_task / task_submit /
+      task_accept / points_release / points_withdraw / credit_score /
+      contribution_score / badge_level），App 层零业务规则重写。
+- [x] **HTTP API**: `--serve` 启动 stdlib-only HTTP JSON 服务，暴露
+      `/post /claim /submit /accept /withdraw /badge`（GET 参数，业务委托 §SK）。
+- [x] **自检一致性**: `python3 impl/python/sigma_app.py` 跑通 §SK.6 十二步剧本
+      （15/15），步骤与 `sigma-runtime --story`（18/18）一一对应——证明被审计的
+      验收剧本可直接实现为可运行后端。
+- [x] **不回归**: consensus 43/43、p0 109/109、sigma-prove 41 项 PROVED、
+      sigma-runtime 59/59（trace）+ 18/18（story）、三端编译 0 warning、py_compile 通过，
+      v0.10–v0.21 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
+
+> v0.22 = 「从协议到产品」：找茬 MVP 真正"开工"的第一步——一个能跑的后端，
+> 业务逻辑逐行对照 ΣLang 语义，任何规则都来自被三端验证、z3 证明过的 §SK。
+
 ---
 
 ## 7. 提交与汇报约定
@@ -346,7 +367,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ```text
 【ΣLang AUTOPILOT 结果】
-- 状态: ✅ v0.21 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
+- 状态: ✅ v0.22 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
 - 本轮完成: 修复 X · 新增 Y · 验证 N/N
 - 验证证据: verify_consensus N/N · verify_p0 109/109 · sigma-prove PROVED
 - 提交: <hash> <subject>
