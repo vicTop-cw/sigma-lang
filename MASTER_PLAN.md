@@ -158,9 +158,15 @@
   额度预支→积分可追溯），逐事件复核定律（11/11 义务满足）；trace 59/59 与
   MVP story 18/18 不回归；consensus 45/45、p0 109/109、三端 0 warning，
   v0.10–v0.34 不回归。
+- ✅ **REACHED v0.36 (2026-08-03)**: 三端增长期 story 对账—— §SK.3.12–3.17
+  增长期故事线扩到三端：Rust `sk.rs growth_story()` + `--sk-growth`（11/11）、
+  Elixir `sk_growth_story()` + `--sk-growth`（11/11），与 Python
+  `sigma-runtime --growth`（11/11）**三端逐项一致**——增长期业务故事线三把尺子
+  同尺；`cargo build` 0 error/0 warning；consensus 45/45、p0 109/109，
+  v0.10–v0.35 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.35 达成后 P3 待办已清空，进入新里程碑规划（v0.36–v0.50 连续推进）。
+  2. （无）— v0.36 达成后 P3 待办已清空，进入新里程碑规划（v0.37–v0.50 连续推进）。
 
 ---
 

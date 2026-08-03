@@ -1926,6 +1926,33 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ SK.6.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  @doc "Run the §SK.3.12–3.17 growth-phase audit story (mirrors sigma-runtime --growth)."
+  def sk_growth_story do
+    checks = [
+      # §SK.3.12 核验师签发勋章
+      {"badge_issue", badge_issue(1001, 3, 105) == {:ok, [1001, 3, 1]}},
+      {"badge_issue_unauthorized", badge_issue(999, 3, 105) == {:error, "AuthError"}},
+      # §SK.3.13 督导处理纠纷
+      {"dispute_review", dispute_review([[1, 1, 3], [2, 1, 2]]) == 1},
+      {"dispute_binary", dispute_review([[1, 1, 3], [2, 1, 2]]) in [0, 1]},
+      # §SK.3.14 团机制
+      {"team_create", team_create(7, 0, 3) == {:ok, [7, 0, 1, 3]}},
+      {"team_join", team_join([7, 0, 1, 3], 5) == {:ok, [7, 0, 2, 3]}},
+      # §SK.3.15 团收益
+      {"team_share", team_share([[3, 2], [4, 4]], 6) == {:ok, [[3, 2], [4, 4]]}},
+      # §SK.3.16 额度预支
+      {"quota_advance", quota_advance([50, 50]) == [50, 100]},
+      {"quota_reset_after_advance", quota_reset(quota_advance([50, 50])) == quota_reset([50, 50])},
+      # §SK.3.17 积分可追溯
+      {"points_ledger", points_ledger([[0, 100, 1]]) == {:ok, [[1, 1, 100]]}},
+      {"points_ledger_untraceable", points_ledger([[0, 100, 0]]) == {:error, "NotTraceable"}}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ SK.3.12–3.17.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -1941,6 +1968,11 @@ case System.argv() do
   ["--sk-story" | _] ->
     {passed, total} = SigmaVerify.sk_story()
     IO.puts("sigma_core story (§SK.6): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-growth" | _] ->
+    {passed, total} = SigmaVerify.sk_growth_story()
+    IO.puts("sigma_core growth story (§SK.3.12–3.17): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

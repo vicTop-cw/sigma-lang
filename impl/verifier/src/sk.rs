@@ -519,3 +519,49 @@ pub fn story() -> (usize, usize) {
 
     (passed, total)
 }
+
+/// Run the §SK.3.12–3.17 growth-phase audit story (spec_p0_socketkit.md),
+/// mirroring `sigma-runtime --growth` so the three implementations audit the
+/// same growth storyline (Law XIII). Returns (passed, total).
+pub fn growth_story() -> (usize, usize) {
+    let mut passed = 0usize;
+    let mut total = 0usize;
+
+    macro_rules! check {
+        ($name:expr, $cond:expr) => {{
+            total += 1;
+            if $cond {
+                passed += 1;
+            } else {
+                eprintln!("  ❌ SK.{}", $name);
+            }
+        }};
+    }
+
+    // §SK.3.12 核验师签发勋章
+    check!("badge_issue", badge_issue(1001, 3, 105) == Ok(vec![1001, 3, 1]));
+    check!("badge_issue_unauthorized", badge_issue(999, 3, 105).is_err());
+    // §SK.3.13 督导处理纠纷
+    let ev = vec![vec![1, 1, 3], vec![2, 1, 2]];
+    check!("dispute_review", dispute_review(&ev) == 1);
+    check!("dispute_binary", (0..=1).contains(&dispute_review(&ev)));
+    // §SK.3.14 团机制
+    let team = team_create(7, 0, 3).unwrap();
+    check!("team_create", team == vec![7, 0, 1, 3]);
+    check!("team_join", team_join(&team, 5) == Ok(vec![7, 0, 2, 3]));
+    // §SK.3.15 团收益
+    check!("team_share",
+           team_share(&[vec![3, 2], vec![4, 4]], 6) == Ok(vec![vec![3, 2], vec![4, 4]]));
+    // §SK.3.16 额度预支
+    let qa = quota_advance(&quota_new(50).unwrap());
+    check!("quota_advance", qa == vec![50, 100]);
+    check!("quota_reset_after_advance",
+           quota_reset(&qa) == quota_reset(&quota_new(50).unwrap()));
+    // §SK.3.17 积分可追溯
+    check!("points_ledger",
+           points_ledger(&[vec![0, 100, 1]]) == Ok(vec![vec![1, 1, 100]]));
+    check!("points_ledger_untraceable",
+           points_ledger(&[vec![0, 100, 0]]).is_err());
+
+    (passed, total)
+}

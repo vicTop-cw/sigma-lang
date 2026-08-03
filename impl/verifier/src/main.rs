@@ -41,6 +41,10 @@ struct Cli {
     #[arg(long)]
     sk_story: bool,
 
+    /// Run the §SK.3.12–3.17 growth-phase story (mirrors sigma-runtime --growth) and exit
+    #[arg(long)]
+    sk_growth: bool,
+
     /// Run the 找茬 MVP reference implementation self-check (§SK.6 through
     /// the App layer, mirrors sigma_app.py) and exit
     #[arg(long)]
@@ -1204,6 +1208,14 @@ fn main() -> Result<()> {
     if cli.sk_story {
         let (passed, total) = sk::story();
         println!("sigma_core story (§SK.6): {passed}/{total} passed");
+        std::process::exit(if passed == total { 0 } else { 1 });
+    }
+
+    // §SK.3.12–3.17 growth story — mirrors `python3 tools/sigma-runtime.py
+    // --growth` so the three implementations audit the same growth line.
+    if cli.sk_growth {
+        let (passed, total) = sk::growth_story();
+        println!("sigma_core growth story (§SK.3.12–3.17): {passed}/{total} passed");
         std::process::exit(if passed == total { 0 } else { 1 });
     }
 

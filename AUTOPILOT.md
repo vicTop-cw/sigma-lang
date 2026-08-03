@@ -133,6 +133,19 @@
       v0.10–v0.34 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.36 完成定义（三端增长期 story 对账，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **Rust growth story**: `sk.rs` 新增 `growth_story()`（§SK.3.12–3.17 增长期
+      11 项审计），CLI 新增 `--sk-growth`（11/11 通过），0 error/0 warning。
+- [x] **Elixir growth story**: `sigma_verify.exs` 新增 `sk_growth_story()` +
+      `--sk-growth`（11/11 通过）。
+- [x] **三端对账**: Python `sigma-runtime --growth` 11/11 == Rust `--sk-growth`
+      11/11 == Elixir `--sk-growth` 11/11——增长期业务故事线三端逐项一致。
+- [x] **不回归**: consensus 45/45、p0 109/109、sigma-prove 48 项 PROVED、
+      trace 59/59 + MVP story 18/18、双端冒烟 13/13、三端 0 warning，
+      v0.10–v0.35 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
