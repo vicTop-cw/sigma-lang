@@ -679,6 +679,18 @@ def badge_issue(verifier: int, user: int, score: int) -> List[int]:
     return [verifier, user, badge_level(score)]
 
 
+def dispute_review(evidence: List[List[int]]) -> int:
+    """督导处理纠纷: evidence[] → decision (1 = 支持, 0 = 驳回).
+
+    §SK.3.13 — decision ≡ 1 if weighted_support(e) ≥ weighted_reject(e)
+    else 0. Each evidence is [reviewer_id, side, weight] (side 0=驳回 1=支持);
+    order-independent by construction (同构于 review_merge).
+    """
+    w_support = sum(w for _, side, w in evidence if side == 1)
+    w_reject = sum(w for _, side, w in evidence if side == 0)
+    return 1 if w_support >= w_reject else 0
+
+
 def encode_quota(quota: List[int]) -> int:
     """Law II — Quota → ℕ."""
     return _encode_list(quota)
@@ -968,6 +980,17 @@ def _main() -> int:
         check("BI.badge_issue_unauthorized_rejected", False)
     except ValueError:
         check("BI.badge_issue_unauthorized_rejected", True)
+
+    # §SK.3.13 督导处理纠纷 dispute_review
+    check("DR.dispute_support",
+          dispute_review([[1, 1, 3], [2, 1, 2]]) == 1)                     # 5 ≥ 0
+    check("DR.dispute_reject",
+          dispute_review([[1, 0, 5], [2, 1, 2]]) == 0)                     # 2 < 5
+    check("DR.dispute_binary",
+          dispute_review([[1, 1, 1], [2, 0, 1]]) in (0, 1))
+    check("DR.dispute_order_indep",
+          dispute_review([[1, 1, 3], [2, 0, 2], [3, 1, 1]]) ==
+          dispute_review([[3, 1, 1], [1, 1, 3], [2, 0, 2]]))
 
     print(f"sigma_core self-check: {passed}/{passed + failed} passed")
     return 0 if failed == 0 else 1

@@ -1216,6 +1216,30 @@ defmodule SigmaVerify do
             end
           _ -> {:error, "bad badge_issue args: #{inner}"}
         end
+      # §SK.3.13 督导处理纠纷 dispute_review — 加权支持 ≥ 加权驳回.
+      String.starts_with?(t, "dispute_review(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 15..-2//1)
+        case eval_expr(inner) do
+          {:ok, {:list, evidence}} ->
+            result =
+              Enum.reduce_while(evidence, {0, 0}, fn e, {ws, wr} ->
+                case e do
+                  {:list, [{:num, _rid}, {:num, side}, {:num, weight}]} ->
+                    cond do
+                      side == 1 -> {:cont, {ws + weight, wr}}
+                      side == 0 -> {:cont, {ws, wr + weight}}
+                      true -> {:halt, :type_error}
+                    end
+                  _ -> {:halt, :shape_error}
+                end
+              end)
+            case result do
+              {ws, wr} -> {:ok, {:num, if(ws >= wr, do: 1, else: 0)}}
+              :type_error -> {:error, "TypeError"}
+              :shape_error -> {:error, "ShapeError"}
+            end
+          _ -> {:error, "TypeError"}
+        end
       t == "I₂" ->
         {:ok, {:list, [{:list, [{:num, 1}, {:num, 0}]},
                        {:list, [{:num, 0}, {:num, 1}]}]}}
@@ -1597,6 +1621,15 @@ defmodule SigmaVerify do
   def badge_issue(verifier, user, score) when verifier >= 1000, do: {:ok, [verifier, user, badge_level(score)]}
   def badge_issue(_verifier, _user, _score), do: {:error, "AuthError"}
 
+  @doc "督导处理纠纷: evidence[] → decision (1 = 支持, 0 = 驳回). §SK.3.13."
+  def dispute_review(evidence) do
+    w_support = evidence |> Enum.filter(fn [_, side, _] -> side == 1 end)
+                         |> Enum.map(fn [_, _, w] -> w end) |> Enum.sum()
+    w_reject = evidence |> Enum.filter(fn [_, side, _] -> side == 0 end)
+                        |> Enum.map(fn [_, _, w] -> w end) |> Enum.sum()
+    if w_support >= w_reject, do: 1, else: 0
+  end
+
   @doc "Law II — Quota → ℕ."
   def encode_quota(quota), do: encode_list(quota)
 
@@ -1686,6 +1719,13 @@ defmodule SigmaVerify do
       {"badge_issue_gold", badge_issue(1002, 3, 450) == {:ok, [1002, 3, 2]}},
       {"badge_issue_diamond", badge_issue(1001, 3, 900) == {:ok, [1001, 3, 3]}},
       {"badge_issue_unauthorized_rejected", badge_issue(999, 3, 105) == {:error, "AuthError"}},
+      # §SK.3.13 督导处理纠纷 dispute_review
+      {"dispute_support", dispute_review([[1, 1, 3], [2, 1, 2]]) == 1},            # 5 ≥ 0
+      {"dispute_reject", dispute_review([[1, 0, 5], [2, 1, 2]]) == 0},            # 2 < 5
+      {"dispute_binary", dispute_review([[1, 1, 1], [2, 0, 1]]) in [0, 1]},
+      {"dispute_order_indep",
+       dispute_review([[1, 1, 3], [2, 0, 2], [3, 1, 1]]) ==
+       dispute_review([[3, 1, 1], [1, 1, 3], [2, 0, 2]])},
       # §SK.4 encodings (Law II)
       {"encode_task_nat", encode_task([1, 2, 0, 0]) >= 0},
       {"encode_distinct", encode_task([1, 2, 0, 0]) != encode_task([1, 3, 0, 0])},

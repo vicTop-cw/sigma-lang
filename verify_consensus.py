@@ -1039,6 +1039,27 @@ def eval_expr(s):
         else:
             lvl = 3
         return ("list", [("num", vv[1]), ("num", vu[1]), ("num", lvl)])
+    # §SK.3.13 督导处理纠纷 dispute_review — 加权支持 ≥ 加权驳回.
+    if s.startswith("dispute_review(") and s.endswith(")"):
+        inner = s[len("dispute_review("):-1]
+        v = eval_expr(inner.strip())
+        if isinstance(v, str):
+            return v
+        if v[0] != "list":
+            return "TypeError"
+        w_support = w_reject = 0
+        for e in v[1]:
+            if e[0] != "list" or len(e[1]) != 3:
+                return "ShapeError"
+            side = e[1][1][1]
+            weight = e[1][2][1]
+            if side == 1:
+                w_support += weight
+            elif side == 0:
+                w_reject += weight
+            else:
+                return "TypeError"
+        return ("num", 1 if w_support >= w_reject else 0)
     if s == "I₂":
         return ("list", [("list", [("num", 1), ("num", 0)]),
                          ("list", [("num", 0), ("num", 1)])])

@@ -209,6 +209,17 @@ pub fn badge_issue(verifier: i64, user: i64, score: i64)
     Ok(vec![verifier, user, badge_level(score)])
 }
 
+/// 督导处理纠纷: evidence[] → decision (1 = 支持, 0 = 驳回). §SK.3.13 —
+/// decision ≡ 1 if weighted_support ≥ weighted_reject else 0. Each evidence
+/// is [reviewer_id, side, weight]; order-independent by construction.
+pub fn dispute_review(evidence: &[Vec<i64>]) -> i64 {
+    let w_support: i64 = evidence.iter()
+        .filter(|e| e[1] == 1).map(|e| e[2]).sum();
+    let w_reject: i64 = evidence.iter()
+        .filter(|e| e[1] == 0).map(|e| e[2]).sum();
+    if w_support >= w_reject { 1 } else { 0 }
+}
+
 /// Law II — Quota → ℕ.
 pub fn encode_quota(quota: &[i64]) -> i64 {
     encode_list(quota, 1000)
@@ -329,6 +340,17 @@ pub fn self_check() -> (usize, usize) {
     check!("badge_issue_gold", badge_issue(1002, 3, 450) == Ok(vec![1002, 3, 2]));
     check!("badge_issue_diamond", badge_issue(1001, 3, 900) == Ok(vec![1001, 3, 3]));
     check!("badge_issue_unauthorized_rejected", badge_issue(999, 3, 105).is_err());
+
+    // §SK.3.13 督导处理纠纷 dispute_review
+    let ev_sup = vec![vec![1, 1, 3], vec![2, 1, 2]];
+    check!("dispute_support", dispute_review(&ev_sup) == 1); // 5 ≥ 0
+    let ev_rej = vec![vec![1, 0, 5], vec![2, 1, 2]];
+    check!("dispute_reject", dispute_review(&ev_rej) == 0); // 2 < 5
+    let ev_bin = vec![vec![1, 1, 1], vec![2, 0, 1]];
+    check!("dispute_binary", (0..=1).contains(&dispute_review(&ev_bin)));
+    let ev_a = vec![vec![1, 1, 3], vec![2, 0, 2], vec![3, 1, 1]];
+    let ev_rev = vec![vec![3, 1, 1], vec![1, 1, 3], vec![2, 0, 2]];
+    check!("dispute_order_indep", dispute_review(&ev_a) == dispute_review(&ev_rev));
 
     // §SK.4 encodings (Law II)
     check!("encode_task_nat", encode_task(&[1, 2, 0, 0]) >= 0);

@@ -41,6 +41,18 @@
 > v0.27–v0.50 = 「找茬完整业务蓝图 + 三域验证」连续推进：每版本一个语义增量，
 > 三端一致、可证明、进共识门禁。
 
+### v0.28 完成定义（增长期语义②督导，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **语义**: §SK.3.13 `dispute_review`（督导处理纠纷）——加权支持 ≥ 加权驳回
+      → 1 否则 0；Laws：binary / order-independent（与 review_merge 同构）。
+- [x] **三端执行层**: sigma_core 138/138、Rust sk.rs / Elixir sigma_verify.exs
+      参考实现 + eval_expr + 自检 60/60，`cargo build` 0 error/0 warning。
+- [x] **语料**: `corpus/socketkit_ok.md` 增 dispute_review（56/56 三端一致 PASS），
+      consensus 43/43 全绿。
+- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 +
+      18/18、双端冒烟 13/13、三端 0 warning，v0.10–v0.27 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

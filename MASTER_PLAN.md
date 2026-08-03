@@ -112,9 +112,14 @@
   核验师（v ≥ 1000）可签发否则 ⊥ AuthError；三端执行层 + eval_expr 同步
   （sigma_core 134/134、Rust/Elixir §SK 自检 56/56、socketkit_ok 53/53 三端一致、
   0 warning）；consensus 43/43、p0 109/109，v0.10–v0.26 不回归。
+- ✅ **REACHED v0.28 (2026-08-03)**: 增长期语义②督导—— §SK.3.13 `dispute_review`
+  （督导处理纠纷，需求文档 §三角色）：加权支持 ≥ 加权驳回 → 1 否则 0，binary +
+  order-independent（与 review_merge 同构）；三端执行层 + eval_expr 同步
+  （sigma_core 138/138、Rust/Elixir §SK 自检 60/60、socketkit_ok 56/56 三端一致、
+  0 warning）；consensus 43/43、p0 109/109，v0.10–v0.27 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.27 达成后 P3 待办已清空，进入新里程碑规划（v0.28–v0.50 连续推进）。
+  2. （无）— v0.28 达成后 P3 待办已清空，进入新里程碑规划（v0.29–v0.50 连续推进）。
 
 ---
 

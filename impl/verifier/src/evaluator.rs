@@ -568,6 +568,38 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
             _ => Err("TypeError".to_string()),
         };
     }
+    // §SK.3.13 督导处理纠纷 dispute_review — 加权支持 ≥ 加权驳回.
+    if let Some(rest) = s.strip_prefix("dispute_review(") {
+        let inner = rest.strip_suffix(')').ok_or("bad dispute_review call")?;
+        let v = eval_expr(inner)?;
+        return match v {
+            TVal::List(evidence) => {
+                let mut w_support = 0i64;
+                let mut w_reject = 0i64;
+                for e in &evidence {
+                    match e {
+                        TVal::List(fields) if fields.len() == 3 => {
+                            match (&fields[1], &fields[2]) {
+                                (TVal::Num(side), TVal::Num(weight)) => {
+                                    if *side == 1 {
+                                        w_support += weight;
+                                    } else if *side == 0 {
+                                        w_reject += weight;
+                                    } else {
+                                        return Err("TypeError".to_string());
+                                    }
+                                }
+                                _ => return Err("TypeError".to_string()),
+                            }
+                        }
+                        _ => return Err("ShapeError".to_string()),
+                    }
+                }
+                Ok(TVal::Num(if w_support >= w_reject { 1 } else { 0 }))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
     if s == "I₂" {
         return Ok(TVal::List(vec![
             TVal::List(vec![TVal::Num(1), TVal::Num(0)]),

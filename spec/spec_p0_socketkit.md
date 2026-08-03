@@ -425,6 +425,33 @@ Definition: badge_issue(v, u, s) ≡ [v, u, badge_level(s)]  if v ≥ 1000
 | badge_issue(1002, 3, 450) | [1002,3,2] |
 | badge_issue(999, 3, 105) | ⊥ AuthError |
 
+### SK.3.13 dispute_review — 督导处理纠纷 (需求文档 §三角色)
+
+督导（增长期）专业处理纠纷。纠纷由双方提交证据（每条证据 = [weight, side]，
+side 0 = 驳回方，1 = 支持方）；督导裁决 = 加权支持 ≥ 加权驳回 → 1，否则 0。
+与 `review_merge`（核验师评审）同构，但语义场景为纠纷仲裁。
+
+```md
+dispute_review : List⟨List⟨ℕ⟩⟩ → ℕ        # evidence[] → decision
+Fingerprint: 0xF011
+Definition: dispute_review(e) ≡ 1 if weighted_support(e) ≥ weighted_reject(e) else 0
+```
+
+**Laws**
+
+```md
+∀ e . dispute_review(e) ≡ 0 ∨ dispute_review(e) ≡ 1     # decision is binary
+∀ e . dispute_review(e) ≡ dispute_review(reverse(e))    # order-independent
+```
+
+**Tests**
+
+| Input | Output |
+|-------|--------|
+| dispute_review([[1,1,3],[2,1,2]]) | 1 |
+| dispute_review([[1,0,5],[2,1,2]]) | 0 |
+| dispute_review(3) | ⊥ TypeError |
+
 ---
 
 ## SK.4 Encodings (Law II — encoding to ℕ for non-numeric returns)

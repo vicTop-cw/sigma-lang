@@ -36,6 +36,7 @@ points_release
 points_withdraw
 badge_level
 badge_issue
+dispute_review
 ```
 
 ## Operation: task_create (Task Posting)
@@ -424,6 +425,30 @@ Fingerprint: 0xF010
 | badge_issue(1001, 3, 105) | [1001,3,1] |
 | badge_issue(1002, 3, 450) | [1002,3,2] |
 | badge_issue(999, 3, 105) | ⊥ AuthError |
+
+## Operation: dispute_review (Dispute Review)
+
+### Signature
+
+```md
+dispute_review : List⟨List⟨ℕ⟩⟩ → ℕ
+Fingerprint: 0xF011
+```
+
+### Laws
+
+```md
+∀ e . dispute_review(e) ≡ 0 ∨ dispute_review(e) ≡ 1
+∀ e . dispute_review(e) ≡ dispute_review(reverse(e))
+```
+
+### Tests
+
+| Input | Output |
+|-------|--------|
+| dispute_review([[1,1,3],[2,1,2]]) | 1 |
+| dispute_review([[1,0,5],[2,1,2]]) | 0 |
+| dispute_review(3) | ⊥ TypeError |
 
 ## Functions
 
