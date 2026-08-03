@@ -679,6 +679,21 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
             _ => Err("TypeError".to_string()),
         };
     }
+    // §SK.3.16 额度预支 quota_advance — [m, r] → [m, r + m].
+    if let Some(rest) = s.strip_prefix("quota_advance(") {
+        let inner = rest.strip_suffix(')').ok_or("bad quota_advance call")?;
+        let vq = eval_expr(inner)?;
+        return match vq {
+            TVal::List(quota) if quota.len() == 2 => {
+                let (monthly, remaining) = match (&quota[0], &quota[1]) {
+                    (TVal::Num(m), TVal::Num(r)) => (*m, *r),
+                    _ => return Err("TypeError".to_string()),
+                };
+                Ok(TVal::List(vec![TVal::Num(monthly), TVal::Num(remaining + monthly)]))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
     if s == "I₂" {
         return Ok(TVal::List(vec![
             TVal::List(vec![TVal::Num(1), TVal::Num(0)]),

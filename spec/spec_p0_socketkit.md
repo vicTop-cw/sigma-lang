@@ -519,6 +519,32 @@ Definition: team_share([[m₁,c₁],…,[mₙ,cₙ]], r) ≡ [[mᵢ, ⌊r·cᵢ/
 | team_share([[3,1],[4,3]], 10) | [[3,2],[4,7]] |
 | team_share([[3,0],[4,0]], 5) | ⊥ DivByZero |
 
+### SK.3.16 quota_advance — 额度预支 (需求文档 §四.1)
+
+每人每月固定额度，月底清零不累计；可预支下月额度，但必须隔月才能再预支
+（月底清零即恢复可预支状态）。预支 = remaining 增加一整月额度。
+
+```md
+quota_advance : List⟨ℕ⟩ → List⟨ℕ⟩        # quota → Quota
+Fingerprint: 0xF015
+Definition: quota_advance([m, r]) ≡ [m, r + m]   # 预支下月额度
+```
+
+**Laws**
+
+```md
+∀ q . index(quota_advance(q), 1) ≡ index(q, 1) + index(q, 0)   # 预支加满月额
+∀ q . quota_reset(quota_advance(q)) ≡ quota_reset(q)           # 月底清零后恢复（隔月可再预支）
+```
+
+**Tests**
+
+| Input | Output |
+|-------|--------|
+| quota_advance(quota_new(50)) | [50,100] |
+| quota_advance([50,30]) | [50,80] |
+| quota_advance(5) | ⊥ TypeError |
+
 ---
 
 ## SK.4 Encodings (Law II — encoding to ℕ for non-numeric returns)

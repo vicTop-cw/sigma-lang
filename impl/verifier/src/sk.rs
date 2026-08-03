@@ -249,6 +249,12 @@ pub fn team_share(contribs: &[Vec<i64>], reward: i64)
     Ok(contribs.iter().map(|e| vec![e[0], reward * e[1] / total]).collect())
 }
 
+/// 额度预支: [m, r] → [m, r + m]. §SK.3.16.
+pub fn quota_advance(quota: &[i64]) -> Vec<i64> {
+    let (monthly, remaining) = (quota[0], quota[1]);
+    vec![monthly, remaining + monthly]
+}
+
 /// Law II — Quota → ℕ.
 pub fn encode_quota(quota: &[i64]) -> i64 {
     encode_list(quota, 1000)
@@ -395,6 +401,13 @@ pub fn self_check() -> (usize, usize) {
            team_share(&[vec![3, 1], vec![4, 3]], 10) == Ok(vec![vec![3, 2], vec![4, 7]]));
     check!("team_share_zero_total_rejected",
            team_share(&[vec![3, 0], vec![4, 0]], 5).is_err());
+
+    // §SK.3.16 额度预支 quota_advance
+    check!("quota_advance_full", quota_advance(&quota_new(50).unwrap()) == vec![50, 100]);
+    check!("quota_advance_used", quota_advance(&vec![50, 30]) == vec![50, 80]);
+    check!("quota_reset_after_advance",
+           quota_reset(&quota_advance(&quota_new(50).unwrap())) ==
+           quota_reset(&quota_new(50).unwrap()));
 
     // §SK.4 encodings (Law II)
     check!("encode_task_nat", encode_task(&[1, 2, 0, 0]) >= 0);

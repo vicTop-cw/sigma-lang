@@ -40,6 +40,7 @@ dispute_review
 team_create
 team_join
 team_share
+quota_advance
 ```
 
 ## Operation: task_create (Task Posting)
@@ -525,6 +526,30 @@ Fingerprint: 0xF014
 | team_share([[3,2],[4,4]], 6) | [[3,2],[4,4]] |
 | team_share([[3,1],[4,3]], 10) | [[3,2],[4,7]] |
 | team_share([[3,0],[4,0]], 5) | ⊥ DivByZero |
+
+## Operation: quota_advance (Quota Advance)
+
+### Signature
+
+```md
+quota_advance : List⟨ℕ⟩ → List⟨ℕ⟩
+Fingerprint: 0xF015
+```
+
+### Laws
+
+```md
+∀ q . index(quota_advance(q), 1) ≡ index(q, 1) + index(q, 0)
+∀ q . quota_reset(quota_advance(q)) ≡ quota_reset(q)
+```
+
+### Tests
+
+| Input | Output |
+|-------|--------|
+| quota_advance(quota_new(50)) | [50,100] |
+| quota_advance([50,30]) | [50,80] |
+| quota_advance(5) | ⊥ TypeError |
 
 ## Functions
 

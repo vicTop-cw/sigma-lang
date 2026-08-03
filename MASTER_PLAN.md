@@ -129,9 +129,15 @@
   （sigma_core 146/146、Rust/Elixir §SK 自检 68/68、socketkit_ok 65/65 三端一致、
   0 warning，语料补 encode_shares 满足 Law II）；consensus 43/43、p0 109/109，
   v0.10–v0.29 不回归。
+- ✅ **REACHED v0.31 (2026-08-03)**: 增长期语义⑤额度预支—— §SK.3.16
+  `quota_advance`（额度预支，需求文档 §四.1）：[m, r] → [m, r+m]（预支下月额度），
+  quota_reset(quota_advance(q)) ≡ quota_reset(q)（月底清零后隔月可再预支）；
+  三端执行层 + eval_expr 同步（sigma_core 149/149、Rust/Elixir §SK 自检 71/71、
+  socketkit_ok 68/68 三端一致、0 warning）；consensus 43/43、p0 109/109，
+  v0.10–v0.30 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.30 达成后 P3 待办已清空，进入新里程碑规划（v0.31–v0.50 连续推进）。
+  2. （无）— v0.31 达成后 P3 待办已清空，进入新里程碑规划（v0.32–v0.50 连续推进）。
 
 ---
 

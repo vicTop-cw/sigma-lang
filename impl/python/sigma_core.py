@@ -720,6 +720,12 @@ def team_share(contribs: List[List[int]], reward: int) -> List[List[int]]:
     return [[m, (reward * c) // total] for m, c in contribs]
 
 
+def quota_advance(quota: List[int]) -> List[int]:
+    """额度预支: [m, r] → [m, r + m]（预支下月额度）. §SK.3.16."""
+    monthly, remaining = quota
+    return [monthly, remaining + monthly]
+
+
 def encode_quota(quota: List[int]) -> int:
     """Law II — Quota → ℕ."""
     return _encode_list(quota)
@@ -1044,6 +1050,12 @@ def _main() -> int:
         check("S.team_share_zero_total_rejected", False)
     except ValueError:
         check("S.team_share_zero_total_rejected", True)
+
+    # §SK.3.16 额度预支 quota_advance
+    check("QA.quota_advance_full", quota_advance(quota_new(50)) == [50, 100])
+    check("QA.quota_advance_used", quota_advance([50, 30]) == [50, 80])
+    check("QA.quota_reset_after_advance",
+          quota_reset(quota_advance(quota_new(50))) == quota_reset(quota_new(50)))
 
     print(f"sigma_core self-check: {passed}/{passed + failed} passed")
     return 0 if failed == 0 else 1

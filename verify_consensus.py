@@ -1124,6 +1124,18 @@ def eval_expr(s):
             c = entry[1][1][1]
             shares.append(("list", [m, ("num", (vr[1] * c) // total)]))
         return ("list", shares)
+    # §SK.3.16 额度预支 quota_advance — [m, r] → [m, r + m].
+    if s.startswith("quota_advance(") and s.endswith(")"):
+        inner = s[len("quota_advance("):-1]
+        vq = eval_expr(inner.strip())
+        if isinstance(vq, str):
+            return vq
+        if vq[0] != "list" or len(vq[1]) != 2:
+            return "TypeError"
+        monthly, remaining = vq[1]
+        if monthly[0] != "num" or remaining[0] != "num":
+            return "TypeError"
+        return ("list", [monthly, ("num", remaining[1] + monthly[1])])
     if s == "I₂":
         return ("list", [("list", [("num", 1), ("num", 0)]),
                          ("list", [("num", 0), ("num", 1)])])

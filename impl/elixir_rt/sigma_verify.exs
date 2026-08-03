@@ -1302,6 +1302,14 @@ defmodule SigmaVerify do
             end
           nil -> {:error, "bad team_share args: #{inner}"}
         end
+      # §SK.3.16 额度预支 quota_advance — [m, r] → [m, r + m].
+      String.starts_with?(t, "quota_advance(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 14..-2//1)
+        case eval_expr(inner) do
+          {:ok, {:list, [{:num, monthly}, {:num, remaining}]}} ->
+            {:ok, {:list, [{:num, monthly}, {:num, remaining + monthly}]}}
+          _ -> {:error, "TypeError"}
+        end
       t == "I₂" ->
         {:ok, {:list, [{:list, [{:num, 1}, {:num, 0}]},
                        {:list, [{:num, 0}, {:num, 1}]}]}}
@@ -1709,6 +1717,9 @@ defmodule SigmaVerify do
     end
   end
 
+  @doc "额度预支: [m, r] → [m, r + m]. §SK.3.16."
+  def quota_advance([monthly, remaining]), do: [monthly, remaining + monthly]
+
   @doc "Law II — Quota → ℕ."
   def encode_quota(quota), do: encode_list(quota)
 
@@ -1815,6 +1826,10 @@ defmodule SigmaVerify do
       {"team_share_even", team_share([[3, 2], [4, 4]], 6) == {:ok, [[3, 2], [4, 4]]}},
       {"team_share_weighted", team_share([[3, 1], [4, 3]], 10) == {:ok, [[3, 2], [4, 7]]}},
       {"team_share_zero_total_rejected", team_share([[3, 0], [4, 0]], 5) == {:error, "DivByZero"}},
+      # §SK.3.16 额度预支 quota_advance
+      {"quota_advance_full", quota_advance([50, 50]) == [50, 100]},
+      {"quota_advance_used", quota_advance([50, 30]) == [50, 80]},
+      {"quota_reset_after_advance", quota_reset(quota_advance([50, 50])) == quota_reset([50, 50])},
       # §SK.4 encodings (Law II)
       {"encode_task_nat", encode_task([1, 2, 0, 0]) >= 0},
       {"encode_distinct", encode_task([1, 2, 0, 0]) != encode_task([1, 3, 0, 0])},
