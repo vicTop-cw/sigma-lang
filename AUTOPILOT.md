@@ -123,6 +123,16 @@
       v0.10–v0.33 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.35 完成定义（增长期审计故事线，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **审计故事线**: `sigma-runtime --growth`（run_growth_story）一次跑通增长期
+      业务故事线（核验师签发→督导裁决→团机制→额度预支→积分可追溯），逐事件
+      复核定律（11/11 义务满足）；`--growth --json` 机器可读。
+- [x] **不回归**: trace 59/59、MVP story 18/18、consensus 45/45、p0 109/109、
+      sigma-prove 48 项 PROVED、双端冒烟 13/13、三端 0 warning，
+      v0.10–v0.34 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

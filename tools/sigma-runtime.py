@@ -573,6 +573,99 @@ def audit(events):
     return total, failed
 
 
+# ---------------------------------------------------------------------------
+# §SK.3.12–3.17 增长期审计故事线 (spec_p0_socketkit.md, v0.35)
+# ---------------------------------------------------------------------------
+
+def run_growth_story(core):
+    """Run the growth-phase audit story (verifier issue → dispute → team →
+    quota advance → points ledger); returns per-event audit records."""
+    events = []
+
+    def record(event, op, inp, out, obligations):
+        events.append({
+            "event": event,
+            "op": op,
+            "input": inp,
+            "output": out,
+            "obligations": obligations,
+        })
+
+    # §SK.3.12 核验师签发勋章
+    badge = core.badge_issue(1001, 3, 105)
+    record("badge_issue", "SK.3.12", [1001, 3, 105], badge, [
+        {"law": "badge_issue(1001, 3, 105) ≡ [1001, 3, 1] — 授权核验师签发银牌",
+         "ok": badge == [1001, 3, 1], "note": f"badge={badge}"},
+    ])
+    try:
+        core.badge_issue(999, 3, 105)
+        record("badge_issue", "SK.3.12", [999, 3, 105], "ISSUED(999)?", [
+            {"law": "v < 1000 ⇒ ⊥ AuthError — 授权核验师",
+             "ok": False, "note": "未授权核验师签发成功"},
+        ])
+    except ValueError as e:
+        record("badge_issue", "SK.3.12", [999, 3, 105], f"rejected ({e})", [
+            {"law": "v < 1000 ⇒ ⊥ AuthError — 授权核验师",
+             "ok": True, "note": "AuthError 拒绝未授权核验师"},
+        ])
+
+    # §SK.3.13 督导处理纠纷
+    d1 = core.dispute_review([[1, 1, 3], [2, 1, 2]])
+    record("dispute_review", "SK.3.13", [[1, 1, 3], [2, 1, 2]], d1, [
+        {"law": "dispute_review ≡ 0 ∨ 1 — 裁决 binary",
+         "ok": d1 in (0, 1), "note": f"decision={d1}"},
+        {"law": "加权支持 ≥ 加权驳回 → 1",
+         "ok": d1 == 1, "note": "support 5 ≥ reject 0"},
+    ])
+
+    # §SK.3.14 团机制
+    team = core.team_create(7, 0, 3)
+    record("team_create", "SK.3.14", [7, 0, 3], team, [
+        {"law": "team_create(7, 0, 3) ≡ [7, 0, 1, 3] — 创始人即成员",
+         "ok": team == [7, 0, 1, 3], "note": f"team={team}"},
+    ])
+    joined = core.team_join(team, 5)
+    record("team_join", "SK.3.14", [team, 5], joined, [
+        {"law": "未满员加入 size+1",
+         "ok": joined == [7, 0, 2, 3], "note": f"team={joined}"},
+    ])
+    shares = core.team_share([[3, 2], [4, 4]], 6)
+    record("team_share", "SK.3.15", [[[3, 2], [4, 4]], 6], shares, [
+        {"law": "Σ shares ≤ r — 不超发",
+         "ok": sum(s for _, s in shares) <= 6, "note": f"shares={shares}"},
+    ])
+
+    # §SK.3.16 额度预支
+    adv = core.quota_advance(core.quota_new(50))
+    record("quota_advance", "SK.3.16", [core.quota_new(50)], adv, [
+        {"law": "quota_advance([50,50]) ≡ [50,100] — 预支加满月额",
+         "ok": adv == [50, 100], "note": f"quota={adv}"},
+        {"law": "quota_reset(quota_advance(q)) ≡ quota_reset(q) — 隔月可再预支",
+         "ok": core.quota_reset(adv) == core.quota_reset(core.quota_new(50)),
+         "note": "月底清零恢复"},
+    ])
+
+    # §SK.3.17 积分可追溯
+    ledger = core.points_ledger([[0, 100, 1]])
+    record("points_ledger", "SK.3.17", [[0, 100, 1]], ledger, [
+        {"law": "points_ledger([[0,100,1]]) ≡ [[1,1,100]] — 来源可追溯",
+         "ok": ledger == [[1, 1, 100]], "note": f"ledger={ledger}"},
+    ])
+    try:
+        core.points_ledger([[0, 100, 0]])
+        record("points_ledger", "SK.3.17", [[0, 100, 0]], "TRACED(0)?", [
+            {"law": "source_id = 0 ⇒ ⊥ NotTraceable",
+             "ok": False, "note": "无来源积分被记录"},
+        ])
+    except ValueError as e:
+        record("points_ledger", "SK.3.17", [[0, 100, 0]], f"rejected ({e})", [
+            {"law": "source_id = 0 ⇒ ⊥ NotTraceable",
+             "ok": True, "note": "NotTraceable 拒绝无来源积分"},
+        ])
+
+    return events
+
+
 def render_human(events):
     lines = []
     lines.append("ΣLang Audit Runtime — SocketKit trace (spec_p0_socketkit.md §SK)")
@@ -620,26 +713,36 @@ def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     as_json = "--json" in argv
     as_story = "--story" in argv
+    as_growth = "--growth" in argv
 
     core = load_core()
     if as_story:
         events = run_mvp_story(core)
+    elif as_growth:
+        events = run_growth_story(core)
     else:
         events = run_trace(core)
     total, failed = audit(events)
 
     if as_json:
+        spec = ("spec_p0_socketkit.md §SK.6 (MVP story)" if as_story
+                else "spec_p0_socketkit.md §SK.3.12–3.17 (growth story)"
+                if as_growth else "spec_p0_socketkit.md §SK")
         print(json.dumps({
             "tool": "sigma-runtime",
-            "spec": "spec_p0_socketkit.md §SK.6 (MVP story)" if as_story
-                    else "spec_p0_socketkit.md §SK",
+            "spec": spec,
             "trace": events,
             "obligations_total": total,
             "violations": failed,
             "auditable": failed == 0,
         }, indent=2, ensure_ascii=False))
     else:
-        print(render_story(events) if as_story else render_human(events))
+        if as_story:
+            print(render_story(events))
+        elif as_growth:
+            print(render_story(events))
+        else:
+            print(render_human(events))
 
     return 0 if failed == 0 else 1
 

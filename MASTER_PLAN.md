@@ -153,9 +153,14 @@
   team_share 不超发 / quota_advance 预支加满月额 / points_ledger 积分非负），
   全部 `PROVED (unsat)`——§SK+§PF+增长期共 48 项义务全绿；consensus 45/45、
   p0 109/109、三端 0 warning，v0.10–v0.33 不回归。
+- ✅ **REACHED v0.35 (2026-08-03)**: 增长期审计故事线—— `sigma-runtime --growth`
+  （run_growth_story）一次跑通增长期业务故事线（核验师签发→督导裁决→团机制→
+  额度预支→积分可追溯），逐事件复核定律（11/11 义务满足）；trace 59/59 与
+  MVP story 18/18 不回归；consensus 45/45、p0 109/109、三端 0 warning，
+  v0.10–v0.34 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.34 达成后 P3 待办已清空，进入新里程碑规划（v0.35–v0.50 连续推进）。
+  2. （无）— v0.35 达成后 P3 待办已清空，进入新里程碑规划（v0.36–v0.50 连续推进）。
 
 ---
 
