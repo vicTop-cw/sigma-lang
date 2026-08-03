@@ -779,9 +779,13 @@ def main(argv=None):
     as_growth = "--growth" in argv
     as_all = "--all" in argv
     as_inventory = "--inventory" in argv
+    as_domains = "--domains" in argv
 
     core = load_core()
-    if as_inventory:
+    if as_domains:
+        # 三域协议巩固：找茬业务（§SK MVP+增长期）+ 供应链（§IN）故事线一次跑通
+        events = run_mvp_story(core) + run_growth_story(core) + run_inventory_story(core)
+    elif as_inventory:
         events = run_inventory_story(core)
     elif as_all:
         # §SK.6 MVP + §SK.3.12–3.17 增长期 —— 完整业务验收剧本
@@ -795,7 +799,8 @@ def main(argv=None):
     total, failed = audit(events)
 
     if as_json:
-        spec = ("spec_p0_inventory.md §IN (inventory story)" if as_inventory
+        spec = ("spec §SK+§IN (three-domain story)" if as_domains
+                else "spec_p0_inventory.md §IN (inventory story)" if as_inventory
                 else "spec_p0_socketkit.md §SK.6+§SK.3.12–3.17 (full story)" if as_all
                 else "spec_p0_socketkit.md §SK.6 (MVP story)" if as_story
                 else "spec_p0_socketkit.md §SK.3.12–3.17 (growth story)"
@@ -809,7 +814,7 @@ def main(argv=None):
             "auditable": failed == 0,
         }, indent=2, ensure_ascii=False))
     else:
-        if as_story or as_growth or as_all or as_inventory:
+        if as_story or as_growth or as_all or as_inventory or as_domains:
             print(render_story(events))
         else:
             print(render_human(events))

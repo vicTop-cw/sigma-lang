@@ -243,6 +243,16 @@
       v0.10–v0.44 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.46 完成定义（三域协议巩固，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **三域验收入口**: `sigma-runtime --domains` 一次跑通三域故事线（§SK MVP 18
+      + §SK 增长期 11 + §IN 供应链 6 = 35/35 义务满足）——找茬业务 + 供应链两条
+      业务线同一条审计命令验收。
+- [x] **不回归**: consensus 47/47、p0 109/109、sigma-prove 53 项 PROVED、
+      sigma-runtime 59/59 + 29/29 + 6/6、双端冒烟 25/25、三端 0 warning，
+      v0.10–v0.45 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

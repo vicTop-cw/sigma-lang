@@ -212,9 +212,14 @@
   sigma_core §IN）+ HTTP 端点（/inventory_new /receive_stock /ship_stock
   /stock_level /fill_rate）；`--smoke` 扩展供应链步骤（20/20 → 25/25）；
   自检 15/15 不回归；consensus 47/47、p0 109/109，v0.10–v0.44 不回归。
+- ✅ **REACHED v0.46 (2026-08-03)**: 三域协议巩固—— `sigma-runtime --domains`
+  一次跑通三域故事线（§SK MVP 18 + §SK 增长期 11 + §IN 供应链 6 = 35/35 义务
+  满足），找茬业务 + 供应链两条业务线同一条审计命令验收——协议承载两个独立
+  业务域（App 行为 + 供应链）且三端一致；consensus 47/47、p0 109/109、
+  sigma-prove 53 项 PROVED，v0.10–v0.45 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.45 达成后 P3 待办已清空，进入新里程碑规划（v0.46–v0.50 连续推进）。
+  2. （无）— v0.46 达成后 P3 待办已清空，进入新里程碑规划（v0.47–v0.50 连续推进）。
 
 ---
 
