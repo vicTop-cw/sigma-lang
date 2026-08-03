@@ -141,9 +141,15 @@
   amount ≥ 0（ℕ）；三端执行层 + eval_expr 同步（sigma_core 152/152、
   Rust/Elixir §SK 自检 74/74、socketkit_ok 71/71 三端一致、0 warning）；
   consensus 43/43、p0 109/109，v0.10–v0.31 不回归。
+- ✅ **REACHED v0.33 (2026-08-03)**: 增长期语料模块化—— 7 个增长期操作
+  （badge_issue/dispute_review/team_create/team_join/team_share/quota_advance/
+  points_ledger）从 socketkit_ok.md 移入独立模块 `corpus/socketkit_growth_ok.md`
+  （21/21 三端一致 PASS）+ `socketkit_growth_break.md`（E-02 三端一致 FAIL）；
+  socketkit_ok.md 回归 MVP+五大制度（50/50 三端一致）；consensus 43/43 → 45/45
+  全绿、p0 109/109、三端 0 warning，v0.10–v0.32 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.32 达成后 P3 待办已清空，进入新里程碑规划（v0.33–v0.50 连续推进）。
+  2. （无）— v0.33 达成后 P3 待办已清空，进入新里程碑规划（v0.34–v0.50 连续推进）。
 
 ---
 

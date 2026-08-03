@@ -103,6 +103,15 @@
       18/18、双端冒烟 13/13、三端 0 warning，v0.10–v0.31 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.33 完成定义（增长期语料模块化，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **语料模块化**: 7 个增长期操作移入 `corpus/socketkit_growth_ok.md`
+      （21/21 三端一致 PASS）+ `socketkit_growth_break.md`（E-02 FAIL）；
+      socketkit_ok.md 回归 MVP+五大制度（50/50 三端一致）。
+- [x] **共识**: consensus 43/43 → 45/45 全绿；三端 0 warning；
+      p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 + 18/18 不回归。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
