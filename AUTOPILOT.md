@@ -18,12 +18,11 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.20 可用**——即：**找茬五大制度补齐**，
-在 v0.19（第二个自举新域）达成的基础上，依据 `D:\Desktop\来找茬_需求文档.md` §四
-把剩余三制度纳入 §SK：SK.3.9 额度制（quota_new/quota_use/quota_reset）、
-SK.3.10 积分制（points_hold/points_release/points_withdraw）、SK.3.11 勋章制
-（badge_level）——五大制度全部成为三端一致、z3 可证明的 ΣLang 语义，
-App 开工时整份业务规则都有被验证过的语义可直接落地。**我只关心这个结果。**
+**总目标**: 把项目推进到 **v0.21 可用**——即：**找茬 MVP 全链路审计剧本**，
+在 v0.20（五大制度补齐）达成的基础上，把找茬完整业务流串成一条端到端「验收剧本」：
+spec §SK.6 定义 12 步 MVP 业务故事线（开户额度→发布需求→扣减额度→赏金托管→接单→
+提交成果→验收确认→释放赏金→提现→契分→贡献→勋章），`sigma-runtime --story`
+一次跑通全流程并逐事件复核不变量——App 开工时照此验收。**我只关心这个结果。**
 
 ---
 
@@ -320,6 +319,23 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > ΣLang 语义——发单扣额度、赏金托管冻结、验收释放、完成 +5 契分、勋章升级，
 > 整条业务规则链三端一致可执行、z3 可证明、语料进共识门禁。
 
+### v0.21 完成定义（找茬 MVP 全链路审计剧本，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **场景章节**: spec 新增 §SK.6 MVP 业务剧本——12 步端到端验收场景（开户额度→
+      发布需求→扣减额度→赏金托管→接单→提交成果→验收确认→释放赏金→找茬人提现→
+      契分奖励→贡献累计→勋章升级），并列出剧本不变量（INV-1 状态单调 / INV-3 守恒 /
+      INV-4 作者授权 / 额度扣减 / 积分托管守恒）。
+- [x] **审计剧本**: `sigma-runtime --story`（run_mvp_story）一次跑通完整业务故事线，
+      逐事件复核定律/不变量，18/18 义务满足、退出码 0；`--story --json` 机器可读。
+- [x] **不回归**: consensus 43/43、p0 109/109、sigma-prove 41 项 PROVED、
+      sigma-runtime 59/59（trace）+ 18/18（story）、三端编译 0 warning、py_compile 通过，
+      v0.10–v0.20 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
+
+> v0.21 = 「App 开工验收剧本」：找茬从开户到勋章升级的完整业务故事线已固化为
+> 一条可审计的 ΣLang 调用序列——开工时任何实现只要按 §SK.6 剧本走，每一步
+> 都被三端验证过、不变量可复核，业务正确性有据可依。
+
 ---
 
 ## 7. 提交与汇报约定
@@ -330,7 +346,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ```text
 【ΣLang AUTOPILOT 结果】
-- 状态: ✅ v0.20 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
+- 状态: ✅ v0.21 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
 - 本轮完成: 修复 X · 新增 Y · 验证 N/N
 - 验证证据: verify_consensus N/N · verify_p0 109/109 · sigma-prove PROVED
 - 提交: <hash> <subject>

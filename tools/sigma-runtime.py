@@ -449,6 +449,123 @@ def run_trace(core):
     return events
 
 
+# ---------------------------------------------------------------------------
+# §SK.6 MVP 业务剧本 (spec_p0_socketkit.md — 端到端验收场景, v0.21)
+# 一次真实交易: 受茬人 author=7 发单, 找茬人 hunter=3 接单, 走完全流程.
+# ---------------------------------------------------------------------------
+
+def run_mvp_story(core):
+    """Run the end-to-end MVP story; returns per-event audit records."""
+    events = []
+
+    def record(event, op, inp, out, obligations):
+        events.append({
+            "event": event,
+            "op": op,
+            "input": inp,
+            "output": out,
+            "obligations": obligations,
+        })
+
+    # 1. 开户额度 (SK.6.1)
+    q0 = core.quota_new(50)
+    record("quota_new", "SK.6.1", [50], q0, [
+        {"law": "quota_new(50) ≡ [50, 50] — 本月额度",
+         "ok": q0 == [50, 50], "note": f"quota={q0}"},
+    ])
+
+    # 2. 发布需求 (SK.6.2)
+    task = core.task_create(7, 100)
+    record("task_create", "SK.6.2", [7, 100], task, [
+        {"law": "task_create(7, 100) ≡ [7, 100, 0, 0] — open, unclaimed",
+         "ok": task == [7, 100, 0, 0], "note": f"task={task}"},
+    ])
+
+    # 3. 扣减额度 (SK.6.3)
+    q1 = core.quota_use(q0, 1)
+    record("quota_use", "SK.6.3", [q0, 1], q1, [
+        {"law": "quota_use 扣减 1 单 — 剩余 50 → 49",
+         "ok": q1 == [50, 49], "note": f"quota={q1}"},
+        {"law": "额度制: 剩余 ∈ [0, 月额]",
+         "ok": 0 <= q1[1] <= q1[0], "note": f"remaining={q1[1]}"},
+    ])
+
+    # 4. 赏金托管 (SK.6.4)
+    p0 = core.points_hold(core.points_new(), 100)
+    record("points_hold", "SK.6.4", [core.points_new(), 100], p0, [
+        {"law": "points_hold 冻结 100 — escrow=100, available=0",
+         "ok": p0 == [100, 0], "note": f"points={p0}"},
+    ])
+
+    # 5. 接单 (SK.6.5)
+    claimed = core.accept_task(task, 3)
+    record("accept_task", "SK.6.5", [task, 3], claimed, [
+        {"law": "INV-1 状态单调: 0 → 1 (open → in_progress)",
+         "ok": claimed[2] == 1, "note": f"status={claimed[2]}"},
+        {"law": "hunter recorded = 3",
+         "ok": claimed[3] == 3, "note": f"hunter={claimed[3]}"},
+    ])
+
+    # 6. 提交成果 (SK.6.6)
+    submitted = core.task_submit(claimed)
+    record("task_submit", "SK.6.6", claimed, submitted, [
+        {"law": "INV-1 状态单调: 1 → 2 (in_progress → pending_review)",
+         "ok": submitted[2] == 2, "note": f"status={submitted[2]}"},
+        {"law": "INV-3 守恒: hunter 保留",
+         "ok": submitted[3] == claimed[3], "note": f"hunter={submitted[3]}"},
+    ])
+
+    # 7. 验收确认 (SK.6.7)
+    done = core.task_accept(submitted, 7)
+    record("task_accept", "SK.6.7", [submitted, 7], done, [
+        {"law": "INV-1 状态单调: 2 → 3 (pending_review → completed)",
+         "ok": done[2] == 3, "note": f"status={done[2]}"},
+        {"law": "INV-4 授权: caller 7 ≡ author 7 (受茬人本人验收)",
+         "ok": done[0] == 7, "note": "author-only acceptance"},
+        {"law": "INV-3 守恒: bounty 100 全程不变",
+         "ok": done[1] == 100, "note": f"bounty={done[1]}"},
+    ])
+
+    # 8. 释放赏金 (SK.6.8)
+    p1 = core.points_release(p0, 100)
+    record("points_release", "SK.6.8", [p0, 100], p1, [
+        {"law": "points_release 释放 100 — escrow→available",
+         "ok": p1 == [0, 100], "note": f"points={p1}"},
+        {"law": "积分制: escrow→available 总额不变",
+         "ok": p1[0] + p1[1] == p0[0] + p0[1], "note": f"total={p1[0] + p1[1]}"},
+    ])
+
+    # 9. 找茬人提现 (SK.6.9)
+    p2 = core.points_withdraw(p1, 100)
+    record("points_withdraw", "SK.6.9", [p1, 100], p2, [
+        {"law": "points_withdraw 提现 100 — available 100 → 0",
+         "ok": p2 == [0, 0], "note": f"points={p2}"},
+    ])
+
+    # 10. 契分奖励 (SK.6.10)
+    cred = core.credit_score([[0, 1]])
+    record("credit_score", "SK.6.10", [[0, 1]], cred, [
+        {"law": "契分制: 完成 1 单 → 100 → 105",
+         "ok": cred == 105, "note": f"credit={cred}"},
+    ])
+
+    # 11. 贡献累计 (SK.6.11)
+    contrib = core.contribution_score([[3, 1, 10]])
+    record("contribution_score", "SK.6.11", [[3, 1, 10]], contrib, [
+        {"law": "贡献制: 找茬人贡献 +10",
+         "ok": contrib == 10, "note": f"points={contrib}"},
+    ])
+
+    # 12. 勋章升级 (SK.6.12)
+    badge = core.badge_level(105)
+    record("badge_level", "SK.6.12", [105], badge, [
+        {"law": "勋章制: badge_level(105) ≡ 1 — 银牌 (score ≥ 100)",
+         "ok": badge == 1, "note": f"badge={badge}"},
+    ])
+
+    return events
+
+
 def audit(events):
     """Flatten all obligations; every one must hold."""
     total = sum(len(e["obligations"]) for e in events)
@@ -476,25 +593,53 @@ def render_human(events):
     return "\n".join(lines)
 
 
+def render_story(events):
+    """Render the §SK.6 MVP story (spec_p0_socketkit.md) human-readable."""
+    lines = []
+    lines.append("ΣLang Audit Runtime — §SK.6 MVP 业务剧本（端到端验收场景）")
+    lines.append("=" * 64)
+    lines.append("受茬人 author=7 发单 · 找茬人 hunter=3 接单 · 一次真实交易全流程")
+    lines.append("-" * 64)
+    for i, e in enumerate(events, 1):
+        lines.append(f"[{i}] {e['op']} {e['event']}  input={e['input']}")
+        lines.append(f"    → {e['output']}")
+        for ob in e["obligations"]:
+            mark = "✓" if ob["ok"] else "✗ VIOLATION"
+            lines.append(f"    {mark} {ob['law']}  ({ob['note']})")
+    total, failed = audit(events)
+    if failed:
+        lines.append(f"Audit: {total - failed}/{total} obligations satisfied — "
+                     f"{failed} VIOLATION(S)")
+    else:
+        lines.append(f"Audit: {total}/{total} obligations satisfied — "
+                     f"MVP story is ΣLang-auditable")
+    return "\n".join(lines)
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     as_json = "--json" in argv
+    as_story = "--story" in argv
 
     core = load_core()
-    events = run_trace(core)
+    if as_story:
+        events = run_mvp_story(core)
+    else:
+        events = run_trace(core)
     total, failed = audit(events)
 
     if as_json:
         print(json.dumps({
             "tool": "sigma-runtime",
-            "spec": "spec_p0_socketkit.md §SK",
+            "spec": "spec_p0_socketkit.md §SK.6 (MVP story)" if as_story
+                    else "spec_p0_socketkit.md §SK",
             "trace": events,
             "obligations_total": total,
             "violations": failed,
             "auditable": failed == 0,
         }, indent=2, ensure_ascii=False))
     else:
-        print(render_human(events))
+        print(render_story(events) if as_story else render_human(events))
 
     return 0 if failed == 0 else 1
 

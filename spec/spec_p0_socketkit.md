@@ -422,3 +422,36 @@ encode_points : List⟨ℕ⟩ → ℕ     # Points → ℕ (Law II)
 - **Tests**: the corpus module carries the canonical tests above as real §SK calls.
 
 > Promotion path reference: Phase 7 — RFC → spec section → Verifier check → tests.
+
+### SK.6 MVP 业务剧本（v0.21，端到端验收场景）
+
+一次「来找茬」MVP 真实交易（受茬人 author=7 发单，找茬人 hunter=3 接单）的完整
+ΣLang 调用序列。`sigma-runtime --story` 逐事件审计该剧本；每一步的定律/不变量
+（INV-1 状态单调、INV-3 守恒、INV-4 作者授权、额度扣减、积分托管守恒）都必须成立。
+
+```md
+# 1. 开户额度      quota_new(50)                          → [50, 50]
+# 2. 发布需求      task_create(7, 100)                    → [7, 100, 0, 0]
+# 3. 扣减额度      quota_use([50, 50], 1)                 → [50, 49]
+# 4. 赏金托管      points_hold(points_new(), 100)         → [100, 0]
+# 5. 接单          accept_task([7, 100, 0, 0], 3)         → [7, 100, 1, 3]
+# 6. 提交成果      task_submit([7, 100, 1, 3])            → [7, 100, 2, 3]
+# 7. 验收确认      task_accept([7, 100, 2, 3], 7)         → [7, 100, 3, 3]
+# 8. 释放赏金      points_release([100, 0], 100)          → [0, 100]
+# 9. 找茬人提现    points_withdraw([0, 100], 100)         → [0, 0]
+# 10. 契分奖励     credit_score([[0, 1]])                 → 105
+# 11. 贡献累计     contribution_score([[3, 1, 10]])       → 10
+# 12. 勋章升级     badge_level(105)                       → 1
+```
+
+**剧本不变量（每一步都必须满足）**
+
+```md
+INV-1  状态单调: 任务状态 0 → 1 → 2 → 3，只前进不后退
+INV-3  守恒:     bounty 100 全程不变；积分 escrow→available 总额不变
+INV-4  授权:     task_accept 的 caller 7 ≡ author 7（受茬人本人验收）
+额度制:  quota_use 扣减正确，剩余 ∈ [0, 月额]
+积分制:  points_release 释放入可用，可用非负
+契分制:  完成 1 单 → 契分 100 → 105
+勋章制:  badge_level(105) ≡ 1（银牌，score ≥ 100）
+```

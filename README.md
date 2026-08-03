@@ -73,6 +73,8 @@ Verifier Consensus / 验证器共识: **41/41** corpus modules agree across Pyth
 
 **v0.20 找茬五大制度补齐 (2026-08-03)**: 依据找茬需求文档（`D:\Desktop\来找茬_需求文档.md` §四）把剩余三制度纳入 §SK——**SK.3.9 额度制**（`quota_new/quota_use/quota_reset`：月额/扣减/月底清零）、**SK.3.10 积分制**（`points_hold/points_release/points_withdraw`：托管冻结/释放/提现，⊥ InsufficientEscrow / InsufficientPoints）、**SK.3.11 勋章制**（`badge_level`：铜银金钻四级）。三端执行层与 eval_expr 同步（sigma_core 130/130、三端 §SK 自检 52/52、socketkit_ok 50/50 三端一致、0 warning），sigma-prove 新增 8 项三制度义务全部 `PROVED (unsat)`（共 41 项），sigma-runtime 审计 trace 增加三制度段（59/59）；consensus 43/43、p0 109/109，v0.10–v0.19 不回归。
 
+**v0.21 找茬 MVP 全链路审计剧本 (2026-08-03)**: spec 新增 **§SK.6 MVP 业务剧本**——12 步端到端验收场景（开户额度→发布需求→扣减额度→赏金托管→接单→提交成果→验收确认→释放赏金→找茬人提现→契分奖励→贡献累计→勋章升级）；`sigma-runtime --story`（run_mvp_story）一次跑通完整业务故事线并逐事件复核不变量（INV-1 状态单调 / INV-3 守恒 / INV-4 作者授权 / 额度扣减 / 积分托管守恒），**18/18 义务满足**——作为 App 开工的「验收剧本」；consensus 43/43、p0 109/109、三端 0 warning，v0.10–v0.20 不回归。
+
 ### Two verification modes / 两种验证模式
 
 ΣLang ships **two distinct verification tools** with different purposes:
@@ -294,7 +296,7 @@ The following files have been moved to `archive/` as they are superseded by newe
 
 ## Version / 版本
 
-- **Milestone / 里程碑**: **v0.20 找茬五大制度补齐 (2026-08-03)** — 额度制/积分制/勋章制进 ΣLang，业务规则链完整可证明 · **v0.19 第二个自举新域（金融 portfolio@1.0）(2026-08-03)** — 协议泛化性再验证，consensus 43/43 · **v0.18 状态机不变量证明 (2026-08-03)** — 作者授权 + 4 项状态机不变量 z3 可证明 · **v0.17 §SK 对齐真实业务 (2026-08-03)** — Task 4 态状态机 + 契分制，MVP 全流程三端一致可执行可证明 · **v0.16 SocketKit 语料执行化 (2026-08-03)** — 业务语义进入 Law XIII 共识门禁 · **v0.15 三端 §SK 执行层 (2026-08-03)** — §SK 业务语义 Python/Rust/Elixir 三端一致可执行 · **v0.14 SocketKit Runtime (2026-08-03)** — §SK 参考实现 + 审计运行时 + z3 证明闭环，共识门禁 41/41 全绿 · **v0.13 SocketKit Protocol (2026-08-02)** — §SK 语义定义，共识门禁 40/40 全绿 · **v0.12 Novel Spec Test (2026-08-02)** — 新域自举闭环 · **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
+- **Milestone / 里程碑**: **v0.21 找茬 MVP 全链路审计剧本 (2026-08-03)** — §SK.6 十二步业务故事线 + `sigma-runtime --story`，App 开工验收剧本 · **v0.20 找茬五大制度补齐 (2026-08-03)** — 额度制/积分制/勋章制进 ΣLang，业务规则链完整可证明 · **v0.19 第二个自举新域（金融 portfolio@1.0）(2026-08-03)** — 协议泛化性再验证，consensus 43/43 · **v0.18 状态机不变量证明 (2026-08-03)** — 作者授权 + 4 项状态机不变量 z3 可证明 · **v0.17 §SK 对齐真实业务 (2026-08-03)** — Task 4 态状态机 + 契分制，MVP 全流程三端一致可执行可证明 · **v0.16 SocketKit 语料执行化 (2026-08-03)** — 业务语义进入 Law XIII 共识门禁 · **v0.15 三端 §SK 执行层 (2026-08-03)** — §SK 业务语义 Python/Rust/Elixir 三端一致可执行 · **v0.14 SocketKit Runtime (2026-08-03)** — §SK 参考实现 + 审计运行时 + z3 证明闭环，共识门禁 41/41 全绿 · **v0.13 SocketKit Protocol (2026-08-02)** — §SK 语义定义，共识门禁 40/40 全绿 · **v0.12 Novel Spec Test (2026-08-02)** — 新域自举闭环 · **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
 - **Spec Version / 规范版本**: 0.3.0
 - **Date / 日期**: 2026-08-03
 - **License / 许可证**: MIT
