@@ -99,9 +99,17 @@
   （15/15）、Elixir `--sk-story`（15/15）**四端逐项一致**——同一业务故事线在
   Python 参考后端与 Rust 生产级实现上算出同一个答案；`cargo build` 0 error/0
   warning；consensus 43/43、p0 109/109，v0.10–v0.24 不回归。
+- ✅ **REACHED v0.26 (2026-08-03)**: Rust HTTP 服务 + 冒烟对账—— `app.rs` 增加
+  stdlib-only HTTP JSON API（手写 TcpListener + serde_json，端点 `/quota /post
+  /claim /submit /accept /withdraw /badge` 与 Python `sigma_app.py --serve`
+  一致，业务全部委托 App 层 → §SK），CLI 新增 `--app-serve`；`--app-smoke`
+  （run_smoke：起服务→HTTP 七步全链路→逐响应断言→13/13）与 Python
+  `sigma_app.py --smoke`（13/13）**双端逐项一致**——HTTP 层也同尺；
+  `cargo build` 0 error/0 warning；consensus 43/43、p0 109/109，v0.10–v0.25
+  不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.25 达成后 P3 待办已清空，进入新里程碑规划。
+  2. （无）— v0.26 达成后 P3 待办已清空，进入新里程碑规划。
 
 ---
 
@@ -382,6 +390,7 @@ This makes your App's business logic **mathematically auditable**.
 | P3 | **v0.23 MVP 端到端 HTTP 冒烟测试 (REACHED 2026-08-03)** | ✅ `sigma_app.py` 增 `/quota` 端点 + `--smoke`（HTTP 七步全链路 /quota→/post→/claim→/submit→/accept→/withdraw→/badge，13/13 通过）——参考实现 HTTP 服务可用性被可重复冒烟固化；consensus 43/43、p0 109/109、三端 0 warning、v0.10–v0.22 不回归 |
 | P3 | **v0.24 三端 §SK.6 story 一致性 (REACHED 2026-08-03)** | ✅ §SK.6 剧本扩到三端：Rust `sk.rs story()` + `--sk-story`（15/15）、Elixir `sk_story()` + `--sk-story`（15/15），与 Python `sigma_app.py` 15/15 逐项一致——三把尺子审计同一故事线；consensus 43/43、p0 109/109、三端 0 warning、v0.10–v0.23 不回归 |
 | P3 | **v0.25 Rust 参考实现 (REACHED 2026-08-03)** | ✅ `impl/verifier/src/app.rs`（MVPApp Rust 版，业务全部委托 sk.rs §SK）+ `--app-self-check`（15/15）；与 Python `sigma_app.py` / Rust `--sk-story` / Elixir `--sk-story` 四端逐项一致；`cargo build` 0 error/0 warning；consensus 43/43、p0 109/109、v0.10–v0.24 不回归 |
+| P3 | **v0.26 Rust HTTP 服务 + 冒烟对账 (REACHED 2026-08-03)** | ✅ `app.rs` stdlib HTTP JSON API（`--app-serve`，端点与 Python `--serve` 一致）+ `--app-smoke`（HTTP 七步全链路 13/13）与 Python `sigma_app.py --smoke` 13/13 双端逐项一致——HTTP 层同尺；`cargo build` 0 error/0 warning；consensus 43/43、p0 109/109、v0.10–v0.25 不回归 |
 | P3 | Lang-Zone backend integration | ⏸️ **DEFERRED**：LZ 原型期，待自举稳定后融入（§6.1） |
 
 ---

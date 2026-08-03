@@ -45,6 +45,18 @@ struct Cli {
     /// the App layer, mirrors sigma_app.py) and exit
     #[arg(long)]
     app_self_check: bool,
+
+    /// Serve the 找茬 MVP HTTP JSON API (stdlib-only, mirrors sigma_app --serve)
+    #[arg(long)]
+    app_serve: bool,
+
+    /// Run the 找茬 MVP HTTP smoke test (7-step chain, mirrors sigma_app --smoke)
+    #[arg(long)]
+    app_smoke: bool,
+
+    /// Port for --app-serve
+    #[arg(long, default_value_t = 8080)]
+    port: u16,
 }
 
 #[derive(Debug, Clone, ValueEnum)]
@@ -1202,6 +1214,26 @@ fn main() -> Result<()> {
         let mut mvapp = app::MVPApp::new();
         let (passed, total) = app::run_story(&mut mvapp);
         println!("sigma_app MVP story (§SK.6): {passed}/{total} passed");
+        std::process::exit(if passed == total { 0 } else { 1 });
+    }
+
+    // 找茬 MVP HTTP JSON API — mirrors `python3 impl/python/sigma_app.py --serve`
+    // (stdlib-only TcpListener + serde_json; endpoints /quota /post /claim
+    // /submit /accept /withdraw /badge all delegate to the App layer → §SK).
+    if cli.app_serve {
+        let mvapp = std::sync::Arc::new(std::sync::Mutex::new(app::MVPApp::new()));
+        let addr = format!("127.0.0.1:{}", cli.port);
+        app::serve(mvapp, &addr)?;
+        return Ok(());
+    }
+
+    // 找茬 MVP HTTP smoke — mirrors `python3 impl/python/sigma_app.py --smoke`
+    // (HTTP 7-step chain /quota → /post → /claim → /submit → /accept →
+    // /withdraw → /badge, 13/13) so the HTTP layer is audited identically
+    // across Python and Rust.
+    if cli.app_smoke {
+        let (passed, total) = app::run_smoke();
+        println!("sigma_app HTTP smoke (MVP chain): {passed}/{total} passed");
         std::process::exit(if passed == total { 0 } else { 1 });
     }
 

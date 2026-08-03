@@ -8,8 +8,13 @@
 //! implementations (Law XIII at the product layer).
 //!
 //!     cargo run -- --app-self-check      # §SK.6 MVP story through the App
+//!     cargo run -- --app-serve           # stdlib-only HTTP JSON API
+//!     cargo run -- --app-smoke           # HTTP 7-step chain smoke (13/13)
 
 use std::collections::HashMap;
+use std::io::{BufRead, BufReader, Write};
+use std::net::{TcpListener, TcpStream};
+use std::sync::{Arc, Mutex};
 
 use crate::sk;
 
@@ -167,6 +172,225 @@ pub fn run_story(app: &mut MVPApp) -> (usize, usize) {
            [task[2], claimed[2], submitted[2], done[2]] == [0, 1, 2, 3]);
     check!("INV-3 bounty conserved", done[1] == 100);
     check!("INV-4 author accept", done[0] == 7);
+
+    (passed, total)
+}
+
+// ============================================================================
+// stdlib-only HTTP JSON API (--app-serve) — mirrors sigma_app.py --serve
+// ============================================================================
+
+/// Parse a query string `a=1&b=2` into name → i64 pairs.
+fn parse_query(query: &str) -> HashMap<String, i64> {
+    let mut out = HashMap::new();
+    for part in query.split('&') {
+        if let Some((k, v)) = part.split_once('=') {
+            if let Ok(n) = v.trim().parse::<i64>() {
+                out.insert(k.to_string(), n);
+            }
+        }
+    }
+    out
+}
+
+/// Route one GET request; returns (status, JSON body).
+fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
+    let q = parse_query(query);
+    let need = |names: &[&str]| -> Option<Vec<i64>> {
+        names.iter().map(|n| q.get(*n).copied()).collect()
+    };
+    let body = match path {
+        "/quota" => {
+            if let Some(v) = need(&["user", "monthly"]) {
+                serde_json::json!({"quota": app.open_quota(v[0], v[1])})
+            } else {
+                return (400, serde_json::json!({"error": "need user & monthly"}).to_string());
+            }
+        }
+        "/post" => {
+            if let Some(v) = need(&["author", "bounty"]) {
+                let (tid, task, quota, points) = app.post_task(v[0], v[1]);
+                serde_json::json!({"task_id": tid, "task": task,
+                                   "quota": quota, "points": points})
+            } else {
+                return (400, serde_json::json!({"error": "need author & bounty"}).to_string());
+            }
+        }
+        "/claim" => {
+            if let Some(v) = need(&["task", "hunter"]) {
+                serde_json::json!({"task": app.claim_task(v[0] as u64, v[1])})
+            } else {
+                return (400, serde_json::json!({"error": "need task & hunter"}).to_string());
+            }
+        }
+        "/submit" => {
+            if let Some(v) = need(&["task"]) {
+                serde_json::json!({"task": app.submit_work(v[0] as u64)})
+            } else {
+                return (400, serde_json::json!({"error": "need task"}).to_string());
+            }
+        }
+        "/accept" => {
+            if let Some(v) = need(&["task", "caller"]) {
+                let (task, points, credit, contribution) = app.accept_work(v[0] as u64, v[1]);
+                serde_json::json!({"task": task, "points": points,
+                                   "credit": credit, "contribution": contribution})
+            } else {
+                return (400, serde_json::json!({"error": "need task & caller"}).to_string());
+            }
+        }
+        "/withdraw" => {
+            if let Some(v) = need(&["user", "amount"]) {
+                serde_json::json!({"points": app.withdraw(v[0], v[1])})
+            } else {
+                return (400, serde_json::json!({"error": "need user & amount"}).to_string());
+            }
+        }
+        "/badge" => {
+            if let Some(v) = need(&["user"]) {
+                serde_json::json!({"credit": app.credit(v[0]), "badge": app.badge(v[0])})
+            } else {
+                return (400, serde_json::json!({"error": "need user"}).to_string());
+            }
+        }
+        _ => return (404, serde_json::json!({"error": "unknown path"}).to_string()),
+    };
+    (200, body.to_string())
+}
+
+/// Handle one HTTP connection: read the request line, route, write the JSON reply.
+fn handle_connection(app: &Mutex<MVPApp>, mut stream: TcpStream) {
+    let Ok(clone) = stream.try_clone() else {
+        return;
+    };
+    let mut reader = BufReader::new(clone);
+    let mut request_line = String::new();
+    if reader.read_line(&mut request_line).is_err() {
+        return;
+    }
+    // "GET /path?query HTTP/1.1"
+    let mut parts = request_line.split_whitespace();
+    let method = parts.next().unwrap_or("");
+    let target = parts.next().unwrap_or("/");
+    let (status, body) = if method != "GET" {
+        (400, serde_json::json!({"error": "only GET supported"}).to_string())
+    } else {
+        let (path, query) = match target.split_once('?') {
+            Some((p, q)) => (p, q),
+            None => (target, ""),
+        };
+        // Business errors (e.g. StateError) surface as panics from the sk
+        // delegation — catch them and reply 400 like the Python backend.
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            route(&mut app.lock().unwrap(), path, query)
+        }));
+        match result {
+            Ok(r) => r,
+            Err(_) => (400, serde_json::json!({"error": "rejected"}).to_string()),
+        }
+    };
+    let reply = format!(
+        "HTTP/1.1 {status} {}\r\nContent-Type: application/json\r\n\
+         Content-Length: {}\r\nConnection: close\r\n\r\n{}",
+        if status == 200 { "OK" } else if status == 404 { "Not Found" } else { "Bad Request" },
+        body.len(),
+        body,
+    );
+    let _ = stream.write_all(reply.as_bytes());
+}
+
+/// Serve the MVP HTTP API forever on `addr` (e.g. "127.0.0.1:8080").
+pub fn serve(app: Arc<Mutex<MVPApp>>, addr: &str) -> std::io::Result<()> {
+    let listener = TcpListener::bind(addr)?;
+    println!("找茬 MVP 参考实现 (Rust) — http://{addr}  \
+              (GET /quota /post /claim /submit /accept /withdraw /badge)");
+    serve_on(app, listener);
+    Ok(())
+}
+
+/// Accept loop over a bound listener (shared by `serve` and `run_smoke`).
+fn serve_on(app: Arc<Mutex<MVPApp>>, listener: TcpListener) {
+    for stream in listener.incoming() {
+        match stream {
+            Ok(s) => {
+                let app = Arc::clone(&app);
+                std::thread::spawn(move || handle_connection(&app, s));
+            }
+            Err(_) => continue,
+        }
+    }
+}
+
+/// GET one path from the smoke server and parse the JSON body.
+fn http_get(port: u16, path: &str) -> serde_json::Value {
+    use std::io::Read;
+    let mut stream = TcpStream::connect(("127.0.0.1", port)).expect("connect to smoke server");
+    let req = format!("GET {path} HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
+    let _ = stream.write_all(req.as_bytes());
+    let mut resp = String::new();
+    let _ = stream.read_to_string(&mut resp);
+    let body = resp.split("\r\n\r\n").nth(1).unwrap_or("");
+    serde_json::from_str(body.trim()).unwrap_or_else(|_| serde_json::json!({"error": "parse"}))
+}
+
+/// --app-smoke: start the server, walk the full MVP chain over HTTP, assert.
+/// Mirrors `python3 impl/python/sigma_app.py --smoke` (13 items) so the HTTP
+/// layer is audited identically across Python and Rust. Returns (passed, total).
+pub fn run_smoke() -> (usize, usize) {
+    let app = Arc::new(Mutex::new(MVPApp::new()));
+    let listener = TcpListener::bind("127.0.0.1:0").expect("bind smoke listener");
+    let port = listener.local_addr().expect("local addr").port();
+    let serve_app = Arc::clone(&app);
+    std::thread::spawn(move || serve_on(serve_app, listener));
+
+    let mut passed = 0usize;
+    let mut total = 0usize;
+
+    macro_rules! check {
+        ($name:expr, $cond:expr) => {{
+            total += 1;
+            if $cond {
+                passed += 1;
+            } else {
+                eprintln!("  ❌ HTTP {}", $name);
+            }
+        }};
+    }
+
+    // 1. 开户额度   /quota?user=7&monthly=50          → {"quota": [50, 50]}
+    let r = http_get(port, "/quota?user=7&monthly=50");
+    check!("HTTP /quota", r == serde_json::json!({"quota": [50, 50]}));
+
+    // 2. 发布需求   /post?author=7&bounty=100        → task / quota / points
+    let r = http_get(port, "/post?author=7&bounty=100");
+    check!("HTTP /post task", r["task"] == serde_json::json!([7, 100, 0, 0]));
+    check!("HTTP /post quota", r["quota"] == serde_json::json!([50, 49]));
+    check!("HTTP /post points", r["points"] == serde_json::json!([100, 0]));
+    let tid = r["task_id"].as_u64().unwrap_or(0);
+
+    // 3. 接单       /claim?task=T&hunter=3           → [7, 100, 1, 3]
+    let r = http_get(port, &format!("/claim?task={tid}&hunter=3"));
+    check!("HTTP /claim", r["task"] == serde_json::json!([7, 100, 1, 3]));
+
+    // 4. 提交成果   /submit?task=T                    → [7, 100, 2, 3]
+    let r = http_get(port, &format!("/submit?task={tid}"));
+    check!("HTTP /submit", r["task"] == serde_json::json!([7, 100, 2, 3]));
+
+    // 5. 验收确认   /accept?task=T&caller=7          → completed + release + credit
+    let r = http_get(port, &format!("/accept?task={tid}&caller=7"));
+    check!("HTTP /accept task", r["task"] == serde_json::json!([7, 100, 3, 3]));
+    check!("HTTP /accept points", r["points"] == serde_json::json!([0, 100]));
+    check!("HTTP /accept credit", r["credit"] == 105);
+    check!("HTTP /accept contribution", r["contribution"] == 10);
+
+    // 6. 找茬人提现 /withdraw?user=3&amount=100      → [0, 0]
+    let r = http_get(port, "/withdraw?user=3&amount=100");
+    check!("HTTP /withdraw", r["points"] == serde_json::json!([0, 0]));
+
+    // 7. 勋章       /badge?user=3                    → credit 105, badge 1
+    let r = http_get(port, "/badge?user=3");
+    check!("HTTP /badge credit", r["credit"] == 105);
+    check!("HTTP /badge badge", r["badge"] == 1);
 
     (passed, total)
 }

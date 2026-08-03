@@ -18,11 +18,12 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.25 可用**——即：**Rust 参考实现（贴近生产部署）**，
-在 v0.24（三端 §SK.6 story 一致性）达成的基础上，把找茬 MVP 参考后端用 Rust
-实现一遍（`impl/verifier/src/app.rs`，业务方法**全部委托** sk.rs §SK），与 Python
-`sigma_app.py` 四端逐项一致——业务代码进入"生产级语言"形态，同时保持对 §SK
-语义的完全委托。**我只关心这个结果。**
+**总目标**: 把项目推进到 **v0.26 可用**——即：**Rust HTTP 服务 + 冒烟对账**，
+在 v0.25（Rust 参考实现）达成的基础上，把 Rust 版参考后端补上 stdlib-only HTTP
+服务（`--app-serve`，端点与 Python `sigma_app.py --serve` 一致）与 `--app-smoke`
+冒烟测试（HTTP 七步全链路 13/13）——与 Python `sigma_app.py --smoke`（13/13）
+双端逐项一致，**HTTP 层也同尺**：找茬的开工验收在任何语言形态下都完整。
+**我只关心这个结果。**
 
 ---
 
@@ -410,6 +411,25 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > 同样的 §SK 委托，四端逐项一致；从"能跑的 Python 参考"到"贴近部署的 Rust
 > 实现"，业务代码形态升级，语义正确性分毫未动。
 
+### v0.26 完成定义（Rust HTTP 服务 + 冒烟对账，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **Rust HTTP 服务**: `app.rs` 增加 stdlib-only HTTP JSON API（手写
+      TcpListener + serde_json，无外部依赖），端点 `/quota /post /claim /submit
+      /accept /withdraw /badge` 与 Python `sigma_app.py --serve` 一致，业务全部
+      委托 App 层 → sk.rs §SK；CLI 新增 `--app-serve`（默认端口 8080）。
+- [x] **--app-smoke**: `app.rs` 新增 `run_smoke()`——起服务（随机端口）→ HTTP
+      七步全链路（/quota → /post → /claim → /submit → /accept → /withdraw →
+      /badge）→ 逐响应断言 → **13/13 通过**，与 Python `sigma_app.py --smoke`
+      （13/13）**双端逐项一致**——HTTP 层也同尺。
+- [x] **不回归**: 四端 story 15/15（Python/Rust app/Rust sk/Elixir）、consensus
+      43/43、p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 +
+      18/18、三端编译 0 warning、py_compile 通过，v0.10–v0.25 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
+
+> v0.26 = 「HTTP 层双端同尺」：找茬参考后端无论 Python 还是 Rust 形态，HTTP
+> 冒烟测试都 13/13 逐项一致——服务层、业务层、语义层全线对账，开工验收在任何
+> 语言形态下都完整。
+
 ---
 
 ## 7. 提交与汇报约定
@@ -420,7 +440,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ```text
 【ΣLang AUTOPILOT 结果】
-- 状态: ✅ v0.25 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
+- 状态: ✅ v0.26 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
 - 本轮完成: 修复 X · 新增 Y · 验证 N/N
 - 验证证据: verify_consensus N/N · verify_p0 109/109 · sigma-prove PROVED
 - 提交: <hash> <subject>
