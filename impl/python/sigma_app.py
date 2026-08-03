@@ -95,6 +95,28 @@ class MVPApp:
     def badge(self, user: int) -> int:
         return core.badge_level(self.credit(user))
 
+    # --- 增长期 (§SK.3.12–3.17) 全部委托 sigma_core -------------------------
+    def issue_badge(self, verifier: int, user: int, score: int) -> List[int]:
+        return core.badge_issue(verifier, user, score)
+
+    def dispute(self, evidence: List[List[int]]) -> int:
+        return core.dispute_review(evidence)
+
+    def create_team(self, owner: int, kind: int, capacity: int) -> List[int]:
+        return core.team_create(owner, kind, capacity)
+
+    def join_team(self, team: List[int], member: int) -> List[int]:
+        return core.team_join(team, member)
+
+    def share_reward(self, contribs: List[List[int]], reward: int) -> List[List[int]]:
+        return core.team_share(contribs, reward)
+
+    def advance_quota(self, quota: List[int]) -> List[int]:
+        return core.quota_advance(quota)
+
+    def ledger(self, entries: List[List[int]]) -> List[List[int]]:
+        return core.points_ledger(entries)
+
 
 # ============================================================================
 # §SK.6 self-check: run the audited MVP story through the App layer
@@ -184,6 +206,14 @@ class _Handler(BaseHTTPRequestHandler):
                     return default
         return default
 
+    def _get_str(self, name: str) -> Optional[str]:
+        """Return a raw string query parameter (for list-typed args)."""
+        raw = self.path.split("?", 1)[1] if "?" in self.path else ""
+        for part in raw.split("&"):
+            if part.startswith(name + "="):
+                return part.split("=", 1)[1]
+        return None
+
     def do_GET(self):
         path = self.path.split("?", 1)[0]
         app = _Handler.app
@@ -233,6 +263,48 @@ class _Handler(BaseHTTPRequestHandler):
                     return self._json({"error": "need user"}, 400)
                 return self._json({"credit": app.credit(user),
                                    "badge": app.badge(user)})
+            # --- 增长期端点 (§SK.3.12–3.17) ---
+            if path == "/badge_issue":
+                v = self._get("verifier")
+                u = self._get("user")
+                s = self._get("score")
+                if v is None or u is None or s is None:
+                    return self._json({"error": "need verifier & user & score"}, 400)
+                return self._json({"badge": app.issue_badge(v, u, s)})
+            if path == "/dispute":
+                ev = self._get_str("evidence")
+                if ev is None:
+                    return self._json({"error": "need evidence"}, 400)
+                return self._json({"decision": app.dispute(eval(ev))})
+            if path == "/team_create":
+                o = self._get("owner")
+                k = self._get("kind")
+                c = self._get("capacity")
+                if o is None or k is None or c is None:
+                    return self._json({"error": "need owner & kind & capacity"}, 400)
+                return self._json({"team": app.create_team(o, k, c)})
+            if path == "/team_join":
+                t = self._get_str("team")
+                m = self._get("member")
+                if t is None or m is None:
+                    return self._json({"error": "need team & member"}, 400)
+                return self._json({"team": app.join_team(eval(t), m)})
+            if path == "/team_share":
+                c = self._get_str("contribs")
+                r = self._get("reward")
+                if c is None or r is None:
+                    return self._json({"error": "need contribs & reward"}, 400)
+                return self._json({"shares": app.share_reward(eval(c), r)})
+            if path == "/advance":
+                q = self._get_str("quota")
+                if q is None:
+                    return self._json({"error": "need quota"}, 400)
+                return self._json({"quota": app.advance_quota(eval(q))})
+            if path == "/ledger":
+                e = self._get_str("entries")
+                if e is None:
+                    return self._json({"error": "need entries"}, 400)
+                return self._json({"ledger": app.ledger(eval(e))})
             return self._json({"error": "unknown path"}, 404)
         except (ValueError, KeyError) as e:
             return self._json({"error": str(e)}, 400)
@@ -303,6 +375,22 @@ def run_http_smoke() -> Tuple[int, int]:
     r = get("/badge?user=3")
     check("HTTP /badge credit", r["credit"] == 105, f"got {r}")
     check("HTTP /badge badge", r["badge"] == 1, f"got {r}")
+
+    # 8. 增长期 (§SK.3.12–3.17)
+    r = get("/badge_issue?verifier=1001&user=3&score=105")
+    check("HTTP /badge_issue", r["badge"] == [1001, 3, 1], f"got {r}")
+    r = get("/dispute?evidence=[[1,1,3],[2,1,2]]")
+    check("HTTP /dispute", r["decision"] == 1, f"got {r}")
+    r = get("/team_create?owner=7&kind=0&capacity=3")
+    check("HTTP /team_create", r["team"] == [7, 0, 1, 3], f"got {r}")
+    r = get("/team_join?team=[7,0,1,3]&member=5")
+    check("HTTP /team_join", r["team"] == [7, 0, 2, 3], f"got {r}")
+    r = get("/team_share?contribs=[[3,2],[4,4]]&reward=6")
+    check("HTTP /team_share", r["shares"] == [[3, 2], [4, 4]], f"got {r}")
+    r = get("/advance?quota=[50,50]")
+    check("HTTP /advance", r["quota"] == [50, 100], f"got {r}")
+    r = get("/ledger?entries=[[0,100,1]]")
+    check("HTTP /ledger", r["ledger"] == [[1, 1, 100]], f"got {r}")
 
     server.shutdown()
     thread.join()

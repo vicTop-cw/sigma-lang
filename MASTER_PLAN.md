@@ -164,9 +164,14 @@
   `sigma-runtime --growth`（11/11）**三端逐项一致**——增长期业务故事线三把尺子
   同尺；`cargo build` 0 error/0 warning；consensus 45/45、p0 109/109，
   v0.10–v0.35 不回归。
+- ✅ **REACHED v0.37 (2026-08-03)**: Python app 增长期端点—— `sigma_app.py`
+  增加增长期方法（全部委托 sigma_core §SK.3.12–3.17）+ HTTP 端点
+  （/badge_issue /dispute /team_create /team_join /team_share /advance /ledger，
+  新增 _get_str 解析列表参数）；`--smoke` 扩展增长期步骤（13/13 → 20/20）；
+  自检 15/15 不回归；consensus 45/45、p0 109/109，v0.10–v0.36 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.36 达成后 P3 待办已清空，进入新里程碑规划（v0.37–v0.50 连续推进）。
+  2. （无）— v0.37 达成后 P3 待办已清空，进入新里程碑规划（v0.38–v0.50 连续推进）。
 
 ---
 

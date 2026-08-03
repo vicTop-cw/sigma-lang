@@ -146,6 +146,18 @@
       v0.10–v0.35 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.37 完成定义（Python app 增长期端点，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **增长期方法**: `sigma_app.py` MVPApp 增加 issue_badge / dispute /
+      create_team / join_team / share_reward / advance_quota / ledger（全部委托
+      sigma_core §SK.3.12–3.17）。
+- [x] **HTTP 端点**: `/badge_issue /dispute /team_create /team_join /team_share
+      /advance /ledger`（新增 _get_str 解析列表参数）；`--smoke` 扩展增长期步骤
+      （13/13 → 20/20）。
+- [x] **不回归**: 自检 15/15、consensus 45/45、p0 109/109、sigma-prove 48 项
+      PROVED、三端 0 warning，v0.10–v0.36 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
