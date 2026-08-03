@@ -490,6 +490,35 @@ Definition: team_join([o, k, s, c], m) ≡ [o, k, s+1, c]  if s < c
 | team_join(team_create(7, 0, 3), 5) | [7,0,2,3] |
 | team_join([7,0,2,2], 5) | ⊥ TeamFull |
 
+### SK.3.15 team_share — 团内收益按贡献分配 (需求文档 §七)
+
+找茬团 N 人分工完成任务后，收益按贡献比例分配（整数除法向下取整）。若
+贡献总和为 0 则 ⊥ DivByZero。
+
+```md
+team_share : List⟨List⟨ℕ⟩⟩ × ℕ → List⟨List⟨ℕ⟩⟩   # (contribs[], reward) → shares[]
+Fingerprint: 0xF014
+Definition: team_share([[m₁,c₁],…,[mₙ,cₙ]], r) ≡ [[mᵢ, ⌊r·cᵢ/Σc⌋], …]
+            # shareᵢ = floor(r · cᵢ / total)；total = Σ cᵢ
+            # total = 0 → ⊥ DivByZero
+```
+
+**Laws**
+
+```md
+∀ c r . total(c) > 0 ⇒ Σ shares ≡ ≤ r                     # 不超发
+∀ c r . total(c) > 0 ⇒ 每份 share ≥ 0                     # 份额非负
+∀ c . total(c) ≡ 0 ⇒ team_share(c, r) ≡ ⊥ DivByZero      # 零贡献拒绝
+```
+
+**Tests**
+
+| Input | Output |
+|-------|--------|
+| team_share([[3,2],[4,4]], 6) | [[3,2],[4,4]] |
+| team_share([[3,1],[4,3]], 10) | [[3,2],[4,7]] |
+| team_share([[3,0],[4,0]], 5) | ⊥ DivByZero |
+
 ---
 
 ## SK.4 Encodings (Law II — encoding to ℕ for non-numeric returns)

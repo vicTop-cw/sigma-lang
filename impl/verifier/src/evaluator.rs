@@ -644,6 +644,41 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
             _ => Err("TypeError".to_string()),
         };
     }
+    // §SK.3.15 团内收益按贡献分配 team_share — shareᵢ = floor(r·cᵢ/Σc).
+    if let Some(rest) = s.strip_prefix("team_share(") {
+        let inner = rest.strip_suffix(')').ok_or("bad team_share call")?;
+        let (c, r) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad team_share args: {}", inner))?;
+        let vc = eval_expr(c)?;
+        let vr = eval_expr(r)?;
+        return match (vc, vr) {
+            (TVal::List(contribs), TVal::Num(reward)) => {
+                let mut total = 0i64;
+                let mut parsed: Vec<(i64, i64)> = Vec::new();
+                for e in &contribs {
+                    match e {
+                        TVal::List(fields) if fields.len() == 2 => {
+                            match (&fields[0], &fields[1]) {
+                                (TVal::Num(m), TVal::Num(cc)) => {
+                                    parsed.push((*m, *cc));
+                                    total += *cc;
+                                }
+                                _ => return Err("TypeError".to_string()),
+                            }
+                        }
+                        _ => return Err("ShapeError".to_string()),
+                    }
+                }
+                if total == 0 {
+                    return Err("DivByZero".to_string());
+                }
+                Ok(TVal::List(parsed.iter()
+                    .map(|(m, cc)| TVal::List(vec![TVal::Num(*m), TVal::Num(reward * *cc / total)]))
+                    .collect()))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
     if s == "I₂" {
         return Ok(TVal::List(vec![
             TVal::List(vec![TVal::Num(1), TVal::Num(0)]),

@@ -123,9 +123,15 @@
   ⊥ TypeError、未满员可加入否则 ⊥ TeamFull；三端执行层 + eval_expr 同步
   （sigma_core 143/143、Rust/Elixir §SK 自检 65/65、socketkit_ok 62/62 三端一致、
   0 warning）；consensus 43/43、p0 109/109，v0.10–v0.28 不回归。
+- ✅ **REACHED v0.30 (2026-08-03)**: 增长期语义④团收益—— §SK.3.15 `team_share`
+  （团内收益按贡献分配，需求文档 §七）：shareᵢ = floor(r·cᵢ/Σc)，Σ shares ≤ r
+  不超发、份额非负、零贡献 ⊥ DivByZero；三端执行层 + eval_expr 同步
+  （sigma_core 146/146、Rust/Elixir §SK 自检 68/68、socketkit_ok 65/65 三端一致、
+  0 warning，语料补 encode_shares 满足 Law II）；consensus 43/43、p0 109/109，
+  v0.10–v0.29 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.29 达成后 P3 待办已清空，进入新里程碑规划（v0.30–v0.50 连续推进）。
+  2. （无）— v0.30 达成后 P3 待办已清空，进入新里程碑规划（v0.31–v0.50 连续推进）。
 
 ---
 

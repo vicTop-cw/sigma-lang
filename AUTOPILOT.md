@@ -66,6 +66,18 @@
       18/18、双端冒烟 13/13、三端 0 warning，v0.10–v0.28 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.30 完成定义（增长期语义④团收益，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **语义**: §SK.3.15 `team_share`（团内收益按贡献分配）——shareᵢ =
+      floor(r·cᵢ/Σc)；Σ shares ≤ r 不超发、份额非负、零贡献 ⊥ DivByZero。
+- [x] **三端执行层**: sigma_core 146/146、Rust sk.rs / Elixir sigma_verify.exs
+      参考实现 + eval_expr + 自检 68/68，`cargo build` 0 error/0 warning。
+- [x] **语料**: `corpus/socketkit_ok.md` 增 team_share + encode_shares（65/65 三端
+      一致 PASS，Law II 满足），consensus 43/43 全绿。
+- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 +
+      18/18、双端冒烟 13/13、三端 0 warning，v0.10–v0.29 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

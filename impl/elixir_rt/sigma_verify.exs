@@ -1274,6 +1274,34 @@ defmodule SigmaVerify do
             end
           nil -> {:error, "bad team_join args: #{inner}"}
         end
+      # §SK.3.15 团内收益按贡献分配 team_share — shareᵢ = floor(r·cᵢ/Σc).
+      String.starts_with?(t, "team_share(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 11..-2//1)
+        case split_top_level(inner, ?,) do
+          {c_s, r_s} ->
+            with {:ok, {:list, contribs}} <- eval_expr(c_s),
+                 {:ok, {:num, reward}} <- eval_expr(r_s) do
+              parsed = Enum.map(contribs, fn
+                {:list, [{:num, m}, {:num, c}]} -> {m, c}
+                _ -> :bad
+              end)
+              if Enum.any?(parsed, &(&1 == :bad)) do
+                {:error, "ShapeError"}
+              else
+                total = Enum.sum(Enum.map(parsed, fn {_, c} -> c end))
+                if total == 0 do
+                  {:error, "DivByZero"}
+                else
+                  {:ok, {:list, Enum.map(parsed, fn {m, c} ->
+                    {:list, [{:num, m}, {:num, div(reward * c, total)}]}
+                  end)}}
+                end
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          nil -> {:error, "bad team_share args: #{inner}"}
+        end
       t == "I₂" ->
         {:ok, {:list, [{:list, [{:num, 1}, {:num, 0}]},
                        {:list, [{:num, 0}, {:num, 1}]}]}}
@@ -1672,6 +1700,15 @@ defmodule SigmaVerify do
   def team_join([owner, kind, size, capacity], _member) when size < capacity, do: {:ok, [owner, kind, size + 1, capacity]}
   def team_join(_team, _member), do: {:error, "TeamFull"}
 
+  @doc "团内收益按贡献分配: shareᵢ = floor(r·cᵢ/Σc). §SK.3.15 — total = 0 → ⊥ DivByZero."
+  def team_share(contribs, reward) do
+    total = Enum.sum(Enum.map(contribs, fn [_, c] -> c end))
+    cond do
+      total == 0 -> {:error, "DivByZero"}
+      true -> {:ok, Enum.map(contribs, fn [m, c] -> [m, div(reward * c, total)] end)}
+    end
+  end
+
   @doc "Law II — Quota → ℕ."
   def encode_quota(quota), do: encode_list(quota)
 
@@ -1774,6 +1811,10 @@ defmodule SigmaVerify do
       {"team_create_zero_capacity_rejected", team_create(7, 0, 0) == {:error, "TypeError"}},
       {"team_join", team_join([7, 0, 1, 3], 5) == {:ok, [7, 0, 2, 3]}},
       {"team_join_full_rejected", team_join([7, 0, 2, 2], 5) == {:error, "TeamFull"}},
+      # §SK.3.15 团内收益按贡献分配 team_share
+      {"team_share_even", team_share([[3, 2], [4, 4]], 6) == {:ok, [[3, 2], [4, 4]]}},
+      {"team_share_weighted", team_share([[3, 1], [4, 3]], 10) == {:ok, [[3, 2], [4, 7]]}},
+      {"team_share_zero_total_rejected", team_share([[3, 0], [4, 0]], 5) == {:error, "DivByZero"}},
       # §SK.4 encodings (Law II)
       {"encode_task_nat", encode_task([1, 2, 0, 0]) >= 0},
       {"encode_distinct", encode_task([1, 2, 0, 0]) != encode_task([1, 3, 0, 0])},

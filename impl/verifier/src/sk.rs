@@ -239,6 +239,16 @@ pub fn team_join(team: &[i64], _member: i64) -> Result<Vec<i64>, &'static str> {
     Ok(vec![owner, kind, size + 1, capacity])
 }
 
+/// 团内收益按贡献分配: shareᵢ = floor(r·cᵢ/Σc). §SK.3.15 — total = 0 → ⊥ DivByZero.
+pub fn team_share(contribs: &[Vec<i64>], reward: i64)
+    -> Result<Vec<Vec<i64>>, &'static str> {
+    let total: i64 = contribs.iter().map(|e| e[1]).sum();
+    if total == 0 {
+        return Err("DivByZero");
+    }
+    Ok(contribs.iter().map(|e| vec![e[0], reward * e[1] / total]).collect())
+}
+
 /// Law II — Quota → ℕ.
 pub fn encode_quota(quota: &[i64]) -> i64 {
     encode_list(quota, 1000)
@@ -377,6 +387,14 @@ pub fn self_check() -> (usize, usize) {
     check!("team_create_zero_capacity_rejected", team_create(7, 0, 0).is_err());
     check!("team_join", team_join(&team_create(7, 0, 3).unwrap(), 5) == Ok(vec![7, 0, 2, 3]));
     check!("team_join_full_rejected", team_join(&vec![7, 0, 2, 2], 5).is_err());
+
+    // §SK.3.15 团内收益按贡献分配 team_share
+    check!("team_share_even",
+           team_share(&[vec![3, 2], vec![4, 4]], 6) == Ok(vec![vec![3, 2], vec![4, 4]]));
+    check!("team_share_weighted",
+           team_share(&[vec![3, 1], vec![4, 3]], 10) == Ok(vec![vec![3, 2], vec![4, 7]]));
+    check!("team_share_zero_total_rejected",
+           team_share(&[vec![3, 0], vec![4, 0]], 5).is_err());
 
     // §SK.4 encodings (Law II)
     check!("encode_task_nat", encode_task(&[1, 2, 0, 0]) >= 0);

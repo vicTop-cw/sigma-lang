@@ -1097,6 +1097,33 @@ def eval_expr(s):
         if size[1] >= capacity[1]:
             return "TeamFull"
         return ("list", [owner, kind, ("num", size[1] + 1), capacity])
+    # §SK.3.15 团内收益按贡献分配 team_share — shareᵢ = floor(r·cᵢ/Σc).
+    if s.startswith("team_share(") and s.endswith(")"):
+        inner = s[len("team_share("):-1]
+        parts = split_top_level(inner, ",")
+        if parts is None or len(parts) < 2:
+            return f"bad team_share args: {inner}"
+        vc = eval_expr(parts[0].strip())
+        vr = eval_expr(parts[1].strip())
+        if isinstance(vc, str):
+            return vc
+        if isinstance(vr, str):
+            return vr
+        if vc[0] != "list" or vr[0] != "num":
+            return "TypeError"
+        total = 0
+        for entry in vc[1]:
+            if entry[0] != "list" or len(entry[1]) != 2:
+                return "ShapeError"
+            total += entry[1][1][1]
+        if total == 0:
+            return "DivByZero"
+        shares = []
+        for entry in vc[1]:
+            m = entry[1][0]
+            c = entry[1][1][1]
+            shares.append(("list", [m, ("num", (vr[1] * c) // total)]))
+        return ("list", shares)
     if s == "I₂":
         return ("list", [("list", [("num", 1), ("num", 0)]),
                          ("list", [("num", 0), ("num", 1)])])

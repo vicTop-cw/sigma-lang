@@ -39,6 +39,7 @@ badge_issue
 dispute_review
 team_create
 team_join
+team_share
 ```
 
 ## Operation: task_create (Task Posting)
@@ -500,6 +501,31 @@ Fingerprint: 0xF013
 | team_join(team_create(7, 0, 3), 5) | [7,0,2,3] |
 | team_join([7,0,2,2], 5) | ⊥ TeamFull |
 
+## Operation: team_share (Team Share)
+
+### Signature
+
+```md
+team_share : List⟨List⟨ℕ⟩⟩ × ℕ → List⟨List⟨ℕ⟩⟩
+Fingerprint: 0xF014
+```
+
+### Laws
+
+```md
+∀ c r . total(c) > 0 ⇒ Σ shares ≤ r
+∀ c r . total(c) > 0 ⇒ 每份 share ≥ 0
+∀ c . total(c) ≡ 0 ⇒ team_share(c, r) ≡ ⊥ DivByZero
+```
+
+### Tests
+
+| Input | Output |
+|-------|--------|
+| team_share([[3,2],[4,4]], 6) | [[3,2],[4,4]] |
+| team_share([[3,1],[4,3]], 10) | [[3,2],[4,7]] |
+| team_share([[3,0],[4,0]], 5) | ⊥ DivByZero |
+
 ## Functions
 
 ### encode_task
@@ -536,4 +562,10 @@ encode_quota : List⟨ℕ⟩ → ℕ
 
 ```md
 encode_points : List⟨ℕ⟩ → ℕ
+```
+
+### encode_shares
+
+```md
+encode_shares : List⟨List⟨ℕ⟩⟩ → ℕ
 ```

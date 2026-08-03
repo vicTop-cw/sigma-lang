@@ -709,6 +709,17 @@ def team_join(team: List[int], member: int) -> List[int]:
     return [owner, kind, size + 1, capacity]
 
 
+def team_share(contribs: List[List[int]], reward: int) -> List[List[int]]:
+    """团内收益按贡献分配: shareᵢ = floor(r · cᵢ / Σc). §SK.3.15.
+
+    total = 0 → ⊥ DivByZero.
+    """
+    total = sum(c for _, c in contribs)
+    if total == 0:
+        raise ValueError("DivByZero")
+    return [[m, (reward * c) // total] for m, c in contribs]
+
+
 def encode_quota(quota: List[int]) -> int:
     """Law II — Quota → ℕ."""
     return _encode_list(quota)
@@ -1024,6 +1035,15 @@ def _main() -> int:
         check("T.team_join_full_rejected", False)
     except ValueError:
         check("T.team_join_full_rejected", True)
+
+    # §SK.3.15 团内收益按贡献分配 team_share
+    check("S.team_share_even", team_share([[3, 2], [4, 4]], 6) == [[3, 2], [4, 4]])
+    check("S.team_share_weighted", team_share([[3, 1], [4, 3]], 10) == [[3, 2], [4, 7]])
+    try:
+        team_share([[3, 0], [4, 0]], 5)
+        check("S.team_share_zero_total_rejected", False)
+    except ValueError:
+        check("S.team_share_zero_total_rejected", True)
 
     print(f"sigma_core self-check: {passed}/{passed + failed} passed")
     return 0 if failed == 0 else 1
