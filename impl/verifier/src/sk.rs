@@ -255,6 +255,23 @@ pub fn quota_advance(quota: &[i64]) -> Vec<i64> {
     vec![monthly, remaining + monthly]
 }
 
+/// 积分来源可追溯: entries[] → [[entry_id, source_id, amount], …]. §SK.3.17 —
+/// source_id ≥ 1 方可追溯否则 ⊥ NotTraceable；amount ≥ 0（ℕ）.
+pub fn points_ledger(entries: &[Vec<i64>]) -> Result<Vec<Vec<i64>>, &'static str> {
+    let mut ledger = Vec::new();
+    for (i, e) in entries.iter().enumerate() {
+        let (_kind, amount, source) = (e[0], e[1], e[2]);
+        if source < 1 {
+            return Err("NotTraceable");
+        }
+        if amount < 0 {
+            return Err("TypeError");
+        }
+        ledger.push(vec![(i + 1) as i64, source, amount]);
+    }
+    Ok(ledger)
+}
+
 /// Law II — Quota → ℕ.
 pub fn encode_quota(quota: &[i64]) -> i64 {
     encode_list(quota, 1000)
@@ -408,6 +425,15 @@ pub fn self_check() -> (usize, usize) {
     check!("quota_reset_after_advance",
            quota_reset(&quota_advance(&quota_new(50).unwrap())) ==
            quota_reset(&quota_new(50).unwrap()));
+
+    // §SK.3.17 积分来源可追溯 points_ledger
+    check!("points_ledger_single",
+           points_ledger(&[vec![0, 100, 1]]) == Ok(vec![vec![1, 1, 100]]));
+    check!("points_ledger_multi",
+           points_ledger(&[vec![0, 50, 2], vec![1, 30, 3]])
+               == Ok(vec![vec![1, 2, 50], vec![2, 3, 30]]));
+    check!("points_ledger_untraceable_rejected",
+           points_ledger(&[vec![0, 100, 0]]).is_err());
 
     // §SK.4 encodings (Law II)
     check!("encode_task_nat", encode_task(&[1, 2, 0, 0]) >= 0);

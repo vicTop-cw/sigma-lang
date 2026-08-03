@@ -1310,6 +1310,29 @@ defmodule SigmaVerify do
             {:ok, {:list, [{:num, monthly}, {:num, remaining + monthly}]}}
           _ -> {:error, "TypeError"}
         end
+      # §SK.3.17 积分来源可追溯 points_ledger — [[entry_id, source_id, amount], …].
+      String.starts_with?(t, "points_ledger(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 14..-2//1)
+        case eval_expr(inner) do
+          {:ok, {:list, entries}} ->
+            result =
+              Enum.reduce_while(Enum.with_index(entries, 1), [], fn {e, i}, acc ->
+                case e do
+                  {:list, [{:num, _kind}, {:num, amount}, {:num, source}]} ->
+                    cond do
+                      source < 1 -> {:halt, {:error, "NotTraceable"}}
+                      amount < 0 -> {:halt, {:error, "TypeError"}}
+                      true -> {:cont, [{:list, [{:num, i}, {:num, source}, {:num, amount}]} | acc]}
+                    end
+                  _ -> {:halt, {:error, "ShapeError"}}
+                end
+              end)
+            case result do
+              {:error, _} = err -> err
+              list -> {:ok, {:list, Enum.reverse(list)}}
+            end
+          _ -> {:error, "TypeError"}
+        end
       t == "I₂" ->
         {:ok, {:list, [{:list, [{:num, 1}, {:num, 0}]},
                        {:list, [{:num, 0}, {:num, 1}]}]}}
@@ -1720,6 +1743,21 @@ defmodule SigmaVerify do
   @doc "额度预支: [m, r] → [m, r + m]. §SK.3.16."
   def quota_advance([monthly, remaining]), do: [monthly, remaining + monthly]
 
+  @doc "积分来源可追溯: entries[] → [[entry_id, source_id, amount], …]. §SK.3.17."
+  def points_ledger(entries) do
+    result = Enum.reduce_while(Enum.with_index(entries, 1), [], fn {[_kind, amount, source], i}, acc ->
+      cond do
+        source < 1 -> {:halt, {:error, "NotTraceable"}}
+        amount < 0 -> {:halt, {:error, "TypeError"}}
+        true -> {:cont, [[i, source, amount] | acc]}
+      end
+    end)
+    case result do
+      {:error, _} = err -> err
+      list -> {:ok, Enum.reverse(list)}
+    end
+  end
+
   @doc "Law II — Quota → ℕ."
   def encode_quota(quota), do: encode_list(quota)
 
@@ -1830,6 +1868,10 @@ defmodule SigmaVerify do
       {"quota_advance_full", quota_advance([50, 50]) == [50, 100]},
       {"quota_advance_used", quota_advance([50, 30]) == [50, 80]},
       {"quota_reset_after_advance", quota_reset(quota_advance([50, 50])) == quota_reset([50, 50])},
+      # §SK.3.17 积分来源可追溯 points_ledger
+      {"points_ledger_single", points_ledger([[0, 100, 1]]) == {:ok, [[1, 1, 100]]}},
+      {"points_ledger_multi", points_ledger([[0, 50, 2], [1, 30, 3]]) == {:ok, [[1, 2, 50], [2, 3, 30]]}},
+      {"points_ledger_untraceable_rejected", points_ledger([[0, 100, 0]]) == {:error, "NotTraceable"}},
       # §SK.4 encodings (Law II)
       {"encode_task_nat", encode_task([1, 2, 0, 0]) >= 0},
       {"encode_distinct", encode_task([1, 2, 0, 0]) != encode_task([1, 3, 0, 0])},

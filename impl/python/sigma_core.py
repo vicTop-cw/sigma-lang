@@ -726,6 +726,21 @@ def quota_advance(quota: List[int]) -> List[int]:
     return [monthly, remaining + monthly]
 
 
+def points_ledger(entries: List[List[int]]) -> List[List[int]]:
+    """积分来源可追溯: entries[] → [[entry_id, source_id, amount], …]. §SK.3.17.
+
+    source_id ≥ 1 方可追溯，否则 ⊥ NotTraceable；amount ≥ 0（ℕ）.
+    """
+    ledger = []
+    for i, (kind, amount, source_id) in enumerate(entries, 1):
+        if source_id < 1:
+            raise ValueError("NotTraceable")
+        if amount < 0:
+            raise ValueError("TypeError")
+        ledger.append([i, source_id, amount])
+    return ledger
+
+
 def encode_quota(quota: List[int]) -> int:
     """Law II — Quota → ℕ."""
     return _encode_list(quota)
@@ -1056,6 +1071,16 @@ def _main() -> int:
     check("QA.quota_advance_used", quota_advance([50, 30]) == [50, 80])
     check("QA.quota_reset_after_advance",
           quota_reset(quota_advance(quota_new(50))) == quota_reset(quota_new(50)))
+
+    # §SK.3.17 积分来源可追溯 points_ledger
+    check("PL.points_ledger_single", points_ledger([[0, 100, 1]]) == [[1, 1, 100]])
+    check("PL.points_ledger_multi",
+          points_ledger([[0, 50, 2], [1, 30, 3]]) == [[1, 2, 50], [2, 3, 30]])
+    try:
+        points_ledger([[0, 100, 0]])
+        check("PL.points_ledger_untraceable_rejected", False)
+    except ValueError:
+        check("PL.points_ledger_untraceable_rejected", True)
 
     print(f"sigma_core self-check: {passed}/{passed + failed} passed")
     return 0 if failed == 0 else 1

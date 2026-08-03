@@ -545,6 +545,36 @@ Definition: quota_advance([m, r]) ≡ [m, r + m]   # 预支下月额度
 | quota_advance([50,30]) | [50,80] |
 | quota_advance(5) | ⊥ TypeError |
 
+### SK.3.17 points_ledger — 积分来源可追溯 (需求文档 §四.2)
+
+每笔积分来源可追溯（1 积分 = ¥1，不可充值；来源记录 [kind, amount,
+source_id]）。账本为每条积分记录生成 [entry_id, source_id, amount]；
+source_id ≥ 1 表示来源可追溯（0 为无来源，⊥ NotTraceable）。
+
+```md
+points_ledger : List⟨List⟨ℕ⟩⟩ → List⟨List⟨ℕ⟩⟩   # entries[] → ledger[]
+Fingerprint: 0xF016
+Definition: points_ledger([[k₁,a₁,s₁],…]) ≡ [[1, s₁, a₁], …, [n, sₙ, aₙ]]
+            # entry_id 从 1 连续编号；source_id ≥ 1 方可追溯，否则 ⊥ NotTraceable
+```
+
+**Laws**
+
+```md
+∀ e . index(points_ledger(e), 0) ≡ 1..n 连续编号              # entry 编号连续
+∀ e . 每笔 source_id ≥ 1 ⇒ 可追溯                              # 来源可追溯
+∀ e . 每笔 amount ≥ 0                                         # 积分非负
+∀ e . ∃ s . s ≡ 0 ⇒ points_ledger(e) ≡ ⊥ NotTraceable       # 无来源拒绝
+```
+
+**Tests**
+
+| Input | Output |
+|-------|--------|
+| points_ledger([[0,100,1]]) | [[1,1,100]] |
+| points_ledger([[0,50,2],[1,30,3]]) | [[1,2,50],[2,3,30]] |
+| points_ledger([[0,100,0]]) | ⊥ NotTraceable |
+
 ---
 
 ## SK.4 Encodings (Law II — encoding to ℕ for non-numeric returns)

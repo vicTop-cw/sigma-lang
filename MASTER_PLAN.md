@@ -135,9 +135,15 @@
   三端执行层 + eval_expr 同步（sigma_core 149/149、Rust/Elixir §SK 自检 71/71、
   socketkit_ok 68/68 三端一致、0 warning）；consensus 43/43、p0 109/109，
   v0.10–v0.30 不回归。
+- ✅ **REACHED v0.32 (2026-08-03)**: 增长期语义⑥积分可追溯—— §SK.3.17
+  `points_ledger`（积分来源可追溯，需求文档 §四.2）：entries[] →
+  [[entry_id, source_id, amount], …]，source_id ≥ 1 可追溯否则 ⊥ NotTraceable、
+  amount ≥ 0（ℕ）；三端执行层 + eval_expr 同步（sigma_core 152/152、
+  Rust/Elixir §SK 自检 74/74、socketkit_ok 71/71 三端一致、0 warning）；
+  consensus 43/43、p0 109/109，v0.10–v0.31 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.31 达成后 P3 待办已清空，进入新里程碑规划（v0.32–v0.50 连续推进）。
+  2. （无）— v0.32 达成后 P3 待办已清空，进入新里程碑规划（v0.33–v0.50 连续推进）。
 
 ---
 

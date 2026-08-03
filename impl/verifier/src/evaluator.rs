@@ -694,6 +694,41 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
             _ => Err("TypeError".to_string()),
         };
     }
+    // §SK.3.17 积分来源可追溯 points_ledger — [[entry_id, source_id, amount], …].
+    if let Some(rest) = s.strip_prefix("points_ledger(") {
+        let inner = rest.strip_suffix(')').ok_or("bad points_ledger call")?;
+        let v = eval_expr(inner)?;
+        return match v {
+            TVal::List(entries) => {
+                let mut ledger = Vec::new();
+                for (i, e) in entries.iter().enumerate() {
+                    match e {
+                        TVal::List(fields) if fields.len() == 3 => {
+                            match (&fields[0], &fields[1], &fields[2]) {
+                                (TVal::Num(_kind), TVal::Num(amount), TVal::Num(source)) => {
+                                    if *source < 1 {
+                                        return Err("NotTraceable".to_string());
+                                    }
+                                    if *amount < 0 {
+                                        return Err("TypeError".to_string());
+                                    }
+                                    ledger.push(TVal::List(vec![
+                                        TVal::Num((i + 1) as i64),
+                                        TVal::Num(*source),
+                                        TVal::Num(*amount),
+                                    ]));
+                                }
+                                _ => return Err("TypeError".to_string()),
+                            }
+                        }
+                        _ => return Err("ShapeError".to_string()),
+                    }
+                }
+                Ok(TVal::List(ledger))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
     if s == "I₂" {
         return Ok(TVal::List(vec![
             TVal::List(vec![TVal::Num(1), TVal::Num(0)]),

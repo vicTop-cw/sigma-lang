@@ -1136,6 +1136,27 @@ def eval_expr(s):
         if monthly[0] != "num" or remaining[0] != "num":
             return "TypeError"
         return ("list", [monthly, ("num", remaining[1] + monthly[1])])
+    # §SK.3.17 积分来源可追溯 points_ledger — [[entry_id, source_id, amount], …].
+    if s.startswith("points_ledger(") and s.endswith(")"):
+        inner = s[len("points_ledger("):-1]
+        v = eval_expr(inner.strip())
+        if isinstance(v, str):
+            return v
+        if v[0] != "list":
+            return "TypeError"
+        ledger = []
+        for i, entry in enumerate(v[1], 1):
+            if entry[0] != "list" or len(entry[1]) != 3:
+                return "ShapeError"
+            kind, amount, source = entry[1]
+            if kind[0] != "num" or amount[0] != "num" or source[0] != "num":
+                return "TypeError"
+            if source[1] < 1:
+                return "NotTraceable"
+            if amount[1] < 0:
+                return "TypeError"
+            ledger.append(("list", [("num", i), source, amount]))
+        return ("list", ledger)
     if s == "I₂":
         return ("list", [("list", [("num", 1), ("num", 0)]),
                          ("list", [("num", 0), ("num", 1)])])

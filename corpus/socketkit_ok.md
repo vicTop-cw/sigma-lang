@@ -41,6 +41,7 @@ team_create
 team_join
 team_share
 quota_advance
+points_ledger
 ```
 
 ## Operation: task_create (Task Posting)
@@ -550,6 +551,31 @@ Fingerprint: 0xF015
 | quota_advance(quota_new(50)) | [50,100] |
 | quota_advance([50,30]) | [50,80] |
 | quota_advance(5) | ⊥ TypeError |
+
+## Operation: points_ledger (Points Ledger)
+
+### Signature
+
+```md
+points_ledger : List⟨List⟨ℕ⟩⟩ → List⟨List⟨ℕ⟩⟩
+Fingerprint: 0xF016
+```
+
+### Laws
+
+```md
+∀ e . 每笔 source_id ≥ 1 ⇒ 可追溯
+∀ e . 每笔 amount ≥ 0
+∀ e . ∃ s . s ≡ 0 ⇒ points_ledger(e) ≡ ⊥ NotTraceable
+```
+
+### Tests
+
+| Input | Output |
+|-------|--------|
+| points_ledger([[0,100,1]]) | [[1,1,100]] |
+| points_ledger([[0,50,2],[1,30,3]]) | [[1,2,50],[2,3,30]] |
+| points_ledger([[0,100,0]]) | ⊥ NotTraceable |
 
 ## Functions
 
