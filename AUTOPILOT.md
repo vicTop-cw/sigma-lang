@@ -199,6 +199,15 @@
       双端冒烟 20/20，v0.10–v0.40 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.42 完成定义（供应链语料 + 共识，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **语料**: `corpus/inventory_ok.md`（§IN 五操作真实调用，16/16 三端一致
+      PASS）+ `inventory_break.md`（E-02 三端一致 FAIL）。
+- [x] **共识**: consensus 45/45 → 47/47 全绿；p0 109/109、sigma-prove 48 项
+      PROVED、sigma-runtime 59/59 + 29/29、双端冒烟 20/20、三端 0 warning，
+      v0.10–v0.41 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

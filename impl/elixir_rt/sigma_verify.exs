@@ -1350,7 +1350,7 @@ defmodule SigmaVerify do
           _ -> {:error, "bad inventory_new args: #{inner}"}
         end
       String.starts_with?(t, "receive_stock(") and String.ends_with?(t, ")") ->
-        inner = String.slice(t, 15..-2//1)
+        inner = String.slice(t, 14..-2//1)
         case split_all_top_level(inner, ?,) do
           [i_s, x_s, q_s] ->
             with {:ok, {:list, [{:num, a}, {:num, b}]}} <- eval_expr(i_s),
