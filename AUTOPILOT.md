@@ -158,6 +158,17 @@
       PROVED、三端 0 warning，v0.10–v0.36 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.38 完成定义（Rust app 增长期端点 + 冒烟对账，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **Rust 增长期路由**: `app.rs` 增加 /badge_issue /dispute /team_create
+      /team_join /team_share /advance /ledger（新增 get_str 解析列表参数，纯函数
+      直接调 sk.rs §SK.3.12–3.17）。
+- [x] **--app-smoke 对账**: 扩展增长期步骤（13/13 → 20/20），与 Python `--smoke`
+      （20/20）**双端逐项一致**；`cargo build` 0 error/0 warning。
+- [x] **不回归**: 自检 15/15、consensus 45/45、p0 109/109、sigma-prove 48 项
+      PROVED、三端 0 warning，v0.10–v0.37 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

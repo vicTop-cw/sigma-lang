@@ -193,6 +193,18 @@ fn parse_query(query: &str) -> HashMap<String, i64> {
     out
 }
 
+/// Return a raw string query value (for list-typed args like `evidence=[...]`).
+fn get_str<'a>(query: &'a str, name: &str) -> Option<&'a str> {
+    for part in query.split('&') {
+        if let Some((k, v)) = part.split_once('=') {
+            if k == name && !v.is_empty() {
+                return Some(v);
+            }
+        }
+    }
+    None
+}
+
 /// Route one GET request; returns (status, JSON body).
 fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
     let q = parse_query(query);
@@ -251,6 +263,81 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 serde_json::json!({"credit": app.credit(v[0]), "badge": app.badge(v[0])})
             } else {
                 return (400, serde_json::json!({"error": "need user"}).to_string());
+            }
+        }
+        // --- 增长期端点 (§SK.3.12–3.17, 纯函数直接调 sk::) ---
+        "/badge_issue" => {
+            if let Some(v) = need(&["verifier", "user", "score"]) {
+                match sk::badge_issue(v[0], v[1], v[2]) {
+                    Ok(b) => serde_json::json!({"badge": b}),
+                    Err(e) => return (400, serde_json::json!({"error": e}).to_string()),
+                }
+            } else {
+                return (400, serde_json::json!({"error": "need verifier & user & score"}).to_string());
+            }
+        }
+        "/dispute" => {
+            match get_str(query, "evidence") {
+                Some(ev) => match serde_json::from_str::<Vec<Vec<i64>>>(ev) {
+                    Ok(evidence) => serde_json::json!({"decision": sk::dispute_review(&evidence)}),
+                    Err(_) => return (400, serde_json::json!({"error": "bad evidence"}).to_string()),
+                },
+                None => return (400, serde_json::json!({"error": "need evidence"}).to_string()),
+            }
+        }
+        "/team_create" => {
+            if let Some(v) = need(&["owner", "kind", "capacity"]) {
+                match sk::team_create(v[0], v[1], v[2]) {
+                    Ok(t) => serde_json::json!({"team": t}),
+                    Err(e) => return (400, serde_json::json!({"error": e}).to_string()),
+                }
+            } else {
+                return (400, serde_json::json!({"error": "need owner & kind & capacity"}).to_string());
+            }
+        }
+        "/team_join" => {
+            match (get_str(query, "team"), q.get("member").copied()) {
+                (Some(ts), Some(member)) => match serde_json::from_str::<Vec<i64>>(ts) {
+                    Ok(team) => match sk::team_join(&team, member) {
+                        Ok(t2) => serde_json::json!({"team": t2}),
+                        Err(e) => return (400, serde_json::json!({"error": e}).to_string()),
+                    },
+                    Err(_) => return (400, serde_json::json!({"error": "bad team"}).to_string()),
+                },
+                _ => return (400, serde_json::json!({"error": "need team & member"}).to_string()),
+            }
+        }
+        "/team_share" => {
+            match (get_str(query, "contribs"), q.get("reward").copied()) {
+                (Some(cs), Some(reward)) => match serde_json::from_str::<Vec<Vec<i64>>>(cs) {
+                    Ok(contribs) => match sk::team_share(&contribs, reward) {
+                        Ok(shares) => serde_json::json!({"shares": shares}),
+                        Err(e) => return (400, serde_json::json!({"error": e}).to_string()),
+                    },
+                    Err(_) => return (400, serde_json::json!({"error": "bad contribs"}).to_string()),
+                },
+                _ => return (400, serde_json::json!({"error": "need contribs & reward"}).to_string()),
+            }
+        }
+        "/advance" => {
+            match get_str(query, "quota") {
+                Some(qs) => match serde_json::from_str::<Vec<i64>>(qs) {
+                    Ok(quota) => serde_json::json!({"quota": sk::quota_advance(&quota)}),
+                    Err(_) => return (400, serde_json::json!({"error": "bad quota"}).to_string()),
+                },
+                None => return (400, serde_json::json!({"error": "need quota"}).to_string()),
+            }
+        }
+        "/ledger" => {
+            match get_str(query, "entries") {
+                Some(es) => match serde_json::from_str::<Vec<Vec<i64>>>(es) {
+                    Ok(entries) => match sk::points_ledger(&entries) {
+                        Ok(ledger) => serde_json::json!({"ledger": ledger}),
+                        Err(e) => return (400, serde_json::json!({"error": e}).to_string()),
+                    },
+                    Err(_) => return (400, serde_json::json!({"error": "bad entries"}).to_string()),
+                },
+                None => return (400, serde_json::json!({"error": "need entries"}).to_string()),
             }
         }
         _ => return (404, serde_json::json!({"error": "unknown path"}).to_string()),
@@ -391,6 +478,22 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/badge?user=3");
     check!("HTTP /badge credit", r["credit"] == 105);
     check!("HTTP /badge badge", r["badge"] == 1);
+
+    // 8. 增长期 (§SK.3.12–3.17)
+    let r = http_get(port, "/badge_issue?verifier=1001&user=3&score=105");
+    check!("HTTP /badge_issue", r["badge"] == serde_json::json!([1001, 3, 1]));
+    let r = http_get(port, "/dispute?evidence=[[1,1,3],[2,1,2]]");
+    check!("HTTP /dispute", r["decision"] == 1);
+    let r = http_get(port, "/team_create?owner=7&kind=0&capacity=3");
+    check!("HTTP /team_create", r["team"] == serde_json::json!([7, 0, 1, 3]));
+    let r = http_get(port, "/team_join?team=[7,0,1,3]&member=5");
+    check!("HTTP /team_join", r["team"] == serde_json::json!([7, 0, 2, 3]));
+    let r = http_get(port, "/team_share?contribs=[[3,2],[4,4]]&reward=6");
+    check!("HTTP /team_share", r["shares"] == serde_json::json!([[3, 2], [4, 4]]));
+    let r = http_get(port, "/advance?quota=[50,50]");
+    check!("HTTP /advance", r["quota"] == serde_json::json!([50, 100]));
+    let r = http_get(port, "/ledger?entries=[[0,100,1]]");
+    check!("HTTP /ledger", r["ledger"] == serde_json::json!([[1, 1, 100]]));
 
     (passed, total)
 }
