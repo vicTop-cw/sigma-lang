@@ -181,9 +181,14 @@
   29/29 义务满足——App 完整业务蓝图的「验收剧本」；trace 59/59、MVP story
   18/18、growth story 11/11 不回归；consensus 45/45、p0 109/109，
   v0.10–v0.38 不回归。
+- ✅ **REACHED v0.40 (2026-08-03)**: 第三个自举新域（供应链 inventory@1.0）——
+  `spec/spec_p0_inventory.md`（§IN：inventory_new / receive_stock / ship_stock /
+  stock_level / fill_rate，库存非负、不超卖 ⊥ InsufficientStock、履约率 0..1
+  可证）——协议泛化性第三次验证（生物→业务→金融→供应链）；consensus 45/45、
+  p0 109/109、三端 0 warning，v0.10–v0.39 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.39 达成后 P3 待办已清空，进入新里程碑规划（v0.40–v0.50 连续推进）。
+  2. （无）— v0.40 达成后 P3 待办已清空，进入新里程碑规划（v0.41–v0.50 连续推进）。
 
 ---
 

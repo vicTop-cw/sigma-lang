@@ -179,6 +179,16 @@
       warning，v0.10–v0.38 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.40 完成定义（第三个自举新域：供应链 inventory@1.0，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **新域 spec**: `spec/spec_p0_inventory.md`（§IN）——inventory_new /
+      receive_stock / ship_stock / stock_level / fill_rate 五个操作；错误路径
+      ⊥ InsufficientStock / UnknownItem / TypeError / DivByZero。
+- [x] **不回归**: consensus 45/45、p0 109/109、sigma-prove 48 项 PROVED、
+      sigma-runtime 59/59 + 29/29（--all）、双端冒烟 20/20、三端 0 warning，
+      v0.10–v0.39 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
