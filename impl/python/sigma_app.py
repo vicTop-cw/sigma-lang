@@ -16,6 +16,8 @@ Exit code 0 = all §SK.6 steps pass.
 
 import json
 import sys
+import threading
+import urllib.request
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Dict, List, Optional, Tuple
 
@@ -186,6 +188,12 @@ class _Handler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         app = _Handler.app
         try:
+            if path == "/quota":
+                user = self._get("user")
+                monthly = self._get("monthly")
+                if user is None or monthly is None:
+                    return self._json({"error": "need user & monthly"}, 400)
+                return self._json({"quota": app.open_quota(user, monthly)})
             if path == "/post":
                 author = self._get("author")
                 bounty = self._get("bounty")
@@ -233,8 +241,80 @@ class _Handler(BaseHTTPRequestHandler):
         sys.stderr.write(f"[sigma-app] {fmt % args}\n")
 
 
+def run_http_smoke() -> Tuple[int, int]:
+    """--smoke: start the HTTP server, walk the full MVP chain over HTTP, assert.
+
+    One end-to-end HTTP acceptance run: /quota → /post → /claim → /submit →
+    /accept → /withdraw → /badge, each response asserted against the §SK.6
+    story. Returns (passed, total).
+    """
+    _Handler.app = MVPApp()  # fresh state for the smoke run
+    server = HTTPServer(("127.0.0.1", 0), _Handler)  # random free port
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    def get(path: str) -> dict:
+        with urllib.request.urlopen(base + path, timeout=10) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+
+    # 1. 开户额度   /quota?user=7&monthly=50          → {"quota": [50, 50]}
+    r = get("/quota?user=7&monthly=50")
+    check("HTTP /quota", r == {"quota": [50, 50]}, f"got {r}")
+
+    # 2. 发布需求   /post?author=7&bounty=100        → task / quota / points
+    r = get("/post?author=7&bounty=100")
+    check("HTTP /post task", r["task"] == [7, 100, 0, 0], f"got {r.get('task')}")
+    check("HTTP /post quota", r["quota"] == [50, 49], f"got {r.get('quota')}")
+    check("HTTP /post points", r["points"] == [100, 0], f"got {r.get('points')}")
+    tid = r["task_id"]
+
+    # 3. 接单       /claim?task=0&hunter=3           → [7, 100, 1, 3]
+    r = get(f"/claim?task={tid}&hunter=3")
+    check("HTTP /claim", r["task"] == [7, 100, 1, 3], f"got {r.get('task')}")
+
+    # 4. 提交成果   /submit?task=0                    → [7, 100, 2, 3]
+    r = get(f"/submit?task={tid}")
+    check("HTTP /submit", r["task"] == [7, 100, 2, 3], f"got {r.get('task')}")
+
+    # 5. 验收确认   /accept?task=0&caller=7          → completed + release + credit
+    r = get(f"/accept?task={tid}&caller=7")
+    check("HTTP /accept task", r["task"] == [7, 100, 3, 3], f"got {r.get('task')}")
+    check("HTTP /accept points", r["points"] == [0, 100], f"got {r.get('points')}")
+    check("HTTP /accept credit", r["credit"] == 105, f"got {r.get('credit')}")
+    check("HTTP /accept contribution", r["contribution"] == 10,
+          f"got {r.get('contribution')}")
+
+    # 6. 找茬人提现 /withdraw?user=3&amount=100      → [0, 0]
+    r = get("/withdraw?user=3&amount=100")
+    check("HTTP /withdraw", r["points"] == [0, 0], f"got {r}")
+
+    # 7. 勋章       /badge?user=3                    → credit 105, badge 1
+    r = get("/badge?user=3")
+    check("HTTP /badge credit", r["credit"] == 105, f"got {r}")
+    check("HTTP /badge badge", r["badge"] == 1, f"got {r}")
+
+    server.shutdown()
+    thread.join()
+    return passed, total
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
+    if "--smoke" in argv:
+        passed, total = run_http_smoke()
+        print(f"sigma_app HTTP smoke (MVP chain): {passed}/{total} passed")
+        return 0 if passed == total else 1
     if "--serve" in argv:
         port = 8080
         for i, a in enumerate(argv):

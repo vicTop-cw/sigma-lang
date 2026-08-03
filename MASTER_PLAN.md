@@ -80,9 +80,15 @@
   /withdraw /badge`）；`python3 impl/python/sigma_app.py` 自检跑通 §SK.6 十二步剧本
   （15/15），步骤与 `sigma-runtime --story` 一一对应——证明被审计的验收剧本可直接
   实现为可运行后端；consensus 43/43、p0 109/109、三端 0 warning，v0.10–v0.21 不回归。
+- ✅ **REACHED v0.23 (2026-08-03)**: MVP 端到端 HTTP 冒烟测试—— `sigma_app.py` 增加
+  `/quota` 端点（开户额度，补全 HTTP 全链路）与 `--smoke` 模式（run_http_smoke：
+  起服务→HTTP 七步全链路 `/quota → /post → /claim → /submit → /accept → /withdraw →
+  /badge`→逐响应断言→关服务，13/13 通过）——参考实现"作为 HTTP 服务的可用性"
+  被可重复执行的冒烟测试固化；自检 15/15 不回归；consensus 43/43、p0 109/109、
+  三端 0 warning，v0.10–v0.22 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.22 达成后 P3 待办已清空，进入新里程碑规划。
+  2. （无）— v0.23 达成后 P3 待办已清空，进入新里程碑规划。
 
 ---
 
@@ -360,6 +366,7 @@ This makes your App's business logic **mathematically auditable**.
 | P3 | **v0.20 找茬五大制度补齐 (REACHED 2026-08-03)** | ✅ SK.3.9 额度制（quota_new/use/reset）+ SK.3.10 积分制（points_hold/release/withdraw）+ SK.3.11 勋章制（badge_level）；三端执行层同步（sigma_core 130/130、三端 §SK 52/52、socketkit_ok 50/50）；sigma-prove 8 项三制度义务全 PROVED（共 41 项）；sigma-runtime 59/59；consensus 43/43、p0 109/109、0 warning |
 | P3 | **v0.21 找茬 MVP 全链路审计剧本 (REACHED 2026-08-03)** | ✅ spec §SK.6 MVP 业务剧本（12 步端到端场景）+ `sigma-runtime --story`（run_mvp_story 一次跑通完整业务故事线，18/18 义务满足）——App 开工「验收剧本」；consensus 43/43、p0 109/109、三端 0 warning、v0.10–v0.20 不回归 |
 | P3 | **v0.22 找茬 MVP 参考实现 (REACHED 2026-08-03)** | ✅ `impl/python/sigma_app.py`（MVPApp 业务方法全部委托 sigma_core §SK + stdlib HTTP `--serve` API）；自检跑通 §SK.6 剧本 15/15，与 `sigma-runtime --story` 步骤一一对应；consensus 43/43、p0 109/109、三端 0 warning、v0.10–v0.21 不回归 |
+| P3 | **v0.23 MVP 端到端 HTTP 冒烟测试 (REACHED 2026-08-03)** | ✅ `sigma_app.py` 增 `/quota` 端点 + `--smoke`（HTTP 七步全链路 /quota→/post→/claim→/submit→/accept→/withdraw→/badge，13/13 通过）——参考实现 HTTP 服务可用性被可重复冒烟固化；consensus 43/43、p0 109/109、三端 0 warning、v0.10–v0.22 不回归 |
 | P3 | Lang-Zone backend integration | ⏸️ **DEFERRED**：LZ 原型期，待自举稳定后融入（§6.1） |
 
 ---
