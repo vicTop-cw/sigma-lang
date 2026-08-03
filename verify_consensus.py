@@ -1060,6 +1060,43 @@ def eval_expr(s):
             else:
                 return "TypeError"
         return ("num", 1 if w_support >= w_reject else 0)
+    # §SK.3.14 团机制 team_create / team_join — Team = [owner, kind, size, capacity].
+    if s.startswith("team_create(") and s.endswith(")"):
+        inner = s[len("team_create("):-1]
+        parts = split_all_top_level(inner, ",")
+        if len(parts) < 3:
+            return f"bad team_create args: {inner}"
+        vo = eval_expr(parts[0].strip())
+        vk = eval_expr(parts[1].strip())
+        vc = eval_expr(parts[2].strip())
+        if isinstance(vo, str):
+            return vo
+        if isinstance(vk, str):
+            return vk
+        if isinstance(vc, str):
+            return vc
+        if vo[0] != "num" or vk[0] != "num" or vc[0] != "num":
+            return "TypeError"
+        if vc[1] < 1:
+            return "TypeError"
+        return ("list", [("num", vo[1]), ("num", vk[1]), ("num", 1), ("num", vc[1])])
+    if s.startswith("team_join(") and s.endswith(")"):
+        inner = s[len("team_join("):-1]
+        parts = split_top_level(inner, ",")
+        if parts is None or len(parts) < 2:
+            return f"bad team_join args: {inner}"
+        vt = eval_expr(parts[0].strip())
+        vm = eval_expr(parts[1].strip())
+        if isinstance(vt, str):
+            return vt
+        if isinstance(vm, str):
+            return vm
+        if vt[0] != "list" or len(vt[1]) != 4 or vm[0] != "num":
+            return "TypeError"
+        owner, kind, size, capacity = vt[1]
+        if size[1] >= capacity[1]:
+            return "TeamFull"
+        return ("list", [owner, kind, ("num", size[1] + 1), capacity])
     if s == "I₂":
         return ("list", [("list", [("num", 1), ("num", 0)]),
                          ("list", [("num", 0), ("num", 1)])])

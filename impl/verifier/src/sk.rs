@@ -220,6 +220,25 @@ pub fn dispute_review(evidence: &[Vec<i64>]) -> i64 {
     if w_support >= w_reject { 1 } else { 0 }
 }
 
+/// 团机制: 受茬团/找茬团创建. §SK.3.14 — capacity ≥ 1 否则 ⊥ TypeError.
+/// Team = [owner, kind, size, capacity] (kind 0=受茬团 1=找茬团).
+pub fn team_create(owner: i64, kind: i64, capacity: i64)
+    -> Result<Vec<i64>, &'static str> {
+    if capacity < 1 {
+        return Err("TypeError");
+    }
+    Ok(vec![owner, kind, 1, capacity])
+}
+
+/// 团机制: 加入团队. §SK.3.14 — 未满员则加入，满员 → ⊥ TeamFull.
+pub fn team_join(team: &[i64], _member: i64) -> Result<Vec<i64>, &'static str> {
+    let (owner, kind, size, capacity) = (team[0], team[1], team[2], team[3]);
+    if size >= capacity {
+        return Err("TeamFull");
+    }
+    Ok(vec![owner, kind, size + 1, capacity])
+}
+
 /// Law II — Quota → ℕ.
 pub fn encode_quota(quota: &[i64]) -> i64 {
     encode_list(quota, 1000)
@@ -351,6 +370,13 @@ pub fn self_check() -> (usize, usize) {
     let ev_a = vec![vec![1, 1, 3], vec![2, 0, 2], vec![3, 1, 1]];
     let ev_rev = vec![vec![3, 1, 1], vec![1, 1, 3], vec![2, 0, 2]];
     check!("dispute_order_indep", dispute_review(&ev_a) == dispute_review(&ev_rev));
+
+    // §SK.3.14 团机制 team_create / team_join
+    check!("team_create_shape", team_create(7, 0, 3) == Ok(vec![7, 0, 1, 3]));
+    check!("team_create_finder", team_create(3, 1, 2) == Ok(vec![3, 1, 1, 2]));
+    check!("team_create_zero_capacity_rejected", team_create(7, 0, 0).is_err());
+    check!("team_join", team_join(&team_create(7, 0, 3).unwrap(), 5) == Ok(vec![7, 0, 2, 3]));
+    check!("team_join_full_rejected", team_join(&vec![7, 0, 2, 2], 5).is_err());
 
     // §SK.4 encodings (Law II)
     check!("encode_task_nat", encode_task(&[1, 2, 0, 0]) >= 0);

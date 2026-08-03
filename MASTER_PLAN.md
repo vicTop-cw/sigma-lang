@@ -117,9 +117,15 @@
   order-independent（与 review_merge 同构）；三端执行层 + eval_expr 同步
   （sigma_core 138/138、Rust/Elixir §SK 自检 60/60、socketkit_ok 56/56 三端一致、
   0 warning）；consensus 43/43、p0 109/109，v0.10–v0.27 不回归。
+- ✅ **REACHED v0.29 (2026-08-03)**: 增长期语义③团机制—— §SK.3.14
+  `team_create/team_join`（受茬团/找茬团，需求文档 §七）：Team =
+  [owner, kind, size, capacity]，创始人为成员（size=1）、capacity ≥ 1 否则
+  ⊥ TypeError、未满员可加入否则 ⊥ TeamFull；三端执行层 + eval_expr 同步
+  （sigma_core 143/143、Rust/Elixir §SK 自检 65/65、socketkit_ok 62/62 三端一致、
+  0 warning）；consensus 43/43、p0 109/109，v0.10–v0.28 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.28 达成后 P3 待办已清空，进入新里程碑规划（v0.29–v0.50 连续推进）。
+  2. （无）— v0.29 达成后 P3 待办已清空，进入新里程碑规划（v0.30–v0.50 连续推进）。
 
 ---
 

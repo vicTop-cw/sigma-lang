@@ -600,6 +600,50 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
             _ => Err("TypeError".to_string()),
         };
     }
+    // §SK.3.14 团机制 team_create / team_join — Team = [owner, kind, size, capacity].
+    if let Some(rest) = s.strip_prefix("team_create(") {
+        let inner = rest.strip_suffix(')').ok_or("bad team_create call")?;
+        let (o, rest2) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad team_create args: {}", inner))?;
+        let (k, c) = split_top_level(rest2, ',')
+            .ok_or_else(|| format!("bad team_create args: {}", inner))?;
+        let vo = eval_expr(o)?;
+        let vk = eval_expr(k)?;
+        let vc = eval_expr(c)?;
+        return match (vo, vk, vc) {
+            (TVal::Num(owner), TVal::Num(kind), TVal::Num(capacity)) => {
+                if capacity < 1 {
+                    return Err("TypeError".to_string());
+                }
+                Ok(TVal::List(vec![
+                    TVal::Num(owner), TVal::Num(kind), TVal::Num(1), TVal::Num(capacity),
+                ]))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("team_join(") {
+        let inner = rest.strip_suffix(')').ok_or("bad team_join call")?;
+        let (t, m) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad team_join args: {}", inner))?;
+        let vt = eval_expr(t)?;
+        let vm = eval_expr(m)?;
+        return match (vt, vm) {
+            (TVal::List(team), TVal::Num(_member)) if team.len() == 4 => {
+                let (owner, kind, size, capacity) = match (&team[0], &team[1], &team[2], &team[3]) {
+                    (TVal::Num(o), TVal::Num(k), TVal::Num(sz), TVal::Num(cp)) => (*o, *k, *sz, *cp),
+                    _ => return Err("TypeError".to_string()),
+                };
+                if size >= capacity {
+                    return Err("TeamFull".to_string());
+                }
+                Ok(TVal::List(vec![
+                    TVal::Num(owner), TVal::Num(kind), TVal::Num(size + 1), TVal::Num(capacity),
+                ]))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
     if s == "I₂" {
         return Ok(TVal::List(vec![
             TVal::List(vec![TVal::Num(1), TVal::Num(0)]),

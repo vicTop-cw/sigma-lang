@@ -691,6 +691,24 @@ def dispute_review(evidence: List[List[int]]) -> int:
     return 1 if w_support >= w_reject else 0
 
 
+def team_create(owner: int, kind: int, capacity: int) -> List[int]:
+    """团机制: 受茬团/找茬团创建. §SK.3.14 — capacity ≥ 1 否则 ⊥ TypeError.
+
+    Team = [owner, kind, size, capacity]（kind 0=受茬团 1=找茬团）.
+    """
+    if capacity < 1:
+        raise ValueError("TypeError")
+    return [owner, kind, 1, capacity]
+
+
+def team_join(team: List[int], member: int) -> List[int]:
+    """团机制: 加入团队. §SK.3.14 — 未满员则加入，满员 → ⊥ TeamFull."""
+    owner, kind, size, capacity = team
+    if size >= capacity:
+        raise ValueError("TeamFull")
+    return [owner, kind, size + 1, capacity]
+
+
 def encode_quota(quota: List[int]) -> int:
     """Law II — Quota → ℕ."""
     return _encode_list(quota)
@@ -991,6 +1009,21 @@ def _main() -> int:
     check("DR.dispute_order_indep",
           dispute_review([[1, 1, 3], [2, 0, 2], [3, 1, 1]]) ==
           dispute_review([[3, 1, 1], [1, 1, 3], [2, 0, 2]]))
+
+    # §SK.3.14 团机制 team_create / team_join
+    check("T.team_create_shape", team_create(7, 0, 3) == [7, 0, 1, 3])
+    check("T.team_create_finder", team_create(3, 1, 2) == [3, 1, 1, 2])
+    try:
+        team_create(7, 0, 0)
+        check("T.team_create_zero_capacity_rejected", False)
+    except ValueError:
+        check("T.team_create_zero_capacity_rejected", True)
+    check("T.team_join", team_join(team_create(7, 0, 3), 5) == [7, 0, 2, 3])
+    try:
+        team_join([7, 0, 2, 2], 5)
+        check("T.team_join_full_rejected", False)
+    except ValueError:
+        check("T.team_join_full_rejected", True)
 
     print(f"sigma_core self-check: {passed}/{passed + failed} passed")
     return 0 if failed == 0 else 1

@@ -1240,6 +1240,40 @@ defmodule SigmaVerify do
             end
           _ -> {:error, "TypeError"}
         end
+      # §SK.3.14 团机制 team_create / team_join — Team = [owner, kind, size, capacity].
+      String.starts_with?(t, "team_create(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 12..-2//1)
+        case split_all_top_level(inner, ?,) do
+          [o_s, k_s, c_s] ->
+            with {:ok, {:num, owner}} <- eval_expr(o_s),
+                 {:ok, {:num, kind}} <- eval_expr(k_s),
+                 {:ok, {:num, capacity}} <- eval_expr(c_s) do
+              if capacity < 1 do
+                {:error, "TypeError"}
+              else
+                {:ok, {:list, [{:num, owner}, {:num, kind}, {:num, 1}, {:num, capacity}]}}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          _ -> {:error, "bad team_create args: #{inner}"}
+        end
+      String.starts_with?(t, "team_join(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 10..-2//1)
+        case split_top_level(inner, ?,) do
+          {t_s, m_s} ->
+            with {:ok, {:list, [{:num, owner}, {:num, kind}, {:num, size}, {:num, capacity}]}} <- eval_expr(t_s),
+                 {:ok, {:num, _member}} <- eval_expr(m_s) do
+              if size >= capacity do
+                {:error, "TeamFull"}
+              else
+                {:ok, {:list, [{:num, owner}, {:num, kind}, {:num, size + 1}, {:num, capacity}]}}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          nil -> {:error, "bad team_join args: #{inner}"}
+        end
       t == "I₂" ->
         {:ok, {:list, [{:list, [{:num, 1}, {:num, 0}]},
                        {:list, [{:num, 0}, {:num, 1}]}]}}
@@ -1630,6 +1664,14 @@ defmodule SigmaVerify do
     if w_support >= w_reject, do: 1, else: 0
   end
 
+  @doc "团机制: 受茬团/找茬团创建. §SK.3.14 — capacity ≥ 1 否则 ⊥ TypeError."
+  def team_create(owner, kind, capacity) when capacity >= 1, do: {:ok, [owner, kind, 1, capacity]}
+  def team_create(_owner, _kind, _capacity), do: {:error, "TypeError"}
+
+  @doc "团机制: 加入团队. §SK.3.14 — 未满员则加入，满员 → ⊥ TeamFull."
+  def team_join([owner, kind, size, capacity], _member) when size < capacity, do: {:ok, [owner, kind, size + 1, capacity]}
+  def team_join(_team, _member), do: {:error, "TeamFull"}
+
   @doc "Law II — Quota → ℕ."
   def encode_quota(quota), do: encode_list(quota)
 
@@ -1726,6 +1768,12 @@ defmodule SigmaVerify do
       {"dispute_order_indep",
        dispute_review([[1, 1, 3], [2, 0, 2], [3, 1, 1]]) ==
        dispute_review([[3, 1, 1], [1, 1, 3], [2, 0, 2]])},
+      # §SK.3.14 团机制 team_create / team_join
+      {"team_create_shape", team_create(7, 0, 3) == {:ok, [7, 0, 1, 3]}},
+      {"team_create_finder", team_create(3, 1, 2) == {:ok, [3, 1, 1, 2]}},
+      {"team_create_zero_capacity_rejected", team_create(7, 0, 0) == {:error, "TypeError"}},
+      {"team_join", team_join([7, 0, 1, 3], 5) == {:ok, [7, 0, 2, 3]}},
+      {"team_join_full_rejected", team_join([7, 0, 2, 2], 5) == {:error, "TeamFull"}},
       # §SK.4 encodings (Law II)
       {"encode_task_nat", encode_task([1, 2, 0, 0]) >= 0},
       {"encode_distinct", encode_task([1, 2, 0, 0]) != encode_task([1, 3, 0, 0])},

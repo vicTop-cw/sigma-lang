@@ -37,6 +37,8 @@ points_withdraw
 badge_level
 badge_issue
 dispute_review
+team_create
+team_join
 ```
 
 ## Operation: task_create (Task Posting)
@@ -449,6 +451,54 @@ Fingerprint: 0xF011
 | dispute_review([[1,1,3],[2,1,2]]) | 1 |
 | dispute_review([[1,0,5],[2,1,2]]) | 0 |
 | dispute_review(3) | ⊥ TypeError |
+
+## Operation: team_create (Team Create)
+
+### Signature
+
+```md
+team_create : ℕ × ℕ × ℕ → List⟨ℕ⟩
+Fingerprint: 0xF012
+```
+
+### Laws
+
+```md
+∀ o k c . c ≥ 1 ⇒ index(team_create(o, k, c), 2) ≡ 1
+∀ o k c . c ≥ 1 ⇒ index(team_create(o, k, c), 2) ≤ index(team_create(o, k, c), 3)
+```
+
+### Tests
+
+| Input | Output |
+|-------|--------|
+| team_create(7, 0, 3) | [7,0,1,3] |
+| team_create(3, 1, 2) | [3,1,1,2] |
+| team_create(7, 0, 0) | ⊥ TypeError |
+
+## Operation: team_join (Team Join)
+
+### Signature
+
+```md
+team_join : List⟨ℕ⟩ × ℕ → List⟨ℕ⟩
+Fingerprint: 0xF013
+```
+
+### Laws
+
+```md
+∀ t m . index(t, 2) < index(t, 3) ⇒ index(team_join(t, m), 2) ≡ index(t, 2) + 1
+∀ t m . index(t, 2) ≥ index(t, 3) ⇒ team_join(t, m) ≡ ⊥ TeamFull
+```
+
+### Tests
+
+| Input | Output |
+|-------|--------|
+| team_join(team_create(7, 0, 3), 5) | [7,0,2,3] |
+| team_join(team_create(7, 0, 3), 5) | [7,0,2,3] |
+| team_join([7,0,2,2], 5) | ⊥ TeamFull |
 
 ## Functions
 

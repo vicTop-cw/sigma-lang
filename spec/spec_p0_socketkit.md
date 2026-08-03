@@ -452,6 +452,44 @@ Definition: dispute_review(e) ≡ 1 if weighted_support(e) ≥ weighted_reject(e
 | dispute_review([[1,0,5],[2,1,2]]) | 0 |
 | dispute_review(3) | ⊥ TypeError |
 
+### SK.3.14 team_create / team_join — 团机制 (需求文档 §七)
+
+受茬团（多人分摊赏金发需求）与找茬团（多人组团接单）。Team =
+[owner, kind, size, capacity]（kind 0 = 受茬团，1 = 找茬团）。创始人为成员
+（size 从 1 起）；加入需未满员，否则 ⊥ TeamFull。规则：单人受茬团不可对接
+单人找茬团（防绕过，v0.30 team_share 验证）。
+
+```md
+Team     : List⟨ℕ⟩        # [owner, kind, size, capacity]
+team_create : ℕ × ℕ × ℕ → List⟨ℕ⟩   # (owner, kind, capacity) → Team
+Fingerprint: 0xF012
+Definition: team_create(o, k, c) ≡ [o, k, 1, c]   if c ≥ 1
+            # 创始人即成员 (size=1)；capacity ≥ 1，否则 ⊥ TypeError
+team_join    : List⟨ℕ⟩ × ℕ → List⟨ℕ⟩   # (team, member) → Team
+Fingerprint: 0xF013
+Definition: team_join([o, k, s, c], m) ≡ [o, k, s+1, c]  if s < c
+            # 未满员则加入；满员 → ⊥ TeamFull
+```
+
+**Laws**
+
+```md
+∀ o k c . c ≥ 1 ⇒ index(team_create(o, k, c), 2) ≡ 1          # 创始人即成员
+∀ o k c . c ≥ 1 ⇒ index(team_create(o, k, c), 2) ≤ index(team_create(o, k, c), 3)  # size ≤ capacity
+∀ t m . index(t, 2) < index(t, 3) ⇒ index(team_join(t, m), 2) ≡ index(t, 2) + 1   # 加入 +1
+∀ t m . index(t, 2) ≥ index(t, 3) ⇒ team_join(t, m) ≡ ⊥ TeamFull                 # 满员拒绝
+```
+
+**Tests**
+
+| Input | Output |
+|-------|--------|
+| team_create(7, 0, 3) | [7,0,1,3] |
+| team_create(3, 1, 2) | [3,1,1,2] |
+| team_create(7, 0, 0) | ⊥ TypeError |
+| team_join(team_create(7, 0, 3), 5) | [7,0,2,3] |
+| team_join([7,0,2,2], 5) | ⊥ TeamFull |
+
 ---
 
 ## SK.4 Encodings (Law II — encoding to ℕ for non-numeric returns)

@@ -53,6 +53,19 @@
       18/18、双端冒烟 13/13、三端 0 warning，v0.10–v0.27 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.29 完成定义（增长期语义③团机制，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **语义**: §SK.3.14 `team_create/team_join`（受茬团/找茬团）——Team =
+      [owner, kind, size, capacity]；创始人即成员（size=1）、capacity ≥ 1 否则
+      ⊥ TypeError、未满员可加入否则 ⊥ TeamFull。
+- [x] **三端执行层**: sigma_core 143/143、Rust sk.rs / Elixir sigma_verify.exs
+      参考实现 + eval_expr + 自检 65/65，`cargo build` 0 error/0 warning。
+- [x] **语料**: `corpus/socketkit_ok.md` 增 team_create/team_join（62/62 三端一致
+      PASS），consensus 43/43 全绿。
+- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 +
+      18/18、双端冒烟 13/13、三端 0 warning，v0.10–v0.28 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
