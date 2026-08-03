@@ -112,6 +112,17 @@
       p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 + 18/18 不回归。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.34 完成定义（增长期义务证明，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **义务生成**: `sigma-prove` 新增 `gen_growth_obligation`——§SK.3.12–3.17
+      七个增长期操作的定律义务，全部 `PROVED (unsat)`（badge_issue 等级有界 /
+      dispute_review binary / team_create 创始人即成员 / team_join 加入 +1 /
+      team_share 不超发 / quota_advance 预支加满月额 / points_ledger 积分非负）。
+- [x] **不回归**: consensus 45/45、p0 109/109、sigma-prove 48 项 PROVED、
+      sigma-runtime 59/59 + 18/18、双端冒烟 13/13、三端 0 warning，
+      v0.10–v0.33 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

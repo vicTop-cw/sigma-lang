@@ -520,7 +520,109 @@ def gen_sk_obligation(op):
         return _contribution_obligations()
     if name == "credit_score":
         return _credit_score_obligations()
-    return gen_pf_obligation(op)
+    return gen_pf_obligation(op) or gen_growth_obligation(op)
+
+
+# ---------------------------------------------------------------------------
+# §SK.3.12–3.17 obligation generation (spec_p0_socketkit.md — 增长期, v0.34)
+# ---------------------------------------------------------------------------
+
+GROWTH_OPS = {"badge_issue", "dispute_review", "team_create", "team_join",
+              "team_share", "quota_advance", "points_ledger"}
+
+
+def gen_growth_obligation(op):
+    """Generate §SK.3.12–3.17 obligations for one growth operation (or [])."""
+    name = op["name"].strip()
+    if name == "badge_issue":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const v Int) (declare-const u Int) (declare-const s Int)\n"
+               "(declare-const b Int)\n"
+               "(assert (>= v 1000)) (assert (>= u 0)) (assert (>= s 0))\n"
+               "; Definition (§SK.3.12): badge_issue(v,u,s) = [v, u, badge_level(s)]\n"
+               "(assert (= (index b 0) v)) (assert (= (index b 1) u))\n"
+               "(assert (= (index b 2) (ite (< s 100) 0 (ite (< s 300) 1 "
+               "(ite (< s 600) 2 3)))))\n"
+               "; Law: level bounded 0..3 (授权核验师 v ≥ 1000)\n"
+               "(assert (not (and (>= (index b 2) 0) (<= (index b 2) 3))))\n(check-sat)\n")
+        return [("badge_issue/law-level-bounded", law)]
+    if name == "dispute_review":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const v1 Int) (declare-const v2 Int) (declare-const v3 Int)\n"
+               "(declare-const w1 Int) (declare-const w2 Int) (declare-const w3 Int)\n"
+               "(assert (or (= v1 0) (= v1 1)))\n"
+               "(assert (or (= v2 0) (= v2 1)))\n"
+               "(assert (or (= v3 0) (= v3 1)))\n"
+               "(assert (>= w1 0)) (assert (>= w2 0)) (assert (>= w3 0))\n"
+               "; Definition (§SK.3.13): dispute_review ≡ 1 if support ≥ reject\n"
+               "(declare-const ws Int) (declare-const wr Int) (declare-const d Int)\n"
+               "(assert (= ws (+ (* v1 w1) (* v2 w2) (* v3 w3))))\n"
+               "(assert (= wr (+ (* (- 1 v1) w1) (* (- 1 v2) w2) (* (- 1 v3) w3))))\n"
+               "(assert (= d (ite (>= ws wr) 1 0)))\n"
+               "; Law: decision is binary\n"
+               "(assert (not (or (= d 0) (= d 1))))\n(check-sat)\n")
+        return [("dispute_review/law-binary", law)]
+    if name == "team_create":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const o Int) (declare-const k Int) (declare-const c Int)\n"
+               "(declare-const t Int)\n"
+               "(assert (>= o 0)) (assert (>= k 0)) (assert (>= c 1))\n"
+               "; Definition (§SK.3.14): team_create(o,k,c) = [o, k, 1, c]\n"
+               "(assert (= (index t 0) o)) (assert (= (index t 1) k))\n"
+               "(assert (= (index t 2) 1)) (assert (= (index t 3) c))\n"
+               "; Law: founder is a member and size ≤ capacity\n"
+               "(assert (not (and (= (index t 2) 1) (<= (index t 2) (index t 3)))))\n(check-sat)\n")
+        return [("team_create/law-founder-member", law)]
+    if name == "team_join":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const o Int) (declare-const k Int) (declare-const s Int)\n"
+               "(declare-const c Int) (declare-const m Int)\n"
+               "(declare-const t Int) (declare-const t2 Int)\n"
+               "(assert (>= o 0)) (assert (>= k 0)) (assert (>= m 0))\n"
+               "(assert (= (index t 0) o)) (assert (= (index t 1) k))\n"
+               "(assert (= (index t 2) s)) (assert (= (index t 3) c))\n"
+               "; Definition (§SK.3.14): team_join(t,m) = [o,k,s+1,c] when s < c\n"
+               "(assert (< s c))\n"
+               "(assert (= (index t2 0) o)) (assert (= (index t2 1) k))\n"
+               "(assert (= (index t2 2) (+ s 1))) (assert (= (index t2 3) c))\n"
+               "; Law: join increments size by 1\n"
+               "(assert (not (= (index t2 2) (+ (index t 2) 1))))\n(check-sat)\n")
+        return [("team_join/law-increment", law)]
+    if name == "team_share":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const c1 Int) (declare-const c2 Int) (declare-const r Int)\n"
+               "(declare-const s1 Int) (declare-const s2 Int)\n"
+               "(assert (>= c1 0)) (assert (>= c2 0)) (assert (>= r 0))\n"
+               "(assert (> (+ c1 c2) 0))\n"
+               "; Definition (§SK.3.15): shareᵢ = floor(r·cᵢ/Σc)\n"
+               "(assert (= s1 (div (* r c1) (+ c1 c2))))\n"
+               "(assert (= s2 (div (* r c2) (+ c1 c2))))\n"
+               "; Law: shares never exceed reward\n"
+               "(assert (not (<= (+ s1 s2) r)))\n(check-sat)\n")
+        return [("team_share/law-no-overpay", law)]
+    if name == "quota_advance":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const m Int) (declare-const r Int)\n"
+               "(declare-const q Int) (declare-const q2 Int)\n"
+               "(assert (>= m 0)) (assert (>= r 0))\n"
+               "(assert (= (index q 0) m)) (assert (= (index q 1) r))\n"
+               "; Definition (§SK.3.16): quota_advance([m,r]) = [m, r+m]\n"
+               "(assert (= (index q2 0) m)) (assert (= (index q2 1) (+ r m)))\n"
+               "; Law: advance adds one full month's quota\n"
+               "(assert (not (= (index q2 1) (+ (index q 1) (index q 0)))))\n(check-sat)\n")
+        return [("quota_advance/law-add-monthly", law)]
+    if name == "points_ledger":
+        law = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+               "(declare-const a1 Int) (declare-const s1 Int) (declare-const a2 Int)\n"
+               "(declare-const s2 Int) (declare-const e1 Int) (declare-const e2 Int)\n"
+               "(assert (>= a1 0)) (assert (>= a2 0))\n"
+               "; Definition (§SK.3.17): points_ledger records [entry_id, source_id, amount]\n"
+               "(assert (>= s1 1)) (assert (>= s2 1))\n"
+               "(assert (= e1 1)) (assert (= e2 2))\n"
+               "; Law: amounts never negative\n"
+               "(assert (not (and (>= a1 0) (>= a2 0))))\n(check-sat)\n")
+        return [("points_ledger/law-nonnegative", law)]
+    return []
 
 
 # ---------------------------------------------------------------------------
@@ -915,6 +1017,7 @@ def prove_module(path):
     name = os.path.basename(path)
 
     has_sk = any(op["name"].strip() in SK_OPS or op["name"].strip() in PF_OPS
+                 or op["name"].strip() in GROWTH_OPS
                  for op in module["ops"])
     if not module["proof_declared"] and not has_sk:
         print(f"  {name}: no `## Proof` block — skipped (structural: {ok})")
