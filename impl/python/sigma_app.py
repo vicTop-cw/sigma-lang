@@ -117,6 +117,22 @@ class MVPApp:
     def ledger(self, entries: List[List[int]]) -> List[List[int]]:
         return core.points_ledger(entries)
 
+    # --- 供应链 (§IN) 全部委托 sigma_core ------------------------------------
+    def open_inventory(self, qty_a: int, qty_b: int) -> List[int]:
+        return core.inventory_new(qty_a, qty_b)
+
+    def receive(self, inv: List[int], item: int, qty: int) -> List[int]:
+        return core.receive_stock(inv, item, qty)
+
+    def ship(self, inv: List[int], item: int, qty: int) -> List[int]:
+        return core.ship_stock(inv, item, qty)
+
+    def level(self, inv: List[int], item: int) -> int:
+        return core.stock_level(inv, item)
+
+    def fill(self, shipped: int, demanded: int) -> float:
+        return core.fill_rate(shipped, demanded)
+
 
 # ============================================================================
 # §SK.6 self-check: run the audited MVP story through the App layer
@@ -305,6 +321,39 @@ class _Handler(BaseHTTPRequestHandler):
                 if e is None:
                     return self._json({"error": "need entries"}, 400)
                 return self._json({"ledger": app.ledger(eval(e))})
+            # --- 供应链端点 (§IN) ---
+            if path == "/inventory_new":
+                a = self._get("qty_a")
+                b = self._get("qty_b")
+                if a is None or b is None:
+                    return self._json({"error": "need qty_a & qty_b"}, 400)
+                return self._json({"inventory": app.open_inventory(a, b)})
+            if path == "/receive_stock":
+                i = self._get_str("inv")
+                x = self._get("item")
+                q = self._get("qty")
+                if i is None or x is None or q is None:
+                    return self._json({"error": "need inv & item & qty"}, 400)
+                return self._json({"inventory": app.receive(eval(i), x, q)})
+            if path == "/ship_stock":
+                i = self._get_str("inv")
+                x = self._get("item")
+                q = self._get("qty")
+                if i is None or x is None or q is None:
+                    return self._json({"error": "need inv & item & qty"}, 400)
+                return self._json({"inventory": app.ship(eval(i), x, q)})
+            if path == "/stock_level":
+                i = self._get_str("inv")
+                x = self._get("item")
+                if i is None or x is None:
+                    return self._json({"error": "need inv & item"}, 400)
+                return self._json({"level": app.level(eval(i), x)})
+            if path == "/fill_rate":
+                s = self._get("shipped")
+                d = self._get("demanded")
+                if s is None or d is None:
+                    return self._json({"error": "need shipped & demanded"}, 400)
+                return self._json({"rate": app.fill(s, d)})
             return self._json({"error": "unknown path"}, 404)
         except (ValueError, KeyError) as e:
             return self._json({"error": str(e)}, 400)
@@ -391,6 +440,18 @@ def run_http_smoke() -> Tuple[int, int]:
     check("HTTP /advance", r["quota"] == [50, 100], f"got {r}")
     r = get("/ledger?entries=[[0,100,1]]")
     check("HTTP /ledger", r["ledger"] == [[1, 1, 100]], f"got {r}")
+
+    # 9. 供应链 (§IN)
+    r = get("/inventory_new?qty_a=10&qty_b=20")
+    check("HTTP /inventory_new", r["inventory"] == [10, 20], f"got {r}")
+    r = get("/receive_stock?inv=[10,20]&item=0&qty=5")
+    check("HTTP /receive_stock", r["inventory"] == [15, 20], f"got {r}")
+    r = get("/ship_stock?inv=[15,20]&item=0&qty=4")
+    check("HTTP /ship_stock", r["inventory"] == [11, 20], f"got {r}")
+    r = get("/stock_level?inv=[11,20]&item=0")
+    check("HTTP /stock_level", r["level"] == 11, f"got {r}")
+    r = get("/fill_rate?shipped=6&demanded=10")
+    check("HTTP /fill_rate", abs(r["rate"] - 0.6) < 1e-9, f"got {r}")
 
     server.shutdown()
     thread.join()

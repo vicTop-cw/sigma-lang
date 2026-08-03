@@ -207,9 +207,14 @@
   --inventory`（6/6）**三端逐项一致**——供应链故事线三把尺子同尺；
   `cargo build` 0 error/0 warning；consensus 47/47、p0 109/109，
   v0.10–v0.43 不回归。
+- ✅ **REACHED v0.45 (2026-08-03)**: 供应链 app 参考实现—— `sigma_app.py`
+  增加供应链方法（open_inventory / receive / ship / level / fill，全部委托
+  sigma_core §IN）+ HTTP 端点（/inventory_new /receive_stock /ship_stock
+  /stock_level /fill_rate）；`--smoke` 扩展供应链步骤（20/20 → 25/25）；
+  自检 15/15 不回归；consensus 47/47、p0 109/109，v0.10–v0.44 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.44 达成后 P3 待办已清空，进入新里程碑规划（v0.45–v0.50 连续推进）。
+  2. （无）— v0.45 达成后 P3 待办已清空，进入新里程碑规划（v0.46–v0.50 连续推进）。
 
 ---
 

@@ -232,6 +232,17 @@
       v0.10–v0.43 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.45 完成定义（供应链 app 参考实现，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **供应链方法**: `sigma_app.py` MVPApp 增加 open_inventory / receive /
+      ship / level / fill（全部委托 sigma_core §IN）。
+- [x] **HTTP 端点**: `/inventory_new /receive_stock /ship_stock /stock_level
+      /fill_rate`；`--smoke` 扩展供应链步骤（20/20 → 25/25）。
+- [x] **不回归**: 自检 15/15、consensus 47/47、p0 109/109、sigma-prove 53 项
+      PROVED、sigma-runtime 59/59 + 29/29 + 6/6、三端 0 warning，
+      v0.10–v0.44 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
