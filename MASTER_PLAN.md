@@ -201,9 +201,15 @@
   义务全绿；`sigma-runtime --inventory`（run_inventory_story）审计供应链故事线
   （开仓→入库→出库→水位→履约率），6/6 义务满足；consensus 47/47、p0 109/109，
   v0.10–v0.42 不回归。
+- ✅ **REACHED v0.44 (2026-08-03)**: 三端供应链 story 对账—— §IN 供应链故事线
+  扩到三端：Rust `sk.rs inventory_story()` + `--sk-inventory`（6/6）、Elixir
+  `sk_inventory_story()` + `--sk-inventory`（6/6），与 Python `sigma-runtime
+  --inventory`（6/6）**三端逐项一致**——供应链故事线三把尺子同尺；
+  `cargo build` 0 error/0 warning；consensus 47/47、p0 109/109，
+  v0.10–v0.43 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.43 达成后 P3 待办已清空，进入新里程碑规划（v0.44–v0.50 连续推进）。
+  2. （无）— v0.44 达成后 P3 待办已清空，进入新里程碑规划（v0.45–v0.50 连续推进）。
 
 ---
 

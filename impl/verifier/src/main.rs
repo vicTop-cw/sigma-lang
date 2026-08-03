@@ -45,6 +45,10 @@ struct Cli {
     #[arg(long)]
     sk_growth: bool,
 
+    /// Run the §IN supply-chain story (mirrors sigma-runtime --inventory) and exit
+    #[arg(long)]
+    sk_inventory: bool,
+
     /// Run the 找茬 MVP reference implementation self-check (§SK.6 through
     /// the App layer, mirrors sigma_app.py) and exit
     #[arg(long)]
@@ -1216,6 +1220,14 @@ fn main() -> Result<()> {
     if cli.sk_growth {
         let (passed, total) = sk::growth_story();
         println!("sigma_core growth story (§SK.3.12–3.17): {passed}/{total} passed");
+        std::process::exit(if passed == total { 0 } else { 1 });
+    }
+
+    // §IN supply-chain story — mirrors `python3 tools/sigma-runtime.py
+    // --inventory` so the three implementations audit the same inventory line.
+    if cli.sk_inventory {
+        let (passed, total) = sk::inventory_story();
+        println!("sigma_core inventory story (§IN): {passed}/{total} passed");
         std::process::exit(if passed == total { 0 } else { 1 });
     }
 

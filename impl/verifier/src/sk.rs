@@ -647,3 +647,39 @@ pub fn growth_story() -> (usize, usize) {
 
     (passed, total)
 }
+
+/// Run the §IN supply-chain audit story (spec_p0_inventory.md), mirroring
+/// `sigma-runtime --inventory` so the three implementations audit the same
+/// inventory storyline (Law XIII). Returns (passed, total).
+pub fn inventory_story() -> (usize, usize) {
+    let mut passed = 0usize;
+    let mut total = 0usize;
+
+    macro_rules! check {
+        ($name:expr, $cond:expr) => {{
+            total += 1;
+            if $cond {
+                passed += 1;
+            } else {
+                eprintln!("  ❌ IN.{}", $name);
+            }
+        }};
+    }
+
+    // §IN.3.1 开仓
+    let inv = inventory_new(10, 20).unwrap();
+    check!("inventory_new", inv == vec![10, 20]);
+    // §IN.3.2 入库（可加性）
+    let inv_r = receive_stock(&inv, 0, 5).unwrap();
+    check!("receive_stock", inv_r == vec![15, 20]);
+    // §IN.3.3 出库（不超卖）
+    let inv_s = ship_stock(&inv_r, 0, 4).unwrap();
+    check!("ship_stock", inv_s == vec![11, 20]);
+    check!("ship_insufficient_rejected", ship_stock(&inv_r, 0, 20).is_err());
+    // §IN.3.4 库存水位
+    check!("stock_level", stock_level(&inv_s, 0) == Ok(11));
+    // §IN.3.5 履约率
+    check!("fill_rate", fill_rate(6, 10) == Ok(0.6));
+
+    (passed, total)
+}

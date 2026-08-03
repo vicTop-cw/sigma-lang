@@ -219,6 +219,19 @@
       双端冒烟 20/20、三端 0 warning，v0.10–v0.42 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.44 完成定义（三端供应链 story 对账，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **Rust inventory story**: `sk.rs` 新增 `inventory_story()`（§IN 供应链 6 项
+      审计），CLI 新增 `--sk-inventory`（6/6 通过），0 error/0 warning。
+- [x] **Elixir inventory story**: `sigma_verify.exs` 新增 `sk_inventory_story()` +
+      `--sk-inventory`（6/6 通过）。
+- [x] **三端对账**: Python `sigma-runtime --inventory` 6/6 == Rust `--sk-inventory`
+      6/6 == Elixir `--sk-inventory` 6/6——供应链故事线三端逐项一致。
+- [x] **不回归**: consensus 47/47、p0 109/109、sigma-prove 53 项 PROVED、
+      sigma-runtime 59/59 + 29/29 + 6/6、双端冒烟 20/20、三端 0 warning，
+      v0.10–v0.43 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

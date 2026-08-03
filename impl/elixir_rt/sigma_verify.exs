@@ -2083,6 +2083,27 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ SK.3.12–3.17.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  @doc "Run the §IN supply-chain audit story (mirrors sigma-runtime --inventory)."
+  def sk_inventory_story do
+    checks = [
+      # §IN.3.1 开仓
+      {"inventory_new", inventory_new(10, 20) == {:ok, [10, 20]}},
+      # §IN.3.2 入库（可加性）
+      {"receive_stock", receive_stock([10, 20], 0, 5) == {:ok, [15, 20]}},
+      # §IN.3.3 出库（不超卖）
+      {"ship_stock", ship_stock([15, 20], 0, 4) == {:ok, [11, 20]}},
+      {"ship_insufficient_rejected", ship_stock([15, 20], 0, 20) == {:error, "InsufficientStock"}},
+      # §IN.3.4 库存水位
+      {"stock_level", stock_level([11, 20], 0) == {:ok, 11}},
+      # §IN.3.5 履约率
+      {"fill_rate", fill_rate(6, 10) == {:ok, 0.6}}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ IN.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2103,6 +2124,11 @@ case System.argv() do
   ["--sk-growth" | _] ->
     {passed, total} = SigmaVerify.sk_growth_story()
     IO.puts("sigma_core growth story (§SK.3.12–3.17): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-inventory" | _] ->
+    {passed, total} = SigmaVerify.sk_inventory_story()
+    IO.puts("sigma_core inventory story (§IN): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->
