@@ -699,6 +699,52 @@ def eval_expr(s):
         if iv is None:
             return f"bad index: {parts[1]}"
         return index_into(tv, iv)
+    # §SK — SocketKit Protocol operations (spec_p0_socketkit.md §SK.3).
+    # Real function calls, not spec-expression aliases: the corpus tests now
+    # exercise the same task_create/review_merge/contribution_score semantics
+    # the reference implementations (sigma_core.py / sk.rs / sigma_verify.exs)
+    # provide, so the consensus gate verifies app behavior itself.
+    if s.startswith("task_create(") and s.endswith(")"):
+        inner = s[len("task_create("):-1]
+        parts = split_top_level(inner, ",")
+        if parts is None or len(parts) < 2:
+            return f"bad task_create args: {inner}"
+        va = parse_val(parts[0].strip())
+        vb = parse_val(parts[1].strip())
+        if va is None or vb is None or va[0] != "num" or vb[0] != "num":
+            return "TypeError"
+        if vb[1] < 0:  # Bounty : Type ≝ ℕ
+            return "BountyErr"
+        return ("list", [("num", va[1]), ("num", vb[1]), ("num", 0)])
+    if s.startswith("review_merge(") and s.endswith(")"):
+        inner = s[len("review_merge("):-1]
+        v = parse_val(inner.strip())
+        if v is None or v[0] != "list":
+            return "TypeError"
+        w_accept = w_reject = 0
+        for o in v[1]:
+            if o[0] != "list" or len(o[1]) != 3:
+                return "ShapeError"
+            vote = o[1][1][1]
+            weight = o[1][2][1]
+            if vote == 1:
+                w_accept += weight
+            elif vote == 0:
+                w_reject += weight
+            else:
+                return "TypeError"
+        return ("num", 1 if w_accept >= w_reject else 0)
+    if s.startswith("contribution_score(") and s.endswith(")"):
+        inner = s[len("contribution_score("):-1]
+        v = parse_val(inner.strip())
+        if v is None or v[0] != "list":
+            return "TypeError"
+        total = 0
+        for a in v[1]:
+            if a[0] != "list" or len(a[1]) != 3:
+                return "ShapeError"
+            total += a[1][2][1]
+        return ("num", max(0, total))
     if s == "I₂":
         return ("list", [("list", [("num", 1), ("num", 0)]),
                          ("list", [("num", 0), ("num", 1)])])

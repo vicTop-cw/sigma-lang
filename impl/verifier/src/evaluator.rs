@@ -97,6 +97,84 @@ fn eval_expr(s: &str) -> Result<TVal, String> {
         let iv = parse_val(&idx).ok_or_else(|| format!("bad index: {}", idx))?;
         return index_into(&tv, &iv);
     }
+    // §SK — SocketKit Protocol operations (spec_p0_socketkit.md §SK.3).
+    // Real function calls, not spec-expression aliases: mirrors
+    // verify_consensus.py so the corpus consensus gate verifies app behavior.
+    if let Some(rest) = s.strip_prefix("task_create(") {
+        let inner = rest.strip_suffix(')').ok_or("bad task_create call")?;
+        let (a, b) = split_top_level(inner, ',')
+            .ok_or_else(|| format!("bad task_create args: {}", inner))?;
+        let va = parse_val(a).ok_or_else(|| format!("bad task_create author: {}", a))?;
+        let vb = parse_val(b).ok_or_else(|| format!("bad task_create bounty: {}", b))?;
+        return match (va, vb) {
+            (TVal::Num(author), TVal::Num(bounty)) => {
+                if bounty < 0 {
+                    // Bounty : Type ≝ ℕ
+                    Err("BountyErr".to_string())
+                } else {
+                    Ok(TVal::List(vec![
+                        TVal::Num(author),
+                        TVal::Num(bounty),
+                        TVal::Num(0),
+                    ]))
+                }
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("review_merge(") {
+        let inner = rest.strip_suffix(')').ok_or("bad review_merge call")?;
+        let v = parse_val(inner).ok_or_else(|| format!("bad review_merge: {}", inner))?;
+        return match v {
+            TVal::List(opinions) => {
+                let mut w_accept = 0i64;
+                let mut w_reject = 0i64;
+                for o in &opinions {
+                    match o {
+                        TVal::List(fields) if fields.len() == 3 => {
+                            match (&fields[1], &fields[2]) {
+                                (TVal::Num(vote), TVal::Num(weight)) => {
+                                    if *vote == 1 {
+                                        w_accept += weight;
+                                    } else if *vote == 0 {
+                                        w_reject += weight;
+                                    } else {
+                                        return Err("TypeError".to_string());
+                                    }
+                                }
+                                _ => return Err("TypeError".to_string()),
+                            }
+                        }
+                        _ => return Err("ShapeError".to_string()),
+                    }
+                }
+                Ok(TVal::Num(if w_accept >= w_reject { 1 } else { 0 }))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
+    if let Some(rest) = s.strip_prefix("contribution_score(") {
+        let inner = rest.strip_suffix(')').ok_or("bad contribution_score call")?;
+        let v = parse_val(inner).ok_or_else(|| format!("bad contribution_score: {}", inner))?;
+        return match v {
+            TVal::List(actions) => {
+                let mut total = 0i64;
+                for a in &actions {
+                    match a {
+                        TVal::List(fields) if fields.len() == 3 => {
+                            match &fields[2] {
+                                TVal::Num(delta) => total += delta,
+                                _ => return Err("TypeError".to_string()),
+                            }
+                        }
+                        _ => return Err("ShapeError".to_string()),
+                    }
+                }
+                Ok(TVal::Num(total.max(0)))
+            }
+            _ => Err("TypeError".to_string()),
+        };
+    }
     if s == "I₂" {
         return Ok(TVal::List(vec![
             TVal::List(vec![TVal::Num(1), TVal::Num(0)]),

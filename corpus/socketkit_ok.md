@@ -5,8 +5,10 @@
 # Domain: app behavior (SocketKit 「来找茬」)
 # Intent: verifier test set for the v0.13 SocketKit protocol (spec_p0_socketkit.md
 # §SK) — task_create / review_merge / contribution_score must behave identically
-# across Python / Rust / Elixir. Reuses the canonical expression patterns proven
-# three-verifier consistent (⊕ ∈ ⊘ on lists / literals / ⊥ errors).
+# across Python / Rust / Elixir. The Tests exercise the §SK operations as real
+# function calls (task_create / review_merge / contribution_score), so the
+# consensus gate (Law XIII) verifies the app behavior itself, not just
+# spec-expression aliases.
 
 ## Imports
 
@@ -43,9 +45,9 @@ Fingerprint: 0xF001
 
 | Input | Output |
 |-------|--------|
-| [1,2] ⊕ [3,4] | [4,6] |
-| [1,2,3] ⊕ [4,5,6] | [5,7,9] |
-| [1] ⊕ [1,2] | ⊥ ShapeError |
+| task_create(7, 100) | [7,100,0] |
+| task_create(2, 0) | [2,0,0] |
+| task_create(1, -5) | ⊥ BountyErr |
 
 ## Operation: review_merge (Review Merge)
 
@@ -67,9 +69,9 @@ Fingerprint: 0xF002
 
 | Input | Output |
 |-------|--------|
-| 2 ∈ [1,2,3] | 1 |
-| 5 ∈ [1,2,3] | 0 |
-| 2 ∈ 3 | ⊥ TypeError |
+| review_merge([[1,1,3],[2,1,2]]) | 1 |
+| review_merge([[1,0,5],[2,1,2]]) | 0 |
+| review_merge(3) | ⊥ TypeError |
 
 ## Operation: contribution_score (Contribution Score)
 
@@ -91,9 +93,9 @@ Fingerprint: 0xF003
 
 | Input | Output |
 |-------|--------|
-| 6 ⊘ 2 | 3 |
-| 7 ⊘ 2 | 3.5 |
-| 5 ⊘ 0 | ⊥ DivByZero |
+| contribution_score([[1,1,3],[2,2,4]]) | 7 |
+| contribution_score([[1,1,-5],[2,2,3]]) | 0 |
+| contribution_score(5) | ⊥ TypeError |
 
 ## Functions
 

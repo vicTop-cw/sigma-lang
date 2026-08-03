@@ -63,6 +63,8 @@ Verifier Consensus / 验证器共识: **41/41** corpus modules agree across Pyth
 
 **v0.15 三端 §SK 执行层 (2026-08-03)**: §SK 参考实现从 Python 单侧同步到 Rust（`impl/verifier/src/sk.rs` + `--sk-self-check`，16/16）与 Elixir（`sigma_verify.exs` §SK + `--sk-self-check`，16/16）——同一组 §SK 用例三端判定一致（Law XIII 业务语义层），`cargo build` 0 error/0 warning；consensus 41/41、p0 109/109 不回退，v0.10–v0.14 不回归。
 
+**v0.16 SocketKit 语料执行化 (2026-08-03)**: 三端求值器（`verify_consensus.py` / `evaluator.rs` / `sigma_verify.exs`）的 eval_expr 直接支持 §SK 三操作真实调用（`task_create(a,b)` / `review_merge([...])` / `contribution_score([...])`，含 ⊥ BountyErr / TypeError / ShapeError 错误路径）；`corpus/socketkit_ok.md` 的 Tests 从规范表达式（⊕ ∈ ⊘）升级为真实调用——**Law XIII 共识门禁从此直接验证业务语义本身**，9/9 三端一致（consensus 41/41）、0 warning，v0.10–v0.15 不回归。
+
 ### Two verification modes / 两种验证模式
 
 ΣLang ships **two distinct verification tools** with different purposes:
@@ -284,7 +286,7 @@ The following files have been moved to `archive/` as they are superseded by newe
 
 ## Version / 版本
 
-- **Milestone / 里程碑**: **v0.15 三端 §SK 执行层 (2026-08-03)** — §SK 业务语义 Python/Rust/Elixir 三端一致可执行 · **v0.14 SocketKit Runtime (2026-08-03)** — §SK 参考实现 + 审计运行时 + z3 证明闭环，共识门禁 41/41 全绿 · **v0.13 SocketKit Protocol (2026-08-02)** — §SK 语义定义，共识门禁 40/40 全绿 · **v0.12 Novel Spec Test (2026-08-02)** — 新域自举闭环 · **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
+- **Milestone / 里程碑**: **v0.16 SocketKit 语料执行化 (2026-08-03)** — 业务语义进入 Law XIII 共识门禁 · **v0.15 三端 §SK 执行层 (2026-08-03)** — §SK 业务语义 Python/Rust/Elixir 三端一致可执行 · **v0.14 SocketKit Runtime (2026-08-03)** — §SK 参考实现 + 审计运行时 + z3 证明闭环，共识门禁 41/41 全绿 · **v0.13 SocketKit Protocol (2026-08-02)** — §SK 语义定义，共识门禁 40/40 全绿 · **v0.12 Novel Spec Test (2026-08-02)** — 新域自举闭环 · **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
 - **Spec Version / 规范版本**: 0.3.0
 - **Date / 日期**: 2026-08-03
 - **License / 许可证**: MIT

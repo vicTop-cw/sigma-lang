@@ -882,6 +882,66 @@ defmodule SigmaVerify do
                  do: index_into(tv, iv)
           nil -> {:error, "bad index args: #{inner}"}
         end
+      # §SK — SocketKit Protocol operations (spec_p0_socketkit.md §SK.3).
+      # Real function calls, not spec-expression aliases: mirrors
+      # verify_consensus.py so the corpus consensus gate verifies app behavior.
+      String.starts_with?(t, "task_create(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 12..-2//1)
+        case split_top_level(inner, ?,) do
+          {a, b} ->
+            with {:ok, {:num, author}} <- parse_val(a),
+                 {:ok, {:num, bounty}} <- parse_val(b) do
+              if bounty < 0 do
+                {:error, "BountyErr"}
+              else
+                {:ok, {:list, [{:num, author}, {:num, bounty}, {:num, 0}]}}
+              end
+            else
+              _ -> {:error, "TypeError"}
+            end
+          nil -> {:error, "bad task_create args: #{inner}"}
+        end
+      String.starts_with?(t, "review_merge(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 13..-2//1)
+        case parse_val(inner) do
+          {:ok, {:list, opinions}} ->
+            result =
+              Enum.reduce_while(opinions, {0, 0}, fn o, {wa, wr} ->
+                case o do
+                  {:list, [{:num, _rid}, {:num, vote}, {:num, weight}]} ->
+                    cond do
+                      vote == 1 -> {:cont, {wa + weight, wr}}
+                      vote == 0 -> {:cont, {wa, wr + weight}}
+                      true -> {:halt, :type_error}
+                    end
+                  _ -> {:halt, :shape_error}
+                end
+              end)
+            case result do
+              {wa, wr} -> {:ok, {:num, if(wa >= wr, do: 1, else: 0)}}
+              :type_error -> {:error, "TypeError"}
+              :shape_error -> {:error, "ShapeError"}
+            end
+          _ -> {:error, "TypeError"}
+        end
+      String.starts_with?(t, "contribution_score(") and String.ends_with?(t, ")") ->
+        inner = String.slice(t, 19..-2//1)
+        case parse_val(inner) do
+          {:ok, {:list, actions}} ->
+            result =
+              Enum.reduce_while(actions, 0, fn a, acc ->
+                case a do
+                  {:list, [{:num, _aid}, {:num, _kind}, {:num, delta}]} ->
+                    {:cont, acc + delta}
+                  _ -> {:halt, :shape_error}
+                end
+              end)
+            case result do
+              total when is_integer(total) -> {:ok, {:num, max(total, 0)}}
+              :shape_error -> {:error, "ShapeError"}
+            end
+          _ -> {:error, "TypeError"}
+        end
       t == "I₂" ->
         {:ok, {:list, [{:list, [{:num, 1}, {:num, 0}]},
                        {:list, [{:num, 0}, {:num, 1}]}]}}

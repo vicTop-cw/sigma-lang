@@ -18,10 +18,11 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.15 可用**——即：**三端 §SK 语义执行层**，
-在 v0.14（SocketKit 参考运行时 + 审计闭环）达成的基础上，让「来找茬」App 的核心业务行为
-（task_create / review_merge / contribution_score）在 **Python / Rust / Elixir 三个独立
-实现上都可执行且行为一致**（Law XIII：一个符号、一种含义、一个结果——业务语义也不例外）。
+**总目标**: 把项目推进到 **v0.16 可用**——即：**SocketKit 语料执行化**，
+在 v0.15（三端 §SK 语义执行层）达成的基础上，让「来找茬」App 的核心业务行为
+（task_create / review_merge / contribution_score）的**语料测试直接调用三端 §SK 执行层**
+（而非规范表达式别名），使 **Law XIII 共识门禁直接验证业务语义本身**——
+业务行为从此进入每日共识检查，任何实现偏差都会被三端一致性检查当场抓住。
 **我只关心这个结果。**
 
 ---
@@ -210,6 +211,24 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > 用各自语言实现了同一套规则，自检用例逐一相同、结果一致；「来找茬」的业务行为
 > 在任何 ΣLang 实现里都算出同一个答案。
 
+### v0.16 完成定义（SocketKit 语料执行化，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **三端求值器支持 §SK 调用**: `verify_consensus.py` / `impl/verifier/src/evaluator.rs` /
+      `impl/elixir_rt/sigma_verify.exs` 的 eval_expr 直接解析并执行
+      `task_create(a,b)` / `review_merge([...])` / `contribution_score([...])`，
+      错误路径返回 ⊥（BountyErr / TypeError / ShapeError），三端语义一致。
+- [x] **语料执行化**: `corpus/socketkit_ok.md` 的 Tests 从规范表达式（⊕ ∈ ⊘）升级为
+      真实 §SK 调用（每操作 2 成功 + 1 负例），consensus 门禁（Law XIII）直接验证业务语义。
+- [x] **三端一致**: socketkit_ok.md 9/9 PASS，Python == Rust == Elixir == Expected
+      （consensus 41/41），0 warning。
+- [x] **不回归**: consensus 41/41、p0 109/109、sigma-prove §SK 六定律 PROVED、
+      sigma-runtime 10/10、三端编译 0 warning 全部保持，v0.10–v0.15 不回归。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
+
+> v0.16 = 「业务语义进共识门禁」：从此每天跑 `verify_consensus.py`，
+> 找茬 App 的提交/评审/贡献行为都作为真实函数调用被三把独立的尺子逐一复核——
+> 语义偏差不再可能悄悄溜进发布。
+
 ---
 
 ## 7. 提交与汇报约定
@@ -220,7 +239,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 ```text
 【ΣLang AUTOPILOT 结果】
-- 状态: ✅ v0.14 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
+- 状态: ✅ v0.16 达成 / ⏳ 进行中（剩余: …）/ ⛔ 阻塞（原因: …）
 - 本轮完成: 修复 X · 新增 Y · 验证 N/N
 - 验证证据: verify_consensus N/N · verify_p0 109/109 · sigma-prove PROVED
 - 提交: <hash> <subject>
