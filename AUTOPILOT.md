@@ -169,6 +169,16 @@
       PROVED、三端 0 warning，v0.10–v0.37 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.39 完成定义（完整业务验收剧本，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **--all 验收剧本**: `sigma-runtime --all` 一次跑通找茬完整业务故事线
+      （§SK.6 MVP 18 项 + §SK.3.12–3.17 增长期 11 项），29/29 义务满足——
+      App 完整业务蓝图的「验收剧本」；`--all --json` 机器可读。
+- [x] **不回归**: trace 59/59、MVP story 18/18、growth story 11/11、consensus
+      45/45、p0 109/109、sigma-prove 48 项 PROVED、双端冒烟 20/20、三端 0
+      warning，v0.10–v0.38 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

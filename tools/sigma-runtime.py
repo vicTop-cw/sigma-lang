@@ -714,9 +714,13 @@ def main(argv=None):
     as_json = "--json" in argv
     as_story = "--story" in argv
     as_growth = "--growth" in argv
+    as_all = "--all" in argv
 
     core = load_core()
-    if as_story:
+    if as_all:
+        # §SK.6 MVP + §SK.3.12–3.17 增长期 —— 完整业务验收剧本
+        events = run_mvp_story(core) + run_growth_story(core)
+    elif as_story:
         events = run_mvp_story(core)
     elif as_growth:
         events = run_growth_story(core)
@@ -725,7 +729,8 @@ def main(argv=None):
     total, failed = audit(events)
 
     if as_json:
-        spec = ("spec_p0_socketkit.md §SK.6 (MVP story)" if as_story
+        spec = ("spec_p0_socketkit.md §SK.6+§SK.3.12–3.17 (full story)" if as_all
+                else "spec_p0_socketkit.md §SK.6 (MVP story)" if as_story
                 else "spec_p0_socketkit.md §SK.3.12–3.17 (growth story)"
                 if as_growth else "spec_p0_socketkit.md §SK")
         print(json.dumps({
@@ -737,9 +742,7 @@ def main(argv=None):
             "auditable": failed == 0,
         }, indent=2, ensure_ascii=False))
     else:
-        if as_story:
-            print(render_story(events))
-        elif as_growth:
+        if as_story or as_growth or as_all:
             print(render_story(events))
         else:
             print(render_human(events))
