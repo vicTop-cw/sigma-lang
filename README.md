@@ -59,7 +59,9 @@ Verifier Consensus / 验证器共识: **41/41** corpus modules agree across Pyth
 
 **v0.13 SocketKit Protocol (2026-08-02)**: `spec/spec_p0_socketkit.md`（§SK：task_create / review_merge / contribution_score 的 ΣLang 语义）+ `corpus/socketkit_ok.md` 三端一致（consensus 40/40），走通 RFC → spec → 验证器 → 测试 晋升路径。见 `MASTER_PLAN.md` §6.2。
 
-**v0.14 SocketKit Runtime (2026-08-03)**: §SK 参考实现进入 `impl/python/sigma_core.py`（自检 73/73）· 审计运行时 `tools/sigma-runtime.py`（业务 trace → ΣLang obligation 日志，10/10 满足）· `sigma-prove` 对 §SK 六条定律义务消解全部 `PROVED (unsat)` · 负例 `corpus/socketkit_break.md`（E-02，三端一致 FAIL）· §SK 行为测试进 `verify_p0.py`（109/109）；共识门禁 41/41 全绿、三端 0 warning，v0.10–v0.13 不回归。
+**v0.14 SocketKit Runtime (2026-08-03)**: §SK 参考实现进入 `impl/python/sigma_core.py`（自检 75/75）· 审计运行时 `tools/sigma-runtime.py`（业务 trace → ΣLang obligation 日志，10/10 满足）· `sigma-prove` 对 §SK 六条定律义务消解全部 `PROVED (unsat)` · 负例 `corpus/socketkit_break.md`（E-02，三端一致 FAIL）· §SK 行为测试进 `verify_p0.py`（109/109）；共识门禁 41/41 全绿、三端 0 warning，v0.10–v0.13 不回归。
+
+**v0.15 三端 §SK 执行层 (2026-08-03)**: §SK 参考实现从 Python 单侧同步到 Rust（`impl/verifier/src/sk.rs` + `--sk-self-check`，16/16）与 Elixir（`sigma_verify.exs` §SK + `--sk-self-check`，16/16）——同一组 §SK 用例三端判定一致（Law XIII 业务语义层），`cargo build` 0 error/0 warning；consensus 41/41、p0 109/109 不回退，v0.10–v0.14 不回归。
 
 ### Two verification modes / 两种验证模式
 
@@ -282,7 +284,7 @@ The following files have been moved to `archive/` as they are superseded by newe
 
 ## Version / 版本
 
-- **Milestone / 里程碑**: **v0.14 SocketKit Runtime (2026-08-03)** — §SK 参考实现 + 审计运行时 + z3 证明闭环，共识门禁 41/41 全绿 · **v0.13 SocketKit Protocol (2026-08-02)** — §SK 语义定义，共识门禁 40/40 全绿 · **v0.12 Novel Spec Test (2026-08-02)** — 新域自举闭环 · **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
+- **Milestone / 里程碑**: **v0.15 三端 §SK 执行层 (2026-08-03)** — §SK 业务语义 Python/Rust/Elixir 三端一致可执行 · **v0.14 SocketKit Runtime (2026-08-03)** — §SK 参考实现 + 审计运行时 + z3 证明闭环，共识门禁 41/41 全绿 · **v0.13 SocketKit Protocol (2026-08-02)** — §SK 语义定义，共识门禁 40/40 全绿 · **v0.12 Novel Spec Test (2026-08-02)** — 新域自举闭环 · **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
 - **Spec Version / 规范版本**: 0.3.0
 - **Date / 日期**: 2026-08-03
 - **License / 许可证**: MIT

@@ -1145,6 +1145,72 @@ defmodule SigmaVerify do
   defp fmt({:num, n}), do: Integer.to_string(n)
   defp fmt({:fnum, f}), do: Float.to_string(f)
   defp fmt({:list, items}), do: "[" <> Enum.map_join(items, ",", &fmt/1) <> "]"
+
+  # ============================================================
+  # §SK — SocketKit Protocol: Auditable App Behavior
+  # (spec/spec_p0_socketkit.md — mirrors impl/python/sigma_core.py §SK)
+  # ============================================================
+
+  @doc "Task submission: (author, bounty) → [author, bounty, 0] (status 0 = open)."
+  def task_create(author, bounty) when bounty >= 0, do: {:ok, [author, bounty, 0]}
+  def task_create(_author, bounty) when bounty < 0, do: {:error, "BountyErr"}
+
+  @doc "Review resolution: opinions[] → decision (1 = accept, 0 = reject)."
+  def review_merge(opinions) do
+    w_accept = opinions |> Enum.filter(fn [_, vote, _] -> vote == 1 end)
+                        |> Enum.map(fn [_, _, w] -> w end) |> Enum.sum()
+    w_reject = opinions |> Enum.filter(fn [_, vote, _] -> vote == 0 end)
+                        |> Enum.map(fn [_, _, w] -> w end) |> Enum.sum()
+    if w_accept >= w_reject, do: 1, else: 0
+  end
+
+  @doc "Contribution scoring: actions[] → points, fold ⊕ over deltas floored at 0."
+  def contribution_score(actions) do
+    total = actions |> Enum.map(fn [_, _, delta] -> delta end) |> Enum.sum()
+    max(total, 0)
+  end
+
+  defp encode_list(xs), do: encode_list(xs, 0)
+  defp encode_list([], _), do: 0
+  defp encode_list([x | rest], i), do: x * round(:math.pow(1000, i)) + encode_list(rest, i + 1)
+
+  @doc "Law II — Task → ℕ."
+  def encode_task(task), do: encode_list(task)
+
+  @doc "Law II — Opinion → ℕ."
+  def encode_opinion(opinion), do: encode_list(opinion)
+
+  @doc "Law II — Action → ℕ."
+  def encode_action(action), do: encode_list(action)
+
+  @doc "Run the §SK self-check (mirrors sigma_core.py §SK block); returns {passed, total}."
+  def sk_self_check do
+    checks = [
+      {"task_create_shape", task_create(1, 100) == {:ok, [1, 100, 0]}},
+      {"task_create_open", match?({:ok, [_, _, 0]}, task_create(5, 50))},
+      {"task_create_bounty_ge0", task_create(2, 0) == {:ok, [2, 0, 0]}},
+      {"task_create_neg_bounty_rejected", task_create(1, -5) == {:error, "BountyErr"}},
+      {"review_merge_accept", review_merge([[1, 1, 3], [2, 1, 2]]) == 1},            # 5 ≥ 0
+      {"review_merge_reject", review_merge([[1, 0, 3], [2, 1, 2]]) == 0},            # 2 < 3
+      {"review_merge_tie_accept", review_merge([[1, 0, 3], [2, 1, 3]]) == 1},        # 3 ≥ 3
+      {"review_merge_binary", review_merge([[1, 1, 1], [2, 0, 1]]) in [0, 1]},
+      {"review_merge_order_indep",
+       review_merge([[1, 1, 3], [2, 0, 2], [3, 1, 1]]) ==
+       review_merge([[3, 1, 1], [1, 1, 3], [2, 0, 2]])},
+      {"contribution_fold", contribution_score([[1, 1, 3], [2, 2, 4]]) == 7},
+      {"contribution_floor_at_0", contribution_score([[1, 1, -5], [2, 2, 3]]) == 0}, # -2 floored
+      {"contribution_zero_neutral",
+       contribution_score([[1, 1, 3]]) == contribution_score([[1, 1, 3], [9, 0, 0]])},
+      {"encode_task_nat", encode_task([1, 2, 0]) >= 0},
+      {"encode_distinct", encode_task([1, 2, 0]) != encode_task([1, 3, 0])},
+      {"encode_opinion_nat", encode_opinion([1, 1, 3]) >= 0},
+      {"encode_action_nat", encode_action([1, 1, 3]) >= 0}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ SK.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -1152,6 +1218,11 @@ end
 # ============================================================
 
 case System.argv() do
+  ["--sk-self-check" | _] ->
+    {passed, total} = SigmaVerify.sk_self_check()
+    IO.puts("sigma_core self-check (§SK): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
   [path | _] ->
     state = SigmaVerify.parse(path)
     {ok, violations} = SigmaVerify.check(state)
@@ -1166,6 +1237,6 @@ case System.argv() do
     end
 
   _ ->
-    IO.puts("usage: elixir sigma_verify.exs <module.md>")
+    IO.puts("usage: elixir sigma_verify.exs <module.md> | --sk-self-check")
     System.halt(2)
 end

@@ -621,6 +621,8 @@ def _main() -> int:
           contribution_score([[1, 1, 3]]) == contribution_score([[1, 1, 3], [9, 0, 0]]))
     check("SK.encode_task_nat", encode_task([1, 2, 0]) >= 0)
     check("SK.encode_distinct", encode_task([1, 2, 0]) != encode_task([1, 3, 0]))
+    check("SK.encode_opinion_nat", encode_opinion([1, 1, 3]) >= 0)
+    check("SK.encode_action_nat", encode_action([1, 1, 3]) >= 0)
 
     print(f"sigma_core self-check: {passed}/{passed + failed} passed")
     return 0 if failed == 0 else 1

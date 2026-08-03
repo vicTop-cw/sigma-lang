@@ -11,6 +11,7 @@ use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 
 mod evaluator;
+mod sk;
 use evaluator::{eval_test, parse_val, TVal};
 
 // ========================================================================
@@ -21,7 +22,7 @@ use evaluator::{eval_test, parse_val, TVal};
 #[command(author, version, about = "ΣLang Verifier")]
 struct Cli {
     /// Path to the ΣLang module (.md file)
-    file: PathBuf,
+    file: Option<PathBuf>,
 
     /// Verbosity level
     #[arg(short, long, default_value = "info")]
@@ -30,6 +31,10 @@ struct Cli {
     /// Output format
     #[arg(short, long, value_enum, default_value = "text")]
     format: OutputFormat,
+
+    /// Run the §SK (SocketKit) reference-implementation self-check and exit
+    #[arg(long)]
+    sk_self_check: bool,
 }
 
 #[derive(Debug, Clone, ValueEnum)]
@@ -1164,6 +1169,14 @@ fn build_sarif(violations: &[Violation]) -> String {
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
+    // §SK (SocketKit) reference-implementation self-check — mirrors
+    // `python3 impl/python/sigma_core.py` §SK block (73/73 total there).
+    if cli.sk_self_check {
+        let (passed, total) = sk::self_check();
+        println!("sigma_core self-check (§SK): {passed}/{total} passed");
+        std::process::exit(if passed == total { 0 } else { 1 });
+    }
+
     // Initialize logging
     let filter = format!("sigma_verifier={}", cli.log_level);
     tracing_subscriber::fmt()
@@ -1171,7 +1184,8 @@ fn main() -> Result<()> {
         .init();
 
     // Parse the ΣLang module from MD
-    let module = parse_sigma_module(&cli.file)?;
+    let file = cli.file.context("a module .md file is required")?;
+    let module = parse_sigma_module(&file)?;
 
     // Run the Verifier
     let mut verifier = Verifier::new();

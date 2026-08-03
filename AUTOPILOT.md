@@ -18,10 +18,10 @@
 - `tools/sigma-prove.py`（z3 证明消解）、`tools/sigma-moonbit.py`（MoonBit 翻译桥）
 - `verify_p0.py` — 95 项算法正确性检查
 
-**总目标**: 把项目推进到 **v0.14 可用**——即：**SocketKit 参考运行时 + 审计闭环**，
-在 v0.13（SocketKit 协议集成，§SK 语义定义）达成的基础上，让「来找茬」App 的核心业务行为
-（task_create / review_merge / contribution_score）真正**可执行、可证明、可审计**：
-参考实现 + 审计运行时 + z3 义务消解 + 负例语料 + p0 集成。
+**总目标**: 把项目推进到 **v0.15 可用**——即：**三端 §SK 语义执行层**，
+在 v0.14（SocketKit 参考运行时 + 审计闭环）达成的基础上，让「来找茬」App 的核心业务行为
+（task_create / review_merge / contribution_score）在 **Python / Rust / Elixir 三个独立
+实现上都可执行且行为一致**（Law XIII：一个符号、一种含义、一个结果——业务语义也不例外）。
 **我只关心这个结果。**
 
 ---
@@ -176,7 +176,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 - [x] **参考实现**: `impl/python/sigma_core.py` 实现 `task_create / review_merge /
       contribution_score` 及 Law II 编码（`encode_task/encode_opinion/encode_action`），
-      自检 59/59 → 73/73。
+      自检 59/59 → 75/75。
 - [x] **审计运行时**: `tools/sigma-runtime.py` 跑完整业务 trace（提交→评审→贡献），
       逐事件输出 ΣLang obligation 日志（--json 机器可读），10/10 义务满足、退出码 0。
 - [x] **证明闭环**: `tools/sigma-prove.py` 新增 §SK 义务生成（gen_sk_obligation，
@@ -193,6 +193,22 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 > v0.14 = 「业务逻辑可执行 + 可证明」：§SK 语义从纸面定义变成参考实现、审计日志与
 > z3 证明义务，任何提交/评审/贡献行为都可逐事件复核。达成后 P3 待办清空，
 > 进入新里程碑规划（Lang-Zone 仍 DEFERRED，待 LZ 自举稳定）。
+
+### v0.15 完成定义（三端 §SK 语义执行层，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **Rust 执行层**: `impl/verifier/src/sk.rs` 实现 §SK 三操作 + Law II 编码，
+      CLI 新增 `--sk-self-check`（16/16 通过），`cargo build` 0 error / 0 warning。
+- [x] **Elixir 执行层**: `impl/elixir_rt/sigma_verify.exs` 新增 §SK 参考实现 +
+      `--sk-self-check`（16/16 通过），常规验证路径 0 warning。
+- [x] **三端行为一致**: Python `sigma_core.py` 75/75（含 §SK 16 项）== Rust 16/16 ==
+      Elixir 16/16，同一组 §SK 用例三端判定一致（Law XIII 业务语义层）。
+- [x] **不回归**: consensus 41/41、p0 109/109、sigma-prove §SK 六定律 PROVED、
+      sigma-runtime 10/10 全部保持，v0.10–v0.14 不回归。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
+
+> v0.15 = 「业务逻辑三端同尺」：§SK 语义不再只有 Python 能跑——Rust 与 Elixir
+> 用各自语言实现了同一套规则，自检用例逐一相同、结果一致；「来找茬」的业务行为
+> 在任何 ΣLang 实现里都算出同一个答案。
 
 ---
 
@@ -217,6 +233,10 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 ```sh
 python3 verify_consensus.py                    # 三方共识
 python3 verify_p0.py                           # 算法检查
+python3 impl/python/sigma_core.py              # Python §SK 参考实现自检（75/75）
+cd impl/verifier && cargo run -q -- --sk-self-check   # Rust §SK 自检（16/16）
+cd ../elixir_rt && elixir sigma_verify.exs --sk-self-check  # Elixir §SK 自检（16/16）
+cd ../..
 python3 tools/sigma-runtime.py                 # SocketKit 审计 trace（obligation 日志）
 python3 tools/sigma-prove.py corpus/proof_max.md   # 证明消解
 python3 tools/sigma-prove.py corpus/socketkit_ok.md  # §SK 六定律义务消解
