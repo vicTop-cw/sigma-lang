@@ -610,6 +610,16 @@
       sigma-prove 73 项 PROVED、三端 0 warning，v0.10–v0.81 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.83 完成定义（前端联调剧本，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **--frontend-scenario**: 前端视角纯 HTTP 联调剧本——注册→开户→发单→
+      列表→接单→提交→验收→提现→勋章→摘要（GET/POST 混合），11/11 逐项对
+      §SK.6 断言。
+- [x] **不回归**: 自检 15/15、method-test 4/4、冒烟 36/36、consensus 51/51、
+      p0 109/109、sigma-prove 73 项 PROVED、三端 0 warning，v0.10–v0.82 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

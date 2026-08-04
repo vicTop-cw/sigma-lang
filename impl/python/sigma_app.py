@@ -1087,6 +1087,67 @@ def run_method_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_frontend_scenario() -> Tuple[int, int]:
+    """--frontend-scenario (v0.83): a frontend-perspective HTTP integration
+    script — the exact call sequence a web page would make (mixed GET/POST),
+    each response asserted against the §SK.6 flow. Pure HTTP, no App calls."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(path: str, method: str = "GET") -> dict:
+        req = urllib.request.Request(base + path, method=method)
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+
+    try:
+        # 1. 前端注册（POST）+ 开户（POST）
+        r = call(f"/register?user=7&name={quote('找茬主')}", "POST")
+        check("FE register", r["profile"].get("joined") is True, f"got {r}")
+        r = call(f"/register?user=3&name={quote('找茬人')}", "POST")
+        check("FE register2", r["profile"].get("joined") is True, f"got {r}")
+        r = call("/quota?user=7&monthly=50", "POST")
+        check("FE quota", r["quota"] == [50, 50], f"got {r}")
+        # 2. 发需求（POST）→ 前端列表（GET）
+        r = call("/post?author=7&bounty=100", "POST")
+        check("FE post", r["task"] == [7, 100, 0, 0], f"got {r}")
+        tid = r["task_id"]
+        r = call("/tasks")
+        check("FE tasks list", len(r["tasks"]) == 1, f"got {r}")
+        # 3. 接单 / 提交 / 验收（POST）
+        r = call(f"/claim?task={tid}&hunter=3", "POST")
+        check("FE claim", r["task"] == [7, 100, 1, 3], f"got {r}")
+        r = call(f"/submit?task={tid}", "POST")
+        check("FE submit", r["task"] == [7, 100, 2, 3], f"got {r}")
+        r = call(f"/accept?task={tid}&caller=7", "POST")
+        check("FE accept", r["task"] == [7, 100, 3, 3], f"got {r}")
+        # 4. 提现（POST）+ 勋章（GET）
+        r = call("/withdraw?user=3&amount=100", "POST")
+        check("FE withdraw", r["points"] == [0, 0], f"got {r}")
+        r = call("/badge?user=3")
+        check("FE badge", r["badge"] == 1, f"got {r}")
+        # 5. 用户摘要（GET）
+        r = call("/me?user=3")
+        check("FE me", r["credit"] == 105, f"got {r}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     state_file = None
@@ -1117,6 +1178,10 @@ def main(argv=None):
     if "--method-test" in argv:
         passed, total = run_method_test()
         print(f"sigma_app method test (v0.82): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--frontend-scenario" in argv:
+        passed, total = run_frontend_scenario()
+        print(f"sigma_app frontend scenario (v0.83): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--auth-test" in argv:
         passed, total = run_auth_test()
