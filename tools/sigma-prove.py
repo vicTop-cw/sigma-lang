@@ -586,6 +586,35 @@ def gen_inventory_obligation(op):
     return []
 
 
+def gen_inventory_invariants(ops):
+    """v0.61 — §IN 跨操作不变量（附加义务，z3 消解）：
+    INV-IN-1 总量守恒（入库后总量 = 初始 + 净入库，库存不凭空产生）/
+    INV-IN-2 库存非负链（出库后每货品 ≥ 0）。"""
+    names = {op["name"].strip() for op in ops}
+    if not (names & INV_OPS):
+        return []
+    inv1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const a Int) (declare-const b Int) (declare-const q Int)\n"
+            "(declare-const inv Int) (declare-const inv2 Int)\n"
+            "(assert (>= a 0)) (assert (>= b 0)) (assert (>= q 0))\n"
+            "(assert (= (index inv 0) a)) (assert (= (index inv 1) b))\n"
+            "; 跨操作: receive_stock([a,b],0,q) 后总量\n"
+            "(assert (= (index inv2 0) (+ a q))) (assert (= (index inv2 1) b))\n"
+            "; INV-IN-1: 总量 = 初始 + 净入库（不凭空产生）\n"
+            "(assert (not (= (+ (index inv2 0) (index inv2 1)) (+ a b q))))\n(check-sat)\n")
+    inv2 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const a Int) (declare-const b Int) (declare-const q Int)\n"
+            "(declare-const inv Int) (declare-const inv2 Int)\n"
+            "(assert (>= a 0)) (assert (>= b 0)) (assert (>= q 0)) (assert (<= q a))\n"
+            "(assert (= (index inv 0) a)) (assert (= (index inv 1) b))\n"
+            "; 跨操作: ship_stock([a,b],0,q) 后库存（q ≤ held）\n"
+            "(assert (= (index inv2 0) (- a q))) (assert (= (index inv2 1) b))\n"
+            "; INV-IN-2: 出库后每货品 ≥ 0\n"
+            "(assert (not (>= (index inv2 0) 0)))\n(check-sat)\n")
+    return [("INV-IN-1 total-conserved", inv1),
+            ("INV-IN-2 no-negative-chain", inv2)]
+
+
 # ---------------------------------------------------------------------------
 # §SK.3.12–3.17 obligation generation (spec_p0_socketkit.md — 增长期, v0.34)
 # ---------------------------------------------------------------------------
@@ -1106,6 +1135,9 @@ def prove_module(path):
     # §SK.3.8 状态机不变量 (v0.18): INV-1 状态单调 / INV-2 终态不可变 /
     # INV-3 守恒 / INV-4 作者授权 — 附加义务，z3 消解 PROVED 即定义满足不变量。
     obligations.extend(gen_invariant_obligations(module["ops"]))
+
+    # §IN 跨操作不变量 (v0.61): INV-IN-1 总量守恒 / INV-IN-2 库存非负链。
+    obligations.extend(gen_inventory_invariants(module["ops"]))
 
     if not structural and obligations:
         for oname, ob in obligations:

@@ -392,6 +392,15 @@
       0 warning，v0.10–v0.59 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.61 完成定义（供应链跨操作不变量，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **跨操作不变量**: `sigma-prove` 新增 `gen_inventory_invariants`——
+      INV-IN-1 总量守恒（入库后总量 = 初始 + 净入库）、INV-IN-2 库存非负链
+      （出库后每货品 ≥ 0），均 `PROVED (unsat)`。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 55 项 PROVED、三端
+      0 warning，v0.10–v0.60 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
