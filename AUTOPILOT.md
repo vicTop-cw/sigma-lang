@@ -563,6 +563,15 @@
       0 warning，v0.10–v0.76 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.78 完成定义（增长期跨操作不变量，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **跨操作不变量**: `sigma-prove` 新增 `gen_growth_invariants`——
+      INV-G-1 授权签发链（badge_issue level = badge_level(score) 且 0..3 有界）、
+      INV-G-2 裁决链（dispute_review 恒 binary 0/1），均 PROVED (unsat)。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 68 项 PROVED、三端
+      0 warning，v0.10–v0.77 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

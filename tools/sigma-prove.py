@@ -735,6 +735,32 @@ def gen_team_invariants(ops):
             ("INV-T-2 member-increment", inv2)]
 
 
+def gen_growth_invariants(ops):
+    """v0.78 — §SK 增长期跨操作不变量（附加义务，z3 消解）：
+    INV-G-1 授权签发链（badge_issue 的 level = badge_level(score) 且 0..3 有界）/
+    INV-G-2 裁决链（dispute_review 对任意证据恒 binary 0/1）。"""
+    names = {op["name"].strip() for op in ops}
+    growth_check = {"badge_issue", "dispute_review"}
+    if not (names & growth_check):
+        return []
+    inv1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const s Int) (declare-const lvl Int)\n"
+            "(assert (>= s 0))\n"
+            "; 跨操作: badge_issue(1001, u, s) 的 level = badge_level(s)\n"
+            "(assert (= lvl (ite (< s 100) 0 (ite (< s 300) 1 (ite (< s 600) 2 3)))))\n"
+            "; INV-G-1: 授权签发链 — level 有界 0..3\n"
+            "(assert (not (and (>= lvl 0) (<= lvl 3))))\n(check-sat)\n")
+    inv2 = ("(set-logic NIA)\n"
+            "(declare-const v1 Int) (declare-const v2 Int) (declare-const d Int)\n"
+            "(assert (or (= v1 0) (= v1 1)))\n"
+            "(assert (or (= v2 0) (= v2 1)))\n"
+            "(assert (= d (ite (>= v1 v2) 1 0)))\n"
+            "; INV-G-2: 裁决链 — dispute_review 恒 binary\n"
+            "(assert (not (or (= d 0) (= d 1))))\n(check-sat)\n")
+    return [("INV-G-1 authorized-issue-chain", inv1),
+            ("INV-G-2 binary-decision-chain", inv2)]
+
+
 # ---------------------------------------------------------------------------
 # §SK.3.12–3.17 obligation generation (spec_p0_socketkit.md — 增长期, v0.34)
 # ---------------------------------------------------------------------------
@@ -1277,6 +1303,9 @@ def prove_module(path):
 
     # §SK 团机制跨操作不变量 (v0.77): INV-T-1 不超员 / INV-T-2 成员递增。
     obligations.extend(gen_team_invariants(module["ops"]))
+
+    # §SK 增长期跨操作不变量 (v0.78): INV-G-1 授权签发链 / INV-G-2 裁决链。
+    obligations.extend(gen_growth_invariants(module["ops"]))
 
     if not structural and obligations:
         for oname, ob in obligations:

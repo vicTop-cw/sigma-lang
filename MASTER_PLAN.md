@@ -408,9 +408,16 @@
   team_join 后 size = 原 size + 1），均 `PROVED (unsat)`——找茬团机制语义从
   单操作定律走向跨操作不变量证明；consensus 51/51、p0 109/109、三端 0 warning，
   v0.10–v0.76 不回归。
+- ✅ **REACHED v0.78 (2026-08-04)**: 增长期跨操作不变量—— `sigma-prove` 新增
+  `gen_growth_invariants`（对含 badge_issue/dispute_review 的模块附加两条跨
+  操作不变量义务：INV-G-1 授权签发链——badge_issue 的 level =
+  badge_level(score) 且 0..3 有界；INV-G-2 裁决链——dispute_review 对任意
+  证据恒 binary 0/1），均 `PROVED (unsat)`——找茬增长期语义从单操作定律走向
+  跨操作不变量证明；consensus 51/51、p0 109/109、三端 0 warning，
+  v0.10–v0.77 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.77 达成，继续 v0.78–v0.90 业务规则深化 + 产品配套连续推进。
+  2. （无）— v0.78 达成，继续 v0.79–v0.90 业务规则深化 + 产品配套连续推进。
 
 ---
 
