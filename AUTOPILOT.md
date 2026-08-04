@@ -652,6 +652,16 @@
       0 warning、sigma-accept 10/10，v0.10–v0.85 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.87 完成定义（CI 全量回归报告，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **--report**: `sigma-accept.py` 新增 `--report FILE`——十道门禁结果写成
+      JSON 报告（spec/date/gates/passed/total/all_ok）。
+- [x] **CI artifact**: workflow 跑 `--report acceptance.json` +
+      upload-artifact——每次提交的回归结果可追溯。
+- [x] **不回归**: --report 验证 10/10、consensus 51/51、p0 109/109、sigma-prove
+      73 项 PROVED、三端 0 warning，v0.10–v0.86 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

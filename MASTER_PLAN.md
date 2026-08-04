@@ -472,9 +472,15 @@
   RFC 记录：「找茬服务化（v0.71–v0.75）+ 业务规则深化（v0.76–v0.80）+
   产品配套（v0.81–v0.85）」三阶段已闭环；consensus 51/51、p0 109/109，
   v0.10–v0.85 不回归。
+- ✅ **REACHED v0.87 (2026-08-04)**: CI 全量回归报告—— `sigma-accept.py`
+  新增 `--report FILE`（十道门禁结果写成 JSON 报告：spec/date/gates（每道
+  name/expect/ok/detail）/passed/total/all_ok），`.github/workflows/ci.yml`
+  CI 跑 `--report acceptance.json` 并用 upload-artifact 保存回归报告——每次
+  提交的全量回归结果可追溯；`--report` 验证 10/10 全绿、报告 JSON 正确；
+  consensus 51/51、p0 109/109，v0.10–v0.86 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.86 达成，继续 v0.87–v0.90 收官工程化连续推进。
+  2. （无）— v0.87 达成，继续 v0.88–v0.90 收官工程化连续推进。
 
 ---
 

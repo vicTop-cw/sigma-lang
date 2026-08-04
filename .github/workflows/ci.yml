@@ -29,5 +29,12 @@ jobs:
 
       # v0.56 — 九道门禁一键验收：consensus / p0 / 三端自检与编译 / 三域审计 /
       # 证明消解 / 找茬冒烟，一条命令在 CI 上全绿才算通过。
+      # v0.87 — --report 输出全量回归报告（JSON），作为 CI artifact 保存。
       - name: ΣLang one-command acceptance (sigma-accept.py)
-        run: python3 tools/sigma-accept.py
+        run: python3 tools/sigma-accept.py --report acceptance.json
+
+      - name: Upload acceptance report (v0.87)
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-report
+          path: acceptance.json
