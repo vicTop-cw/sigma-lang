@@ -381,6 +381,17 @@
       0 warning，v0.10–v0.58 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.60 完成定义（协议版本化，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **版本升级**: spec 0.3.0 → 0.4.0（README Spec Version + Citation 同步）；
+      v0.51–v0.60 的语义面扩展（51 共识模块 / App 产品层五件套 / CI / 扩容 /
+      双语文档 / 架构全景）满足 0.4.0。
+- [x] **RFC 记录**: 「找茬产品落地（v0.51–v0.55）+ 协议工程化（v0.56–v0.60）」
+      两阶段已闭环并记录。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 53 项 PROVED、三端
+      0 warning，v0.10–v0.59 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
