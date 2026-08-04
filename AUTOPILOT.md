@@ -554,6 +554,15 @@
       0 warning，v0.10–v0.75 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.77 完成定义（团机制跨操作不变量，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **跨操作不变量**: `sigma-prove` 新增 `gen_team_invariants`——
+      INV-T-1 不超员（team_join 链 size ≤ capacity）、INV-T-2 成员递增
+      （join 后 size = 原 size + 1），均 PROVED (unsat)。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 66 项 PROVED、三端
+      0 warning，v0.10–v0.76 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

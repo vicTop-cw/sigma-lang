@@ -704,6 +704,37 @@ def gen_quota_invariants(ops):
             ("INV-Q-2 reset-restores", inv2)]
 
 
+def gen_team_invariants(ops):
+    """v0.77 — §SK 团机制跨操作不变量（附加义务，z3 消解）：
+    INV-T-1 不超员（team_join 链中 size 永不 > capacity）/
+    INV-T-2 成员递增（team_join 后 size = 原 size + 1）。"""
+    names = {op["name"].strip() for op in ops}
+    team_ops = {"team_create", "team_join"}
+    if not (names & team_ops):
+        return []
+    inv1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const o Int) (declare-const k Int) (declare-const s Int)\n"
+            "(declare-const c Int) (declare-const s2 Int)\n"
+            "(assert (>= o 0)) (assert (>= k 0)) (assert (>= s 1)) (assert (>= c 1))\n"
+            "(assert (<= s c))\n"
+            "; 跨操作: team_join([o,k,s,c], m) 后（s < c 才允许加入）\n"
+            "(assert (< s c))\n"
+            "(assert (= s2 (+ s 1)))\n"
+            "; INV-T-1: 不超员 — join 后 size ≤ capacity\n"
+            "(assert (not (<= s2 c)))\n(check-sat)\n")
+    inv2 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const o Int) (declare-const k Int) (declare-const s Int)\n"
+            "(declare-const c Int) (declare-const s2 Int)\n"
+            "(assert (>= o 0)) (assert (>= k 0)) (assert (>= s 1)) (assert (>= c 1))\n"
+            "(assert (< s c))\n"
+            "; 跨操作: team_join 后 size\n"
+            "(assert (= s2 (+ s 1)))\n"
+            "; INV-T-2: 成员递增 — join 后 size = 原 size + 1\n"
+            "(assert (not (= s2 (+ s 1))))\n(check-sat)\n")
+    return [("INV-T-1 no-over-capacity", inv1),
+            ("INV-T-2 member-increment", inv2)]
+
+
 # ---------------------------------------------------------------------------
 # §SK.3.12–3.17 obligation generation (spec_p0_socketkit.md — 增长期, v0.34)
 # ---------------------------------------------------------------------------
@@ -1243,6 +1274,9 @@ def prove_module(path):
 
     # §SK 额度制跨操作不变量 (v0.76): INV-Q-1 不超用 / INV-Q-2 重置恢复。
     obligations.extend(gen_quota_invariants(module["ops"]))
+
+    # §SK 团机制跨操作不变量 (v0.77): INV-T-1 不超员 / INV-T-2 成员递增。
+    obligations.extend(gen_team_invariants(module["ops"]))
 
     if not structural and obligations:
         for oname, ob in obligations:

@@ -402,9 +402,15 @@
   INV-Q-2 重置恢复——quota_reset 后 remaining 恢复 monthly），均
   `PROVED (unsat)`——找茬额度制语义从单操作定律走向跨操作不变量证明；
   consensus 51/51、p0 109/109、三端 0 warning，v0.10–v0.75 不回归。
+- ✅ **REACHED v0.77 (2026-08-04)**: 团机制跨操作不变量—— `sigma-prove` 新增
+  `gen_team_invariants`（对含 team 操作的模块附加两条跨操作不变量义务：
+  INV-T-1 不超员——team_join 链中 size 永不 > capacity；INV-T-2 成员递增——
+  team_join 后 size = 原 size + 1），均 `PROVED (unsat)`——找茬团机制语义从
+  单操作定律走向跨操作不变量证明；consensus 51/51、p0 109/109、三端 0 warning，
+  v0.10–v0.76 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.76 达成，继续 v0.77–v0.90 业务规则深化 + 产品配套连续推进。
+  2. （无）— v0.77 达成，继续 v0.78–v0.90 业务规则深化 + 产品配套连续推进。
 
 ---
 
