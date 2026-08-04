@@ -374,9 +374,15 @@
   AuthRequired；未启用时全部放行），`--auth-test`（4/4：无 token→401 /
   错 token→401 / 对 token→200 / 业务可用）；自检 15/15、冒烟 36/36、
   scenario 16/16 不回归；consensus 51/51、p0 109/109，v0.10–v0.70 不回归。
+- ✅ **REACHED v0.72 (2026-08-04)**: 找茬 App 状态原子写—— `sigma_app.py`
+  `_save_state` 改为原子写（tmp 文件 + os.replace：崩溃中途永不损坏状态/审计
+  文件），并改为 classmethod 统一入口；新增 `--atomic-test`（4/4：文件始终
+  有效 JSON / 任务持久化完整 / 无 .tmp 残留 / 重建后业务流继续）；自检 15/15、
+  冒烟 36/36、persist-test 10/10 不回归；consensus 51/51、p0 109/109，
+  v0.10–v0.71 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.71 达成，继续 v0.72–v0.90 找茬服务化 + 业务规则深化 + 产品配套连续推进。
+  2. （无）— v0.72 达成，继续 v0.73–v0.90 找茬服务化 + 业务规则深化 + 产品配套连续推进。
 
 ---
 

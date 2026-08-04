@@ -349,15 +349,22 @@ class _Handler(BaseHTTPRequestHandler):
                 return unquote(part.split("=", 1)[1])
         return None
 
-    def _save_state(self):
+    @classmethod
+    def _save_state(cls):
         """v0.51 — persist the whole App state after every request (--state).
-        v0.55 — also export the ΣLang audit trail (--audit-log)."""
-        if _Handler._state_file:
-            with open(_Handler._state_file, "w", encoding="utf-8") as f:
-                json.dump(_Handler.app.to_state(), f, ensure_ascii=False)
-        if _Handler._audit_file:
-            with open(_Handler._audit_file, "w", encoding="utf-8") as f:
-                json.dump(_Handler.app.audit_trail(), f, ensure_ascii=False, indent=2)
+        v0.55 — also export the ΣLang audit trail (--audit-log).
+        v0.72 — atomic writes: tmp file + os.replace, so a crash mid-write
+        never corrupts the state/audit file."""
+        if cls._state_file:
+            tmp = cls._state_file + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(cls.app.to_state(), f, ensure_ascii=False)
+            os.replace(tmp, cls._state_file)
+        if cls._audit_file:
+            tmp = cls._audit_file + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(cls.app.audit_trail(), f, ensure_ascii=False, indent=2)
+            os.replace(tmp, cls._audit_file)
 
     def do_GET(self):
         # v0.71 — 鉴权门禁：--auth-token 启用时未带正确 token → 401
@@ -831,6 +838,50 @@ def run_auth_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_atomic_test() -> Tuple[int, int]:
+    """--atomic-test (v0.72): atomic state writes — tmp + os.replace, so the
+    state file is always valid JSON, no .tmp residue remains, and a rebuilt
+    App continues the business flow."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    import tempfile
+    fd, path = tempfile.mkstemp(suffix=".json")
+    os.close(fd)
+    try:
+        app = MVPApp()
+        app.open_quota(7, 50)
+        tid, _, _, _ = app.post_task(7, 100)
+        app.claim_task(tid, 3)
+        _Handler.app = app
+        _Handler._state_file = path
+        for _ in range(2):  # 连续两次请求后的持久化（原子写路径）
+            _Handler._save_state()
+        with open(path, encoding="utf-8") as f:
+            state = json.load(f)
+        check("ATOMIC file valid json", state["next_task"] == 1, f"got {state}")
+        check("ATOMIC tasks persisted", len(state["tasks"]) == 1,
+              f"got {state['tasks']}")
+        check("ATOMIC no tmp residue", not os.path.exists(path + ".tmp"))
+        app2 = MVPApp.from_state(state)
+        rebuilt = app2.submit_work(tid)
+        check("ATOMIC rebuild continues", rebuilt == [7, 100, 2, 3],
+              f"got {rebuilt}")
+    finally:
+        _Handler._state_file = None
+        for p in (path, path + ".tmp"):
+            if os.path.exists(p):
+                os.remove(p)
+    return passed, total
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     state_file = None
@@ -845,6 +896,10 @@ def main(argv=None):
     if "--auth-test" in argv:
         passed, total = run_auth_test()
         print(f"sigma_app auth test (v0.71): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--atomic-test" in argv:
+        passed, total = run_atomic_test()
+        print(f"sigma_app atomic test (v0.72): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--audit-test" in argv:
         passed, total = run_audit_test()

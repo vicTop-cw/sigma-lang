@@ -503,6 +503,17 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.72 完成定义（找茬 App 状态原子写，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **原子写**: `_save_state` 改为 tmp 文件 + os.replace（崩溃中途永不损坏
+      状态/审计文件），并改为 classmethod 统一入口。
+- [x] **--atomic-test**: 4/4（文件始终有效 JSON / 任务持久化完整 / 无 .tmp
+      残留 / 重建后业务流继续）。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、persist-test 10/10、consensus 51/51、
+      p0 109/109、sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.71 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
