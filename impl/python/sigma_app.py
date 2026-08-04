@@ -332,6 +332,15 @@ class _Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _html(self, html: str, code: int = 200):
+        """v0.95 — serve an HTML page (run-status panel)."""
+        body = html.encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def _get(self, name: str, default: Optional[int] = None) -> Optional[int]:
         raw = self.path.split("?", 1)[1] if "?" in self.path else ""
         for part in raw.split("&"):
@@ -406,6 +415,35 @@ class _Handler(BaseHTTPRequestHandler):
                         "scenario": "16/16",
                     },
                 })
+            if path == "/panel":
+                # v0.95 — 运行状态面板：业务摘要 + 门禁摘要（HTML 页）
+                by_state = {0: 0, 1: 0, 2: 0, 3: 0}
+                total_bounty = 0
+                for t in app.tasks.values():
+                    by_state[t[2]] = by_state.get(t[2], 0) + 1
+                    total_bounty += t[1]
+                return self._html(f"""<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="utf-8"><title>找茬运行面板</title>
+<style>body{{font-family:sans-serif;max-width:720px;margin:40px auto;padding:0 16px;color:#263238}}
+h1{{color:#1a237e}} table{{border-collapse:collapse;width:100%}}
+td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
+.card{{background:#fff;border-radius:8px;padding:16px;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.12)}}</style>
+</head><body><h1>🔍 找茬运行面板（v0.95）</h1>
+<div class="card"><h3>服务</h3><table>
+<tr><td>app</td><td>找茬 MVP 参考实现</td></tr>
+<tr><td>状态</td><td>ok</td></tr>
+<tr><td>用户数</td><td>{len(app.users)}</td></tr>
+<tr><td>任务数</td><td>{len(app.tasks)}</td></tr></table></div>
+<div class="card"><h3>业务摘要</h3><table>
+<tr><th>状态</th><th>待接单</th><th>进行中</th><th>待验收</th><th>已完成</th></tr>
+<tr><td>数量</td><td>{by_state[0]}</td><td>{by_state[1]}</td><td>{by_state[2]}</td><td>{by_state[3]}</td></tr>
+<tr><td>赏金总额</td><td colspan="4">{total_bounty}</td></tr></table></div>
+<div class="card"><h3>门禁摘要</h3><table>
+<tr><td>consensus</td><td>51/51</td></tr>
+<tr><td>p0</td><td>109/109</td></tr>
+<tr><td>prove</td><td>73 PROVED</td></tr>
+<tr><td>scenario</td><td>16/16</td></tr></table></div>
+</body></html>""")
             if path == "/tasks":
                 status = self._get("status")
                 return self._json({"tasks": app.tasks_list(status)})
@@ -1217,6 +1255,48 @@ def run_web_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_panel_test() -> Tuple[int, int]:
+    """--panel-test (v0.95): GET /panel — the run-status HTML page carries the
+    live business summary (users / tasks / bounty) and the gate summary."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        call(f"/register?user=7&name={quote('找茬主')}")
+        call("/quota?user=7&monthly=50")
+        call("/post?author=7&bounty=100")
+        with urllib.request.urlopen(base + "/panel", timeout=10) as r:
+            html = r.read().decode("utf-8")
+        check("PANEL serves", r.status == 200 and "找茬运行面板" in html,
+              f"status {r.status}")
+        check("PANEL live users", "用户数" in html and ">1<" in html, "")
+        check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
+        check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
+        check("PANEL gates", "51/51" in html and "73 PROVED" in html, "")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
 def run_launch(argv=None) -> int:
     """--launch (v0.94): one-command go-live — startup self-check (§SK.6),
     then serve the backend API (--port, default 8080) and the web/ frontend
@@ -1357,6 +1437,10 @@ def main(argv=None):
     if "--launch-test" in argv:
         passed, total = run_launch_test()
         print(f"sigma_app launch test (v0.94): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--panel-test" in argv:
+        passed, total = run_panel_test()
+        print(f"sigma_app panel test (v0.95): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--launch" in argv:
         return run_launch(argv)
