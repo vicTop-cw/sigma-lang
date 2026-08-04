@@ -670,6 +670,15 @@
       0 warning、sigma-accept 10/10，v0.10–v0.87 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.89 完成定义（README 收官总览，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **收官总览**: README Status 章节更新共识数字（41/41 → 51/51）并新增
+      「v0.89 收官总览」段——spec 0.5.0 / 三域 / 51/51 / 109/109 / 73 PROVED /
+      47/47 / 双端 36/36 / 十道门禁 / 找茬产品落地，首页一张图看全貌。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 73 项 PROVED、三端
+      0 warning、sigma-accept 10/10，v0.10–v0.88 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

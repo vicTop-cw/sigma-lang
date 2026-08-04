@@ -485,9 +485,17 @@
   （Conventional Commits）、分支/PR 流程（CI 自动跑门禁 + 回归报告 artifact）、
   常见问题（consensus 不过/E-02/证明 DISPROVED/从哪开始）——贡献者的上手
   路径一张文档落地；consensus 51/51、p0 109/109，v0.10–v0.87 不回归。
+- ✅ **REACHED v0.89 (2026-08-04)**: README 收官总览—— README Status 章节
+  更新共识数字（41/41 → **51/51**）并新增「v0.89 收官总览」段：协议 spec
+  0.5.0、三域（§SK/§PF/§IN）、consensus 51/51、p0 109/109、sigma-prove
+  73 项 PROVED、sigma-runtime 59/59 + 47/47（--domains 十二项不变量复核）、
+  双端 HTTP 冒烟 36/36 逐项一致、sigma-accept 十道门禁 10/10（含 CI 回归报告
+  artifact）、三端 0 warning、找茬产品落地（服务化十件套 + 文档 + checklist +
+  前端剧本）——README 首页一张图看到 v0.89 全貌；consensus 51/51、p0 109/109，
+  v0.10–v0.88 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.88 达成，继续 v0.89–v0.90 收官。
+  2. （无）— v0.89 达成，进入 v0.90 里程碑收官。
 
 ---
 
