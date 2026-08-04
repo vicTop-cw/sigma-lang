@@ -79,6 +79,53 @@ python3 tools/sigma-runtime.py --domains       # 35/35
 
 ---
 
+## Architecture / 架构与数据流（v0.59）
+
+ΣLang 的语义如何从规范一路走到共识门禁？全景如下：
+
+```text
+  spec/ 规范（英文为准 + spec/zh 中文参考）
+   │  定义操作：指纹 / 签名 / 定律 / 测试（真实函数调用）
+   ▼
+  corpus/ 语料（51 个模块：ok 期望 PASS，break 期望 FAIL）
+   │  三端验证器独立解析 + 求值（eval_expr 真实调用 §SK/§PF/§IN）
+   ├──▶ Python verify_consensus.py ─┐
+   ├──▶ Rust  impl/verifier        ├──▶ Law XIII 共识门禁（51/51 全绿）
+   └──▶ Elixir impl/elixir_rt      ─┘
+   │
+   ├──▶ tools/sigma-prove.py     z3 义务消解（53 项 PROVED）
+   ├──▶ tools/sigma-runtime.py   审计运行时（trace 59/59 + --domains 35/35）
+   ├──▶ impl/python/sigma_app.py 找茬参考后端（自检 15/15 + 冒烟 36/36 + 持久化/审计）
+   └──▶ tools/sigma-accept.py    一键验收（9 道门禁）→ GitHub Actions CI
+```
+
+**工具链职责**
+
+| 工具 | 职责 | 结果 |
+|------|------|------|
+| `verify_consensus.py` | 三端验证器对 51 个语料模块独立判定（Python/Rust/Elixir/Expected） | 51/51 一致 |
+| `verify_p0.py` | 算法正确性（含 §SK 语义检查） | 109/109 |
+| `tools/sigma-prove.py` | 把语料定律编码为 z3 义务并消解 | 53 项 PROVED |
+| `tools/sigma-runtime.py` | 审计运行时：逐事件复核定律（trace / --story / --growth / --inventory / --domains） | 59/59 + 35/35 |
+| `impl/python/sigma_app.py` | 找茬 MVP 参考后端：业务全委托 §SK，App 只管状态 | 自检 15/15 + 冒烟 36/36 |
+| `tools/sigma-accept.py` | 九道门禁一键验收（本地与 CI 同一条命令） | 9/9 |
+| `.github/workflows/ci.yml` | push/PR 自动验收，全绿才算过 | CI 门禁 |
+
+**一条语义的旅程**（以 §SK `task_create` 为例）：
+
+1. `spec/spec_p0_socketkit.md` 定义指纹 `0xF001`、签名、定律与测试；
+2. `corpus/socketkit_taskflow_ok.md` 把它写成**真实函数调用**测试；
+3. Python / Rust / Elixir 三个独立验证器各自求值，结果必须逐项一致（Law XIII）；
+4. `tools/sigma-prove.py` 把定律编码为 z3 义务，证明不可违反（P-01 结构 + 义务 PROVED）；
+5. `tools/sigma-runtime.py` 在业务故事线里审计它的行为（input/output/定律复核）；
+6. `impl/python/sigma_app.py` 的 `post_task` 直接委托它，并记录审计事件；
+7. 任何改动后 `tools/sigma-accept.py` 九道门禁全绿，CI 放行。
+
+> 整条链路的含义：**业务规则先以 ΣLang 语义存在并被证明，然后才是任何语言
+> 的实现**——实现只是语义的投影。
+
+---
+
 ## Status / 项目状态
 
 | Module / 模块 | Tests / 测试 | Status / 状态 |

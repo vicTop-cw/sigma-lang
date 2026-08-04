@@ -372,6 +372,15 @@
       0 warning，v0.10–v0.57 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.59 完成定义（README 架构数据流全景，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **全景章节**: README 新增「Architecture / 架构与数据流」——数据流全景图
+      （spec → corpus 51 模块 → 三端验证器 → Law XIII 共识门禁 → 证明/审计/
+      找茬后端 → 一键验收 → CI）、工具链职责表、task_create 七步旅程说明。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 53 项 PROVED、三端
+      0 warning，v0.10–v0.58 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
