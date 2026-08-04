@@ -673,6 +673,37 @@ def gen_socketkit_invariants(ops):
             ("INV-SK-2 no-over-withdraw", inv2)]
 
 
+def gen_quota_invariants(ops):
+    """v0.76 — §SK 额度制跨操作不变量（附加义务，z3 消解）：
+    INV-Q-1 不超用（quota_use 链中 remaining 永不 < 0，累计使用 ≤ monthly）/
+    INV-Q-2 重置恢复（quota_reset 后 remaining 恢复 monthly）。"""
+    names = {op["name"].strip() for op in ops}
+    quota_ops = {"quota_new", "quota_use", "quota_reset"}
+    if not (names & quota_ops):
+        return []
+    inv1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const m Int) (declare-const a1 Int) (declare-const a2 Int)\n"
+            "(declare-const q Int) (declare-const q2 Int)\n"
+            "(assert (>= m 0)) (assert (>= a1 0)) (assert (>= a2 0))\n"
+            "(assert (<= a1 m)) (assert (<= a2 (- m a1)))\n"
+            "; 跨操作: quota_use(quota_use([m,m], a1), a2) 后 remaining\n"
+            "(assert (= (index q 0) m)) (assert (= (index q 1) (- m a1)))\n"
+            "(assert (= (index q2 0) m)) (assert (= (index q2 1) (- (- m a1) a2)))\n"
+            "; INV-Q-1: 不超用 — remaining ≥ 0（累计使用 ≤ monthly）\n"
+            "(assert (not (>= (index q2 1) 0)))\n(check-sat)\n")
+    inv2 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const m Int) (declare-const a Int)\n"
+            "(declare-const q Int) (declare-const q2 Int)\n"
+            "(assert (>= m 0)) (assert (>= a 0)) (assert (<= a m))\n"
+            "; 跨操作: quota_reset(quota_use([m,m], a)) 后\n"
+            "(assert (= (index q 0) m)) (assert (= (index q 1) (- m a)))\n"
+            "(assert (= (index q2 0) m)) (assert (= (index q2 1) m))\n"
+            "; INV-Q-2: 重置恢复 remaining = monthly\n"
+            "(assert (not (= (index q2 1) m)))\n(check-sat)\n")
+    return [("INV-Q-1 no-over-use", inv1),
+            ("INV-Q-2 reset-restores", inv2)]
+
+
 # ---------------------------------------------------------------------------
 # §SK.3.12–3.17 obligation generation (spec_p0_socketkit.md — 增长期, v0.34)
 # ---------------------------------------------------------------------------
@@ -1209,6 +1240,9 @@ def prove_module(path):
 
     # §SK 跨操作不变量 (v0.63): INV-SK-1 赏金守恒 / INV-SK-2 不超提。
     obligations.extend(gen_socketkit_invariants(module["ops"]))
+
+    # §SK 额度制跨操作不变量 (v0.76): INV-Q-1 不超用 / INV-Q-2 重置恢复。
+    obligations.extend(gen_quota_invariants(module["ops"]))
 
     if not structural and obligations:
         for oname, ob in obligations:

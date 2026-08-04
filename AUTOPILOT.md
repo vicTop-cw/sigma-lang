@@ -545,6 +545,15 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.76 完成定义（额度制跨操作不变量，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **跨操作不变量**: `sigma-prove` 新增 `gen_quota_invariants`——
+      INV-Q-1 不超用（quota_use 链 remaining ≥ 0，累计使用 ≤ monthly）、
+      INV-Q-2 重置恢复（quota_reset 后 remaining = monthly），均 PROVED (unsat)。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 64 项 PROVED、三端
+      0 warning，v0.10–v0.75 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

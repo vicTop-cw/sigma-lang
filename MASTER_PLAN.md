@@ -396,9 +396,15 @@
   可跳过），`--startup-test`（3/3：门禁通过 / 失败拒绝（monkeypatch 模拟）/
   通过放行）；自检 15/15、冒烟 36/36、health-test 4/4 不回归；consensus 51/51、
   p0 109/109，v0.10–v0.74 不回归。
+- ✅ **REACHED v0.76 (2026-08-04)**: 额度制跨操作不变量—— `sigma-prove` 新增
+  `gen_quota_invariants`（对含 quota 操作的模块附加两条跨操作不变量义务：
+  INV-Q-1 不超用——quota_use 链中 remaining 永不 < 0，累计使用 ≤ monthly；
+  INV-Q-2 重置恢复——quota_reset 后 remaining 恢复 monthly），均
+  `PROVED (unsat)`——找茬额度制语义从单操作定律走向跨操作不变量证明；
+  consensus 51/51、p0 109/109、三端 0 warning，v0.10–v0.75 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.75 达成，继续 v0.76–v0.90 业务规则深化 + 产品配套连续推进。
+  2. （无）— v0.76 达成，继续 v0.77–v0.90 业务规则深化 + 产品配套连续推进。
 
 ---
 
