@@ -572,6 +572,16 @@
       0 warning，v0.10–v0.77 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.79 完成定义（三域 story 不变量段扩展，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **不变量段扩展**: `run_invariant_checks` 新增三条链——INV-Q-1/2（额度链
+      不超用与重置恢复）、INV-T-1/2（团链不超员与成员递增）、INV-G-1/2（增长期
+      授权签发与裁决二元）。
+- [x] **--domains 扩展**: 41/41 → 47/47（不变量复核从 6 项扩到 12 项）。
+- [x] **不回归**: trace 59/59、--growth 11/11、consensus 51/51、p0 109/109、
+      sigma-prove 68 项 PROVED、三端 0 warning，v0.10–v0.78 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

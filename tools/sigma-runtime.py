@@ -788,6 +788,45 @@ def run_invariant_checks(core):
          "ok": inv2[0] >= 0 and inv2[1] >= 0, "note": f"inv={inv2}"},
     ])
 
+    # §SK 额度链 (v0.79, INV-Q-1 / INV-Q-2)
+    q = core.quota_new(50)
+    q1 = core.quota_use(q, 20)
+    q2 = core.quota_use(q1, 10)
+    record("INV-Q-1", "invariant", ["quota_new(50)→use(20)→use(10)"], q2, [
+        {"law": "不超用 — quota_use 链中 remaining ≥ 0（累计使用 ≤ monthly）",
+         "ok": q2[1] >= 0, "note": f"quota={q2}"},
+    ])
+    qr = core.quota_reset(q1)
+    record("INV-Q-2", "invariant", ["quota_reset(use(20))"], qr, [
+        {"law": "重置恢复 — quota_reset 后 remaining = monthly",
+         "ok": qr == [50, 50], "note": f"quota={qr}"},
+    ])
+
+    # §SK 团链 (v0.79, INV-T-1 / INV-T-2)
+    team = core.team_create(7, 0, 3)
+    t1 = core.team_join(team, 5)
+    record("INV-T-1", "invariant", ["team_create(7,0,3)→join(5)"], t1, [
+        {"law": "不超员 — team_join 链 size ≤ capacity",
+         "ok": t1[2] <= t1[3], "note": f"team={t1}"},
+    ])
+    record("INV-T-2", "invariant", ["join 前后 size"], t1, [
+        {"law": "成员递增 — join 后 size = 原 size + 1",
+         "ok": t1[2] == team[2] + 1, "note": f"team={t1}"},
+    ])
+
+    # §SK 增长期链 (v0.79, INV-G-1 / INV-G-2)
+    badge = core.badge_issue(1001, 3, 105)
+    record("INV-G-1", "invariant", ["badge_issue(1001,3,105)"], badge, [
+        {"law": "授权签发链 — level = badge_level(score) 且 0..3 有界",
+         "ok": badge[2] == core.badge_level(105) and 0 <= badge[2] <= 3,
+         "note": f"badge={badge}"},
+    ])
+    decision = core.dispute_review([[1, 1, 3], [2, 1, 2]])
+    record("INV-G-2", "invariant", ["dispute_review([[1,1,3],[2,1,2]])"], decision, [
+        {"law": "裁决链 — dispute_review 恒 binary 0/1",
+         "ok": decision in (0, 1), "note": f"decision={decision}"},
+    ])
+
     return events
 
 
