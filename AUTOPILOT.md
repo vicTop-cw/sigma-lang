@@ -410,6 +410,17 @@
       0 warning，v0.10–v0.61 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.63 完成定义（找茬跨操作不变量，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **跨操作不变量**: `sigma-prove` 新增 `gen_socketkit_invariants`——
+      INV-SK-1 赏金守恒（hold→release 后 escrow+available 恒等）、INV-SK-2
+      不超提（withdraw 后 available ≥ 0），均 `PROVED (unsat)`。
+- [x] **has_sk 修复**: 五大制度操作（SK_SYS_OPS）纳入 has_sk 检查，
+      socketkit_quota/points 模块不再被 skip（points 单操作义务也全部 PROVED）。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 59 项 PROVED、三端
+      0 warning，v0.10–v0.62 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

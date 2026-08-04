@@ -644,12 +644,47 @@ def gen_portfolio_invariants(ops):
             ("INV-PF-2 shares-conserved", inv2)]
 
 
+def gen_socketkit_invariants(ops):
+    """v0.63 — §SK 跨操作不变量（附加义务，z3 消解）：
+    INV-SK-1 赏金守恒（hold→release 后 escrow+available 恒等，赏金不凭空增减）/
+    INV-SK-2 不超提（withdraw 后 available ≥ 0，available 不出现负）。"""
+    names = {op["name"].strip() for op in ops}
+    points_ops = {"points_new", "points_hold", "points_release", "points_withdraw"}
+    if not (names & points_ops):
+        return []
+    inv1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const b Int) (declare-const p Int) (declare-const p2 Int)\n"
+            "(assert (>= b 0))\n"
+            "(assert (= (index p 0) 0)) (assert (= (index p 1) 0))\n"
+            "; 跨操作: hold(b) 后 → release(b) 后（托管→释放）\n"
+            "(assert (= (index p2 0) 0)) (assert (= (index p2 1) b))\n"
+            "; INV-SK-1: escrow + available 恒等（赏金不凭空增减）\n"
+            "(assert (not (= (+ (index p2 0) (index p2 1)) b)))\n(check-sat)\n")
+    inv2 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const a Int) (declare-const x Int)\n"
+            "(declare-const p Int) (declare-const p2 Int)\n"
+            "(assert (>= a 0)) (assert (>= x 0)) (assert (<= x a))\n"
+            "(assert (= (index p 0) 0)) (assert (= (index p 1) a))\n"
+            "; 跨操作: withdraw(available=a, x) 后\n"
+            "(assert (= (index p2 0) 0)) (assert (= (index p2 1) (- a x)))\n"
+            "; INV-SK-2: available ≥ 0（不超提）\n"
+            "(assert (not (>= (index p2 1) 0)))\n(check-sat)\n")
+    return [("INV-SK-1 bounty-conserved", inv1),
+            ("INV-SK-2 no-over-withdraw", inv2)]
+
+
 # ---------------------------------------------------------------------------
 # §SK.3.12–3.17 obligation generation (spec_p0_socketkit.md — 增长期, v0.34)
 # ---------------------------------------------------------------------------
 
 GROWTH_OPS = {"badge_issue", "dispute_review", "team_create", "team_join",
               "team_share", "quota_advance", "points_ledger"}
+
+# 五大制度操作（额度/积分/勋章）—— §SK 系统操作，需纳入 has_sk（v0.63
+# 修复：否则 socketkit_quota/points 模块会被 skip，跨操作不变量义务不生成）。
+SK_SYS_OPS = {"quota_new", "quota_use", "quota_reset",
+              "points_new", "points_hold", "points_release", "points_withdraw",
+              "badge_level"}
 
 
 def gen_growth_obligation(op):
@@ -1139,6 +1174,7 @@ def prove_module(path):
 
     has_sk = any(op["name"].strip() in SK_OPS or op["name"].strip() in PF_OPS
                  or op["name"].strip() in GROWTH_OPS or op["name"].strip() in INV_OPS
+                 or op["name"].strip() in SK_SYS_OPS
                  for op in module["ops"])
     if not module["proof_declared"] and not has_sk:
         print(f"  {name}: no `## Proof` block — skipped (structural: {ok})")
@@ -1170,6 +1206,9 @@ def prove_module(path):
 
     # §PF 跨操作不变量 (v0.62): INV-PF-1 现金守恒 / INV-PF-2 份额守恒。
     obligations.extend(gen_portfolio_invariants(module["ops"]))
+
+    # §SK 跨操作不变量 (v0.63): INV-SK-1 赏金守恒 / INV-SK-2 不超提。
+    obligations.extend(gen_socketkit_invariants(module["ops"]))
 
     if not structural and obligations:
         for oname, ob in obligations:
