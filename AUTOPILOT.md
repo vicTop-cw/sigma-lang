@@ -329,6 +329,19 @@
       sigma-prove 53 项 PROVED、三端 0 warning，v0.10–v0.53 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.55 完成定义（找茬 App 审计日志，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **审计追踪**: `sigma_app.py` MVPApp 增加 `_audit`/`audit_trail`——每个业务
+      动作记录 op/input/output（事件形状与 sigma-runtime 一致）；核心方法
+      （quota_new/task_create/accept_task/task_submit/task_accept/
+      points_withdraw）全部记录；audit 纳入状态持久化。
+- [x] **导出与验证**: `--audit-log FILE` 每次请求后导出审计追踪；`--audit-test`
+      跑完整 story 验证审计日志（op 齐全/顺序正确/JSON 可序列化/语义正确，5/5）。
+- [x] **不回归**: 自检 15/15、persist-test 10/10、冒烟 36/36、consensus 47/47、
+      p0 109/109、sigma-prove 53 项 PROVED、三端 0 warning，v0.10–v0.54 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

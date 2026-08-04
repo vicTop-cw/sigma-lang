@@ -262,9 +262,17 @@
   （33/33 → 36/36：InsufficientStock→409 / AuthError→403 / DivByZero→409）；
   自检 15/15、persist-test 10/10 不回归；consensus 47/47、p0 109/109，
   v0.10–v0.53 不回归。
+- ✅ **REACHED v0.55 (2026-08-04)**: 找茬 App 审计日志—— `sigma_app.py`
+  MVPApp 增加 ΣLang 审计追踪（`_audit`/`audit_trail`：每个业务动作记录
+  op/input/output，事件形状与 sigma-runtime 一致——同一批 op 可被运行时审计），
+  核心方法（quota_new/task_create/accept_task/task_submit/task_accept/
+  points_withdraw）全部记录；audit 纳入状态持久化；`--audit-log FILE`：HTTP
+  服务每次请求后导出审计追踪；`--audit-test`：跑完整 story 验证审计日志
+  （op 齐全/顺序正确/JSON 可序列化/语义正确，5/5）；自检 15/15、persist-test
+  10/10、冒烟 36/36 不回归；consensus 47/47、p0 109/109，v0.10–v0.54 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.54 达成，继续 v0.55–v0.70 找茬产品落地 + 协议工程化连续推进。
+  2. （无）— v0.55 达成，继续 v0.56–v0.70 找茬产品落地 + 协议工程化连续推进。
 
 ---
 

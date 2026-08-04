@@ -57,6 +57,19 @@ class MVPApp:
         self.credit_events: Dict[int, List[List[int]]] = {}   # user -> credit events
         self.contribution_actions: Dict[int, List[List[int]]] = {}  # user -> actions
         self.users: Dict[int, Dict[str, object]] = {}      # v0.52 — user -> profile
+        self.audit: List[dict] = []                       # v0.55 — ΣLang audit trail
+
+    # --- v0.55 审计日志（每个业务动作的 ΣLang 事件，可对账） -----------------
+    def _audit(self, op: str, inp: object, out: object) -> object:
+        """Record one ΣLang business event; returns `out` unchanged so methods
+        can wrap their return with `return self._audit(...)`."""
+        self.audit.append({"op": op, "input": inp, "output": out})
+        return out
+
+    def audit_trail(self) -> List[dict]:
+        """Return the audit trail (JSON-serializable, matches sigma-runtime
+        event shape — the same ops are auditable by the runtime)."""
+        return list(self.audit)
 
     # --- v0.52 用户会话层（用户态隔离） -------------------------------------
     def register(self, user: int, name: str) -> Dict[str, object]:
@@ -105,6 +118,7 @@ class MVPApp:
             "credit_events": {str(k): v for k, v in self.credit_events.items()},
             "contribution_actions": {str(k): v for k, v in self.contribution_actions.items()},
             "users": {str(k): v for k, v in self.users.items()},
+            "audit": self.audit,
         }
 
     @classmethod
@@ -120,6 +134,7 @@ class MVPApp:
             int(k): v for k, v in state.get("contribution_actions", {}).items()
         }
         app.users = {int(k): v for k, v in state.get("users", {}).items()}
+        app.audit = list(state.get("audit", []))
         return app
 
     # --- §SK.6.1 开户额度 ---------------------------------------------------
@@ -127,7 +142,7 @@ class MVPApp:
         """Open a monthly quota for a user (delegates quota_new)."""
         q = core.quota_new(monthly)
         self.quotas[user] = q
-        return q
+        return self._audit("quota_new", [user, monthly], q)
 
     # --- §SK.6.2–4 发布需求（发单 + 扣额度 + 赏金托管） ---------------------
     def post_task(self, author: int, bounty: int) -> Tuple[int, List[int], List[int], List[int]]:
@@ -139,19 +154,23 @@ class MVPApp:
         tid = self._next_task
         self._next_task += 1
         self.tasks[tid] = task
-        return (tid, task, quota, self.points)
+        result = (tid, task, quota, self.points)
+        self._audit("task_create", [author, bounty],
+                    {"task_id": tid, "task": task, "quota": quota,
+                     "points": self.points})
+        return result
 
     # --- §SK.6.5 接单 --------------------------------------------------------
     def claim_task(self, task_id: int, hunter: int) -> List[int]:
         task = core.accept_task(self.tasks[task_id], hunter)
         self.tasks[task_id] = task
-        return task
+        return self._audit("accept_task", [task_id, hunter], task)
 
     # --- §SK.6.6 提交成果 ----------------------------------------------------
     def submit_work(self, task_id: int) -> List[int]:
         task = core.task_submit(self.tasks[task_id])
         self.tasks[task_id] = task
-        return task
+        return self._audit("task_submit", [task_id], task)
 
     # --- §SK.6.7–8 验收确认（验收 + 释放赏金 + 契分 + 贡献） -----------------
     def accept_work(self, task_id: int, caller: int) -> Tuple[List[int], List[int], int, int]:
@@ -164,12 +183,16 @@ class MVPApp:
         self.contribution_actions.setdefault(hunter, []).append([hunter, 1, 10])  # 贡献 +10
         credit = core.credit_score(self.credit_events[hunter])
         contribution = core.contribution_score(self.contribution_actions[hunter])
-        return (task, self.points, credit, contribution)
+        result = (task, self.points, credit, contribution)
+        self._audit("task_accept", [task_id, caller],
+                    {"task": task, "points": self.points,
+                     "credit": credit, "contribution": contribution})
+        return result
 
     # --- §SK.6.9 提现 --------------------------------------------------------
     def withdraw(self, user: int, amount: int) -> List[int]:
         self.points = core.points_withdraw(self.points, amount)
-        return self.points
+        return self._audit("points_withdraw", [user, amount], self.points)
 
     # --- §SK.6.10–12 契分 / 贡献 / 勋章 -------------------------------------
     def credit(self, user: int) -> int:
@@ -290,6 +313,7 @@ def run_story(app: MVPApp) -> Tuple[int, int]:
 class _Handler(BaseHTTPRequestHandler):
     app: MVPApp = MVPApp()
     _state_file: Optional[str] = None          # v0.51 — --state FILE (persist)
+    _audit_file: Optional[str] = None          # v0.55 — --audit-log FILE
 
     def _json(self, obj, code: int = 200):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -318,10 +342,14 @@ class _Handler(BaseHTTPRequestHandler):
         return None
 
     def _save_state(self):
-        """v0.51 — persist the whole App state after every request (--state)."""
+        """v0.51 — persist the whole App state after every request (--state).
+        v0.55 — also export the ΣLang audit trail (--audit-log)."""
         if _Handler._state_file:
             with open(_Handler._state_file, "w", encoding="utf-8") as f:
                 json.dump(_Handler.app.to_state(), f, ensure_ascii=False)
+        if _Handler._audit_file:
+            with open(_Handler._audit_file, "w", encoding="utf-8") as f:
+                json.dump(_Handler.app.audit_trail(), f, ensure_ascii=False, indent=2)
 
     def do_GET(self):
         path = self.path.split("?", 1)[0]
@@ -649,12 +677,62 @@ def run_persist_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_audit_test() -> Tuple[int, int]:
+    """--audit-test (v0.55): run the full §SK.6 story and verify the audit
+    trail covers every business op with JSON-serializable, semantics-correct
+    events (matches sigma-runtime event shape — the same ops are auditable)."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    app = MVPApp()
+    app.open_quota(7, 50)
+    tid, _, _, _ = app.post_task(7, 100)
+    app.claim_task(tid, 3)
+    app.submit_work(tid)
+    app.accept_work(tid, 7)
+    app.withdraw(3, 100)
+
+    trail = app.audit_trail()
+    ops = [e["op"] for e in trail]
+    expect = ["quota_new", "task_create", "accept_task", "task_submit",
+              "task_accept", "points_withdraw"]
+    check("AUDIT all ops", ops == expect, f"ops={ops}")
+    check("AUDIT every event has io",
+          all("input" in e and "output" in e for e in trail))
+    try:
+        json.dumps(trail)
+        check("AUDIT json-serializable", True)
+    except (TypeError, ValueError) as e:
+        check("AUDIT json-serializable", False, str(e))
+    accept_event = trail[4]
+    check("AUDIT task_accept semantics",
+          accept_event["output"]["task"] == [7, 100, 3, 3],
+          f"got {accept_event['output']}")
+    check("AUDIT points_withdraw semantics",
+          trail[5]["output"] == [0, 0], f"got {trail[5]['output']}")
+    return passed, total
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     state_file = None
+    audit_file = None
     for i, a in enumerate(argv):
         if a == "--state" and i + 1 < len(argv):
             state_file = argv[i + 1]
+        if a == "--audit-log" and i + 1 < len(argv):
+            audit_file = argv[i + 1]
+    if "--audit-test" in argv:
+        passed, total = run_audit_test()
+        print(f"sigma_app audit test (v0.55): {passed}/{total} passed")
+        return 0 if passed == total else 1
     if "--persist-test" in argv:
         passed, total = run_persist_test()
         print(f"sigma_app persist test (v0.51): {passed}/{total} passed")
@@ -673,6 +751,7 @@ def main(argv=None):
                 _Handler.app = MVPApp.from_state(json.load(f))
             print(f"找茬 MVP 参考实现 — loaded state from {state_file}")
         _Handler._state_file = state_file
+        _Handler._audit_file = audit_file
         print(f"找茬 MVP 参考实现 — http://127.0.0.1:{port}  "
               f"(GET /post /claim /submit /accept /withdraw /badge)")
         HTTPServer(("127.0.0.1", port), _Handler).serve_forever()
