@@ -62,6 +62,10 @@ struct Cli {
     #[arg(long)]
     app_smoke: bool,
 
+    /// Run the full business-flow scenario (mirrors sigma_app --scenario, v0.67)
+    #[arg(long)]
+    app_scenario: bool,
+
     /// Port for --app-serve
     #[arg(long, default_value_t = 8080)]
     port: u16,
@@ -1258,6 +1262,15 @@ fn main() -> Result<()> {
     if cli.app_smoke {
         let (passed, total) = app::run_smoke();
         println!("sigma_app HTTP smoke (MVP chain): {passed}/{total} passed");
+        std::process::exit(if passed == total { 0 } else { 1 });
+    }
+
+    // 找茬 full business-flow scenario — mirrors `python3 impl/python/
+    // sigma_app.py --scenario` (v0.67) so the Python and Rust reference
+    // backends audit the same 找茬 flow item-for-item (Law XIII).
+    if cli.app_scenario {
+        let (passed, total) = app::app_scenario();
+        println!("sigma_app scenario (v0.66): {passed}/{total} passed");
         std::process::exit(if passed == total { 0 } else { 1 });
     }
 

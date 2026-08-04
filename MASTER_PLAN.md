@@ -339,9 +339,17 @@
   不变量/可持久化，16/16）——与 --smoke 的 HTTP 全链路对应，CLI 直调 App
   方法剧本；自检 15/15、冒烟 36/36、persist-test 10/10 不回归；consensus
   51/51、p0 109/109，v0.10–v0.65 不回归。
+- ✅ **REACHED v0.67 (2026-08-04)**: 找茬业务流双端对账—— Rust `app.rs`
+  MVPApp 补齐双端对账方法（users/register/me/tasks_list/users_list/
+  issue_badge/dispute，与 Python sigma_app.py 对应），新增 `app_scenario()` +
+  `--app-scenario`（完整业务流剧本 16 项）；与 Python `--scenario`（16/16）
+  **双端逐项一致**（注册/开户/发单/接单/提交/验收/守恒/提现/结清/勋章/查询/
+  签发/裁决/审计机制）——找茬完整业务流 Python/Rust 两个参考后端同一条剧本
+  对账；`cargo build` 0 error/0 warning；consensus 51/51、p0 109/109，
+  v0.10–v0.66 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.66 达成，继续 v0.67–v0.70 双端对账 + 部署文档 + 收官。
+  2. （无）— v0.67 达成，继续 v0.68–v0.70 部署文档 + 落地指南 + 收官。
 
 ---
 

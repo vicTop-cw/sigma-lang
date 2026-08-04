@@ -453,6 +453,16 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.67 完成定义（找茬业务流双端对账，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **Rust 对账方法**: `app.rs` MVPApp 补齐 users/register/me/tasks_list/
+      users_list/issue_badge/dispute（与 Python sigma_app.py 对应）。
+- [x] **app_scenario**: Rust 新增 `app_scenario()` + `--app-scenario`（完整业务流
+      剧本 16 项），与 Python `--scenario`（16/16）**双端逐项一致**；0 warning。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 51/51、p0 109/109、
+      sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.66 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

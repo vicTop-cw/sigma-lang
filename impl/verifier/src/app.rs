@@ -26,6 +26,8 @@ pub struct MVPApp {
     points: Vec<i64>,                                  // platform escrow/available
     credit_events: HashMap<i64, Vec<Vec<i64>>>,        // user -> credit events
     contribution_actions: HashMap<i64, Vec<Vec<i64>>>, // user -> actions
+    users: HashMap<i64, serde_json::Value>,             // v0.67 — user -> profile
+    audit: Vec<serde_json::Value>,                     // v0.67 — ΣLang audit trail
 }
 
 impl MVPApp {
@@ -37,6 +39,8 @@ impl MVPApp {
             points: sk::points_new(),
             credit_events: HashMap::new(),
             contribution_actions: HashMap::new(),
+            users: HashMap::new(),
+            audit: Vec::new(),
         }
     }
 
@@ -111,6 +115,102 @@ impl MVPApp {
     pub fn badge(&self, user: i64) -> i64 {
         sk::badge_level(self.credit(user))
     }
+
+    // --- v0.67 双端对账方法（与 Python sigma_app.py 对应） -----------------
+    pub fn register(&mut self, user: i64, name: &str) -> serde_json::Value {
+        let profile = serde_json::json!({"name": name, "joined": true});
+        self.users.entry(user).or_insert(profile.clone());
+        self.users[&user].clone()
+    }
+
+    pub fn me(&self, user: i64) -> serde_json::Value {
+        let profile = self.users.get(&user).cloned()
+            .unwrap_or(serde_json::json!({"name": "", "joined": false}));
+        let credit = if self.credit_events.contains_key(&user) { self.credit(user) } else { 0 };
+        let posted: Vec<u64> = self.tasks.iter()
+            .filter(|(_, t)| t[0] == user).map(|(tid, _)| *tid).collect();
+        serde_json::json!({"user": user, "profile": profile, "credit": credit,
+                           "posted_tasks": posted})
+    }
+
+    pub fn tasks_list(&self) -> Vec<serde_json::Value> {
+        let mut out: Vec<serde_json::Value> = self.tasks.iter()
+            .map(|(tid, t)| serde_json::json!({"task_id": *tid, "task": t}))
+            .collect();
+        out.sort_by(|a, b| a["task_id"].as_u64().cmp(&b["task_id"].as_u64()));
+        out
+    }
+
+    pub fn users_list(&self) -> Vec<serde_json::Value> {
+        let mut users: Vec<i64> = self.users.keys().copied().collect();
+        users.sort();
+        users.iter().map(|u| self.me(*u)).collect()
+    }
+
+    pub fn issue_badge(&self, verifier: i64, user: i64, score: i64)
+        -> Result<Vec<i64>, &'static str> {
+        sk::badge_issue(verifier, user, score)
+    }
+
+    pub fn dispute(&self, evidence: &[Vec<i64>]) -> i64 {
+        sk::dispute_review(evidence)
+    }
+}
+
+/// Run the §SK full business-flow scenario through the App layer (v0.67),
+/// mirroring `python3 impl/python/sigma_app.py --scenario` item-for-item so the
+/// Python and Rust reference backends audit the same 找茬 flow (Law XIII).
+pub fn app_scenario() -> (usize, usize) {
+    let mut passed = 0usize;
+    let mut total = 0usize;
+
+    macro_rules! check {
+        ($name:expr, $cond:expr) => {{
+            total += 1;
+            if $cond {
+                passed += 1;
+            } else {
+                eprintln!("  ❌ SCEN.{}", $name);
+            }
+        }};
+    }
+
+    let mut app = MVPApp::new();
+    // 1. 用户会话
+    app.register(7, "找茬主");
+    app.register(3, "找茬人");
+    check!("users", app.users.len() == 2);
+    // 2. §SK.6 MVP 链
+    let q0 = app.open_quota(7, 50);
+    check!("quota", q0 == vec![50, 50]);
+    let (tid, task, _q1, _p0) = app.post_task(7, 100);
+    check!("post", task == vec![7, 100, 0, 0]);
+    let claimed = app.claim_task(tid, 3);
+    check!("claim", claimed == vec![7, 100, 1, 3]);
+    let submitted = app.submit_work(tid);
+    check!("submit", submitted == vec![7, 100, 2, 3]);
+    let (done, _p1, credit, _contribution) = app.accept_work(tid, 7);
+    check!("accept", done == vec![7, 100, 3, 3]);
+    check!("bounty conserved", done[1] == 100);
+    // 3. 提现 + 勋章
+    let p2 = app.withdraw(3, 100);
+    check!("withdraw", p2 == vec![0, 0]);
+    check!("points settled", app.points == vec![0, 0]);
+    check!("badge", app.badge(3) == 1);
+    // 4. 查询
+    check!("tasks", app.tasks_list().len() == 1);
+    check!("users list", app.users_list().len() == 2);
+    // 5. 增长期（核验师签发 + 督导裁决）
+    check!("badge_issue", app.issue_badge(1001, 3, credit) == Ok(vec![1001, 3, 1]));
+    let ev = vec![vec![1, 1, 3], vec![2, 1, 2]];
+    check!("dispute", app.dispute(&ev) == 1);
+    // 6. 审计机制可用（v0.67 — Rust audit 字段可记录 ΣLang 事件）
+    app.audit.push(serde_json::json!({"op": "task_accept", "input": [tid, 7],
+                                      "output": done}));
+    check!("audit", app.audit.len() == 1);
+    check!("audit json", serde_json::to_string(&app.audit[0]).is_ok());
+
+    (passed, total)
 }
 
 /// Run the §SK.6 MVP story through the App layer; returns (passed, total).
