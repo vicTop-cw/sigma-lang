@@ -362,6 +362,16 @@
       三端 0 warning，v0.10–v0.56 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.58 完成定义（spec 中英对照补全，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **中文参考版**: 新建 `spec/zh/spec_p0_inventory_zh.md`（§IN 供应链中文
+      参考版，193 行）——IN.1–IN.5 全量对照；英文原版为准、中文为参考。
+- [x] **覆盖扩展**: 业务域 spec 中英对照从 4 个基础文件扩展到 5 个（第三个新域
+      首次获得中文参考）。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 53 项 PROVED、三端
+      0 warning，v0.10–v0.57 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
