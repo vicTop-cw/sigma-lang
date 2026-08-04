@@ -255,9 +255,16 @@
   `/users`；`--smoke` 增加查询步骤（29/29 → 33/33：任务列表/计数/状态过滤/
   用户列表）；自检 15/15、persist-test 10/10 不回归；consensus 47/47、
   p0 109/109，v0.10–v0.52 不回归。
+- ✅ **REACHED v0.54 (2026-08-04)**: 找茬 App HTTP 错误码语义化—— `sigma_app.py`
+  新增 `ERROR_STATUS` 映射表（§SK/§IN 语义错误码 → 语义化 HTTP 状态码：
+  AuthError→403、TypeError/ShapeError→422、业务冲突类→409 等），do_GET 异常
+  响应按映射返回语义化 4xx（不再是笼统 400）；`--smoke` 增加错误语义化步骤
+  （33/33 → 36/36：InsufficientStock→409 / AuthError→403 / DivByZero→409）；
+  自检 15/15、persist-test 10/10 不回归；consensus 47/47、p0 109/109，
+  v0.10–v0.53 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.53 达成，继续 v0.54–v0.70 找茬产品落地 + 协议工程化连续推进。
+  2. （无）— v0.54 达成，继续 v0.55–v0.70 找茬产品落地 + 协议工程化连续推进。
 
 ---
 

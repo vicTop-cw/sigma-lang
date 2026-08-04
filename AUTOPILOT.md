@@ -318,6 +318,17 @@
       sigma-prove 53 项 PROVED、三端 0 warning，v0.10–v0.52 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.54 完成定义（找茬 App HTTP 错误码语义化，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **错误语义化**: `sigma_app.py` 新增 `ERROR_STATUS` 映射表（§SK/§IN 语义
+      错误码 → HTTP 状态码：AuthError→403、TypeError/ShapeError→422、业务冲突
+      类→409），do_GET 异常响应按映射返回语义化 4xx。
+- [x] **冒烟扩展**: `--smoke` 增加错误语义化步骤（33/33 → 36/36：
+      InsufficientStock→409 / AuthError→403 / DivByZero→409）。
+- [x] **不回归**: 自检 15/15、persist-test 10/10、consensus 47/47、p0 109/109、
+      sigma-prove 53 项 PROVED、三端 0 warning，v0.10–v0.53 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

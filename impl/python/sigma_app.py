@@ -18,6 +18,7 @@ import json
 import os
 import sys
 import threading
+import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Dict, List, Optional, Tuple
@@ -25,6 +26,24 @@ from urllib.parse import unquote
 
 sys.path.insert(0, __file__ and __file__.rsplit("/", 1)[0] or ".")
 import sigma_core as core
+
+# v0.54 — §SK/§IN 语义错误码 → HTTP 状态码（语义化映射，4xx 语义对齐）
+ERROR_STATUS: Dict[str, int] = {
+    "AuthError": 403,              # 未授权
+    "TypeError": 422,              # 类型不符（不可处理实体）
+    "ShapeError": 422,
+    "BountyErr": 409,              # 业务状态冲突
+    "StateError": 409,
+    "QuotaExhausted": 409,
+    "InsufficientEscrow": 409,
+    "InsufficientPoints": 409,
+    "InsufficientStock": 409,
+    "TeamFull": 409,
+    "UnknownItem": 409,
+    "DivByZero": 409,
+    "NotTraceable": 409,
+}
+DEFAULT_ERROR_STATUS = 400
 
 
 class MVPApp:
@@ -446,7 +465,10 @@ class _Handler(BaseHTTPRequestHandler):
                 return self._json({"rate": app.fill(s, d)})
             return self._json({"error": "unknown path"}, 404)
         except (ValueError, KeyError) as e:
-            return self._json({"error": str(e)}, 400)
+            # v0.54 — 语义化错误码：§SK/§IN 错误 → 语义化 HTTP 状态码
+            msg = str(e)
+            status = ERROR_STATUS.get(msg, DEFAULT_ERROR_STATUS)
+            return self._json({"error": msg}, status)
         finally:
             # v0.51 — persist after every request (--state FILE)
             self._save_state()
@@ -481,6 +503,14 @@ def run_http_smoke() -> Tuple[int, int]:
     def get(path: str) -> dict:
         with urllib.request.urlopen(base + path, timeout=10) as resp:
             return json.loads(resp.read().decode("utf-8"))
+
+    def get_status(path: str) -> Tuple[int, dict]:
+        """GET and return (http_status, body) — 4xx/5xx surface as HTTPError."""
+        try:
+            with urllib.request.urlopen(base + path, timeout=10) as resp:
+                return resp.status, json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            return e.code, json.loads(e.read().decode("utf-8"))
 
     # 0. 用户会话 (v0.52)  /register?user=7&name=… → profile; /me → summary
     r = get("/register?user=7&name=%E6%89%BE%E8%8C%AC%E4%B8%BB")
@@ -563,6 +593,14 @@ def run_http_smoke() -> Tuple[int, int]:
     check("HTTP /stock_level", r["level"] == 11, f"got {r}")
     r = get("/fill_rate?shipped=6&demanded=10")
     check("HTTP /fill_rate", abs(r["rate"] - 0.6) < 1e-9, f"got {r}")
+
+    # 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
+    st, r = get_status("/ship_stock?inv=[15,20]&item=0&qty=99")
+    check("HTTP err InsufficientStock->409", st == 409, f"got {st}")
+    st, r = get_status("/badge_issue?verifier=999&user=3&score=105")
+    check("HTTP err AuthError->403", st == 403, f"got {st}")
+    st, r = get_status("/fill_rate?shipped=6&demanded=0")
+    check("HTTP err DivByZero->409", st == 409, f"got {st}")
 
     server.shutdown()
     thread.join()
