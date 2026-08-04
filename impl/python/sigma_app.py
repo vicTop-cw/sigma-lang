@@ -315,6 +315,7 @@ class _Handler(BaseHTTPRequestHandler):
     _state_file: Optional[str] = None          # v0.51 — --state FILE (persist)
     _audit_file: Optional[str] = None          # v0.55 — --audit-log FILE
     _auth_token: Optional[str] = None          # v0.71 — --auth-token (401 gate)
+    _log_file: Optional[str] = None            # v0.73 — --log-file (leveled)
 
     def _authorized(self) -> bool:
         """v0.71 — token auth: every request must carry ?token= matching
@@ -520,7 +521,23 @@ class _Handler(BaseHTTPRequestHandler):
             self._save_state()
 
     def log_message(self, fmt, *args):
-        sys.stderr.write(f"[sigma-app] {fmt % args}\n")
+        """v0.73 — leveled access log: 2xx = INFO, 4xx/5xx = WARNING; written
+        to --log-file when set (append), else stderr."""
+        status = ""
+        for a in args:
+            if isinstance(a, int) and a >= 100:
+                status = str(a)
+                break
+            if isinstance(a, str) and a.isdigit() and len(a) == 3:
+                status = a
+                break
+        level = "WARNING" if status.startswith(("4", "5")) else "INFO"
+        line = f"[sigma-app][{level}] {fmt % args}"
+        if _Handler._log_file:
+            with open(_Handler._log_file, "a", encoding="utf-8") as f:
+                f.write(line + "\n")
+        else:
+            sys.stderr.write(line + "\n")
 
 
 def run_http_smoke() -> Tuple[int, int]:
@@ -882,10 +899,66 @@ def run_atomic_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_log_test() -> Tuple[int, int]:
+    """--log-test (v0.73): leveled logging over HTTP — success requests log
+    INFO, error requests log WARNING, all into the --log-file."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    import tempfile
+    fd, path = tempfile.mkstemp(suffix=".log")
+    os.close(fd)
+    try:
+        _Handler.app = MVPApp()
+        _Handler._log_file = path
+        server = HTTPServer(("127.0.0.1", 0), _Handler)
+        port = server.server_address[1]
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        base = f"http://127.0.0.1:{port}"
+
+        def get_status(path_: str) -> int:
+            try:
+                with urllib.request.urlopen(base + path_, timeout=10) as resp:
+                    return resp.status
+            except urllib.error.HTTPError as e:
+                return e.code
+
+        get_status("/tasks")                                  # 200 → INFO
+        get_status("/ship_stock?inv=[15,20]&item=0&qty=99")   # 409 → WARNING
+        get_status("/unknown")                                # 404 → WARNING
+
+        with open(path, encoding="utf-8") as f:
+            logs = f.read()
+        check("LOG access INFO", "INFO" in logs and "/tasks" in logs,
+              f"logs={logs[:120]!r}")
+        check("LOG error WARNING", "WARNING" in logs, f"logs={logs[:120]!r}")
+        check("LOG business error", "/ship_stock" in logs and "409" in logs,
+              f"logs={logs[:120]!r}")
+        check("LOG unknown 404", "/unknown" in logs, f"logs={logs[:120]!r}")
+
+        server.shutdown()
+        thread.join()
+    finally:
+        _Handler._log_file = None
+        if os.path.exists(path):
+            os.remove(path)
+    return passed, total
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     state_file = None
     audit_file = None
+    auth_token = None
+    log_file = None
     for i, a in enumerate(argv):
         if a == "--state" and i + 1 < len(argv):
             state_file = argv[i + 1]
@@ -893,6 +966,12 @@ def main(argv=None):
             audit_file = argv[i + 1]
         if a == "--auth-token" and i + 1 < len(argv):
             auth_token = argv[i + 1]
+        if a == "--log-file" and i + 1 < len(argv):
+            log_file = argv[i + 1]
+    if "--log-test" in argv:
+        passed, total = run_log_test()
+        print(f"sigma_app log test (v0.73): {passed}/{total} passed")
+        return 0 if passed == total else 1
     if "--auth-test" in argv:
         passed, total = run_auth_test()
         print(f"sigma_app auth test (v0.71): {passed}/{total} passed")
@@ -929,6 +1008,7 @@ def main(argv=None):
         _Handler._state_file = state_file
         _Handler._audit_file = audit_file
         _Handler._auth_token = auth_token
+        _Handler._log_file = log_file
         print(f"找茬 MVP 参考实现 — http://127.0.0.1:{port}  "
               f"(GET /post /claim /submit /accept /withdraw /badge)")
         HTTPServer(("127.0.0.1", port), _Handler).serve_forever()

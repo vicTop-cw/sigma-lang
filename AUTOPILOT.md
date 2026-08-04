@@ -514,6 +514,16 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.73 完成定义（找茬 App 分级日志，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **分级日志**: `--log-file FILE`——访问日志分级（2xx=INFO / 4xx/5xx=
+      WARNING，状态码兼容 str/int），写入日志文件（否则 stderr）。
+- [x] **--log-test**: 4/4（访问 INFO / 业务错误 WARNING / 409 路径 / 404 路径）。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、auth-test 4/4、consensus 51/51、
+      p0 109/109、sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.72 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

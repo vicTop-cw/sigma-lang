@@ -380,9 +380,14 @@
   有效 JSON / 任务持久化完整 / 无 .tmp 残留 / 重建后业务流继续）；自检 15/15、
   冒烟 36/36、persist-test 10/10 不回归；consensus 51/51、p0 109/109，
   v0.10–v0.71 不回归。
+- ✅ **REACHED v0.73 (2026-08-04)**: 找茬 App 分级日志—— `sigma_app.py`
+  `--log-file FILE`：访问日志分级（2xx=INFO / 4xx/5xx=WARNING，状态码兼容
+  str/int），写入日志文件（否则 stderr）；新增 `--log-test`（4/4：访问 INFO /
+  业务错误 WARNING / 409 路径 / 404 路径）；自检 15/15、冒烟 36/36、auth-test
+  4/4 不回归；consensus 51/51、p0 109/109，v0.10–v0.72 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.72 达成，继续 v0.73–v0.90 找茬服务化 + 业务规则深化 + 产品配套连续推进。
+  2. （无）— v0.73 达成，继续 v0.74–v0.90 找茬服务化 + 业务规则深化 + 产品配套连续推进。
 
 ---
 
