@@ -662,6 +662,14 @@
       73 项 PROVED、三端 0 warning，v0.10–v0.86 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.88 完成定义（贡献者指南，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **CONTRIBUTING.md**: 新建 `docs/CONTRIBUTING.md`（87 行）——快速开始 /
+      开发流程七步 / 门禁要求 / 提交约定 / 分支 PR / 常见问题。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 73 项 PROVED、三端
+      0 warning、sigma-accept 10/10，v0.10–v0.87 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

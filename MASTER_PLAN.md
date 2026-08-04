@@ -478,9 +478,16 @@
   CI 跑 `--report acceptance.json` 并用 upload-artifact 保存回归报告——每次
   提交的全量回归结果可追溯；`--report` 验证 10/10 全绿、报告 JSON 正确；
   consensus 51/51、p0 109/109，v0.10–v0.86 不回归。
+- ✅ **REACHED v0.88 (2026-08-04)**: 贡献者指南—— 新建 `docs/CONTRIBUTING.md`
+  （87 行）：快速开始（先读 README/AUTOPILOT/spec + 基线验收）、开发流程
+  （一条语义的旅程七步：规范→三端→语料→证明→审计→App→验收）、门禁要求
+  （sigma-accept 十道门禁全绿、禁止弱化测试掩盖失败、不回归）、提交约定
+  （Conventional Commits）、分支/PR 流程（CI 自动跑门禁 + 回归报告 artifact）、
+  常见问题（consensus 不过/E-02/证明 DISPROVED/从哪开始）——贡献者的上手
+  路径一张文档落地；consensus 51/51、p0 109/109，v0.10–v0.87 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.87 达成，继续 v0.88–v0.90 收官工程化连续推进。
+  2. （无）— v0.88 达成，继续 v0.89–v0.90 收官。
 
 ---
 
