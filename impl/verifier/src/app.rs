@@ -129,8 +129,8 @@ impl MVPApp {
         let credit = if self.credit_events.contains_key(&user) { self.credit(user) } else { 0 };
         let posted: Vec<u64> = self.tasks.iter()
             .filter(|(_, t)| t[0] == user).map(|(tid, _)| *tid).collect();
-        serde_json::json!({"user": user, "profile": profile, "credit": credit,
-                           "posted_tasks": posted})
+        serde_json::json!({"user": user, "profile": profile, "quota": self.quotas.get(&user),
+                           "credit": credit, "posted_tasks": posted})
     }
 
     pub fn tasks_list(&self) -> Vec<serde_json::Value> {
@@ -305,6 +305,16 @@ fn get_str<'a>(query: &'a str, name: &str) -> Option<&'a str> {
     None
 }
 
+/// v0.84 — §SK/§IN 语义错误码 → HTTP 状态码（与 Python ERROR_STATUS 对齐，
+/// v0.54）：AuthError→403、TypeError/ShapeError→422、业务冲突类→409。
+fn error_status(e: &str) -> u16 {
+    match e {
+        "AuthError" => 403,
+        "TypeError" | "ShapeError" => 422,
+        _ => 409,
+    }
+}
+
 /// Route one GET request; returns (status, JSON body).
 fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
     let q = parse_query(query);
@@ -312,6 +322,21 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
         names.iter().map(|n| q.get(*n).copied()).collect()
     };
     let body = match path {
+        "/register" => {
+            let user = q.get("user").copied();
+            let name = get_str(query, "name");
+            match (user, name) {
+                (Some(u), Some(n)) => serde_json::json!({"profile": app.register(u, n)}),
+                _ => return (400, serde_json::json!({"error": "need user & name"}).to_string()),
+            }
+        }
+        "/me" => {
+            if let Some(v) = need(&["user"]) {
+                serde_json::json!(app.me(v[0]))
+            } else {
+                return (400, serde_json::json!({"error": "need user"}).to_string());
+            }
+        }
         "/quota" => {
             if let Some(v) = need(&["user", "monthly"]) {
                 serde_json::json!({"quota": app.open_quota(v[0], v[1])})
@@ -327,6 +352,18 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
             } else {
                 return (400, serde_json::json!({"error": "need author & bounty"}).to_string());
             }
+        }
+        "/tasks" => {
+            let status = q.get("status").copied();
+            let list: Vec<serde_json::Value> = match status {
+                Some(st) => app.tasks_list().into_iter()
+                    .filter(|t| t["task"][2] == st).collect(),
+                None => app.tasks_list(),
+            };
+            serde_json::json!({"tasks": list})
+        }
+        "/users" => {
+            serde_json::json!({"users": app.users_list()})
         }
         "/claim" => {
             if let Some(v) = need(&["task", "hunter"]) {
@@ -370,7 +407,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
             if let Some(v) = need(&["verifier", "user", "score"]) {
                 match sk::badge_issue(v[0], v[1], v[2]) {
                     Ok(b) => serde_json::json!({"badge": b}),
-                    Err(e) => return (400, serde_json::json!({"error": e}).to_string()),
+                    Err(e) => return (error_status(e), serde_json::json!({"error": e}).to_string()),
                 }
             } else {
                 return (400, serde_json::json!({"error": "need verifier & user & score"}).to_string());
@@ -389,7 +426,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
             if let Some(v) = need(&["owner", "kind", "capacity"]) {
                 match sk::team_create(v[0], v[1], v[2]) {
                     Ok(t) => serde_json::json!({"team": t}),
-                    Err(e) => return (400, serde_json::json!({"error": e}).to_string()),
+                    Err(e) => return (error_status(e), serde_json::json!({"error": e}).to_string()),
                 }
             } else {
                 return (400, serde_json::json!({"error": "need owner & kind & capacity"}).to_string());
@@ -400,7 +437,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 (Some(ts), Some(member)) => match serde_json::from_str::<Vec<i64>>(ts) {
                     Ok(team) => match sk::team_join(&team, member) {
                         Ok(t2) => serde_json::json!({"team": t2}),
-                        Err(e) => return (400, serde_json::json!({"error": e}).to_string()),
+                        Err(e) => return (error_status(e), serde_json::json!({"error": e}).to_string()),
                     },
                     Err(_) => return (400, serde_json::json!({"error": "bad team"}).to_string()),
                 },
@@ -412,7 +449,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 (Some(cs), Some(reward)) => match serde_json::from_str::<Vec<Vec<i64>>>(cs) {
                     Ok(contribs) => match sk::team_share(&contribs, reward) {
                         Ok(shares) => serde_json::json!({"shares": shares}),
-                        Err(e) => return (400, serde_json::json!({"error": e}).to_string()),
+                        Err(e) => return (error_status(e), serde_json::json!({"error": e}).to_string()),
                     },
                     Err(_) => return (400, serde_json::json!({"error": "bad contribs"}).to_string()),
                 },
@@ -433,11 +470,74 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 Some(es) => match serde_json::from_str::<Vec<Vec<i64>>>(es) {
                     Ok(entries) => match sk::points_ledger(&entries) {
                         Ok(ledger) => serde_json::json!({"ledger": ledger}),
-                        Err(e) => return (400, serde_json::json!({"error": e}).to_string()),
+                        Err(e) => return (error_status(e), serde_json::json!({"error": e}).to_string()),
                     },
                     Err(_) => return (400, serde_json::json!({"error": "bad entries"}).to_string()),
                 },
                 None => return (400, serde_json::json!({"error": "need entries"}).to_string()),
+            }
+        }
+        // --- 供应链路由 (§IN, v0.84 与 Python v0.45 对齐) ---
+        "/inventory_new" => {
+            if let Some(v) = need(&["qty_a", "qty_b"]) {
+                match sk::inventory_new(v[0], v[1]) {
+                    Ok(inv) => serde_json::json!({"inventory": inv}),
+                    Err(e) => return (error_status(e), serde_json::json!({"error": e}).to_string()),
+                }
+            } else {
+                return (400, serde_json::json!({"error": "need qty_a & qty_b"}).to_string());
+            }
+        }
+        "/receive_stock" => {
+            match (get_str(query, "inv"), q.get("item").copied(), q.get("qty").copied()) {
+                (Some(is_), Some(item), Some(qty)) => {
+                    match serde_json::from_str::<Vec<i64>>(is_) {
+                        Ok(inv) => match sk::receive_stock(&inv, item, qty) {
+                            Ok(r) => serde_json::json!({"inventory": r}),
+                            Err(e) => return (error_status(e), serde_json::json!({"error": e}).to_string()),
+                        },
+                        Err(_) => return (400, serde_json::json!({"error": "bad inv"}).to_string()),
+                    }
+                }
+                _ => return (400, serde_json::json!({"error": "need inv & item & qty"}).to_string()),
+            }
+        }
+        "/ship_stock" => {
+            match (get_str(query, "inv"), q.get("item").copied(), q.get("qty").copied()) {
+                (Some(is_), Some(item), Some(qty)) => {
+                    match serde_json::from_str::<Vec<i64>>(is_) {
+                        Ok(inv) => match sk::ship_stock(&inv, item, qty) {
+                            Ok(r) => serde_json::json!({"inventory": r}),
+                            Err(e) => return (error_status(e), serde_json::json!({"error": e}).to_string()),
+                        },
+                        Err(_) => return (400, serde_json::json!({"error": "bad inv"}).to_string()),
+                    }
+                }
+                _ => return (400, serde_json::json!({"error": "need inv & item & qty"}).to_string()),
+            }
+        }
+        "/stock_level" => {
+            match (get_str(query, "inv"), q.get("item").copied()) {
+                (Some(is_), Some(item)) => {
+                    match serde_json::from_str::<Vec<i64>>(is_) {
+                        Ok(inv) => match sk::stock_level(&inv, item) {
+                            Ok(level) => serde_json::json!({"level": level}),
+                            Err(e) => return (error_status(e), serde_json::json!({"error": e}).to_string()),
+                        },
+                        Err(_) => return (400, serde_json::json!({"error": "bad inv"}).to_string()),
+                    }
+                }
+                _ => return (400, serde_json::json!({"error": "need inv & item"}).to_string()),
+            }
+        }
+        "/fill_rate" => {
+            if let Some(v) = need(&["shipped", "demanded"]) {
+                match sk::fill_rate(v[0], v[1]) {
+                    Ok(rate) => serde_json::json!({"rate": rate}),
+                    Err(e) => return (error_status(e), serde_json::json!({"error": e}).to_string()),
+                }
+            } else {
+                return (400, serde_json::json!({"error": "need shipped & demanded"}).to_string());
             }
         }
         _ => return (404, serde_json::json!({"error": "unknown path"}).to_string()),
@@ -467,13 +567,28 @@ fn handle_connection(app: &Mutex<MVPApp>, mut stream: TcpStream) {
             None => (target, ""),
         };
         // Business errors (e.g. StateError) surface as panics from the sk
-        // delegation — catch them and reply 400 like the Python backend.
+        // delegation — catch them and map to semantic HTTP codes (v0.84,
+        // mirrors the Python ERROR_STATUS table from v0.54).
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             route(&mut app.lock().unwrap(), path, query)
         }));
         match result {
             Ok(r) => r,
-            Err(_) => (400, serde_json::json!({"error": "rejected"}).to_string()),
+            Err(payload) => {
+                let msg = if let Some(s) = payload.downcast_ref::<&str>() {
+                    (*s).to_string()
+                } else if let Some(s) = payload.downcast_ref::<String>() {
+                    s.clone()
+                } else {
+                    "rejected".to_string()
+                };
+                let status = match msg.as_str() {
+                    "AuthError" => 403,
+                    "TypeError" | "ShapeError" => 422,
+                    _ => 409,
+                };
+                (status, serde_json::json!({"error": msg}).to_string())
+            }
         }
     };
     let reply = format!(
@@ -520,6 +635,24 @@ fn http_get(port: u16, path: &str) -> serde_json::Value {
     serde_json::from_str(body.trim()).unwrap_or_else(|_| serde_json::json!({"error": "parse"}))
 }
 
+/// GET and return (http_status, json body) — for 4xx semantic-code checks
+/// (v0.84, mirrors Python get_status).
+fn http_get_status(port: u16, path: &str) -> (u16, serde_json::Value) {
+    use std::io::Read;
+    let mut stream = TcpStream::connect(("127.0.0.1", port)).expect("connect to smoke server");
+    let req = format!("GET {path} HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
+    let _ = stream.write_all(req.as_bytes());
+    let mut resp = String::new();
+    let _ = stream.read_to_string(&mut resp);
+    let status_line = resp.lines().next().unwrap_or("");
+    let status: u16 = status_line.split_whitespace().nth(1).unwrap_or("0")
+        .parse().unwrap_or(0);
+    let body = resp.split("\r\n\r\n").nth(1).unwrap_or("");
+    let val = serde_json::from_str(body.trim())
+        .unwrap_or_else(|_| serde_json::json!({"error": "parse"}));
+    (status, val)
+}
+
 /// --app-smoke: start the server, walk the full MVP chain over HTTP, assert.
 /// Mirrors `python3 impl/python/sigma_app.py --smoke` (13 items) so the HTTP
 /// layer is audited identically across Python and Rust. Returns (passed, total).
@@ -544,9 +677,18 @@ pub fn run_smoke() -> (usize, usize) {
         }};
     }
 
+    // 0. 用户会话 (v0.52)  /register?user=7&name=… → profile; /me → summary
+    let r = http_get(port, "/register?user=7&name=zhao");
+    check!("HTTP /register", r["profile"]["joined"] == serde_json::json!(true));
+    let r = http_get(port, "/me?user=7");
+    check!("HTTP /me user", r["user"] == 7);
+    check!("HTTP /me profile", r["profile"]["name"] == "zhao");
+
     // 1. 开户额度   /quota?user=7&monthly=50          → {"quota": [50, 50]}
     let r = http_get(port, "/quota?user=7&monthly=50");
     check!("HTTP /quota", r == serde_json::json!({"quota": [50, 50]}));
+    let r = http_get(port, "/me?user=7");
+    check!("HTTP /me quota", r["quota"] == serde_json::json!([50, 50]));
 
     // 2. 发布需求   /post?author=7&bounty=100        → task / quota / points
     let r = http_get(port, "/post?author=7&bounty=100");
@@ -554,6 +696,19 @@ pub fn run_smoke() -> (usize, usize) {
     check!("HTTP /post quota", r["quota"] == serde_json::json!([50, 49]));
     check!("HTTP /post points", r["points"] == serde_json::json!([100, 0]));
     let tid = r["task_id"].as_u64().unwrap_or(0);
+
+    // 2.5 查询端点 (v0.53)  /tasks → 列表; /tasks?status=N → 过滤; /users
+    let r = http_get(port, "/tasks");
+    check!("HTTP /tasks list",
+           r["tasks"].as_array().map(|a| a.len() == 1).unwrap_or(false));
+    check!("HTTP /tasks count",
+           r["tasks"].as_array().map(|a| a.len() == 1).unwrap_or(false));
+    let r = http_get(port, "/tasks?status=1");
+    check!("HTTP /tasks filter",
+           r["tasks"].as_array().map(|a| a.is_empty()).unwrap_or(false));
+    let r = http_get(port, "/users");
+    check!("HTTP /users",
+           r["users"].as_array().map(|a| a.len() == 1).unwrap_or(false));
 
     // 3. 接单       /claim?task=T&hunter=3           → [7, 100, 1, 3]
     let r = http_get(port, &format!("/claim?task={tid}&hunter=3"));
@@ -594,6 +749,26 @@ pub fn run_smoke() -> (usize, usize) {
     check!("HTTP /advance", r["quota"] == serde_json::json!([50, 100]));
     let r = http_get(port, "/ledger?entries=[[0,100,1]]");
     check!("HTTP /ledger", r["ledger"] == serde_json::json!([[1, 1, 100]]));
+
+    // 9. 供应链 (§IN)
+    let r = http_get(port, "/inventory_new?qty_a=10&qty_b=20");
+    check!("HTTP /inventory_new", r["inventory"] == serde_json::json!([10, 20]));
+    let r = http_get(port, "/receive_stock?inv=[10,20]&item=0&qty=5");
+    check!("HTTP /receive_stock", r["inventory"] == serde_json::json!([15, 20]));
+    let r = http_get(port, "/ship_stock?inv=[15,20]&item=0&qty=4");
+    check!("HTTP /ship_stock", r["inventory"] == serde_json::json!([11, 20]));
+    let r = http_get(port, "/stock_level?inv=[11,20]&item=0");
+    check!("HTTP /stock_level", r["level"] == 11);
+    let r = http_get(port, "/fill_rate?shipped=6&demanded=10");
+    check!("HTTP /fill_rate", (r["rate"].as_f64().unwrap_or(0.0) - 0.6).abs() < 1e-9);
+
+    // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
+    let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");
+    check!("HTTP err InsufficientStock->409", st == 409);
+    let (st, _) = http_get_status(port, "/badge_issue?verifier=999&user=3&score=105");
+    check!("HTTP err AuthError->403", st == 403);
+    let (st, _) = http_get_status(port, "/fill_rate?shipped=6&demanded=0");
+    check!("HTTP err DivByZero->409", st == 409);
 
     (passed, total)
 }

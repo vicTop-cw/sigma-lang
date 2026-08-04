@@ -448,9 +448,19 @@
   提现→勋章→摘要，GET/POST 混合，11/11 逐项对 §SK.6 断言）——前端接入的
   验收剧本；自检 15/15、method-test 4/4、冒烟 36/36 不回归；consensus 51/51、
   p0 109/109，v0.10–v0.82 不回归。
+- ✅ **REACHED v0.84 (2026-08-04)**: 双端 HTTP API 逐项对账—— Rust `app.rs`
+  HTTP 层补全与 Python 对齐：新增 /register /me /tasks /users 路由（v0.67 漏
+  掉的）、供应链路由（/inventory_new /receive_stock /ship_stock /stock_level
+  /fill_rate，与 Python v0.45 对齐）、语义化错误码（error_status 映射
+  AuthError→403 / TypeError→422 / 业务冲突→409，route 10 处 + catch_unwind
+  统一，与 Python v0.54 对齐）、me() 补 quota 字段；`run_smoke` 从 20 项扩到
+  **36 项**（用户会话/查询/供应链/错误语义化），与 Python `--smoke`（36/36）
+  **双端逐项一致**；`sigma-accept.py` 新增门禁 10（Rust --app-smoke），十道
+  门禁全绿；`cargo build` 0 error/0 warning；consensus 51/51、p0 109/109，
+  v0.10–v0.83 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.83 达成，继续 v0.84–v0.90 产品配套 + 收官工程化连续推进。
+  2. （无）— v0.84 达成，继续 v0.85–v0.90 产品配套 + 收官工程化连续推进。
 
 ---
 

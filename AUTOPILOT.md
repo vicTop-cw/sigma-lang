@@ -620,6 +620,18 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.84 完成定义（双端 HTTP API 逐项对账，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **Rust HTTP 层补全**: /register /me /tasks /users 路由（v0.67 漏掉）、
+      供应链路由（与 Python v0.45 对齐）、语义化错误码（error_status 映射，
+      route 10 处 + catch_unwind 统一，与 Python v0.54 对齐）、me() 补 quota。
+- [x] **run_smoke 对账**: 20 → 36 项（用户会话/查询/供应链/错误语义化），与
+      Python --smoke（36/36）**双端逐项一致**；0 warning。
+- [x] **sigma-accept 门禁 10**: Rust --app-smoke（36/36），十道门禁全绿。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 73 项 PROVED、三端
+      0 warning，v0.10–v0.83 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
