@@ -720,6 +720,62 @@ def run_audit_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_scenario() -> Tuple[int, int]:
+    """--scenario (v0.66): CLI 版完整业务流剧本 — 注册 → 开户 → 发单 → 接单 →
+    提交 → 验收 → 提现 → 勋章 → 查询 → 增长期 → 审计/不变量，一条命令走完找茬
+    全业务流（与 --smoke 的 HTTP 全链路对应，这里是 App 方法直调剧本）。"""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    app = MVPApp()
+    # 1. 用户会话
+    app.register(7, "找茬主")
+    app.register(3, "找茬人")
+    check("SCEN users", len(app.users) == 2, f"users={len(app.users)}")
+    # 2. 开户 → 发单 → 接单 → 提交 → 验收（§SK.6 MVP 链）
+    q0 = app.open_quota(7, 50)
+    check("SCEN quota", q0 == [50, 50], f"got {q0}")
+    tid, task, q1, p0 = app.post_task(7, 100)
+    check("SCEN post", task == [7, 100, 0, 0], f"got {task}")
+    claimed = app.claim_task(tid, 3)
+    check("SCEN claim", claimed == [7, 100, 1, 3], f"got {claimed}")
+    submitted = app.submit_work(tid)
+    check("SCEN submit", submitted == [7, 100, 2, 3], f"got {submitted}")
+    done, p1, credit, contribution = app.accept_work(tid, 7)
+    check("SCEN accept", done == [7, 100, 3, 3], f"got {done}")
+    check("SCEN bounty conserved", done[1] == 100, f"bounty={done[1]}")
+    # 3. 提现 + 勋章
+    p2 = app.withdraw(3, 100)
+    check("SCEN withdraw", p2 == [0, 0], f"got {p2}")
+    check("SCEN points settled", app.points == [0, 0], f"got {app.points}")
+    check("SCEN badge", app.badge(3) == 1, f"got {app.badge(3)}")
+    # 4. 查询端点
+    check("SCEN tasks", len(app.tasks_list()) == 1, f"got {app.tasks_list()}")
+    check("SCEN users", len(app.users_list()) == 2, f"got {app.users_list()}")
+    # 5. 增长期（核验师签发 + 督导裁决）
+    check("SCEN badge_issue", app.issue_badge(1001, 3, credit) == [1001, 3, 1],
+          f"got {app.issue_badge(1001, 3, credit)}")
+    check("SCEN dispute", app.dispute([[1, 1, 3], [2, 1, 2]]) == 1,
+          f"got {app.dispute([[1, 1, 3], [2, 1, 2]])}")
+    # 6. 审计追踪（每个业务动作都有 ΣLang 事件）
+    check("SCEN audit", len(app.audit_trail()) >= 6,
+          f"trail={len(app.audit_trail())}")
+    # 7. 状态可持久化（scenario 结束时全状态可 JSON 序列化）
+    try:
+        json.dumps(app.to_state())
+        check("SCEN persistable", True)
+    except (TypeError, ValueError) as e:
+        check("SCEN persistable", False, str(e))
+    return passed, total
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     state_file = None
@@ -732,6 +788,10 @@ def main(argv=None):
     if "--audit-test" in argv:
         passed, total = run_audit_test()
         print(f"sigma_app audit test (v0.55): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--scenario" in argv:
+        passed, total = run_scenario()
+        print(f"sigma_app scenario (v0.66): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--persist-test" in argv:
         passed, total = run_persist_test()

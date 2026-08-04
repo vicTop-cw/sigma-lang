@@ -443,6 +443,16 @@
       三端 0 warning，v0.10–v0.64 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.66 完成定义（找茬完整业务流 CLI 剧本，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **--scenario**: `sigma_app.py` 新增 `run_scenario`——一条命令走完找茬全
+      业务流剧本（注册 → 开户 → 发单 → 接单 → 提交 → 验收 → 提现 → 勋章 →
+      查询 → 增长期 → 审计/不变量/可持久化），16/16。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、persist-test 10/10、consensus 51/51、
+      p0 109/109、sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.65 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

@@ -333,9 +333,15 @@
   （§SK 任务流/额度/积分/增长期 + §PF + §IN，含跨操作不变量 INV-SK/PF/IN）；
   Makefile `make prove` 与 sigma-accept.py 门禁 8 同步改为全量语料重验；
   consensus 51/51、p0 109/109，v0.10–v0.64 不回归。
+- ✅ **REACHED v0.66 (2026-08-04)**: 找茬完整业务流 CLI 剧本—— `sigma_app.py`
+  新增 `--scenario`（run_scenario）：一条命令走完找茬全业务流剧本（注册 →
+  开户 → 发单 → 接单 → 提交 → 验收 → 提现 → 勋章 → 查询 → 增长期 → 审计/
+  不变量/可持久化，16/16）——与 --smoke 的 HTTP 全链路对应，CLI 直调 App
+  方法剧本；自检 15/15、冒烟 36/36、persist-test 10/10 不回归；consensus
+  51/51、p0 109/109，v0.10–v0.65 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.65 达成，继续 v0.66–v0.70 开工验收连续推进。
+  2. （无）— v0.66 达成，继续 v0.67–v0.70 双端对账 + 部署文档 + 收官。
 
 ---
 
