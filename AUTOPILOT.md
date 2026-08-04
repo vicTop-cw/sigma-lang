@@ -632,6 +632,15 @@
       0 warning，v0.10–v0.83 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.85 完成定义（README 开工检查清单，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **开工 checklist**: README 新增「Launch Checklist」——上线前 10 项逐项
+      勾选（启动自检/鉴权/原子写/审计/分级日志/健康检查/HTTP 方法/业务流剧本/
+      双端对账/一键门禁），每项含命令与期望结果。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 73 项 PROVED、三端
+      0 warning、sigma-accept 10/10，v0.10–v0.84 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
