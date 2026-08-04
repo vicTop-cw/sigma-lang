@@ -747,6 +747,17 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.97 完成定义（协议版本化，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **版本升级**: spec 0.5.0 → 0.6.0（README Spec Version + Citation +
+      web/index.html 前端显示同步）；v0.91–v0.96 的运行形态扩展（web 前端 /
+      --web-test / --launch / /panel / --run-accept）满足 0.6.0。
+- [x] **RFC 记录**: 「找茬开工（v0.91–v0.96）」阶段已闭环——从"协议可用"到
+      "协议驱动产品可运行"。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 73 项 PROVED、三端
+      0 warning、sigma-accept 10/10，v0.10–v0.96 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
