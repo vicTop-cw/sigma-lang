@@ -431,6 +431,18 @@
       sigma-prove 59 项 PROVED、三端 0 warning，v0.10–v0.63 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.65 完成定义（sigma-prove 全量义务重验 + 报告，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **汇总报告**: `sigma-prove` 输出 `Obligations discharged: N PROVED across
+      M modules`；默认全量重验只处理 Expected: PASS 模块（break 负例属共识检查
+      E-02，非证明对象）。
+- [x] **全量重验**: 62 项 PROVED / 29 个语料模块全绿（§SK 任务流/额度/积分/
+      增长期 + §PF + §IN，含跨操作不变量 INV-SK/PF/IN）；`make prove` 与
+      sigma-accept.py 门禁 8 同步改为全量语料重验。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-runtime 59/59 + 41/41、
+      三端 0 warning，v0.10–v0.64 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

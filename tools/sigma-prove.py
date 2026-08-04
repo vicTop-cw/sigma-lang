@@ -1219,6 +1219,8 @@ def prove_module(path):
             solver, res = discharge(ob)
             if solver:
                 verdict = "PROVED (unsat)" if res["sat"] else f"DISPROVED ({res['result']})"
+                if res["sat"]:
+                    PROVED_TOTAL[0] += 1  # v0.65 — 全量义务重验计数
                 print(f"    • {oname}: obligation → {verdict} [{solver}]")
                 if not res["sat"]:
                     ok = False
@@ -1238,13 +1240,25 @@ def main(paths=None):
     files = paths or sorted(
         os.path.join(CORPUS_DIR, f) for f in os.listdir(CORPUS_DIR) if f.endswith(".md")
     )
+    # v0.65 — 全量重验只处理 Expected: PASS 模块（break 负例属共识检查 E-02，
+    # 不是证明对象）；显式传入的文件尊重调用方。
+    if not paths:
+        files = [f for f in files
+                 if vc.parse_module(f).get("expected") == "PASS"]
     all_ok = True
     for path in files:
         if not prove_module(path):
             all_ok = False
     print("-" * 74)
+    # v0.65 — 全量义务重验报告：汇总所有模块的 z3 消解结果
+    print(f"Obligations discharged: {PROVED_TOTAL[0]} PROVED (unsat) "
+          f"across {len(files)} corpus module(s)")
     print("ALL STRUCTURAL CHECKS PASS" if all_ok else "STRUCTURAL FAILURES PRESENT")
     return 0 if all_ok else 1
+
+
+# v0.65 — 全量义务重验计数（prove_module 消解 PROVED 时累加，main 汇总报告）
+PROVED_TOTAL = [0]
 
 
 if __name__ == "__main__":

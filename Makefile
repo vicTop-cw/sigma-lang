@@ -24,8 +24,8 @@ check: ## 三端共识（Law XIII）+ 算法正确性
 story: ## 三域审计故事线（找茬 MVP+增长期 + 供应链）
 	$(PYTHON) tools/sigma-runtime.py --domains
 
-prove: ## z3 义务消解（三域语料）
-	$(PYTHON) tools/sigma-prove.py corpus/socketkit_ok.md corpus/portfolio_ok.md corpus/inventory_ok.md
+prove: ## z3 义务消解（全量语料重验，v0.65）
+	$(PYTHON) tools/sigma-prove.py corpus/*.md
 
 rust: ## Rust 编译（0 warning）+ §SK 自检
 	cd impl/verifier && cargo build

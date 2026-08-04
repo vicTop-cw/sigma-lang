@@ -42,9 +42,8 @@ def main():
          "elixir sigma_verify.exs --sk-self-check",
          os.path.join(ROOT, "impl", "elixir_rt"), "88/88"),
         ("7. 三域审计故事线", "python3 tools/sigma-runtime.py --domains", ROOT, "35/35"),
-        ("8. 证明消解 (三域语料)",
-         "python3 tools/sigma-prove.py corpus/socketkit_ok.md corpus/portfolio_ok.md "
-         "corpus/inventory_ok.md", ROOT, "PROVED"),
+        ("8. 证明消解 (全量语料重验)",
+         "python3 tools/sigma-prove.py corpus/*.md", ROOT, "PROVED"),
         ("9. 找茬参考后端冒烟", "python3 impl/python/sigma_app.py --smoke", ROOT, "25/25"),
     ]
 
