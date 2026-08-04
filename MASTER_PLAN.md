@@ -236,9 +236,16 @@
   sigma-accept.py 9 道门禁一键验收；consensus 47/47、p0 109/109、sigma-prove
   53 项 PROVED、三端 0 warning，v0.10–v0.49 不回归——ΣLang 从 v0.10 到 v0.50
   里程碑链完整。
+- ✅ **REACHED v0.51 (2026-08-04)**: 找茬 App 状态持久化—— `sigma_app.py`
+  MVPApp 增加 `to_state()/from_state()`（全状态 JSON 序列化，业务规则仍在
+  sigma_core §SK），`--state FILE`：HTTP 服务启动加载、每次请求后自动保存
+  （重启不丢）；`--persist-test`：半段 §SK.6 story → 序列化 → 重建 → 后半段
+  在重建 App 上跑通（10/10，含 INV-1/3 不变量）——找茬从内存版走向可重启版；
+  自检 15/15、冒烟 25/25 不回归；consensus 47/47、p0 109/109，v0.10–v0.50
+  不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.50 达成，v0.27–v0.50 连续推进收官。
+  2. （无）— v0.51 达成，进入 v0.52–v0.70 找茬产品落地 + 协议工程化连续推进。
 
 ---
 

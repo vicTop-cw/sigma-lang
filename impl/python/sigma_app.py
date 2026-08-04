@@ -15,6 +15,7 @@ Exit code 0 = all §SK.6 steps pass.
 """
 
 import json
+import os
 import sys
 import threading
 import urllib.request
@@ -35,6 +36,33 @@ class MVPApp:
         self.points: List[int] = core.points_new()         # platform escrow/available
         self.credit_events: Dict[int, List[List[int]]] = {}   # user -> credit events
         self.contribution_actions: Dict[int, List[List[int]]] = {}  # user -> actions
+
+    # --- v0.51 状态持久化（JSON 序列化，重启不丢） ---------------------------
+    def to_state(self) -> dict:
+        """Serialize all App state to a JSON-able dict (state is data only —
+        business rules stay in sigma_core §SK)."""
+        return {
+            "next_task": self._next_task,
+            "tasks": {str(k): v for k, v in self.tasks.items()},
+            "quotas": {str(k): v for k, v in self.quotas.items()},
+            "points": self.points,
+            "credit_events": {str(k): v for k, v in self.credit_events.items()},
+            "contribution_actions": {str(k): v for k, v in self.contribution_actions.items()},
+        }
+
+    @classmethod
+    def from_state(cls, state: dict) -> "MVPApp":
+        """Rebuild an App from a previously serialized state dict."""
+        app = cls()
+        app._next_task = int(state.get("next_task", 0))
+        app.tasks = {int(k): v for k, v in state.get("tasks", {}).items()}
+        app.quotas = {int(k): v for k, v in state.get("quotas", {}).items()}
+        app.points = state.get("points", core.points_new())
+        app.credit_events = {int(k): v for k, v in state.get("credit_events", {}).items()}
+        app.contribution_actions = {
+            int(k): v for k, v in state.get("contribution_actions", {}).items()
+        }
+        return app
 
     # --- §SK.6.1 开户额度 ---------------------------------------------------
     def open_quota(self, user: int, monthly: int) -> List[int]:
@@ -203,6 +231,7 @@ def run_story(app: MVPApp) -> Tuple[int, int]:
 
 class _Handler(BaseHTTPRequestHandler):
     app: MVPApp = MVPApp()
+    _state_file: Optional[str] = None          # v0.51 — --state FILE (persist)
 
     def _json(self, obj, code: int = 200):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -229,6 +258,12 @@ class _Handler(BaseHTTPRequestHandler):
             if part.startswith(name + "="):
                 return part.split("=", 1)[1]
         return None
+
+    def _save_state(self):
+        """v0.51 — persist the whole App state after every request (--state)."""
+        if _Handler._state_file:
+            with open(_Handler._state_file, "w", encoding="utf-8") as f:
+                json.dump(_Handler.app.to_state(), f, ensure_ascii=False)
 
     def do_GET(self):
         path = self.path.split("?", 1)[0]
@@ -357,6 +392,9 @@ class _Handler(BaseHTTPRequestHandler):
             return self._json({"error": "unknown path"}, 404)
         except (ValueError, KeyError) as e:
             return self._json({"error": str(e)}, 400)
+        finally:
+            # v0.51 — persist after every request (--state FILE)
+            self._save_state()
 
     def log_message(self, fmt, *args):
         sys.stderr.write(f"[sigma-app] {fmt % args}\n")
@@ -458,8 +496,58 @@ def run_http_smoke() -> Tuple[int, int]:
     return passed, total
 
 
+def run_persist_test() -> Tuple[int, int]:
+    """--persist-test (v0.51): run half the §SK.6 story, serialize, rebuild,
+    finish the story on the rebuilt App — state survives a restart."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    # 前半段 story（开户 → 发单 → 接单）
+    app = MVPApp()
+    q0 = app.open_quota(7, 50)
+    check("PERSIST open_quota", q0 == [50, 50], f"got {q0}")
+    tid, task, q1, p0 = app.post_task(7, 100)
+    check("PERSIST post_task", task == [7, 100, 0, 0], f"got {task}")
+    claimed = app.claim_task(tid, 3)
+    check("PERSIST claim", claimed == [7, 100, 1, 3], f"got {claimed}")
+
+    # 序列化 → 重建（模拟重启）
+    state = app.to_state()
+    app2 = MVPApp.from_state(state)
+    check("PERSIST tasks", app2.tasks == app.tasks, f"got {app2.tasks}")
+    check("PERSIST quotas", app2.quotas == app.quotas, f"got {app2.quotas}")
+    check("PERSIST points", app2.points == app.points, f"got {app2.points}")
+    check("PERSIST next_task", app2._next_task == app._next_task,
+          f"got {app2._next_task}")
+
+    # 后半段 story 在重建的 App 上跑，结果一致
+    submitted = app2.submit_work(tid)
+    done, p1, credit, contribution = app2.accept_work(tid, 7)
+    check("PERSIST story continues", done == [7, 100, 3, 3], f"got {done}")
+    check("PERSIST invariants",
+          [task[2], claimed[2], submitted[2], done[2]] == [0, 1, 2, 3],
+          f"statuses {[task[2], claimed[2], submitted[2], done[2]]}")
+    check("PERSIST bounty conserved", done[1] == 100, f"bounty={done[1]}")
+    return passed, total
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
+    state_file = None
+    for i, a in enumerate(argv):
+        if a == "--state" and i + 1 < len(argv):
+            state_file = argv[i + 1]
+    if "--persist-test" in argv:
+        passed, total = run_persist_test()
+        print(f"sigma_app persist test (v0.51): {passed}/{total} passed")
+        return 0 if passed == total else 1
     if "--smoke" in argv:
         passed, total = run_http_smoke()
         print(f"sigma_app HTTP smoke (MVP chain): {passed}/{total} passed")
@@ -469,6 +557,11 @@ def main(argv=None):
         for i, a in enumerate(argv):
             if a == "--port" and i + 1 < len(argv):
                 port = int(argv[i + 1])
+        if state_file and os.path.exists(state_file):
+            with open(state_file, encoding="utf-8") as f:
+                _Handler.app = MVPApp.from_state(json.load(f))
+            print(f"找茬 MVP 参考实现 — loaded state from {state_file}")
+        _Handler._state_file = state_file
         print(f"找茬 MVP 参考实现 — http://127.0.0.1:{port}  "
               f"(GET /post /claim /submit /accept /withdraw /badge)")
         HTTPServer(("127.0.0.1", port), _Handler).serve_forever()

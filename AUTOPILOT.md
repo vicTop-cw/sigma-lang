@@ -286,6 +286,16 @@
       v0.10–v0.49 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.51 完成定义（找茬 App 状态持久化，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **状态持久化**: `sigma_app.py` MVPApp 增加 `to_state()/from_state()`（全状态
+      JSON 序列化）；`--state FILE`：HTTP 服务启动加载、每次请求后自动保存
+      （重启不丢）；`--persist-test` 10/10（半段 story → 序列化 → 重建 → 后半段
+      跑通，含 INV-1/3 不变量）。
+- [x] **不回归**: 自检 15/15、冒烟 25/25、consensus 47/47、p0 109/109、
+      sigma-prove 53 项 PROVED、三端 0 warning，v0.10–v0.50 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
