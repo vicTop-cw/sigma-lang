@@ -463,6 +463,15 @@
       sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.66 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.68 完成定义（找茬 App 部署文档，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **部署文档**: 新建 `docs/deploy_zhaocha.md`——Python/Rust 双形态对比与
+      HTTP 端点清单、启动参数（--serve/--port/--state/--audit-log）、部署前
+      验收检查（sigma-accept 九道门禁 + 找茬专项）、运维要点。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 62 项 PROVED、三端
+      0 warning，v0.10–v0.67 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

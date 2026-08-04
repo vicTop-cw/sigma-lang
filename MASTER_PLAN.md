@@ -347,9 +347,16 @@
   签发/裁决/审计机制）——找茬完整业务流 Python/Rust 两个参考后端同一条剧本
   对账；`cargo build` 0 error/0 warning；consensus 51/51、p0 109/109，
   v0.10–v0.66 不回归。
+- ✅ **REACHED v0.68 (2026-08-04)**: 找茬 App 部署文档—— 新建
+  `docs/deploy_zhaocha.md`（找茬 MVP 参考后端部署与运维说明）：Python/Rust
+  双形态对比与 HTTP 端点清单、启动参数（--serve/--port/--state/--audit-log）、
+  部署前必跑的验收检查（sigma-accept 九道门禁 + --scenario/--smoke/
+  --persist-test/--audit-test/--app-scenario）、运维要点（状态文件权限/审计日志
+  归档/无外部依赖/扩展方向）——找茬从"可运行"走向"可部署"；consensus 51/51、
+  p0 109/109，v0.10–v0.67 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.67 达成，继续 v0.68–v0.70 部署文档 + 落地指南 + 收官。
+  2. （无）— v0.68 达成，继续 v0.69–v0.70 落地指南 + 收官。
 
 ---
 
