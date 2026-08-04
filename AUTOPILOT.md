@@ -421,6 +421,16 @@
       0 warning，v0.10–v0.62 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.64 完成定义（三域 story 不变量检查段，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **不变量检查段**: `sigma-runtime` 新增 `run_invariant_checks`——与
+      sigma-prove 的 INV-SK/INV-PF/INV-IN 义务对应，运行时复核同一批守恒定律
+      （§SK 赏金守恒链 / §PF 现金与份额守恒 / §IN 总量守恒与库存非负链）。
+- [x] **--domains 扩展**: 三域 story 追加不变量检查段（35/35 → 41/41）。
+- [x] **不回归**: trace 59/59、--growth 11/11、consensus 51/51、p0 109/109、
+      sigma-prove 59 项 PROVED、三端 0 warning，v0.10–v0.63 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

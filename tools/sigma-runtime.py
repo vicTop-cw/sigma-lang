@@ -729,6 +729,68 @@ def run_inventory_story(core):
     return events
 
 
+# ---------------------------------------------------------------------------
+# 三域跨操作不变量检查段 (v0.64) — 与 sigma-prove 的 INV-SK/INV-PF/INV-IN
+# 义务对应，运行时复核同一批守恒定律
+# ---------------------------------------------------------------------------
+
+def run_invariant_checks(core):
+    """Audit the cross-operation invariants for all three domains (§SK bounty
+    chain, §PF cash/shares, §IN total/non-negative) as runtime events."""
+    events = []
+
+    def record(event, op, inp, out, obligations):
+        events.append({
+            "event": event,
+            "op": op,
+            "input": inp,
+            "output": out,
+            "obligations": obligations,
+        })
+
+    # §SK 赏金守恒链 (INV-SK-1 / INV-SK-2)
+    p = core.points_new()
+    p1 = core.points_hold(p, 100)
+    p2 = core.points_release(p1, 100)
+    record("INV-SK-1", "invariant", ["hold(100)→release(100)"], p2, [
+        {"law": "hold→release 后 escrow+available 恒等（赏金不凭空增减）",
+         "ok": p2[0] + p2[1] == 100, "note": f"points={p2}"},
+    ])
+    p3 = core.points_withdraw(p2, 60)
+    record("INV-SK-2", "invariant", ["withdraw(60)"], p3, [
+        {"law": "withdraw 后 available ≥ 0（不超提）",
+         "ok": p3[1] >= 0, "note": f"points={p3}"},
+    ])
+
+    # §PF 现金/份额守恒 (INV-PF-1 / INV-PF-2)
+    pf = core.portfolio_new(100)
+    pf1 = core.buy(pf, 0, 40)
+    record("INV-PF-1", "invariant", ["portfolio_new(100)→buy(0,40)"], pf1, [
+        {"law": "buy 后 cash ≥ 0（现金不凭空产生）",
+         "ok": pf1[0] >= 0, "note": f"pf={pf1}"},
+    ])
+    pf2 = core.sell(pf1, 0, 10)
+    record("INV-PF-2", "invariant", ["sell(0,10)"], pf2, [
+        {"law": "sell 后 shares ≥ 0（不凭空卖份额）",
+         "ok": pf2[1] >= 0, "note": f"pf={pf2}"},
+    ])
+
+    # §IN 总量守恒 / 非负链 (INV-IN-1 / INV-IN-2)
+    inv = core.inventory_new(10, 20)
+    inv1 = core.receive_stock(inv, 0, 5)
+    record("INV-IN-1", "invariant", ["inventory_new(10,20)→receive(0,5)"], inv1, [
+        {"law": "入库后总量 = 初始 + 净入库（库存不凭空产生）",
+         "ok": inv1[0] + inv1[1] == 35, "note": f"inv={inv1}"},
+    ])
+    inv2 = core.ship_stock(inv1, 0, 4)
+    record("INV-IN-2", "invariant", ["ship(0,4)"], inv2, [
+        {"law": "出库后每货品 ≥ 0（库存非负）",
+         "ok": inv2[0] >= 0 and inv2[1] >= 0, "note": f"inv={inv2}"},
+    ])
+
+    return events
+
+
 def render_human(events):
     lines = []
     lines.append("ΣLang Audit Runtime — SocketKit trace (spec_p0_socketkit.md §SK)")
@@ -784,7 +846,8 @@ def main(argv=None):
     core = load_core()
     if as_domains:
         # 三域协议巩固：找茬业务（§SK MVP+增长期）+ 供应链（§IN）故事线一次跑通
-        events = run_mvp_story(core) + run_growth_story(core) + run_inventory_story(core)
+        events = run_mvp_story(core) + run_growth_story(core) \
+            + run_inventory_story(core) + run_invariant_checks(core)
     elif as_inventory:
         events = run_inventory_story(core)
     elif as_all:

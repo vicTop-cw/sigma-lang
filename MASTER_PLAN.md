@@ -320,9 +320,15 @@
   模块不再被 skip，points 单操作义务也全部 PROVED）——找茬赏金链语义从单操作
   定律走向跨操作不变量证明；consensus 51/51、p0 109/109、三端 0 warning，
   v0.10–v0.62 不回归。
+- ✅ **REACHED v0.64 (2026-08-04)**: 三域 story 不变量检查段—— `sigma-runtime`
+  新增 `run_invariant_checks`（与 sigma-prove 的 INV-SK/INV-PF/INV-IN 义务对应，
+  运行时复核同一批守恒定律：§SK 赏金守恒链 / §PF 现金与份额守恒 / §IN 总量
+  守恒与库存非负链），`--domains` 追加不变量检查段（35/35 → **41/41**）——
+  三域 story 在业务事件之外同步审计跨操作不变量；trace 59/59、--growth 11/11
+  不回归；consensus 51/51、p0 109/109，v0.10–v0.63 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.63 达成，继续 v0.64–v0.70 深度不变量 + 开工验收连续推进。
+  2. （无）— v0.64 达成，继续 v0.65–v0.70 深度不变量 + 开工验收连续推进。
 
 ---
 
