@@ -21,6 +21,7 @@ import threading
 import urllib.request
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Dict, List, Optional, Tuple
+from urllib.parse import unquote
 
 sys.path.insert(0, __file__ and __file__.rsplit("/", 1)[0] or ".")
 import sigma_core as core
@@ -36,6 +37,28 @@ class MVPApp:
         self.points: List[int] = core.points_new()         # platform escrow/available
         self.credit_events: Dict[int, List[List[int]]] = {}   # user -> credit events
         self.contribution_actions: Dict[int, List[List[int]]] = {}  # user -> actions
+        self.users: Dict[int, Dict[str, object]] = {}      # v0.52 — user -> profile
+
+    # --- v0.52 用户会话层（用户态隔离） -------------------------------------
+    def register(self, user: int, name: str) -> Dict[str, object]:
+        """Register a user (idempotent: re-register keeps the existing profile).
+        Every business value stays isolated per user (quota/credit/actions)."""
+        if user not in self.users:
+            self.users[user] = {"name": name, "joined": True}
+        return self.users[user]
+
+    def me(self, user: int) -> Dict[str, object]:
+        """Per-user session summary: profile + quota + credit + tasks posted."""
+        quota = self.quotas.get(user)
+        credit = self.credit(user) if user in self.credit_events else 0
+        posted = [tid for tid, t in self.tasks.items() if t[0] == user]
+        return {
+            "user": user,
+            "profile": self.users.get(user, {"name": "", "joined": False}),
+            "quota": quota,
+            "credit": credit,
+            "posted_tasks": posted,
+        }
 
     # --- v0.51 状态持久化（JSON 序列化，重启不丢） ---------------------------
     def to_state(self) -> dict:
@@ -48,6 +71,7 @@ class MVPApp:
             "points": self.points,
             "credit_events": {str(k): v for k, v in self.credit_events.items()},
             "contribution_actions": {str(k): v for k, v in self.contribution_actions.items()},
+            "users": {str(k): v for k, v in self.users.items()},
         }
 
     @classmethod
@@ -62,6 +86,7 @@ class MVPApp:
         app.contribution_actions = {
             int(k): v for k, v in state.get("contribution_actions", {}).items()
         }
+        app.users = {int(k): v for k, v in state.get("users", {}).items()}
         return app
 
     # --- §SK.6.1 开户额度 ---------------------------------------------------
@@ -252,11 +277,11 @@ class _Handler(BaseHTTPRequestHandler):
         return default
 
     def _get_str(self, name: str) -> Optional[str]:
-        """Return a raw string query parameter (for list-typed args)."""
+        """Return a raw string query parameter (URL-decoded, for list args)."""
         raw = self.path.split("?", 1)[1] if "?" in self.path else ""
         for part in raw.split("&"):
             if part.startswith(name + "="):
-                return part.split("=", 1)[1]
+                return unquote(part.split("=", 1)[1])
         return None
 
     def _save_state(self):
@@ -275,6 +300,17 @@ class _Handler(BaseHTTPRequestHandler):
                 if user is None or monthly is None:
                     return self._json({"error": "need user & monthly"}, 400)
                 return self._json({"quota": app.open_quota(user, monthly)})
+            if path == "/register":
+                user = self._get("user")
+                name = self._get_str("name")
+                if user is None or name is None:
+                    return self._json({"error": "need user & name"}, 400)
+                return self._json({"profile": app.register(user, name)})
+            if path == "/me":
+                user = self._get("user")
+                if user is None:
+                    return self._json({"error": "need user"}, 400)
+                return self._json(app.me(user))
             if path == "/post":
                 author = self._get("author")
                 bounty = self._get("bounty")
@@ -427,9 +463,18 @@ def run_http_smoke() -> Tuple[int, int]:
         with urllib.request.urlopen(base + path, timeout=10) as resp:
             return json.loads(resp.read().decode("utf-8"))
 
+    # 0. 用户会话 (v0.52)  /register?user=7&name=… → profile; /me → summary
+    r = get("/register?user=7&name=%E6%89%BE%E8%8C%AC%E4%B8%BB")
+    check("HTTP /register", r["profile"].get("joined") is True, f"got {r}")
+    r = get("/me?user=7")
+    check("HTTP /me user", r["user"] == 7, f"got {r}")
+    check("HTTP /me profile", r["profile"].get("name") == "找茬主", f"got {r}")
+
     # 1. 开户额度   /quota?user=7&monthly=50          → {"quota": [50, 50]}
     r = get("/quota?user=7&monthly=50")
     check("HTTP /quota", r == {"quota": [50, 50]}, f"got {r}")
+    r = get("/me?user=7")
+    check("HTTP /me quota", r["quota"] == [50, 50], f"got {r}")
 
     # 2. 发布需求   /post?author=7&bounty=100        → task / quota / points
     r = get("/post?author=7&bounty=100")

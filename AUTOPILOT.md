@@ -296,6 +296,17 @@
       sigma-prove 53 项 PROVED、三端 0 warning，v0.10–v0.50 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.52 完成定义（找茬 App 用户会话层，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **用户态隔离**: `sigma_app.py` MVPApp 增加 `users` 用户表 +
+      `register()/me()`（每个用户独立配额/积分/贡献/任务上下文）；HTTP 端点
+      `/register`（幂等注册）与 `/me`（会话摘要）；users 纳入状态持久化。
+- [x] **冒烟扩展**: `--smoke` 增加用户会话步骤（25/25 → 29/29）；新增 _get_str
+      URL 解码支持中文名（找茬主）。
+- [x] **不回归**: 自检 15/15、persist-test 10/10、consensus 47/47、p0 109/109、
+      sigma-prove 53 项 PROVED、三端 0 warning，v0.10–v0.51 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
