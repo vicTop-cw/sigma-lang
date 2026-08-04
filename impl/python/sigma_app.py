@@ -1297,6 +1297,90 @@ def run_panel_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_run_accept() -> Tuple[int, int]:
+    """--run-accept (v0.96): go-live run acceptance, end to end — startup
+    self-check, dual services online, the full frontend business flow, live
+    /panel data, persistable state and an auditable ΣLang trail."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    import http.server
+    # 1. 启动自检（§SK.6 门禁）
+    sp, st = run_story(MVPApp())
+    check("RA self-check", sp == st == 15, f"got {sp}/{st}")
+    # 2. 双服务（开工形态）
+    _Handler.app = MVPApp()
+    api_server = HTTPServer(("127.0.0.1", 0), _Handler)
+    api_port = api_server.server_address[1]
+    threading.Thread(target=api_server.serve_forever, daemon=True).start()
+    web_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "web")
+    old_cwd = os.getcwd()
+    try:
+        os.chdir(web_dir)
+        front = HTTPServer(("127.0.0.1", 0), http.server.SimpleHTTPRequestHandler)
+        front_port = front.server_address[1]
+        threading.Thread(target=front.serve_forever, daemon=True).start()
+        base = f"http://127.0.0.1:{api_port}"
+        fbase = f"http://127.0.0.1:{front_port}"
+
+        with urllib.request.urlopen(fbase + "/", timeout=10) as r:
+            html = r.read().decode("utf-8")
+        check("RA front online", r.status == 200 and "找茬" in html,
+              f"status {r.status}")
+        with urllib.request.urlopen(base + "/health", timeout=10) as r:
+            h = json.loads(r.read().decode("utf-8"))
+        check("RA api online", h.get("status") == "ok", f"got {h}")
+
+        # 3. 全链路业务流（真实使用序列）
+        def call(p: str) -> dict:
+            with urllib.request.urlopen(base + p, timeout=10) as r:
+                return json.loads(r.read().decode("utf-8"))
+        call(f"/register?user=7&name={quote('找茬主')}")
+        call(f"/register?user=3&name={quote('找茬人')}")
+        call("/quota?user=7&monthly=50")
+        r = call("/post?author=7&bounty=100")
+        tid = r["task_id"]
+        call(f"/claim?task={tid}&hunter=3")
+        call(f"/submit?task={tid}")
+        r = call(f"/accept?task={tid}&caller=7")
+        check("RA flow accept", r["task"] == [7, 100, 3, 3], f"got {r}")
+        call("/withdraw?user=3&amount=100")
+        r = call("/badge?user=3")
+        check("RA flow badge", r["badge"] == 1, f"got {r}")
+
+        # 4. /panel 实时数据
+        with urllib.request.urlopen(base + "/panel", timeout=10) as r:
+            panel = r.read().decode("utf-8")
+        check("RA panel live", "用户数" in panel and ">2<" in panel
+              and "已完成" in panel, "")
+
+        # 5. 状态可持久化（重建后业务流状态保持）
+        s = _Handler.app.to_state()
+        app2 = MVPApp.from_state(s)
+        check("RA persist rebuild", len(app2.tasks) == 1
+              and app2.tasks[tid][2] == 3, f"got {app2.tasks}")
+
+        # 6. 审计可对账（ΣLang 事件链覆盖全链路变更操作）
+        trail = _Handler.app.audit_trail()
+        ops = [e.get("op") for e in trail]
+        check("RA audit trail",
+              len(trail) >= 6 and "task_create" in ops
+              and "task_accept" in ops and "points_withdraw" in ops,
+              f"len {len(trail)} ops {ops}")
+        front.shutdown()
+    finally:
+        os.chdir(old_cwd)
+        api_server.shutdown()
+    return passed, total
+
+
 def run_launch(argv=None) -> int:
     """--launch (v0.94): one-command go-live — startup self-check (§SK.6),
     then serve the backend API (--port, default 8080) and the web/ frontend
@@ -1441,6 +1525,10 @@ def main(argv=None):
     if "--panel-test" in argv:
         passed, total = run_panel_test()
         print(f"sigma_app panel test (v0.95): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--run-accept" in argv:
+        passed, total = run_run_accept()
+        print(f"sigma_app run accept (v0.96): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--launch" in argv:
         return run_launch(argv)

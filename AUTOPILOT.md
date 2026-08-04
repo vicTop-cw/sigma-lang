@@ -738,6 +738,15 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.96 完成定义（运行验收，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **--run-accept**: 开工放行端到端验收 8 项——启动自检 / 双服务在线 /
+      全链路业务流 / /panel 实时数据 / 状态可持久化 / 审计可对账。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、panel-test 5/5、consensus 51/51、
+      p0 109/109、sigma-prove 73 项 PROVED、三端 0 warning，v0.10–v0.95 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
