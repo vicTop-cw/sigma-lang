@@ -436,9 +436,15 @@
   /fill_rate）、验收清单（--scenario/--smoke/--auth-test/--health-test/
   --app-smoke）——每个端点含参数表与响应示例，文档与实现双端对应；
   consensus 51/51、p0 109/109，v0.10–v0.80 不回归。
+- ✅ **REACHED v0.82 (2026-08-04)**: HTTP 方法语义对齐—— `sigma_app.py`
+  新增 `do_POST`（委托 do_GET：变更端点如 /post /claim /submit 可用 POST，
+  查询端点也可 POST，参数仍在 URL query——GET 保留向后兼容），`--method-test`
+  （4/4：GET 查询 / POST 变更（注册+开户） / GET==POST 同路径结果一致）；
+  自检 15/15、冒烟 36/36 不回归；consensus 51/51、p0 109/109，
+  v0.10–v0.81 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.81 达成，继续 v0.82–v0.90 产品配套 + 收官工程化连续推进。
+  2. （无）— v0.82 达成，继续 v0.83–v0.90 产品配套 + 收官工程化连续推进。
 
 ---
 

@@ -535,6 +535,11 @@ class _Handler(BaseHTTPRequestHandler):
             # v0.51 — persist after every request (--state FILE)
             self._save_state()
 
+    def do_POST(self):
+        # v0.82 — HTTP 方法语义对齐：POST 与 GET 同行为（变更端点如 /post
+        # /claim /submit 可用 POST；查询端点也可 POST；参数仍在 URL query）
+        self.do_GET()
+
     def log_message(self, fmt, *args):
         """v0.73 — leveled access log: 2xx = INFO, 4xx/5xx = WARNING; written
         to --log-file when set (append), else stderr."""
@@ -1033,6 +1038,55 @@ def run_startup_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_method_test() -> Tuple[int, int]:
+    """--method-test (v0.82): HTTP method semantics — queries work on GET,
+    mutations work on POST, and GET/POST on the same path agree."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def get(path: str) -> dict:
+        with urllib.request.urlopen(base + path, timeout=10) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+
+    def post(path: str) -> dict:
+        req = urllib.request.Request(base + path, method="POST")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+
+    try:
+        # 1. 查询端点 GET 可用
+        r = get("/tasks")
+        check("METHOD get query", "tasks" in r, f"got {r}")
+        # 2. 变更端点 POST 可用（注册 + 发单）
+        r = post(f"/register?user=7&name={quote('找茬主')}")
+        check("METHOD post mutation", r["profile"].get("joined") is True,
+              f"got {r}")
+        r = post("/quota?user=7&monthly=50")
+        check("METHOD post quota", r["quota"] == [50, 50], f"got {r}")
+        # 3. GET/POST 同路径结果一致
+        g = get("/tasks")
+        p = post("/tasks")
+        check("METHOD get==post", g == p, f"GET {g} vs POST {p}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     state_file = None
@@ -1059,6 +1113,10 @@ def main(argv=None):
     if "--startup-test" in argv:
         passed, total = run_startup_test()
         print(f"sigma_app startup test (v0.75): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--method-test" in argv:
+        passed, total = run_method_test()
+        print(f"sigma_app method test (v0.82): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--auth-test" in argv:
         passed, total = run_auth_test()

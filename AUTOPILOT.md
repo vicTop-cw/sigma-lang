@@ -601,6 +601,15 @@
       0 warning，v0.10–v0.80 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.82 完成定义（HTTP 方法语义对齐，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **do_POST**: 委托 do_GET——变更端点可用 POST，查询端点也可 POST，
+      GET 保留向后兼容。
+- [x] **--method-test**: 4/4（GET 查询 / POST 变更 / GET==POST 同路径一致）。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 51/51、p0 109/109、
+      sigma-prove 73 项 PROVED、三端 0 warning，v0.10–v0.81 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
