@@ -492,6 +492,17 @@
       0 warning，v0.10–v0.69 全部保持全绿；sigma-accept.py 九道门禁全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.71 完成定义（找茬 App 鉴权层，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **token 鉴权**: `sigma_app.py` 新增 `--auth-token TOKEN`——请求须带
+      ?token= 匹配，否则 401 AuthRequired；未启用时全部放行。
+- [x] **--auth-test**: 4/4（无 token→401 / 错 token→401 / 对 token→200 /
+      业务可用）。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、scenario 16/16、consensus 51/51、
+      p0 109/109、sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.70 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

@@ -22,7 +22,7 @@ import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Dict, List, Optional, Tuple
-from urllib.parse import unquote
+from urllib.parse import quote, unquote
 
 sys.path.insert(0, __file__ and __file__.rsplit("/", 1)[0] or ".")
 import sigma_core as core
@@ -314,6 +314,14 @@ class _Handler(BaseHTTPRequestHandler):
     app: MVPApp = MVPApp()
     _state_file: Optional[str] = None          # v0.51 — --state FILE (persist)
     _audit_file: Optional[str] = None          # v0.55 — --audit-log FILE
+    _auth_token: Optional[str] = None          # v0.71 — --auth-token (401 gate)
+
+    def _authorized(self) -> bool:
+        """v0.71 — token auth: every request must carry ?token= matching
+        --auth-token; when auth is disabled (None) everything passes."""
+        if _Handler._auth_token is None:
+            return True
+        return self._get_str("token") == _Handler._auth_token
 
     def _json(self, obj, code: int = 200):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -352,6 +360,9 @@ class _Handler(BaseHTTPRequestHandler):
                 json.dump(_Handler.app.audit_trail(), f, ensure_ascii=False, indent=2)
 
     def do_GET(self):
+        # v0.71 — 鉴权门禁：--auth-token 启用时未带正确 token → 401
+        if not self._authorized():
+            return self._json({"error": "AuthRequired"}, 401)
         path = self.path.split("?", 1)[0]
         app = _Handler.app
         try:
@@ -776,6 +787,50 @@ def run_scenario() -> Tuple[int, int]:
     return passed, total
 
 
+def run_auth_test() -> Tuple[int, int]:
+    """--auth-test (v0.71): token auth gate over HTTP — no token → 401,
+    wrong token → 401, right token → 200 (and business works)."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    _Handler._auth_token = "test-token"
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def get_status(path: str) -> Tuple[int, dict]:
+        try:
+            with urllib.request.urlopen(base + path, timeout=10) as resp:
+                return resp.status, json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            return e.code, json.loads(e.read().decode("utf-8"))
+
+    st, r = get_status("/tasks")
+    check("AUTH no token -> 401", st == 401, f"got {st} {r}")
+    st, r = get_status("/tasks?token=wrong")
+    check("AUTH wrong token -> 401", st == 401, f"got {st} {r}")
+    st, r = get_status("/tasks?token=test-token")
+    check("AUTH right token -> 200", st == 200, f"got {st} {r}")
+    st, r = get_status(f"/register?token=test-token&user=7&name={quote('找茬主')}")
+    check("AUTH business works", st == 200 and r["profile"].get("joined") is True,
+          f"got {st} {r}")
+
+    _Handler._auth_token = None  # 复位（不影响后续测试）
+    server.shutdown()
+    thread.join()
+    return passed, total
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     state_file = None
@@ -785,6 +840,12 @@ def main(argv=None):
             state_file = argv[i + 1]
         if a == "--audit-log" and i + 1 < len(argv):
             audit_file = argv[i + 1]
+        if a == "--auth-token" and i + 1 < len(argv):
+            auth_token = argv[i + 1]
+    if "--auth-test" in argv:
+        passed, total = run_auth_test()
+        print(f"sigma_app auth test (v0.71): {passed}/{total} passed")
+        return 0 if passed == total else 1
     if "--audit-test" in argv:
         passed, total = run_audit_test()
         print(f"sigma_app audit test (v0.55): {passed}/{total} passed")
@@ -812,6 +873,7 @@ def main(argv=None):
             print(f"找茬 MVP 参考实现 — loaded state from {state_file}")
         _Handler._state_file = state_file
         _Handler._audit_file = audit_file
+        _Handler._auth_token = auth_token
         print(f"找茬 MVP 参考实现 — http://127.0.0.1:{port}  "
               f"(GET /post /claim /submit /accept /withdraw /badge)")
         HTTPServer(("127.0.0.1", port), _Handler).serve_forever()

@@ -369,9 +369,14 @@
   PROVED、--domains 41/41、全量重验 62 项）；sigma-accept.py 九道门禁全绿；
   consensus 51/51、p0 109/109、三端 0 warning，v0.10–v0.69 不回归——ΣLang
   从 v0.10 到 v0.70 里程碑链完整。
+- ✅ **REACHED v0.71 (2026-08-04)**: 找茬 App 鉴权层—— `sigma_app.py` 新增
+  `--auth-token TOKEN`（token 鉴权门禁：请求须带 ?token= 匹配，否则 401
+  AuthRequired；未启用时全部放行），`--auth-test`（4/4：无 token→401 /
+  错 token→401 / 对 token→200 / 业务可用）；自检 15/15、冒烟 36/36、
+  scenario 16/16 不回归；consensus 51/51、p0 109/109，v0.10–v0.70 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.70 达成，v0.51–v0.70 连续推进收官。
+  2. （无）— v0.71 达成，继续 v0.72–v0.90 找茬服务化 + 业务规则深化 + 产品配套连续推进。
 
 ---
 
