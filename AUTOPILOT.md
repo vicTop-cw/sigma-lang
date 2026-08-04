@@ -641,6 +641,17 @@
       0 warning、sigma-accept 10/10，v0.10–v0.84 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.86 完成定义（协议版本化，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **版本升级**: spec 0.4.0 → 0.5.0（README Spec Version + Citation 同步）；
+      v0.71–v0.85 的语义面扩展（服务化十件套 + 跨操作不变量 73 项 PROVED）
+      满足 0.5.0。
+- [x] **RFC 记录**: 「找茬服务化（v0.71–v0.75）+ 业务规则深化（v0.76–v0.80）+
+      产品配套（v0.81–v0.85）」三阶段已闭环并记录。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 73 项 PROVED、三端
+      0 warning、sigma-accept 10/10，v0.10–v0.85 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
