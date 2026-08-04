@@ -354,9 +354,17 @@
   --persist-test/--audit-test/--app-scenario）、运维要点（状态文件权限/审计日志
   归档/无外部依赖/扩展方向）——找茬从"可运行"走向"可部署"；consensus 51/51、
   p0 109/109，v0.10–v0.67 不回归。
+- ✅ **REACHED v0.69 (2026-08-04)**: README 产品落地指南—— README 新增
+  「Product Guide / 用 ΣLang 做找茬」章节：找茬功能 ↔ §SK 语义对照表
+  （发单=task_create+points_hold / 接单=accept_task / 验收=task_accept /
+  提现=points_withdraw / 勋章=badge_level / 核验师=badge_issue / 督导=
+  dispute_review / 团=team_* / 预支=quota_advance / 可追溯=points_ledger 等
+  十二项）、落地三步走（起后端 → 过验收 → 扩展业务先写进 spec）、指向部署
+  文档——从"协议"到"产品"的路径一张表看懂；consensus 51/51、p0 109/109，
+  v0.10–v0.68 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.68 达成，继续 v0.69–v0.70 落地指南 + 收官。
+  2. （无）— v0.69 达成，进入 v0.70 里程碑收官。
 
 ---
 

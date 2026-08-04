@@ -472,6 +472,15 @@
       0 warning，v0.10–v0.67 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.69 完成定义（README 产品落地指南，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **落地指南**: README 新增「Product Guide / 用 ΣLang 做找茬」——找茬功能
+      ↔ §SK 语义对照表（十二项）、落地三步走（起后端 → 过验收 → 扩展业务先写进
+      spec）、指向部署文档。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 62 项 PROVED、三端
+      0 warning，v0.10–v0.68 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
