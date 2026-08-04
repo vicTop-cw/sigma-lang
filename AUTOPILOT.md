@@ -758,6 +758,15 @@
       0 warning、sigma-accept 10/10，v0.10–v0.96 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.98 完成定义（README 找茬运行指南，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **运行指南**: README 新增「Run Guide / 找茬运行指南」——一条命令开工
+      （--launch）、四入口（前端/API//panel//health）、开工后使用流程五步、
+      运行验收与协议门禁——"照着跑起来"。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 73 项 PROVED、三端
+      0 warning、sigma-accept 10/10，v0.10–v0.97 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
