@@ -89,7 +89,7 @@ def main():
     if report_file:
         with open(report_file, "w", encoding="utf-8") as f:
             json.dump({
-                "spec": "0.5.0",
+                "spec": "0.6.0",
                 "date": "2026-08-04",
                 "gates": results,
                 "passed": len(gates) - failed,

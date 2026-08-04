@@ -767,6 +767,17 @@
       0 warning、sigma-accept 10/10，v0.10–v0.97 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.99 完成定义（里程碑达成，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **收官**: v0.91–v0.99 连续推进收官——找茬真正开工（web 前端/--web-test/
+      --launch//panel/--run-accept/spec 0.6.0/运行指南）全部达成——从"协议可用"
+      到"协议驱动产品可运行可验收"。
+- [x] **门禁**: consensus 51/51、p0 109/109、sigma-prove 73 项 PROVED、
+      sigma-runtime 59/59 + 47/47、双端冒烟 36/36、sigma-accept 十道门禁
+      10/10（含 --report）、--run-accept 8/8、三端 0 warning，
+      v0.10–v0.98 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

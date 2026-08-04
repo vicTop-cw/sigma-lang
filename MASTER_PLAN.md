@@ -557,9 +557,17 @@
   提现→勋章）、运行验收（--run-accept 8 项端到端）与协议门禁
   （sigma-accept 十道门禁）——从"知道能跑"到"照着跑起来"；
   consensus 51/51、p0 109/109，v0.10–v0.97 不回归。
+- ✅ **REACHED v0.99 (2026-08-04)**: 里程碑达成—— v0.91–v0.99 连续推进收官：
+  找茬真正开工（前端单页应用 web/index.html + UI 完善、前端联调验证
+  --web-test、一键开工 --launch、运行状态面板 /panel、运行验收 --run-accept、
+  协议版本化 spec 0.6.0、README 运行指南）——从"协议可用"到"协议驱动产品
+  可运行可验收"；最终验收：sigma-accept.py 十道门禁全绿（含 --report 回归
+  报告）+ --run-accept 8/8 运行形态放行；consensus 51/51、p0 109/109、
+  三端 0 warning，v0.10–v0.98 不回归——ΣLang 从 v0.10 到 v0.99 里程碑链
+  完整。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.98 达成，进入 v0.99 里程碑收官。
+  2. （无）— v0.99 达成，v0.91–v0.99 连续推进收官。
 
 ---
 
