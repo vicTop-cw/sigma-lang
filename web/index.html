@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>找茬 · ΣLang 驱动的找茬平台（v0.91）</title>
+<style>
+  :root { --ok:#2e7d32; --warn:#c62828; --accent:#1565c0; --bg:#f5f7fa; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Microsoft YaHei", sans-serif; background:var(--bg); color:#263238; }
+  header { background:#1a237e; color:#fff; padding:14px 24px; font-size:18px;
+           display:flex; justify-content:space-between; align-items:center; }
+  header span { font-size:12px; opacity:.8; }
+  main { max-width:960px; margin:20px auto; padding:0 16px; display:grid; gap:16px; }
+  section { background:#fff; border-radius:8px; padding:16px; box-shadow:0 1px 3px rgba(0,0,0,.12); }
+  h2 { margin:0 0 12px; font-size:15px; color:#1a237e; border-left:4px solid var(--accent); padding-left:8px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px; }
+  input, button { padding:8px 12px; border-radius:6px; border:1px solid #cfd8dc; font-size:14px; }
+  input { width:110px; }
+  button { cursor:pointer; background:var(--accent); color:#fff; border-color:var(--accent); }
+  button.ghost { background:#fff; color:var(--accent); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid #eceff1; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:12px; }
+  .s0 { background:#eceff1; color:#546e7a; } .s1 { background:#fff3e0; color:#ef6c00; }
+  .s2 { background:#e3f2fd; color:#1565c0; } .s3 { background:#e8f5e9; color:#2e7d32; }
+  #log { max-height:200px; overflow:auto; font-family:Consolas,monospace; font-size:12px;
+         background:#263238; color:#b2dfdb; border-radius:6px; padding:10px; }
+  #log div { padding:2px 0; }
+  .err { color:#ef9a9a; } .ok { color:#a5d6a7; }
+  .muted { color:#78909c; font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <div>🔍 找茬 · ΣLang 语义协议驱动的找茬平台</div>
+  <span id="spec-ver">spec 0.5.0 · 后端 <span id="backend">未连接</span></span>
+</header>
+
+<main>
+  <section id="user-panel">
+    <h2>我的会话（v0.52 用户态）</h2>
+    <div class="row">
+      <input id="u-reg" type="number" placeholder="用户 id" value="7">
+      <input id="n-reg" placeholder="昵称" value="找茬主">
+      <button onclick="reg()">注册</button>
+      <button class="ghost" onclick="quota()">开户额度(50)</button>
+      <button class="ghost" onclick="me()">我的摘要</button>
+      <span id="me-out" class="muted"></span>
+    </div>
+  </section>
+
+  <section id="post-panel">
+    <h2>发布需求（§SK.6）</h2>
+    <div class="row">
+      <input id="p-author" type="number" placeholder="作者" value="7">
+      <input id="p-bounty" type="number" placeholder="赏金" value="100">
+      <button onclick="post()">发单</button>
+      <span id="post-out" class="muted"></span>
+    </div>
+  </section>
+
+  <section id="tasks-panel">
+    <h2>任务列表
+      <button class="ghost" onclick="tasks()" style="float:right">刷新</button>
+    </h2>
+    <table id="task-table">
+      <thead><tr><th>#</th><th>作者</th><th>赏金</th><th>状态</th><th>找茬人</th><th>操作</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="action-panel">
+    <h2>任务操作 / 提现 / 勋章</h2>
+    <div class="row">
+      <input id="a-task" type="number" placeholder="任务 id" value="0">
+      <input id="a-hunter" type="number" placeholder="找茬人" value="3">
+      <button onclick="claim()">接单</button>
+      <button onclick="submit()">提交</button>
+      <button onclick="accept()">验收</button>
+      <button onclick="withdraw()">提现100</button>
+      <button onclick="badge()">勋章</button>
+      <span id="act-out" class="muted"></span>
+    </div>
+  </section>
+
+  <section>
+    <h2>操作日志（ΣLang 审计视角）</h2>
+    <div id="log">等待操作…</div>
+  </section>
+</main>
+
+<script>
+const BASE = localStorage.getItem("sigma_base") || "http://127.0.0.1:8080";
+
+function log(msg, cls) {
+  const el = document.getElementById("log");
+  const d = document.createElement("div");
+  d.className = cls || "";
+  d.textContent = msg;
+  el.prepend(d);
+}
+
+async function api(path, label) {
+  const r = await fetch(BASE + path);
+  const j = await r.json().catch(() => ({}));
+  const status = r.status;
+  log(`[${label || path}] HTTP ${status} → ${JSON.stringify(j).slice(0, 120)}`,
+      status >= 400 ? "err" : "ok");
+  if (status >= 400) throw new Error((j.error || "HTTP " + status));
+  return j;
+}
+
+function setBackend() {
+  fetch(BASE + "/health").then(r => r.json()).then(j => {
+    document.getElementById("backend").textContent = j.status === "ok"
+      ? "在线（" + BASE + "）" : "异常";
+    document.getElementById("spec-ver").textContent =
+      "spec " + (j.gates ? "0.5.0" : "?") + " · 后端 在线";
+  }).catch(() => {
+    document.getElementById("backend").textContent = "离线（" + BASE + "）";
+  });
+}
+
+async function reg() {
+  const u = document.getElementById("u-reg").value;
+  const n = encodeURIComponent(document.getElementById("n-reg").value);
+  const j = await api(`/register?user=${u}&name=${n}`, "register");
+  document.getElementById("me-out").textContent = "已注册 " + u;
+}
+async function quota() {
+  const u = document.getElementById("u-reg").value;
+  const j = await api(`/quota?user=${u}&monthly=50`, "quota");
+  document.getElementById("me-out").textContent = "额度 " + JSON.stringify(j.quota);
+}
+async function me() {
+  const u = document.getElementById("u-reg").value;
+  const j = await api(`/me?user=${u}`, "me");
+  document.getElementById("me-out").textContent =
+    `契分 ${j.credit} · 勋章 ${j.badge ?? "—"}`;
+}
+async function post() {
+  const a = document.getElementById("p-author").value;
+  const b = document.getElementById("p-bounty").value;
+  const j = await api(`/post?author=${a}&bounty=${b}`, "post");
+  document.getElementById("post-out").textContent = `任务 #${j.task_id} 已发布`;
+  tasks();
+}
+async function tasks() {
+  try {
+    const j = await api("/tasks", "tasks");
+    const tb = document.querySelector("#task-table tbody");
+    tb.innerHTML = "";
+    for (const { task_id, task } of j.tasks || []) {
+      const [author, bounty, st, hunter] = task;
+      const s = ["待接单", "进行中", "待验收", "已完成"][st] || st;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${task_id}</td><td>${author}</td><td>${bounty}</td>
+        <td><span class="badge s${st}">${s}</span></td><td>${hunter}</td>
+        <td><button class="ghost" onclick="fill(${task_id})">操作</button></td>`;
+      tb.appendChild(tr);
+    }
+  } catch (e) { /* 已在 log 显示 */ }
+}
+function fill(tid) { document.getElementById("a-task").value = tid; }
+async function claim() {
+  const t = document.getElementById("a-task").value;
+  const h = document.getElementById("a-hunter").value;
+  const j = await api(`/claim?task=${t}&hunter=${h}`, "claim");
+  document.getElementById("act-out").textContent = `任务 #${t} 已接单`;
+  tasks();
+}
+async function submit() {
+  const t = document.getElementById("a-task").value;
+  await api(`/submit?task=${t}`, "submit");
+  document.getElementById("act-out").textContent = `任务 #${t} 已提交`;
+  tasks();
+}
+async function accept() {
+  const t = document.getElementById("a-task").value;
+  await api(`/accept?task=${t}&caller=${document.getElementById("p-author").value}`, "accept");
+  document.getElementById("act-out").textContent = `任务 #${t} 已验收`;
+  tasks();
+}
+async function withdraw() {
+  const u = document.getElementById("a-hunter").value;
+  await api(`/withdraw?user=${u}&amount=100`, "withdraw");
+  document.getElementById("act-out").textContent = "已提现 100";
+}
+async function badge() {
+  const u = document.getElementById("a-hunter").value;
+  const j = await api(`/badge?user=${u}`, "badge");
+  document.getElementById("act-out").textContent = `契分 ${j.credit} · 勋章 ${j.badge}`;
+}
+
+setBackend();
+tasks();
+</script>
+</body>
+</html>

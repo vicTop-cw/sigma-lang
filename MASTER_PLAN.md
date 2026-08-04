@@ -501,9 +501,16 @@
   README 收官总览）；sigma-accept.py 十道门禁全绿（含 --report 回归报告）；
   consensus 51/51、p0 109/109、三端 0 warning，v0.10–v0.89 不回归——ΣLang
   从 v0.10 到 v0.90 里程碑链完整。
+- ✅ **REACHED v0.91 (2026-08-04)**: 找茬静态前端—— 新建 `web/index.html`
+  （201 行单页应用，纯 HTML+JS 无依赖）：中文 UI（我的会话注册/开户/摘要、
+  发布需求发单、任务列表带状态徽章、任务操作接单/提交/验收/提现/勋章、ΣLang
+  审计视角操作日志），全部经 `fetch` 调后端 HTTP API（/register /quota /post
+  /tasks /claim /submit /accept /withdraw /badge /health），后端地址可配
+  （localStorage sigma_base，默认 127.0.0.1:8080）——找茬"开工"的前端雏形
+  落地；consensus 51/51、p0 109/109，v0.10–v0.90 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.90 达成，v0.71–v0.90 连续推进收官。
+  2. （无）— v0.91 达成，继续 v0.92–v0.99 找茬开工连续推进。
 
 ---
 

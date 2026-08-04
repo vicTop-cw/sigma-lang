@@ -690,6 +690,15 @@
       10/10（含 --report）、三端 0 warning，v0.10–v0.89 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.91 完成定义（找茬静态前端，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **web/index.html**: 新建找茬单页前端（201 行，纯 HTML+JS 无依赖）——
+      注册/开户/摘要、发单、任务列表（状态徽章）、接单/提交/验收/提现/勋章、
+      ΣLang 审计操作日志，全 fetch 调后端 API，后端地址可配。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 73 项 PROVED、三端
+      0 warning、sigma-accept 10/10，v0.10–v0.90 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
