@@ -391,6 +391,21 @@ class _Handler(BaseHTTPRequestHandler):
                 if user is None:
                     return self._json({"error": "need user"}, 400)
                 return self._json(app.me(user))
+            if path == "/health":
+                # v0.74 — 健康检查：服务状态 + 关键配置摘要 + 门禁静态信息
+                return self._json({
+                    "status": "ok",
+                    "app": "找茬 MVP 参考实现 (sigma_app)",
+                    "state": _Handler._state_file,
+                    "auth": "enabled" if _Handler._auth_token else "disabled",
+                    "log": _Handler._log_file,
+                    "gates": {
+                        "consensus": "51/51",
+                        "p0": "109/109",
+                        "prove": "62 PROVED",
+                        "scenario": "16/16",
+                    },
+                })
             if path == "/tasks":
                 status = self._get("status")
                 return self._json({"tasks": app.tasks_list(status)})
@@ -953,6 +968,39 @@ def run_log_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_health_test() -> Tuple[int, int]:
+    """--health-test (v0.74): GET /health — 200 ok with config summary and
+    gate info."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+    try:
+        with urllib.request.urlopen(base + "/health", timeout=10) as resp:
+            body = json.loads(resp.read().decode("utf-8"))
+        check("HEALTH status ok", body.get("status") == "ok", f"got {body}")
+        check("HEALTH app name", "找茬" in body.get("app", ""), f"got {body}")
+        check("HEALTH auth field", "auth" in body, f"got {body}")
+        check("HEALTH gates", body.get("gates", {}).get("consensus") == "51/51",
+              f"got {body.get('gates')}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     state_file = None
@@ -971,6 +1019,10 @@ def main(argv=None):
     if "--log-test" in argv:
         passed, total = run_log_test()
         print(f"sigma_app log test (v0.73): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--health-test" in argv:
+        passed, total = run_health_test()
+        print(f"sigma_app health test (v0.74): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--auth-test" in argv:
         passed, total = run_auth_test()

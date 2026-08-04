@@ -524,6 +524,16 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.74 完成定义（找茬 App 健康检查，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **/health 端点**: 服务状态 ok + 配置摘要（state/auth/log）+ 门禁静态信息
+      （consensus 51/51 / p0 109/109 / prove 62 PROVED / scenario 16/16）。
+- [x] **--health-test**: 4/4（status ok / 应用名 / auth 字段 / gates）。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、log-test 4/4、consensus 51/51、
+      p0 109/109、sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.73 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
