@@ -493,9 +493,17 @@
   artifact）、三端 0 warning、找茬产品落地（服务化十件套 + 文档 + checklist +
   前端剧本）——README 首页一张图看到 v0.89 全貌；consensus 51/51、p0 109/109，
   v0.10–v0.88 不回归。
+- ✅ **REACHED v0.90 (2026-08-04)**: 里程碑达成—— v0.71–v0.90 连续推进收官：
+  找茬正式开工准备（服务化十件套：鉴权/原子写/分级日志/健康检查/启动自检/
+  方法语义/前端剧本/双端对账/API 文档/开工 checklist）+ 业务规则深化
+  （INV-Q/T/G/SK-3/Q-3 跨操作不变量 73 项 PROVED、--domains 47/47 十二项
+  不变量复核）+ 工程化收官（spec 0.5.0、CI 回归报告 artifact、贡献者指南、
+  README 收官总览）；sigma-accept.py 十道门禁全绿（含 --report 回归报告）；
+  consensus 51/51、p0 109/109、三端 0 warning，v0.10–v0.89 不回归——ΣLang
+  从 v0.10 到 v0.90 里程碑链完整。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.89 达成，进入 v0.90 里程碑收官。
+  2. （无）— v0.90 达成，v0.71–v0.90 连续推进收官。
 
 ---
 

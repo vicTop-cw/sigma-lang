@@ -679,6 +679,17 @@
       0 warning、sigma-accept 10/10，v0.10–v0.88 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.90 完成定义（里程碑达成，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **收官**: v0.71–v0.90 连续推进收官——找茬开工准备（服务化十件套）、
+      业务规则深化（INV-Q/T/G/SK-3/Q-3 跨操作不变量 73 项 PROVED、
+      --domains 47/47 十二项复核）、工程化收官（spec 0.5.0、CI 回归报告、
+      贡献者指南、README 收官总览）全部达成。
+- [x] **门禁**: consensus 51/51、p0 109/109、sigma-prove 73 项 PROVED、
+      sigma-runtime 59/59 + 47/47、双端冒烟 36/36、sigma-accept 十道门禁
+      10/10（含 --report）、三端 0 warning，v0.10–v0.89 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
