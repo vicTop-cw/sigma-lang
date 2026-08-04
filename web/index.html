@@ -38,6 +38,9 @@
   <span id="spec-ver">spec 0.5.0 · 后端 <span id="backend">未连接</span></span>
 </header>
 
+<div id="banner" hidden style="background:#ffebee; color:#c62828; padding:10px 24px;
+     border-bottom:1px solid #ffcdd2; font-size:14px;"></div>
+
 <main>
   <section id="user-panel">
     <h2>我的会话（v0.52 用户态）</h2>
@@ -65,6 +68,14 @@
     <h2>任务列表
       <button class="ghost" onclick="tasks()" style="float:right">刷新</button>
     </h2>
+    <div class="row" style="margin-bottom:8px">
+      <span class="muted">筛选:</span>
+      <button class="ghost filter-btn" data-f="all" onclick="setFilter('all')" style="opacity:1">全部</button>
+      <button class="ghost filter-btn" data-f="0" onclick="setFilter('0')" style="opacity:.45">待接单</button>
+      <button class="ghost filter-btn" data-f="1" onclick="setFilter('1')" style="opacity:.45">进行中</button>
+      <button class="ghost filter-btn" data-f="2" onclick="setFilter('2')" style="opacity:.45">待验收</button>
+      <button class="ghost filter-btn" data-f="3" onclick="setFilter('3')" style="opacity:.45">已完成</button>
+    </div>
     <table id="task-table">
       <thead><tr><th>#</th><th>作者</th><th>赏金</th><th>状态</th><th>找茬人</th><th>操作</th></tr></thead>
       <tbody></tbody>
@@ -102,13 +113,27 @@ function log(msg, cls) {
   el.prepend(d);
 }
 
+// v0.92 — 错误横幅：操作失败时顶部醒目提示（不只进日志）
+function showError(msg) {
+  const b = document.getElementById("banner");
+  b.hidden = false;
+  b.textContent = "⚠ " + msg;
+  clearTimeout(showError._t);
+  showError._t = setTimeout(() => { b.hidden = true; }, 6000);
+}
+
+let currentFilter = "all";  // v0.92 — 状态筛选
+
 async function api(path, label) {
   const r = await fetch(BASE + path);
   const j = await r.json().catch(() => ({}));
   const status = r.status;
   log(`[${label || path}] HTTP ${status} → ${JSON.stringify(j).slice(0, 120)}`,
       status >= 400 ? "err" : "ok");
-  if (status >= 400) throw new Error((j.error || "HTTP " + status));
+  if (status >= 400) {
+    showError((j.error || "HTTP " + status) + " — " + (label || path));
+    throw new Error(j.error || "HTTP " + status);
+  }
   return j;
 }
 
@@ -137,8 +162,10 @@ async function quota() {
 async function me() {
   const u = document.getElementById("u-reg").value;
   const j = await api(`/me?user=${u}`, "me");
+  // v0.92 — 用户面板：契分/勋章/额度/已发任务
+  const q = j.quota ? JSON.stringify(j.quota) : "未开户";
   document.getElementById("me-out").textContent =
-    `契分 ${j.credit} · 勋章 ${j.badge ?? "—"}`;
+    `契分 ${j.credit} · 勋章 ${j.badge ?? "—"} · 额度 ${q} · 已发任务 ${(j.posted_tasks || []).length}`;
 }
 async function post() {
   const a = document.getElementById("p-author").value;
@@ -154,14 +181,35 @@ async function tasks() {
     tb.innerHTML = "";
     for (const { task_id, task } of j.tasks || []) {
       const [author, bounty, st, hunter] = task;
+      if (currentFilter !== "all" && st !== Number(currentFilter)) continue;
       const s = ["待接单", "进行中", "待验收", "已完成"][st] || st;
       const tr = document.createElement("tr");
+      // v0.92 — 任务详情：点行展开显示完整任务数组
+      tr.style.cursor = "pointer";
       tr.innerHTML = `<td>${task_id}</td><td>${author}</td><td>${bounty}</td>
         <td><span class="badge s${st}">${s}</span></td><td>${hunter}</td>
         <td><button class="ghost" onclick="fill(${task_id})">操作</button></td>`;
+      tr.addEventListener("click", () => {
+        const detail = document.getElementById("detail-" + task_id);
+        if (detail) {
+          detail.remove();
+        } else {
+          const row = document.createElement("tr");
+          row.id = "detail-" + task_id;
+          row.innerHTML = `<td colspan="6" class="muted">ΣLang 任务态（author, bounty, state, hunter）: ${JSON.stringify(task)}</td>`;
+          tr.after(row);
+        }
+      });
       tb.appendChild(tr);
     }
-  } catch (e) { /* 已在 log 显示 */ }
+  } catch (e) { /* 已在 log/banner 显示 */ }
+}
+// v0.92 — 状态筛选
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll(".filter-btn").forEach(b =>
+    b.style.opacity = b.dataset.f === f ? "1" : ".45");
+  tasks();
 }
 function fill(tid) { document.getElementById("a-task").value = tid; }
 async function claim() {

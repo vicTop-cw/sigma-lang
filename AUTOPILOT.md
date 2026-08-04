@@ -699,6 +699,15 @@
       0 warning、sigma-accept 10/10，v0.10–v0.90 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.92 完成定义（前端 UI 完善，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **UI 增强**: web/index.html → 249 行——错误横幅（失败顶部提示）、任务
+      详情（点行展开任务态）、用户面板（契分/勋章/额度/已发任务）、状态筛选
+      （五档按钮组）。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 73 项 PROVED、三端
+      0 warning、sigma-accept 10/10，v0.10–v0.91 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
