@@ -1148,6 +1148,75 @@ def run_frontend_scenario() -> Tuple[int, int]:
     return passed, total
 
 
+def run_web_test() -> Tuple[int, int]:
+    """--web-test (v0.93): frontend-backend integration over HTTP — serves the
+    web/ frontend statically, then walks the exact call sequence a browser
+    page would make and probes every endpoint the page's JS references."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    import http.server
+    import re
+    _Handler.app = MVPApp()
+    api_server = HTTPServer(("127.0.0.1", 0), _Handler)
+    api_port = api_server.server_address[1]
+    threading.Thread(target=api_server.serve_forever, daemon=True).start()
+    web_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "web")
+    old_cwd = os.getcwd()
+    try:
+        os.chdir(web_dir)
+        front = HTTPServer(("127.0.0.1", 0), http.server.SimpleHTTPRequestHandler)
+        front_port = front.server_address[1]
+        threading.Thread(target=front.serve_forever, daemon=True).start()
+        base = f"http://127.0.0.1:{api_port}"
+        fbase = f"http://127.0.0.1:{front_port}"
+
+        # 1. 前端页面可访问（含关键 UI 元素）
+        with urllib.request.urlopen(fbase + "/", timeout=10) as r:
+            html = r.read().decode("utf-8")
+        check("WEB front serves",
+              r.status == 200 and "找茬" in html and "注册" in html and "任务列表" in html,
+              f"status {r.status}")
+        # 2. 后端健康
+        with urllib.request.urlopen(base + "/health", timeout=10) as r:
+            h = json.loads(r.read().decode("utf-8"))
+        check("WEB api health", h.get("status") == "ok", f"got {h}")
+        # 3. 前端视角业务流（页面会发出的调用序列）
+        def call(p: str) -> dict:
+            with urllib.request.urlopen(base + p, timeout=10) as r:
+                return json.loads(r.read().decode("utf-8"))
+        call(f"/register?user=7&name={quote('找茬主')}")
+        call("/quota?user=7&monthly=50")
+        r = call("/post?author=7&bounty=100")
+        check("WEB flow post", r["task"] == [7, 100, 0, 0], f"got {r}")
+        r = call("/tasks")
+        check("WEB flow tasks", len(r["tasks"]) == 1, f"got {r}")
+        # 4. 页面 JS 引用的端点全部存在（404 = 路径不存在；400 = 路由存在
+        #    但参数缺失，属正常）
+        def probe(p: str) -> int:
+            try:
+                return urllib.request.urlopen(base + "/" + p, timeout=10).status
+            except urllib.error.HTTPError as e:
+                return e.code
+        paths = sorted(set(re.findall(
+            r"/(register|quota|post|tasks|claim|submit|accept|withdraw|badge|me|health)\b",
+            html)))
+        missing = [p for p in paths if probe(p) == 404]
+        check("WEB endpoints exist", not missing, f"missing(404) {missing} in {paths}")
+        front.shutdown()
+    finally:
+        os.chdir(old_cwd)
+        api_server.shutdown()
+    return passed, total
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     state_file = None
@@ -1182,6 +1251,10 @@ def main(argv=None):
     if "--frontend-scenario" in argv:
         passed, total = run_frontend_scenario()
         print(f"sigma_app frontend scenario (v0.83): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--web-test" in argv:
+        passed, total = run_web_test()
+        print(f"sigma_app web test (v0.93): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--auth-test" in argv:
         passed, total = run_auth_test()

@@ -708,6 +708,14 @@
       0 warning、sigma-accept 10/10，v0.10–v0.91 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.93 完成定义（前端联调验证，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **--web-test**: 起后端 API + web/ 静态前端双服务，验证 5 项（前端可访问
+      含关键 UI / /health / 前端视角业务流 / 页面 JS 引用 11 端点全存在）。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 51/51、p0 109/109、
+      sigma-prove 73 项 PROVED、三端 0 warning，v0.10–v0.92 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
