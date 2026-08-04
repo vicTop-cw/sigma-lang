@@ -60,6 +60,20 @@ class MVPApp:
             "posted_tasks": posted,
         }
 
+    # --- v0.53 查询端点（任务列表 / 用户列表） -------------------------------
+    def tasks_list(self, status: Optional[int] = None) -> List[Dict[str, object]]:
+        """List tasks, optionally filtered by §SK status (0..3)."""
+        out = []
+        for tid in sorted(self.tasks):
+            t = self.tasks[tid]
+            if status is None or t[2] == status:
+                out.append({"task_id": tid, "task": t})
+        return out
+
+    def users_list(self) -> List[Dict[str, object]]:
+        """List all registered users with their session summaries."""
+        return [self.me(u) for u in sorted(self.users)]
+
     # --- v0.51 状态持久化（JSON 序列化，重启不丢） ---------------------------
     def to_state(self) -> dict:
         """Serialize all App state to a JSON-able dict (state is data only —
@@ -311,6 +325,11 @@ class _Handler(BaseHTTPRequestHandler):
                 if user is None:
                     return self._json({"error": "need user"}, 400)
                 return self._json(app.me(user))
+            if path == "/tasks":
+                status = self._get("status")
+                return self._json({"tasks": app.tasks_list(status)})
+            if path == "/users":
+                return self._json({"users": app.users_list()})
             if path == "/post":
                 author = self._get("author")
                 bounty = self._get("bounty")
@@ -482,6 +501,15 @@ def run_http_smoke() -> Tuple[int, int]:
     check("HTTP /post quota", r["quota"] == [50, 49], f"got {r.get('quota')}")
     check("HTTP /post points", r["points"] == [100, 0], f"got {r.get('points')}")
     tid = r["task_id"]
+
+    # 2.5 查询端点 (v0.53)  /tasks → 列表; /tasks?status=N → 过滤; /users
+    r = get("/tasks")
+    check("HTTP /tasks list", any(t["task_id"] == tid for t in r["tasks"]), f"got {r}")
+    check("HTTP /tasks count", len(r["tasks"]) == 1, f"got {r}")
+    r = get("/tasks?status=1")
+    check("HTTP /tasks filter", len(r["tasks"]) == 0, f"got {r}")
+    r = get("/users")
+    check("HTTP /users", any(u["user"] == 7 for u in r["users"]), f"got {r}")
 
     # 3. 接单       /claim?task=0&hunter=3           → [7, 100, 1, 3]
     r = get(f"/claim?task={tid}&hunter=3")

@@ -307,6 +307,17 @@
       sigma-prove 53 项 PROVED、三端 0 warning，v0.10–v0.51 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.53 完成定义（找茬 App 查询端点，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **查询端点**: `sigma_app.py` MVPApp 增加 `tasks_list(status)`（任务列表，
+      可按 §SK 状态 0..3 过滤）与 `users_list()`（用户会话摘要列表）；HTTP 端点
+      `/tasks`（可带 ?status=）与 `/users`。
+- [x] **冒烟扩展**: `--smoke` 增加查询步骤（29/29 → 33/33：任务列表/计数/状态
+      过滤/用户列表）。
+- [x] **不回归**: 自检 15/15、persist-test 10/10、consensus 47/47、p0 109/109、
+      sigma-prove 53 项 PROVED、三端 0 warning，v0.10–v0.52 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
