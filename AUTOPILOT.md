@@ -481,6 +481,17 @@
       0 warning，v0.10–v0.68 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.70 完成定义（里程碑达成，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **收官**: v0.51–v0.70 连续推进收官——找茬产品落地（持久化/会话/查询/
+      错误语义化/审计 + CLI 剧本 + 双端对账 + 部署文档 + 落地指南）、协议工程化
+      （CI/扩容 51 模块/中英对照/架构全景/版本化 0.4.0）、深度不变量
+      （INV-SK/PF/IN 全 PROVED、--domains 41/41、全量重验 62 项）全部达成。
+- [x] **门禁**: consensus 51/51、p0 109/109、sigma-prove 62 项 PROVED、
+      sigma-runtime 59/59 + 41/41、双端 scenario 16/16、冒烟 36/36、三端
+      0 warning，v0.10–v0.69 全部保持全绿；sigma-accept.py 九道门禁全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

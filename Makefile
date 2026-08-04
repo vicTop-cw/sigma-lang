@@ -25,7 +25,7 @@ story: ## 三域审计故事线（找茬 MVP+增长期 + 供应链）
 	$(PYTHON) tools/sigma-runtime.py --domains
 
 prove: ## z3 义务消解（全量语料重验，v0.65）
-	$(PYTHON) tools/sigma-prove.py corpus/*.md
+	$(PYTHON) tools/sigma-prove.py
 
 rust: ## Rust 编译（0 warning）+ §SK 自检
 	cd impl/verifier && cargo build
