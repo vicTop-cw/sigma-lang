@@ -402,7 +402,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "gates": {
                         "consensus": "51/51",
                         "p0": "109/109",
-                        "prove": "62 PROVED",
+                        "prove": "73 PROVED",
                         "scenario": "16/16",
                     },
                 })

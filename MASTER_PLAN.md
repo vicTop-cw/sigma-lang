@@ -421,9 +421,15 @@
   `--domains` 追加扩展段（41/41 → **47/47**）——v0.76–78 新证明的跨操作不变量
   全部进入运行时审计，三域 story 的不变量复核从 6 项扩到 12 项；trace 59/59、
   --growth 11/11 不回归；consensus 51/51、p0 109/109，v0.10–v0.78 不回归。
+- ✅ **REACHED v0.80 (2026-08-04)**: sigma-prove 全量重验（62→70+）——
+  新增两条跨操作不变量义务（INV-SK-3 积分非负链——points 链 escrow/available
+  ≥ 0；INV-Q-3 预支链——quota_advance 后 remaining = r+m ≥ 0），全量重验
+  **62 → 73 项 PROVED / 29 模块全绿**（> 70 达标）；sigma-accept.py 门禁 8
+  期望、health 端点 gates、README 架构数字全部同步为 73 PROVED；consensus
+  51/51、p0 109/109、sigma-accept 9/9 全绿，v0.10–v0.79 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.79 达成，继续 v0.80–v0.90 业务规则深化 + 产品配套连续推进。
+  2. （无）— v0.80 达成，继续 v0.81–v0.90 产品配套 + 收官工程化连续推进。
 
 ---
 

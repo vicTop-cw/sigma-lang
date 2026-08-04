@@ -669,8 +669,15 @@ def gen_socketkit_invariants(ops):
             "(assert (= (index p2 0) 0)) (assert (= (index p2 1) (- a x)))\n"
             "; INV-SK-2: available ≥ 0（不超提）\n"
             "(assert (not (>= (index p2 1) 0)))\n(check-sat)\n")
+    inv3 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const e Int) (declare-const a Int) (declare-const p Int)\n"
+            "(assert (>= e 0)) (assert (>= a 0))\n"
+            "(assert (= (index p 0) e)) (assert (= (index p 1) a))\n"
+            "; INV-SK-3 (v0.80): 积分非负链 — escrow ≥ 0 ∧ available ≥ 0\n"
+            "(assert (not (and (>= (index p 0) 0) (>= (index p 1) 0))))\n(check-sat)\n")
     return [("INV-SK-1 bounty-conserved", inv1),
-            ("INV-SK-2 no-over-withdraw", inv2)]
+            ("INV-SK-2 no-over-withdraw", inv2),
+            ("INV-SK-3 nonnegative-chain", inv3)]
 
 
 def gen_quota_invariants(ops):
@@ -678,7 +685,7 @@ def gen_quota_invariants(ops):
     INV-Q-1 不超用（quota_use 链中 remaining 永不 < 0，累计使用 ≤ monthly）/
     INV-Q-2 重置恢复（quota_reset 后 remaining 恢复 monthly）。"""
     names = {op["name"].strip() for op in ops}
-    quota_ops = {"quota_new", "quota_use", "quota_reset"}
+    quota_ops = {"quota_new", "quota_use", "quota_reset", "quota_advance"}
     if not (names & quota_ops):
         return []
     inv1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
@@ -700,8 +707,16 @@ def gen_quota_invariants(ops):
             "(assert (= (index q2 0) m)) (assert (= (index q2 1) m))\n"
             "; INV-Q-2: 重置恢复 remaining = monthly\n"
             "(assert (not (= (index q2 1) m)))\n(check-sat)\n")
+    inv3 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const m Int) (declare-const r Int) (declare-const q2 Int)\n"
+            "(assert (>= m 0)) (assert (>= r 0))\n"
+            "; 跨操作 (v0.80): quota_advance([m,r]) 后 remaining = r + m\n"
+            "(assert (= (index q2 0) m)) (assert (= (index q2 1) (+ r m)))\n"
+            "; INV-Q-3: 预支链 — advance 后 remaining ≥ 0\n"
+            "(assert (not (>= (index q2 1) 0)))\n(check-sat)\n")
     return [("INV-Q-1 no-over-use", inv1),
-            ("INV-Q-2 reset-restores", inv2)]
+            ("INV-Q-2 reset-restores", inv2),
+            ("INV-Q-3 advance-chain", inv3)]
 
 
 def gen_team_invariants(ops):
