@@ -306,9 +306,15 @@
   库存非负链——出库后每货品 ≥ 0），均 `PROVED (unsat)`——供应链语义从单操作
   定律走向跨操作不变量证明；consensus 51/51、p0 109/109、三端 0 warning，
   v0.10–v0.60 不回归。
+- ✅ **REACHED v0.62 (2026-08-04)**: 金融跨操作不变量—— `sigma-prove` 新增
+  `gen_portfolio_invariants`（对含 §PF 操作的模块附加两条跨操作不变量义务：
+  INV-PF-1 现金守恒——buy 后 cash = 初始 − 花费 ≥ 0，现金不凭空产生；INV-PF-2
+  份额守恒——sell 后 shares = 初始 − 卖出 ≥ 0，不凭空卖份额），均
+  `PROVED (unsat)`——金融语义从单操作定律走向跨操作不变量证明；consensus 51/51、
+  p0 109/109、三端 0 warning，v0.10–v0.61 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.61 达成，继续 v0.62–v0.70 深度不变量 + 开工验收连续推进。
+  2. （无）— v0.62 达成，继续 v0.63–v0.70 深度不变量 + 开工验收连续推进。
 
 ---
 

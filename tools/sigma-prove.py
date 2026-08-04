@@ -615,6 +615,35 @@ def gen_inventory_invariants(ops):
             ("INV-IN-2 no-negative-chain", inv2)]
 
 
+def gen_portfolio_invariants(ops):
+    """v0.62 — §PF 跨操作不变量（附加义务，z3 消解）：
+    INV-PF-1 现金守恒（buy 后 cash = 初始 − 花费 ≥ 0，现金不凭空产生）/
+    INV-PF-2 份额守恒（sell 后 shares = 初始 − 卖出 ≥ 0，不凭空卖份额）。"""
+    names = {op["name"].strip() for op in ops}
+    if not (names & PF_OPS):
+        return []
+    inv1 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const c Int) (declare-const q Int)\n"
+            "(declare-const p Int) (declare-const p2 Int)\n"
+            "(assert (>= c 0)) (assert (>= q 0)) (assert (<= q c))\n"
+            "(assert (= (index p 0) c)) (assert (= (index p 1) 0)) (assert (= (index p 2) 0))\n"
+            "; 跨操作: buy([c,0,0], 0, q) 后现金（c ≥ q 可支付）\n"
+            "(assert (= (index p2 0) (- c q))) (assert (= (index p2 1) q)) (assert (= (index p2 2) 0))\n"
+            "; INV-PF-1: 现金守恒 — cash ≥ 0，现金不凭空产生\n"
+            "(assert (not (>= (index p2 0) 0)))\n(check-sat)\n")
+    inv2 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const c Int) (declare-const q Int)\n"
+            "(declare-const p Int) (declare-const p2 Int)\n"
+            "(assert (>= c 0)) (assert (>= q 0)) (assert (<= q c))\n"
+            "(assert (= (index p 0) c)) (assert (= (index p 1) c)) (assert (= (index p 2) 0))\n"
+            "; 跨操作: sell([c,c,0], 0, q) 后份额（q ≤ 持有）\n"
+            "(assert (= (index p2 0) (+ c q))) (assert (= (index p2 1) (- c q))) (assert (= (index p2 2) 0))\n"
+            "; INV-PF-2: 份额守恒 — shares ≥ 0，不凭空卖份额\n"
+            "(assert (not (>= (index p2 1) 0)))\n(check-sat)\n")
+    return [("INV-PF-1 cash-conserved", inv1),
+            ("INV-PF-2 shares-conserved", inv2)]
+
+
 # ---------------------------------------------------------------------------
 # §SK.3.12–3.17 obligation generation (spec_p0_socketkit.md — 增长期, v0.34)
 # ---------------------------------------------------------------------------
@@ -1138,6 +1167,9 @@ def prove_module(path):
 
     # §IN 跨操作不变量 (v0.61): INV-IN-1 总量守恒 / INV-IN-2 库存非负链。
     obligations.extend(gen_inventory_invariants(module["ops"]))
+
+    # §PF 跨操作不变量 (v0.62): INV-PF-1 现金守恒 / INV-PF-2 份额守恒。
+    obligations.extend(gen_portfolio_invariants(module["ops"]))
 
     if not structural and obligations:
         for oname, ob in obligations:

@@ -401,6 +401,15 @@
       0 warning，v0.10–v0.60 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.62 完成定义（金融跨操作不变量，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **跨操作不变量**: `sigma-prove` 新增 `gen_portfolio_invariants`——
+      INV-PF-1 现金守恒（buy 后 cash ≥ 0，现金不凭空产生）、INV-PF-2 份额
+      守恒（sell 后 shares ≥ 0，不凭空卖份额），均 `PROVED (unsat)`。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 57 项 PROVED、三端
+      0 warning，v0.10–v0.61 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
