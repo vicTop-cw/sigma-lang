@@ -270,9 +270,15 @@
   服务每次请求后导出审计追踪；`--audit-test`：跑完整 story 验证审计日志
   （op 齐全/顺序正确/JSON 可序列化/语义正确，5/5）；自检 15/15、persist-test
   10/10、冒烟 36/36 不回归；consensus 47/47、p0 109/109，v0.10–v0.54 不回归。
+- ✅ **REACHED v0.56 (2026-08-04)**: 一键验收接 CI—— 新建 `Makefile`
+  （`make accept` = 九道门禁一键验收，另有 check/story/prove/rust/elixir/app
+  分目标）与 `.github/workflows/ci.yml`（GitHub Actions：push/PR 时 setup
+  Python+Rust+Elixir+z3 后跑 `python3 tools/sigma-accept.py`）——协议工程化：
+  σLang 九道门禁进入标准 CI，任何提交全绿才算过；本地与 CI 同一条命令
+  （sigma-accept.py 9/9 验证通过）；v0.10–v0.55 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.55 达成，继续 v0.56–v0.70 找茬产品落地 + 协议工程化连续推进。
+  2. （无）— v0.56 达成，继续 v0.57–v0.70 找茬产品落地 + 协议工程化连续推进。
 
 ---
 

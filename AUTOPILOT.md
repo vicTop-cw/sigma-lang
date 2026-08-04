@@ -342,6 +342,15 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.56 完成定义（一键验收接 CI，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **Makefile**: `make accept` = 九道门禁一键验收；另有 check/story/prove/
+      rust/elixir/app 分目标。
+- [x] **CI workflow**: `.github/workflows/ci.yml`——push/PR 时 setup
+      Python+Rust+Elixir+z3 后跑 `python3 tools/sigma-accept.py`，全绿才算过。
+- [x] **不回归**: sigma-accept.py 9/9 验证通过；v0.10–v0.55 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

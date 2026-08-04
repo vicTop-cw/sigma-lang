@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  accept:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "26"
+          elixir-version: "1.16"
+
+      - name: Install z3 (proof discharge)
+        run: pip install z3-solver
+
+      # v0.56 — 九道门禁一键验收：consensus / p0 / 三端自检与编译 / 三域审计 /
+      # 证明消解 / 找茬冒烟，一条命令在 CI 上全绿才算通过。
+      - name: ΣLang one-command acceptance (sigma-accept.py)
+        run: python3 tools/sigma-accept.py
