@@ -427,9 +427,18 @@
   **62 → 73 项 PROVED / 29 模块全绿**（> 70 达标）；sigma-accept.py 门禁 8
   期望、health 端点 gates、README 架构数字全部同步为 73 PROVED；consensus
   51/51、p0 109/109、sigma-accept 9/9 全绿，v0.10–v0.79 不回归。
+- ✅ **REACHED v0.81 (2026-08-04)**: 找茬 API 文档—— 新建 `docs/api_zhaocha.md`
+  （找茬 MVP 参考后端完整 HTTP API 文档，180 行）：通用约定（--auth-token
+  鉴权、语义化错误码映射表 v0.54）、系统（/health）、会话（/register /me
+  /users）、任务流（/quota /post /claim /submit /accept /withdraw /tasks
+  /badge）、制度（/advance /ledger）、增长期（/badge_issue /dispute
+  /team_*）、供应链（/inventory_new /receive_stock /ship_stock /stock_level
+  /fill_rate）、验收清单（--scenario/--smoke/--auth-test/--health-test/
+  --app-smoke）——每个端点含参数表与响应示例，文档与实现双端对应；
+  consensus 51/51、p0 109/109，v0.10–v0.80 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.80 达成，继续 v0.81–v0.90 产品配套 + 收官工程化连续推进。
+  2. （无）— v0.81 达成，继续 v0.82–v0.90 产品配套 + 收官工程化连续推进。
 
 ---
 
