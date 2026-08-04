@@ -1217,6 +1217,104 @@ def run_web_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_launch(argv=None) -> int:
+    """--launch (v0.94): one-command go-live — startup self-check (§SK.6),
+    then serve the backend API (--port, default 8080) and the web/ frontend
+    (--web-port, default 8000) side by side until Ctrl+C."""
+    import http.server
+    import time
+    argv = argv if argv is not None else sys.argv[1:]
+    port, web_port = 8080, 8000
+    for i, a in enumerate(argv):
+        if a == "--port" and i + 1 < len(argv):
+            port = int(argv[i + 1])
+        if a == "--web-port" and i + 1 < len(argv):
+            web_port = int(argv[i + 1])
+    sp, st = run_story(MVPApp())
+    if sp != st:
+        print(f"启动自检失败 {sp}/{st} — 拒绝开工")
+        return 1
+    print(f"启动自检通过 {sp}/{st}")
+    _Handler.app = MVPApp()
+    threading.Thread(target=lambda: HTTPServer(
+        ("127.0.0.1", port), _Handler).serve_forever(), daemon=True).start()
+    web_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "web")
+    os.chdir(web_dir)
+    threading.Thread(target=lambda: HTTPServer(
+        ("127.0.0.1", web_port), http.server.SimpleHTTPRequestHandler)
+        .serve_forever(), daemon=True).start()
+    print(f"找茬已开工 — 前端 http://127.0.0.1:{web_port}  "
+          f"API http://127.0.0.1:{port}  （Ctrl+C 停止）")
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("已停止")
+        return 0
+
+
+def run_launch_test() -> Tuple[int, int]:
+    """--launch-test (v0.94): the one-command go-live stack — backend API and
+    static frontend both reachable, and the full business flow walks end to
+    end (register -> quota -> post -> claim -> submit -> accept)."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    import http.server
+    _Handler.app = MVPApp()
+    api_server = HTTPServer(("127.0.0.1", 0), _Handler)
+    api_port = api_server.server_address[1]
+    threading.Thread(target=api_server.serve_forever, daemon=True).start()
+    web_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "web")
+    old_cwd = os.getcwd()
+    try:
+        os.chdir(web_dir)
+        front = HTTPServer(("127.0.0.1", 0), http.server.SimpleHTTPRequestHandler)
+        front_port = front.server_address[1]
+        threading.Thread(target=front.serve_forever, daemon=True).start()
+        base = f"http://127.0.0.1:{api_port}"
+        fbase = f"http://127.0.0.1:{front_port}"
+
+        # 1. 双服务并存
+        with urllib.request.urlopen(fbase + "/", timeout=10) as r:
+            html = r.read().decode("utf-8")
+        check("LAUNCH front online", r.status == 200 and "找茬" in html,
+              f"status {r.status}")
+        with urllib.request.urlopen(base + "/health", timeout=10) as r:
+            h = json.loads(r.read().decode("utf-8"))
+        check("LAUNCH api online", h.get("status") == "ok", f"got {h}")
+
+        # 2. 全链路业务流（开工后的真实使用序列）
+        def call(p: str) -> dict:
+            with urllib.request.urlopen(base + p, timeout=10) as r:
+                return json.loads(r.read().decode("utf-8"))
+        call(f"/register?user=7&name={quote('找茬主')}")
+        call("/quota?user=7&monthly=50")
+        r = call("/post?author=7&bounty=100")
+        tid = r["task_id"]
+        r = call(f"/claim?task={tid}&hunter=3")
+        check("LAUNCH flow claim", r["task"] == [7, 100, 1, 3], f"got {r}")
+        r = call(f"/submit?task={tid}")
+        r = call(f"/accept?task={tid}&caller=7")
+        check("LAUNCH flow accept", r["task"] == [7, 100, 3, 3], f"got {r}")
+
+        # 3. 状态可持久化（开工形态）
+        s = _Handler.app.to_state()
+        check("LAUNCH state persistable", len(s["tasks"]) == 1, f"got {s}")
+        front.shutdown()
+    finally:
+        os.chdir(old_cwd)
+        api_server.shutdown()
+    return passed, total
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     state_file = None
@@ -1256,6 +1354,12 @@ def main(argv=None):
         passed, total = run_web_test()
         print(f"sigma_app web test (v0.93): {passed}/{total} passed")
         return 0 if passed == total else 1
+    if "--launch-test" in argv:
+        passed, total = run_launch_test()
+        print(f"sigma_app launch test (v0.94): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--launch" in argv:
+        return run_launch(argv)
     if "--auth-test" in argv:
         passed, total = run_auth_test()
         print(f"sigma_app auth test (v0.71): {passed}/{total} passed")
