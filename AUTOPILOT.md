@@ -269,6 +269,14 @@
 - [x] **不回归**: v0.10–v0.47 全部保持全绿；三端 0 warning。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.49 完成定义（收官验收续，2026-08-03 立项 → 2026-08-03 达成）
+
+- [x] **验收扩展**: `tools/sigma-accept.py` 扩展到 9 道门禁（新增 Rust 编译
+      0 warning、Rust §SK 自检 88/88、Elixir §SK 自检 88/88）——三端编译与自检
+      纳入一键验收，9/9 全部通过。
+- [x] **不回归**: v0.10–v0.48 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

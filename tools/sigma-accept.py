@@ -34,11 +34,18 @@ def main():
         ("1. 三端共识 (Law XIII)", "python3 verify_consensus.py", ROOT, "47/47"),
         ("2. 算法正确性", "python3 verify_p0.py", ROOT, "109/109"),
         ("3. Python 参考实现", "python3 impl/python/sigma_core.py", ROOT, "167/167"),
-        ("4. 三域审计故事线", "python3 tools/sigma-runtime.py --domains", ROOT, "35/35"),
-        ("5. 证明消解 (三域语料)",
+        ("4. Rust 编译 (0 warning)",
+         "cargo build", os.path.join(ROOT, "impl", "verifier"), "0 err/warn"),
+        ("5. Rust §SK 自检",
+         "cargo run -q -- --sk-self-check", os.path.join(ROOT, "impl", "verifier"), "88/88"),
+        ("6. Elixir §SK 自检",
+         "elixir sigma_verify.exs --sk-self-check",
+         os.path.join(ROOT, "impl", "elixir_rt"), "88/88"),
+        ("7. 三域审计故事线", "python3 tools/sigma-runtime.py --domains", ROOT, "35/35"),
+        ("8. 证明消解 (三域语料)",
          "python3 tools/sigma-prove.py corpus/socketkit_ok.md corpus/portfolio_ok.md "
          "corpus/inventory_ok.md", ROOT, "PROVED"),
-        ("6. 找茬参考后端冒烟", "python3 impl/python/sigma_app.py --smoke", ROOT, "25/25"),
+        ("9. 找茬参考后端冒烟", "python3 impl/python/sigma_app.py --smoke", ROOT, "25/25"),
     ]
 
     print("ΣLang 一键收官验收 (v0.48)")
