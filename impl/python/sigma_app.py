@@ -1001,6 +1001,38 @@ def run_health_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_startup_test() -> Tuple[int, int]:
+    """--startup-test (v0.75): the --serve startup self-check gate — the §SK.6
+    story must pass before listening; a failing gate refuses to start."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    # 1. 自检门禁本身通过（§SK.6 15/15）
+    p, t = run_story(MVPApp())
+    check("STARTUP gate passes", p == t == 15, f"got {p}/{t}")
+
+    # 2. 失败 → 拒绝启动（monkeypatch run_story 返回失败，模拟门禁不过）
+    orig = globals()["run_story"]
+    try:
+        globals()["run_story"] = lambda app: (0, 1)
+        sp, st = run_story(MVPApp())
+        check("STARTUP gate failure refused", sp != st, f"got {sp}/{st}")
+    finally:
+        globals()["run_story"] = orig
+
+    # 3. 通过 → 放行
+    sp, st = run_story(MVPApp())
+    check("STARTUP gate pass proceeds", sp == st, f"got {sp}/{st}")
+    return passed, total
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv[1:]
     state_file = None
@@ -1023,6 +1055,10 @@ def main(argv=None):
     if "--health-test" in argv:
         passed, total = run_health_test()
         print(f"sigma_app health test (v0.74): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--startup-test" in argv:
+        passed, total = run_startup_test()
+        print(f"sigma_app startup test (v0.75): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--auth-test" in argv:
         passed, total = run_auth_test()
@@ -1053,6 +1089,14 @@ def main(argv=None):
         for i, a in enumerate(argv):
             if a == "--port" and i + 1 < len(argv):
                 port = int(argv[i + 1])
+        # v0.75 — 启动自检：--serve 先过 §SK.6 门禁再监听（失败拒绝启动）
+        if "--skip-startup-check" not in argv:
+            sp, st = run_story(MVPApp())
+            if sp != st:
+                print(f"启动自检失败 {sp}/{st} — 拒绝启动 "
+                      f"（--skip-startup-check 可跳过）")
+                return 1
+            print(f"启动自检通过 {sp}/{st} — 开始监听")
         if state_file and os.path.exists(state_file):
             with open(state_file, encoding="utf-8") as f:
                 _Handler.app = MVPApp.from_state(json.load(f))

@@ -391,9 +391,14 @@
   `--health-test`（4/4：status ok / 应用名 / auth 字段 / gates）；自检 15/15、
   冒烟 36/36、log-test 4/4 不回归；consensus 51/51、p0 109/109，v0.10–v0.73
   不回归。
+- ✅ **REACHED v0.75 (2026-08-04)**: 找茬 App 启动自检—— `sigma_app.py`
+  `--serve` 启动前先跑 §SK.6 自检门禁（失败拒绝启动，`--skip-startup-check`
+  可跳过），`--startup-test`（3/3：门禁通过 / 失败拒绝（monkeypatch 模拟）/
+  通过放行）；自检 15/15、冒烟 36/36、health-test 4/4 不回归；consensus 51/51、
+  p0 109/109，v0.10–v0.74 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.74 达成，继续 v0.75–v0.90 找茬服务化 + 业务规则深化 + 产品配套连续推进。
+  2. （无）— v0.75 达成，继续 v0.76–v0.90 业务规则深化 + 产品配套连续推进。
 
 ---
 

@@ -534,6 +534,17 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.75 完成定义（找茬 App 启动自检，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **启动门禁**: `--serve` 启动前先跑 §SK.6 自检（失败拒绝启动，
+      `--skip-startup-check` 可跳过）。
+- [x] **--startup-test**: 3/3（门禁通过 / 失败拒绝（monkeypatch 模拟）/
+      通过放行）。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、health-test 4/4、consensus 51/51、
+      p0 109/109、sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.74 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
