@@ -276,9 +276,15 @@
   Python+Rust+Elixir+z3 后跑 `python3 tools/sigma-accept.py`）——协议工程化：
   σLang 九道门禁进入标准 CI，任何提交全绿才算过；本地与 CI 同一条命令
   （sigma-accept.py 9/9 验证通过）；v0.10–v0.55 不回归。
+- ✅ **REACHED v0.57 (2026-08-04)**: 语料扩容—— `corpus/socketkit_ok.md` 按主题
+  拆分为三个独立模块（任务流 socketkit_taskflow_ok 25/25、额度制
+  socketkit_quota_ok 9/9、积分/勋章制 socketkit_points_ok 16/16，操作分布不重叠
+  fingerprint 无冲突），新增两个 E-02 负例（taskflow_break/quota_break）；
+  consensus 47/47 → **51/51 全绿**（> 50 扩容达标）、p0 109/109、三端 0 warning，
+  v0.10–v0.56 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.56 达成，继续 v0.57–v0.70 找茬产品落地 + 协议工程化连续推进。
+  2. （无）— v0.57 达成，继续 v0.58–v0.70 找茬产品落地 + 协议工程化连续推进。
 
 ---
 

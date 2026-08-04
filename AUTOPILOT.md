@@ -351,6 +351,17 @@
 - [x] **不回归**: sigma-accept.py 9/9 验证通过；v0.10–v0.55 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.57 完成定义（语料扩容，2026-08-04 立项 → 2026-08-04 达成）
+
+- [x] **拆分模块**: `corpus/socketkit_ok.md` 按主题拆为三个独立模块（任务流
+      socketkit_taskflow_ok 25/25、额度制 socketkit_quota_ok 9/9、积分/勋章制
+      socketkit_points_ok 16/16，操作分布不重叠 fingerprint 无冲突）。
+- [x] **负例补全**: 新增 socketkit_taskflow_break / socketkit_quota_break
+      （E-02 三端一致 FAIL）。
+- [x] **共识扩容**: consensus 47/47 → 51/51 全绿（> 50 达标）；p0 109/109、
+      三端 0 warning，v0.10–v0.56 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
