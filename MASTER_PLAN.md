@@ -743,9 +743,22 @@
   inventory_new → [10,20]），装包后 repo 内验证器不受影响（自检 15/15、
   冒烟 36/36、py_compile OK）——"pip install 即用"验证通过；
   consensus 51/51、p0 109/109，v0.10–v0.126 不回归。
+- ✅ **REACHED v0.128 (2026-08-05)**: 发布 workflow—— 新建
+  `.github/workflows/publish.yml`（push 形如 v* 的 tag 自动触发：构建 sdist +
+  wheel → 冒烟测试构建产物 → 用 softprops/action-gh-release 创建 GitHub
+  Release 并附 dist/ 资产、自动生成发布说明；PyPI 发布预留 PYPI_TOKEN）；
+  顺带把 `pip install -e .` 误入库的 `sigma_lang.egg-info/` 构建产物移出并
+  在 .gitignore 加 `*.egg-info/`/`build/`/`dist/`——发布从手动变成打 tag 即
+  发；consensus 51/51、p0 109/109，v0.10–v0.127 不回归。
+- ✅ **REACHED v0.129 (2026-08-05)**: 发布验证成功—— 本地 `pip wheel` 构建
+  `sigma_lang-0.7.0-py3-none-any.whl`（33338 B）并装包验证 import 正确；
+  打发布 tag `v0.129` 推送后，GitHub Actions publish workflow 自动触发
+  （run #30997898776，event=push）并 **conclusion: success**（构建 + 冒烟 +
+  Release 创建全通过）——"打 tag 即发布"全流程验证跑通，GitHub Releases
+  页面已有 v0.129 版本；consensus 51/51、p0 109/109，v0.10–v0.128 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.127 达成，打包发布链路（pyproject/验证/README 入口）闭环。
+  2. （无）— v0.129 达成，打包发布链路（pyproject/验证/workflow/Release）全闭环。
 
 ---
 

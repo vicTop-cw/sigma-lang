@@ -1039,6 +1039,23 @@
       0 warning，v0.10–v0.126 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.128 完成定义（发布 workflow，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **publish.yml**: push v* tag 自动构建 sdist+wheel → 冒烟 → 创建 GitHub
+      Release 附资产；PyPI 发布预留；顺带清理 egg-info 构建产物 + .gitignore。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 80 项 PROVED、三端
+      0 warning，v0.10–v0.127 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+### v0.129 完成定义（发布验证成功，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **本地验证**: pip wheel 构建 sigma_lang-0.7.0 wheel + 装包 import 正确。
+- [x] **线上验证**: 打 tag v0.129 推送 → GitHub Actions publish workflow 自动
+      触发（run #30997898776）→ conclusion: success——"打 tag 即发布"跑通。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 80 项 PROVED、三端
+      0 warning，v0.10–v0.128 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
