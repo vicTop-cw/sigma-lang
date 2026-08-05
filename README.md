@@ -65,6 +65,61 @@ It is a **contract between intelligences**.
 
 ---
 
+## 怎么用它 / How to use it（2026-08-05）
+
+**用法 1：把找茬产品跑起来（2 分钟，不写代码）**
+
+```sh
+git clone https://github.com/vicTop-cw/sigma-lang.git
+cd sigma-lang
+make deploy        # 就绪检查通过后自动启动前后端（Windows 无 make，用下面两条）
+python3 impl/python/sigma_app.py --launch-ready
+python3 impl/python/sigma_app.py --launch
+```
+浏览器打开 http://127.0.0.1:8000 —— 注册用户、发单、接单、验收、提现、勋章，
+全流程可用；API 在 http://127.0.0.1:8080（端点见 `docs/api_zhaocha.md`），
+运行面板 http://127.0.0.1:8080/panel。
+
+**用法 2：把 ΣLang 当"业务规则协议"（给 AI 定语义、验证规则）**
+
+不用这个仓库的产品，只借它的协议能力：
+1. 读规范：`spec/spec_p0_socketkit.md`（找茬）/ `spec_p0_inventory.md`（供应链）
+   —— 看业务规则怎么写；
+2. 抄格式写自己的规则：把业务操作（如"验收"）写成 `corpus/*.md` 那样的
+   函数 + 定律 + 测试；
+3. 三端验证：`python3 verify_consensus.py`（Python/Rust/Elixir 三个验证器
+   结论必须一致）；
+4. 数学证明：`python3 tools/sigma-prove.py`（z3 证明你的规则不会自相矛盾）；
+5. 一键验收：`python3 tools/sigma-accept.py`（十道门禁全绿才算合格）。
+
+**用法 3：把语义嵌入自己的项目（当库用，不碰协议）**
+
+```python
+import sys; sys.path.insert(0, "impl/python")
+import sigma_core as core          # 纯函数库，无第三方依赖
+task = core.task_create(7, 100)    # 发单 → [7, 100, 0, 0]
+task = core.accept_task(task, 3)   # 接单 → [7, 100, 1, 3]
+task = core.task_accept(task, 7)   # 验收 → [7, 100, 3, 3]
+```
+或走 HTTP：`curl "http://127.0.0.1:8080/post?author=7&bounty=100"`。
+你拿到的行为与三端验证器共识一致——就是协议保证的行为。
+
+**用法 4：让别的 AI 智能体用（给 AI 的 prompt 模板）**
+
+把下面这段发给任何 AI（Claude / GPT / 其他 Agent）：
+
+> 你是 ΣLang 协议的开发者。先读 `README.md` 的"大白话导读"和"怎么用它"，
+> 再读 `spec/spec_p0_socketkit.md` 掌握业务规则写法。你的任务：
+> 1. 用 `impl/python/sigma_core.py` 的纯函数实现业务逻辑（禁止自己重新定义规则）；
+> 2. 用 `python3 verify_consensus.py` 确认语义与三个验证器一致；
+> 3. 改完必须 `python3 tools/sigma-accept.py` 十道门禁全绿。
+> 规则以 spec/ 为准，语料在 corpus/，任何不一致先查 spec 再改实现。
+
+**一句话总结**：想用产品 → 用法 1；想用协议 → 用法 2；想用语义 → 用法 3；
+想教 AI 用 → 用法 4。详细分角色上手见 `docs/USAGE.md`。
+
+---
+
 ## Quick Start / 新人 30 分钟上手（v0.47）
 
 ΣLang 用一句话介绍：**给 AI 立的"度量衡"协议——同一份规则文档，
