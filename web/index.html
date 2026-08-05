@@ -96,6 +96,33 @@
     </div>
   </section>
 
+  <section id="growth-panel">
+    <h2>增长期（§SK.3.12–3.17，v0.110）</h2>
+    <div class="row">
+      <input id="g-verifier" type="number" placeholder="核验师" value="1001">
+      <input id="g-user" type="number" placeholder="用户" value="3">
+      <input id="g-score" type="number" placeholder="契分" value="105">
+      <button onclick="badgeIssue()">签发勋章</button>
+      <button onclick="dispute()">督导裁决</button>
+      <span id="g-out" class="muted"></span>
+    </div>
+    <div class="row">
+      <input id="g-owner" type="number" placeholder="团长" value="7">
+      <select id="g-kind">
+        <option value="0">受茬团</option>
+        <option value="1">找茬团</option>
+      </select>
+      <input id="g-cap" type="number" placeholder="容量" value="3">
+      <button onclick="teamCreate()">建团</button>
+      <input id="g-team" placeholder="team=[o,k,s,c]" value="[7,0,1,3]">
+      <input id="g-member" type="number" placeholder="成员" value="5">
+      <button onclick="teamJoin()">入团</button>
+      <button onclick="teamShare()">分收益</button>
+      <button onclick="advance()">额度预支</button>
+      <button onclick="ledger()">积分台账</button>
+    </div>
+  </section>
+
   <section>
     <h2>操作日志（ΣLang 审计视角）</h2>
     <div id="log">等待操作…</div>
@@ -240,6 +267,46 @@ async function badge() {
   const u = document.getElementById("a-hunter").value;
   const j = await api(`/badge?user=${u}`, "badge");
   document.getElementById("act-out").textContent = `契分 ${j.credit} · 勋章 ${j.badge}`;
+}
+
+// v0.110 — 增长期操作（§SK.3.12–3.17）
+async function badgeIssue() {
+  const v = document.getElementById("g-verifier").value;
+  const u = document.getElementById("g-user").value;
+  const s = document.getElementById("g-score").value;
+  const j = await api(`/badge_issue?verifier=${v}&user=${u}&score=${s}`, "badge_issue");
+  document.getElementById("g-out").textContent = "勋章 " + JSON.stringify(j.badge);
+}
+async function dispute() {
+  const j = await api("/dispute?evidence=[[1,1,3],[2,1,2]]", "dispute");
+  document.getElementById("g-out").textContent = "裁决 " + j.decision;
+}
+async function teamCreate() {
+  const o = document.getElementById("g-owner").value;
+  const k = document.getElementById("g-kind").value;
+  const c = document.getElementById("g-cap").value;
+  const j = await api(`/team_create?owner=${o}&kind=${k}&capacity=${c}`, "team_create");
+  document.getElementById("g-team").value = JSON.stringify(j.team);
+  document.getElementById("g-out").textContent = "团队 " + JSON.stringify(j.team);
+}
+async function teamJoin() {
+  const t = encodeURIComponent(document.getElementById("g-team").value);
+  const m = document.getElementById("g-member").value;
+  const j = await api(`/team_join?team=${t}&member=${m}`, "team_join");
+  document.getElementById("g-team").value = JSON.stringify(j.team);
+  document.getElementById("g-out").textContent = "团队 " + JSON.stringify(j.team);
+}
+async function teamShare() {
+  const j = await api("/team_share?contribs=[[3,2],[4,4]]&reward=6", "team_share");
+  document.getElementById("g-out").textContent = "收益 " + JSON.stringify(j.shares);
+}
+async function advance() {
+  const j = await api("/advance?quota=[50,50]", "advance");
+  document.getElementById("g-out").textContent = "额度 " + JSON.stringify(j.quota);
+}
+async function ledger() {
+  const j = await api("/ledger?entries=[[0,100,1]]", "ledger");
+  document.getElementById("g-out").textContent = "台账 " + JSON.stringify(j.ledger);
 }
 
 setBackend();

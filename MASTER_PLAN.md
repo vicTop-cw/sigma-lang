@@ -637,9 +637,15 @@
   证明层新增的跨操作不变量全部进入运行时审计，三域 story 不变量复核从
   12 项扩到 20 项；trace 59/59、--growth 11/11、--inventory 6/6 不回归；
   consensus 51/51、p0 109/109，v0.10–v0.108 不回归。
+- ✅ **REACHED v0.110 (2026-08-05)**: 前端增长期面板—— `web/index.html` 新增
+  「增长期」section（§SK.3.12–3.17）：勋章签发（badge_issue）、督导裁决
+  （dispute）、团机制（team_create 建团 / team_join 入团 / team_share 分收益）、
+  额度预支（advance）、积分台账（ledger），7 个 JS 操作函数全调后端 API——
+  前端从 MVP 任务流扩展到增长期全操作；web-test 5/5、自检 15/15、冒烟 36/36
+  不回归；consensus 51/51、p0 109/109，v0.10–v0.109 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.109 达成，继续 v0.110–v0.120 产品增强 + 收官连续推进。
+  2. （无）— v0.110 达成，继续 v0.111–v0.120 产品增强 + 收官连续推进。
 
 ---
 
