@@ -691,9 +691,14 @@
   sigma-accept --report 十道门禁 + runtime 段）、运维要点（data/ 备份、
   审计对账、/health 监控、/panel 面板、并发兜底）——从"照着跑起来"到
   "照着上线"；consensus 51/51、p0 109/109，v0.10–v0.116 不回归。
+- ✅ **REACHED v0.118 (2026-08-05)**: 性能基准—— `sigma_app.py`
+  `--bench`（run_bench）：200 次请求测量 /health 与 /tasks 的吞吐与延迟
+  （实测 /health 99 req/s avg 10.12 ms、/tasks 270 req/s avg 3.70 ms），
+  4 项验证（吞吐 > 0 / 延迟 < 100 ms）——上线后的性能基线；自检 15/15、
+  冒烟 36/36 不回归；consensus 51/51、p0 109/109，v0.10–v0.117 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.117 达成，继续 v0.118–v0.120 收官连续推进。
+  2. （无）— v0.118 达成，继续 v0.119–v0.120 收官。
 
 ---
 

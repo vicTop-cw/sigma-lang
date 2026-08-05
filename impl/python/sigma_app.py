@@ -1501,6 +1501,59 @@ def run_deploy_accept() -> Tuple[int, int]:
     return passed, total
 
 
+def run_bench() -> Tuple[int, int]:
+    """--bench (v0.118): measure API throughput and latency — N requests to
+    /health and /tasks, reporting req/s and average latency (ms)."""
+    import time
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    _Handler._log_file = os.devnull  # 静音访问日志（N 次请求不刷屏）
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> int:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return r.status
+
+    try:
+        n = 200
+        for _ in range(10):
+            call("/health")
+        t0 = time.perf_counter()
+        for _ in range(n):
+            call("/health")
+        dt_h = time.perf_counter() - t0
+        t0 = time.perf_counter()
+        for _ in range(n):
+            call("/tasks")
+        dt_t = time.perf_counter() - t0
+        rps_h, rps_t = n / dt_h, n / dt_t
+        avg_h, avg_t = dt_h / n * 1000, dt_t / n * 1000
+        print(f"BENCH /health: {n} req → {rps_h:.0f} req/s, avg {avg_h:.2f} ms")
+        print(f"BENCH /tasks:  {n} req → {rps_t:.0f} req/s, avg {avg_t:.2f} ms")
+        check("BENCH health throughput", rps_h > 0, f"got {rps_h:.0f} req/s")
+        check("BENCH tasks throughput", rps_t > 0, f"got {rps_t:.0f} req/s")
+        check("BENCH health latency", avg_h < 100, f"got {avg_h:.2f} ms")
+        check("BENCH tasks latency", avg_t < 100, f"got {avg_t:.2f} ms")
+    finally:
+        _Handler._log_file = None
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
 def run_run_accept() -> Tuple[int, int]:
     """--run-accept (v0.96): go-live run acceptance, end to end — startup
     self-check, dual services online, the full frontend business flow, live
@@ -1819,6 +1872,10 @@ def main(argv=None):
     if "--deploy-accept" in argv:
         passed, total = run_deploy_accept()
         print(f"sigma_app deploy accept (v0.104): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--bench" in argv:
+        passed, total = run_bench()
+        print(f"sigma_app bench (v0.118): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--run-accept" in argv:
         passed, total = run_run_accept()
