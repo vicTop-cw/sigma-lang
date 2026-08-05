@@ -589,9 +589,15 @@
   （LAUNCH default cfg 默认路径 / LAUNCH override cfg 显式覆盖）；自检
   15/15、冒烟 36/36、run-accept 8/8 不回归；consensus 51/51、p0 109/109，
   v0.10–v0.101 不回归。
+- ✅ **REACHED v0.103 (2026-08-05)**: 并发安全验证—— `sigma_app.py`
+  `--concurrency-test`（run_concurrency_test）：ThreadPoolExecutor 16 并发
+  客户端 70 个请求（20 注册 + 20 开户 + 10 发单 + 20 查询），验证 4 项
+  （全部 200 无 500 / 状态最终一致 20 用户 10 任务 / 服务存活 /health）——
+  上线形态下并发请求状态一致、不崩溃；自检 15/15、冒烟 36/36、launch-test
+  10/10 不回归；consensus 51/51、p0 109/109，v0.10–v0.102 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.102 达成，继续 v0.103–v0.120 找茬上线化 + 协议深化连续推进。
+  2. （无）— v0.103 达成，继续 v0.104–v0.120 找茬上线化 + 协议深化连续推进。
 
 ---
 

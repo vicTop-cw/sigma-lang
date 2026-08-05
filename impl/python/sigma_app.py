@@ -1325,6 +1325,58 @@ def run_panel_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_concurrency_test() -> Tuple[int, int]:
+    """--concurrency-test (v0.103): concurrent requests keep the state
+    consistent — parallel clients (register / quota / post / tasks mix) all
+    succeed, the final state matches expectations, and the service stays
+    alive afterwards."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    from concurrent.futures import ThreadPoolExecutor
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str):
+        try:
+            with urllib.request.urlopen(base + p, timeout=15) as r:
+                return r.status, json.loads(r.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            return e.code, {}
+
+    try:
+        reqs = [f"/register?user={i}&name=u{i}" for i in range(20)]
+        reqs += [f"/quota?user={i}&monthly=50" for i in range(20)]
+        reqs += [f"/post?author={i}&bounty=100" for i in range(10)]
+        reqs += ["/tasks"] * 20
+        with ThreadPoolExecutor(max_workers=16) as ex:
+            results = list(ex.map(call, reqs))
+        bad = sum(1 for s, _ in results if s != 200)
+        check("CONC all 200", bad == 0, f"{bad} non-200 responses")
+        check("CONC users", len(_Handler.app.users) == 20,
+              f"got {len(_Handler.app.users)}")
+        check("CONC tasks", len(_Handler.app.tasks) == 10,
+              f"got {len(_Handler.app.tasks)}")
+        st, h = call("/health")
+        check("CONC alive", st == 200 and h.get("status") == "ok",
+              f"got {st} {h}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
 def run_run_accept() -> Tuple[int, int]:
     """--run-accept (v0.96): go-live run acceptance, end to end — startup
     self-check, dual services online, the full frontend business flow, live
@@ -1635,6 +1687,10 @@ def main(argv=None):
     if "--panel-test" in argv:
         passed, total = run_panel_test()
         print(f"sigma_app panel test (v0.95): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--concurrency-test" in argv:
+        passed, total = run_concurrency_test()
+        print(f"sigma_app concurrency test (v0.103): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--run-accept" in argv:
         passed, total = run_run_accept()
