@@ -123,6 +123,23 @@
     </div>
   </section>
 
+  <section id="supply-panel">
+    <h2>供应链（§IN，v0.111）</h2>
+    <div class="row">
+      <input id="s-a" type="number" placeholder="货品A" value="10">
+      <input id="s-b" type="number" placeholder="货品B" value="20">
+      <button onclick="invNew()">开仓</button>
+      <input id="s-inv" placeholder="inv=[a,b]" value="[10,20]">
+      <input id="s-item" type="number" placeholder="货品" value="0">
+      <input id="s-qty" type="number" placeholder="数量" value="5">
+      <button onclick="receive()">入库</button>
+      <button onclick="ship()">出库</button>
+      <button onclick="stockLevel()">水位</button>
+      <button onclick="fillRate()">履约率</button>
+      <span id="s-out" class="muted"></span>
+    </div>
+  </section>
+
   <section>
     <h2>操作日志（ΣLang 审计视角）</h2>
     <div id="log">等待操作…</div>
@@ -307,6 +324,41 @@ async function advance() {
 async function ledger() {
   const j = await api("/ledger?entries=[[0,100,1]]", "ledger");
   document.getElementById("g-out").textContent = "台账 " + JSON.stringify(j.ledger);
+}
+
+// v0.111 — 供应链操作（§IN）
+async function invNew() {
+  const a = document.getElementById("s-a").value;
+  const b = document.getElementById("s-b").value;
+  const j = await api(`/inventory_new?qty_a=${a}&qty_b=${b}`, "inventory_new");
+  document.getElementById("s-inv").value = JSON.stringify(j.inventory);
+  document.getElementById("s-out").textContent = "库存 " + JSON.stringify(j.inventory);
+}
+async function receive() {
+  const inv = encodeURIComponent(document.getElementById("s-inv").value);
+  const item = document.getElementById("s-item").value;
+  const qty = document.getElementById("s-qty").value;
+  const j = await api(`/receive_stock?inv=${inv}&item=${item}&qty=${qty}`, "receive_stock");
+  document.getElementById("s-inv").value = JSON.stringify(j.inventory);
+  document.getElementById("s-out").textContent = "库存 " + JSON.stringify(j.inventory);
+}
+async function ship() {
+  const inv = encodeURIComponent(document.getElementById("s-inv").value);
+  const item = document.getElementById("s-item").value;
+  const qty = document.getElementById("s-qty").value;
+  const j = await api(`/ship_stock?inv=${inv}&item=${item}&qty=${qty}`, "ship_stock");
+  document.getElementById("s-inv").value = JSON.stringify(j.inventory);
+  document.getElementById("s-out").textContent = "库存 " + JSON.stringify(j.inventory);
+}
+async function stockLevel() {
+  const inv = encodeURIComponent(document.getElementById("s-inv").value);
+  const item = document.getElementById("s-item").value;
+  const j = await api(`/stock_level?inv=${inv}&item=${item}`, "stock_level");
+  document.getElementById("s-out").textContent = "水位 " + j.level;
+}
+async function fillRate() {
+  const j = await api("/fill_rate?shipped=6&demanded=10", "fill_rate");
+  document.getElementById("s-out").textContent = "履约率 " + j.rate;
 }
 
 setBackend();

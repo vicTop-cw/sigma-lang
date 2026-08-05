@@ -643,9 +643,15 @@
   额度预支（advance）、积分台账（ledger），7 个 JS 操作函数全调后端 API——
   前端从 MVP 任务流扩展到增长期全操作；web-test 5/5、自检 15/15、冒烟 36/36
   不回归；consensus 51/51、p0 109/109，v0.10–v0.109 不回归。
+- ✅ **REACHED v0.111 (2026-08-05)**: 前端供应链面板—— `web/index.html` 新增
+  「供应链」section（§IN）：开仓（inventory_new）、入库（receive_stock）、
+  出库（ship_stock）、库存水位（stock_level）、履约率（fill_rate），5 个 JS
+  操作函数全调后端 API——前端从增长期扩展到供应链全操作，找茬前端覆盖
+  三域全部端点；web-test 5/5、自检 15/15、冒烟 36/36 不回归；consensus
+  51/51、p0 109/109，v0.10–v0.110 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.110 达成，继续 v0.111–v0.120 产品增强 + 收官连续推进。
+  2. （无）— v0.111 达成，继续 v0.112–v0.120 产品增强 + 收官连续推进。
 
 ---
 

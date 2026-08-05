@@ -885,6 +885,15 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.111 完成定义（前端供应链面板，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **供应链 section**: web/index.html 新增开仓 / 入库 / 出库 / 库存水位 /
+      履约率，5 个 JS 函数全调后端 API——前端覆盖三域全部端点。
+- [x] **不回归**: web-test 5/5、自检 15/15、冒烟 36/36、consensus 51/51、
+      p0 109/109、sigma-prove 80 项 PROVED、三端 0 warning，v0.10–v0.110 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
