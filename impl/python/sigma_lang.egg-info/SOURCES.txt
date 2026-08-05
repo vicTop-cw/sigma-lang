@@ -1,9 +1,0 @@
-LICENSE
-README.md
-pyproject.toml
-impl/python/sigma_lang.egg-info/PKG-INFO
-impl/python/sigma_lang.egg-info/SOURCES.txt
-impl/python/sigma_lang.egg-info/dependency_links.txt
-impl/python/sigma_lang.egg-info/top_level.txt
-impl/python/sigma_core.py
-impl/python/sigma_lang.egg-info/SOURCES.txt
