@@ -902,6 +902,15 @@
       0 warning、sigma-accept 10/10，v0.10–v0.111 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.113 完成定义（双端面板对账，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **Rust /panel**: app.rs 新增 /panel 路由（JSON 面板数据，与 Python v0.95
+      对等），run_smoke 36 → 37 项（users/tasks/gates 对账）。
+- [x] **不回归**: --app-smoke 37/37、panel-test 5/5、cargo build 0 warning、
+      consensus 51/51、p0 109/109、sigma-prove 80 项 PROVED，v0.10–v0.112 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

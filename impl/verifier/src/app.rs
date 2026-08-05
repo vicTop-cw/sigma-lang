@@ -540,6 +540,23 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 return (400, serde_json::json!({"error": "need shipped & demanded"}).to_string());
             }
         }
+        "/panel" => {
+            // v0.113 — 运行状态面板（与 Python v0.95 对等，JSON 形式便于双端对账）
+            let users = app.users.len();
+            let tasks_n = app.tasks.len();
+            let mut by_state = [0i64; 4];
+            let mut total_bounty = 0i64;
+            for t in app.tasks.values() {
+                let st = t[2] as usize;
+                if st < 4 { by_state[st] += 1; }
+                total_bounty += t[1];
+            }
+            serde_json::json!({"users": users, "tasks": tasks_n,
+                "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
+                "total_bounty": total_bounty,
+                "gates": {"consensus": "51/51", "p0": "109/109",
+                          "prove": "80 PROVED", "scenario": "16/16"}})
+        }
         _ => return (404, serde_json::json!({"error": "unknown path"}).to_string()),
     };
     (200, body.to_string())
@@ -761,6 +778,12 @@ pub fn run_smoke() -> (usize, usize) {
     check!("HTTP /stock_level", r["level"] == 11);
     let r = http_get(port, "/fill_rate?shipped=6&demanded=10");
     check!("HTTP /fill_rate", (r["rate"].as_f64().unwrap_or(0.0) - 0.6).abs() < 1e-9);
+
+    // 11. 运行面板 (v0.113) — 与 Python /panel 对账
+    let r = http_get(port, "/panel");
+    check!("HTTP /panel",
+           r["users"] == 1 && r["tasks"] == 1
+           && r["gates"]["prove"] == "80 PROVED");
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

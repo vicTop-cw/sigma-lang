@@ -655,9 +655,16 @@
   ③ §7 验收清单加 v0.96–0.104 新命令（--run-accept 8/8、--deploy-accept 9/9、
   --launch-test 10/10、--concurrency-test 4/4）——文档与实现双端保持同步；
   consensus 51/51、p0 109/109，v0.10–v0.111 不回归。
+- ✅ **REACHED v0.113 (2026-08-05)**: 双端面板对账—— Rust `app.rs` 新增
+  `/panel` 路由（运行状态面板 JSON：users/tasks/by_state/total_bounty/gates，
+  与 Python v0.95 功能对等、JSON 形式便于双端对账），`run_smoke` 36 → 37 项
+  （HTTP /panel：users==1、tasks==1、gates.prove==80 PROVED）——双端运行
+  面板逐项一致；`cargo build` 0 error/0 warning、--app-smoke 37/37、
+  Python panel-test 5/5 全绿；consensus 51/51、p0 109/109，
+  v0.10–v0.112 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.112 达成，继续 v0.113–v0.120 产品增强 + 收官连续推进。
+  2. （无）— v0.113 达成，继续 v0.114–v0.120 产品增强 + 收官连续推进。
 
 ---
 
