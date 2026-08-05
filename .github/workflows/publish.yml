@@ -44,3 +44,7 @@ jobs:
       # PyPI 发布（可选）：配好 PYPI_TOKEN secret 后取消注释
       # - name: Publish to PyPI
       #   uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_TOKEN }}
