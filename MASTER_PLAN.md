@@ -725,9 +725,16 @@
   生产启动从"多条命令"变成"一条 make deploy"；ready 命令实测 7/7 通过、
   deploy 目标命令拼接正确（Windows 本地无 make，按命令直接验证）；
   consensus 51/51、p0 109/109，v0.10–v0.121 不回归。
+- ✅ **REACHED v0.123 (2026-08-05)**: 部署验证收官—— 完整部署链路一次跑通：
+  --launch-ready 就绪检查 7/7 → --deploy-accept 上线验收 9/9 →
+  sigma-accept 十道门禁 10/10（含 --report runtime 段 run_accept/
+  deploy_accept 均 ok、spec 0.7.0）→ --bench 性能基线（/health 95 req/s、
+  /tasks 159 req/s）→ 自检 15/15、冒烟 36/36 回归全绿——"就绪 → 上线 →
+  门禁 → 性能 → 回归"上线全链路闭环；consensus 51/51、p0 109/109、
+  三端 0 warning，v0.10–v0.122 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.122 达成，进入 v0.123 部署验证收官。
+  2. （无）— v0.123 达成，找茬上线部署链（就绪/启动/验收/门禁/性能）收官。
 
 ---
 
