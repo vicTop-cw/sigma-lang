@@ -684,9 +684,16 @@
   deploy_accept 各含 ok/detail）——CI 回归报告从十道门禁扩展到含运行形态
   验收，上线放行证据链更完整；`--report` 验证 10/10 全绿、runtime 双项
   ok、spec 0.7.0；consensus 51/51、p0 109/109，v0.10–v0.115 不回归。
+- ✅ **REACHED v0.117 (2026-08-05)**: README 上线指南—— README 新增
+  「Deploy Guide / 找茬上线指南」章节：上线启动（--launch 一条命令 +
+  生产参数透传示例）、生产配置表（--port/--web-port/--auth-token/--state/
+  --audit-log/--log-file 各参数说明）、上线验收（--deploy-accept 9/9 →
+  sigma-accept --report 十道门禁 + runtime 段）、运维要点（data/ 备份、
+  审计对账、/health 监控、/panel 面板、并发兜底）——从"照着跑起来"到
+  "照着上线"；consensus 51/51、p0 109/109，v0.10–v0.116 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.116 达成，继续 v0.117–v0.120 收官连续推进。
+  2. （无）— v0.117 达成，继续 v0.118–v0.120 收官连续推进。
 
 ---
 
