@@ -554,8 +554,8 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
             serde_json::json!({"users": users, "tasks": tasks_n,
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
-                "gates": {"consensus": "52/52", "p0": "109/109",
-                          "prove": "109 PROVED", "scenario": "16/16"}})
+                "gates": {"consensus": "53/53", "p0": "109/109",
+                          "prove": "110 PROVED", "scenario": "16/16"}})
         }
         "/stats" => {
             // v0.139 — 业务统计（与 Python v0.134 对等，JSON）
@@ -578,6 +578,74 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "platform_points": app.points,
                 "total_credit": total_credit,
             })
+        }
+        "/portfolio_new" => {
+            // v0.149 — §PF 开户（与 Python v0.147 对等）
+            if let Some(v) = need(&["cash"]) {
+                match sk::portfolio_new(v[0]) {
+                    Ok(pf) => serde_json::json!({"portfolio": pf}),
+                    Err(e) => return (error_status(e),
+                        serde_json::json!({"error": e}).to_string()),
+                }
+            } else {
+                return (400, serde_json::json!({"error": "need cash"}).to_string());
+            }
+        }
+        "/portfolio_buy" => {
+            match (get_str(query, "pf"), q.get("asset").copied(), q.get("qty").copied()) {
+                (Some(pfs), Some(a), Some(qty)) => {
+                    match serde_json::from_str::<Vec<i64>>(pfs) {
+                        Ok(pf) => match sk::buy(&pf, a, qty) {
+                            Ok(r) => serde_json::json!({"portfolio": r}),
+                            Err(e) => return (error_status(e),
+                                serde_json::json!({"error": e}).to_string()),
+                        },
+                        Err(_) => return (400, serde_json::json!({"error": "bad pf"}).to_string()),
+                    }
+                }
+                _ => return (400, serde_json::json!({"error": "need pf & asset & qty"}).to_string()),
+            }
+        }
+        "/portfolio_sell" => {
+            match (get_str(query, "pf"), q.get("asset").copied(), q.get("qty").copied()) {
+                (Some(pfs), Some(a), Some(qty)) => {
+                    match serde_json::from_str::<Vec<i64>>(pfs) {
+                        Ok(pf) => match sk::sell(&pf, a, qty) {
+                            Ok(r) => serde_json::json!({"portfolio": r}),
+                            Err(e) => return (error_status(e),
+                                serde_json::json!({"error": e}).to_string()),
+                        },
+                        Err(_) => return (400, serde_json::json!({"error": "bad pf"}).to_string()),
+                    }
+                }
+                _ => return (400, serde_json::json!({"error": "need pf & asset & qty"}).to_string()),
+            }
+        }
+        "/portfolio_value" => {
+            match get_str(query, "pf") {
+                Some(pfs) => match serde_json::from_str::<Vec<i64>>(pfs) {
+                    Ok(pf) => match sk::portfolio_value(&pf) {
+                        Ok(v) => serde_json::json!({"value": v}),
+                        Err(e) => return (error_status(e),
+                            serde_json::json!({"error": e}).to_string()),
+                    },
+                    Err(_) => return (400, serde_json::json!({"error": "bad pf"}).to_string()),
+                },
+                None => return (400, serde_json::json!({"error": "need pf"}).to_string()),
+            }
+        }
+        "/portfolio_risk" => {
+            match get_str(query, "pf") {
+                Some(pfs) => match serde_json::from_str::<Vec<i64>>(pfs) {
+                    Ok(pf) => match sk::risk_score(&pf) {
+                        Ok(r) => serde_json::json!({"risk": r}),
+                        Err(e) => return (error_status(e),
+                            serde_json::json!({"error": e}).to_string()),
+                    },
+                    Err(_) => return (400, serde_json::json!({"error": "bad pf"}).to_string()),
+                },
+                None => return (400, serde_json::json!({"error": "need pf"}).to_string()),
+            }
         }
         _ => return (404, serde_json::json!({"error": "unknown path"}).to_string()),
     };
@@ -805,13 +873,25 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "109 PROVED");
+           && r["gates"]["prove"] == "110 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
     check!("HTTP /stats",
            r["users"] == 1 && r["tasks"] == 1
            && r["total_bounty"] == 100 && r["tasks_by_state"]["3"] == 1);
+
+    // 13. 金融市场 (v0.149) — 与 Python /portfolio_* 对账
+    let r = http_get(port, "/portfolio_new?cash=100");
+    check!("HTTP /portfolio_new", r["portfolio"] == serde_json::json!([100, 0, 0]));
+    let r = http_get(port, "/portfolio_buy?pf=[100,0,0]&asset=0&qty=30");
+    check!("HTTP /portfolio_buy", r["portfolio"] == serde_json::json!([70, 30, 0]));
+    let r = http_get(port, "/portfolio_sell?pf=[70,30,0]&asset=0&qty=20");
+    check!("HTTP /portfolio_sell", r["portfolio"] == serde_json::json!([90, 10, 0]));
+    let r = http_get(port, "/portfolio_value?pf=[90,10,0]");
+    check!("HTTP /portfolio_value", r["value"] == 100);
+    let r = http_get(port, "/portfolio_risk?pf=[90,10,0]");
+    check!("HTTP /portfolio_risk", r["risk"] == 10);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

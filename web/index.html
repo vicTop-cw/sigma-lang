@@ -148,6 +148,21 @@
     </div>
   </section>
 
+  <section id="pf-panel">
+    <h2>金融市场（§PF，v0.148）</h2>
+    <div class="row">
+      <input id="pf-cash" type="number" placeholder="本金" value="100">
+      <button onclick="pfNew()">开户</button>
+      <input id="pf-pf" placeholder="pf=[c,s,p]" value="[100,0,0]">
+      <input id="pf-qty" type="number" placeholder="数量" value="10">
+      <button onclick="pfBuy()">买入</button>
+      <button onclick="pfSell()">卖出</button>
+      <button onclick="pfValue()">估值</button>
+      <button onclick="pfRisk()">风险</button>
+      <span id="pf-out" class="muted"></span>
+    </div>
+  </section>
+
   <section>
     <h2>操作日志（ΣLang 审计视角）</h2>
     <div id="log">等待操作…</div>
@@ -379,6 +394,38 @@ async function stats() {
     ` · 赏金总额 ${j.total_bounty} · 平台托管 ${pts[0]} / 可用 ${pts[1]} · 契分 ${j.total_credit}`;
 }
 stats();
+
+// v0.148 — 金融市场（§PF）
+async function pfNew() {
+  const c = document.getElementById("pf-cash").value;
+  const j = await api(`/portfolio_new?cash=${c}`, "portfolio_new");
+  document.getElementById("pf-pf").value = JSON.stringify(j.portfolio);
+  document.getElementById("pf-out").textContent = "组合 " + JSON.stringify(j.portfolio);
+}
+async function pfBuy() {
+  const pf = encodeURIComponent(document.getElementById("pf-pf").value);
+  const q = document.getElementById("pf-qty").value;
+  const j = await api(`/portfolio_buy?pf=${pf}&asset=0&qty=${q}`, "portfolio_buy");
+  document.getElementById("pf-pf").value = JSON.stringify(j.portfolio);
+  document.getElementById("pf-out").textContent = "组合 " + JSON.stringify(j.portfolio);
+}
+async function pfSell() {
+  const pf = encodeURIComponent(document.getElementById("pf-pf").value);
+  const q = document.getElementById("pf-qty").value;
+  const j = await api(`/portfolio_sell?pf=${pf}&asset=0&qty=${q}`, "portfolio_sell");
+  document.getElementById("pf-pf").value = JSON.stringify(j.portfolio);
+  document.getElementById("pf-out").textContent = "组合 " + JSON.stringify(j.portfolio);
+}
+async function pfValue() {
+  const pf = encodeURIComponent(document.getElementById("pf-pf").value);
+  const j = await api(`/portfolio_value?pf=${pf}`, "portfolio_value");
+  document.getElementById("pf-out").textContent = "估值 " + j.value;
+}
+async function pfRisk() {
+  const pf = encodeURIComponent(document.getElementById("pf-pf").value);
+  const j = await api(`/portfolio_risk?pf=${pf}`, "portfolio_risk");
+  document.getElementById("pf-out").textContent = "风险 " + j.risk;
+}
 
 setBackend();
 tasks();

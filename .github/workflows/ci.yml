@@ -33,6 +33,10 @@ jobs:
           python3 impl/python/sigma_app.py --stats-test
           cd impl/verifier && cargo run -q -- --app-smoke
 
+      # v0.151 — 金融市场对账进 CI（Python /portfolio-test）
+      - name: ΣLang portfolio reconciliation (v0.151)
+        run: python3 impl/python/sigma_app.py --portfolio-test
+
       # v0.56 — 九道门禁一键验收：consensus / p0 / 三端自检与编译 / 三域审计 /
       # 证明消解 / 找茬冒烟，一条命令在 CI 上全绿才算通过。
       # v0.87 — --report 输出全量回归报告（JSON），作为 CI artifact 保存。

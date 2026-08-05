@@ -1858,6 +1858,39 @@ defmodule SigmaVerify do
   def receive_stock(_inv, item, _qty) when item in [0, 1], do: {:error, "TypeError"}
   def receive_stock(_inv, _item, _qty), do: {:error, "UnknownItem"}
 
+  # --- §PF portfolio (v0.150) — 对齐 Python sigma_core §PF.3.x ---
+
+  @doc "开户: cash → [cash, 0, 0]. §PF.3.1 — 负数拒绝."
+  def portfolio_new(cash) when cash >= 0, do: {:ok, [cash, 0, 0]}
+  def portfolio_new(_cash), do: {:error, "TypeError"}
+
+  @doc "买入: 花现金买仓位（单价 1）. §PF.3.2 — 现金不足 InsufficientFunds; 未知资产 UnknownAsset."
+  def buy([cash, qa, qb], asset, qty) when qty >= 0 and asset in [0, 1] and qty <= cash,
+    do: if(asset == 0, do: {:ok, [cash - qty, qa + qty, qb]}, else: {:ok, [cash - qty, qa, qb + qty]})
+  def buy([_cash, _, _], _, qty) when qty > 0, do: {:error, "InsufficientFunds"}
+  def buy(_, asset, _) when asset not in [0, 1], do: {:error, "UnknownAsset"}
+  def buy(_, _, _), do: {:error, "TypeError"}
+
+  @doc "卖出: 平仓变现（单价 1）. §PF.3.3 — 仓位不足 InsufficientShares; 未知资产 UnknownAsset."
+  def sell([cash, qa, qb], asset, qty) when qty >= 0 and asset in [0, 1] do
+    held = if asset == 0, do: qa, else: qb
+    if qty <= held do
+      if asset == 0, do: {:ok, [cash + qty, qa - qty, qb]}, else: {:ok, [cash + qty, qa, qb - qty]}
+    else
+      {:error, "InsufficientShares"}
+    end
+  end
+  def sell(_, asset, _) when asset not in [0, 1], do: {:error, "UnknownAsset"}
+  def sell(_, _, _), do: {:error, "TypeError"}
+
+  @doc "估值: cash + qA + qB（单价 1）. §PF.3.4."
+  def portfolio_value([cash, qa, qb]), do: {:ok, cash + qa + qb}
+  def portfolio_value(_), do: {:error, "TypeError"}
+
+  @doc "风险: 仓位暴露 qA + qB. §PF.3.5."
+  def risk_score([_, qa, qb]), do: {:ok, qa + qb}
+  def risk_score(_), do: {:error, "TypeError"}
+
   @doc "出库: 扣库存，不超卖. §IN.3.3 — qty ≤ held 否则 InsufficientStock."
   def ship_stock([a, b], 0, qty) when qty >= 0 and qty <= a, do: {:ok, [a - qty, b]}
   def ship_stock([a, b], 1, qty) when qty >= 0 and qty <= b, do: {:ok, [a, b - qty]}
@@ -2104,6 +2137,28 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ IN.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_portfolio_story do
+    checks = [
+      # §PF.3.1 开户
+      {"portfolio_new", portfolio_new(100) == {:ok, [100, 0, 0]}},
+      {"portfolio_new_negative_rejected", portfolio_new(-5) == {:error, "TypeError"}},
+      # §PF.3.2 买入
+      {"buy", buy(elem(portfolio_new(100), 1), 0, 30) == {:ok, [70, 30, 0]}},
+      {"buy_insufficient_rejected", buy(elem(portfolio_new(10), 1), 0, 30) == {:error, "InsufficientFunds"}},
+      # §PF.3.3 卖出
+      {"sell", sell(elem(buy(elem(portfolio_new(100), 1), 0, 30), 1), 0, 20) == {:ok, [90, 10, 0]}},
+      {"sell_insufficient_rejected", sell([70, 30, 0], 0, 40) == {:error, "InsufficientShares"}},
+      # §PF.3.4 估值
+      {"portfolio_value", portfolio_value([90, 10, 0]) == {:ok, 100}},
+      # §PF.3.5 风险
+      {"risk_score", risk_score([90, 10, 0]) == {:ok, 10}}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ PF.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2129,6 +2184,11 @@ case System.argv() do
   ["--sk-inventory" | _] ->
     {passed, total} = SigmaVerify.sk_inventory_story()
     IO.puts("sigma_core inventory story (§IN): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-portfolio" | _] ->
+    {passed, total} = SigmaVerify.sk_portfolio_story()
+    IO.puts("sigma_core portfolio story (§PF): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

@@ -341,6 +341,41 @@ pub fn encode_points(points: &[i64]) -> i64 {
     encode_list(points, 1000)
 }
 
+// --- §PF portfolio (v0.149) — 对齐 Python sigma_core §PF.3.x ---
+pub fn portfolio_new(cash: i64) -> Result<Vec<i64>, &'static str> {
+    if cash < 0 { return Err("TypeError"); }
+    Ok(vec![cash, 0, 0])
+}
+
+pub fn buy(portfolio: &[i64], asset: i64, qty: i64) -> Result<Vec<i64>, &'static str> {
+    if portfolio.len() != 3 || asset < 0 || qty < 0 { return Err("TypeError"); }
+    if asset != 0 && asset != 1 { return Err("UnknownAsset"); }
+    let (cash, qa, qb) = (portfolio[0], portfolio[1], portfolio[2]);
+    if qty > cash { return Err("InsufficientFunds"); }
+    if asset == 0 { Ok(vec![cash - qty, qa + qty, qb]) }
+    else { Ok(vec![cash - qty, qa, qb + qty]) }
+}
+
+pub fn sell(portfolio: &[i64], asset: i64, qty: i64) -> Result<Vec<i64>, &'static str> {
+    if portfolio.len() != 3 || asset < 0 || qty < 0 { return Err("TypeError"); }
+    if asset != 0 && asset != 1 { return Err("UnknownAsset"); }
+    let (cash, qa, qb) = (portfolio[0], portfolio[1], portfolio[2]);
+    let held = if asset == 0 { qa } else { qb };
+    if qty > held { return Err("InsufficientShares"); }
+    if asset == 0 { Ok(vec![cash + qty, qa - qty, qb]) }
+    else { Ok(vec![cash + qty, qa, qb - qty]) }
+}
+
+pub fn portfolio_value(portfolio: &[i64]) -> Result<i64, &'static str> {
+    if portfolio.len() != 3 { return Err("TypeError"); }
+    Ok(portfolio[0] + portfolio[1] + portfolio[2])
+}
+
+pub fn risk_score(portfolio: &[i64]) -> Result<i64, &'static str> {
+    if portfolio.len() != 3 { return Err("TypeError"); }
+    Ok(portfolio[1] + portfolio[2])
+}
+
 /// Run the §SK self-check (mirrors `sigma_core.py` §SK block); returns
 /// (passed, total).
 pub fn self_check() -> (usize, usize) {

@@ -885,6 +885,21 @@ def run_invariant_checks(core):
          "ok": s2[0] >= 0 and s2[1] >= 0, "note": f"inv={s2}"},
     ])
 
+    # §PF 交易链可加性 (v0.145, INV-PF-4)
+    pf4 = core.buy(core.buy(core.portfolio_new(100), 0, 20), 0, 10)
+    record("INV-PF-4", "invariant", ["buy(20)→buy(10)"], pf4, [
+        {"law": "交易链可加性 — 链后 cash+30=100 且 shares−30=0",
+         "ok": pf4[0] + 30 == 100 and pf4[1] - 30 == 0, "note": f"pf={pf4}"},
+    ])
+
+    # §SK 额度-托管联动 (v0.145, INV-SK-6)
+    q6 = core.quota_use(core.quota_new(50), 1)
+    p6 = core.points_hold(core.points_new(), 100)
+    record("INV-SK-6", "invariant", ["quota_use(1)→points_hold(100)"], p6, [
+        {"law": "额度-托管联动 — 额度 remaining ≥ 0 且 escrow = 托管额",
+         "ok": q6[1] >= 0 and p6[0] == 100, "note": f"q={q6} p={p6}"},
+    ])
+
     return events
 
 

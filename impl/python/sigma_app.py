@@ -437,9 +437,9 @@ class _Handler(BaseHTTPRequestHandler):
                     "auth": "enabled" if _Handler._auth_token else "disabled",
                     "log": _Handler._log_file,
                     "gates": {
-                        "consensus": "52/52",
+                        "consensus": "53/53",
                         "p0": "109/109",
-                        "prove": "109 PROVED",
+                        "prove": "110 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -467,9 +467,9 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <tr><td>数量</td><td>{by_state[0]}</td><td>{by_state[1]}</td><td>{by_state[2]}</td><td>{by_state[3]}</td></tr>
 <tr><td>赏金总额</td><td colspan="4">{total_bounty}</td></tr></table></div>
 <div class="card"><h3>门禁摘要</h3><table>
-<tr><td>consensus</td><td>52/52</td></tr>
+<tr><td>consensus</td><td>53/53</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>109 PROVED</td></tr>
+<tr><td>prove</td><td>110 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/stats":
@@ -607,6 +607,35 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
                 if s is None or d is None:
                     return self._json({"error": "need shipped & demanded"}, 400)
                 return self._json({"rate": app.fill(s, d)})
+            if path == "/portfolio_new":
+                c = self._get("cash")
+                if c is None:
+                    return self._json({"error": "need cash"}, 400)
+                return self._json({"portfolio": core.portfolio_new(c)})
+            if path == "/portfolio_buy":
+                pf = self._get_str("pf")
+                a = self._get("asset")
+                q = self._get("qty")
+                if pf is None or a is None or q is None:
+                    return self._json({"error": "need pf & asset & qty"}, 400)
+                return self._json({"portfolio": core.buy(eval(pf), a, q)})
+            if path == "/portfolio_sell":
+                pf = self._get_str("pf")
+                a = self._get("asset")
+                q = self._get("qty")
+                if pf is None or a is None or q is None:
+                    return self._json({"error": "need pf & asset & qty"}, 400)
+                return self._json({"portfolio": core.sell(eval(pf), a, q)})
+            if path == "/portfolio_value":
+                pf = self._get_str("pf")
+                if pf is None:
+                    return self._json({"error": "need pf"}, 400)
+                return self._json({"value": core.portfolio_value(eval(pf))})
+            if path == "/portfolio_risk":
+                pf = self._get_str("pf")
+                if pf is None:
+                    return self._json({"error": "need pf"}, 400)
+                return self._json({"risk": core.risk_score(eval(pf))})
             return self._json({"error": "unknown path"}, 404)
         except (ValueError, KeyError) as e:
             # v0.54 — 语义化错误码：§SK/§IN 错误 → 语义化 HTTP 状态码
@@ -1080,7 +1109,7 @@ def run_health_test() -> Tuple[int, int]:
         check("HEALTH status ok", body.get("status") == "ok", f"got {body}")
         check("HEALTH app name", "找茬" in body.get("app", ""), f"got {body}")
         check("HEALTH auth field", "auth" in body, f"got {body}")
-        check("HEALTH gates", body.get("gates", {}).get("consensus") == "52/52",
+        check("HEALTH gates", body.get("gates", {}).get("consensus") == "53/53",
               f"got {body.get('gates')}")
     finally:
         server.shutdown()
@@ -1354,7 +1383,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "52/52" in html and "109 PROVED" in html, "")
+        check("PANEL gates", "53/53" in html and "110 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -1396,6 +1425,47 @@ def run_stats_test() -> Tuple[int, int]:
         check("STATS bounty", s["total_bounty"] == 100, f"got {s}")
         check("STATS by_state", s["tasks_by_state"]["0"] == 1, f"got {s}")
         check("STATS escrow", s["platform_points"][0] == 100, f"got {s}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
+def run_portfolio_test() -> Tuple[int, int]:
+    """--portfolio-test (v0.147): §PF market endpoints — new/buy/sell/value/risk
+    chain over HTTP, results match the portfolio semantics."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        r = call("/portfolio_new?cash=100")
+        check("PF new", r["portfolio"] == [100, 0, 0], f"got {r}")
+        r = call("/portfolio_buy?pf=[100,0,0]&asset=0&qty=30")
+        check("PF buy", r["portfolio"] == [70, 30, 0], f"got {r}")
+        r = call("/portfolio_sell?pf=[70,30,0]&asset=0&qty=20")
+        check("PF sell", r["portfolio"] == [90, 10, 0], f"got {r}")
+        r = call("/portfolio_value?pf=[90,10,0]")
+        check("PF value", r["value"] == 100, f"got {r}")
+        r = call("/portfolio_risk?pf=[90,10,0]")
+        check("PF risk", r["risk"] == 10, f"got {r}")
     finally:
         server.shutdown()
         thread.join()
@@ -1978,6 +2048,10 @@ def main(argv=None):
     if "--stats-test" in argv:
         passed, total = run_stats_test()
         print(f"sigma_app stats test (v0.134): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--portfolio-test" in argv:
+        passed, total = run_portfolio_test()
+        print(f"sigma_app portfolio test (v0.147): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()
