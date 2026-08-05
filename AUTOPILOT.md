@@ -921,6 +921,17 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.115 完成定义（协议版本化，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **版本升级**: spec 0.6.0 → 0.7.0（README Spec Version + Citation +
+      web/index.html 前端显示 + sigma-accept --report 字段同步）；v0.100–0.114
+      的上线化/链式不变量深化/产品增强满足 0.7.0。
+- [x] **RFC 记录**: 「上线化（v0.100–0.104）+ 协议深化（v0.105–0.109）+
+      产品增强（v0.110–0.114）」三阶段已闭环——从"可运行"到"可上线可验收"。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 80 项 PROVED、三端
+      0 warning、sigma-accept 10/10，v0.10–v0.114 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

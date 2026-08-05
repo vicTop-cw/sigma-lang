@@ -35,7 +35,7 @@
 <body>
 <header>
   <div>🔍 找茬 · ΣLang 语义协议驱动的找茬平台</div>
-  <span id="spec-ver">spec 0.6.0 · 后端 <span id="backend">未连接</span></span>
+  <span id="spec-ver">spec 0.7.0 · 后端 <span id="backend">未连接</span></span>
 </header>
 
 <div id="banner" hidden style="background:#ffebee; color:#c62828; padding:10px 24px;
@@ -186,7 +186,7 @@ function setBackend() {
     document.getElementById("backend").textContent = j.status === "ok"
       ? "在线（" + BASE + "）" : "异常";
     document.getElementById("spec-ver").textContent =
-      "spec " + (j.gates ? "0.6.0" : "?") + " · 后端 在线";
+      "spec " + (j.gates ? "0.7.0" : "?") + " · 后端 在线";
   }).catch(() => {
     document.getElementById("backend").textContent = "离线（" + BASE + "）";
   });
