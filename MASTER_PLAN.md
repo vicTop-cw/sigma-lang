@@ -604,9 +604,15 @@
   quota，先并发开户再并发发单）；自检 15/15、冒烟 36/36、launch-test 10/10、
   concurrency-test 4/4 不回归；consensus 51/51、p0 109/109，v0.10–v0.103
   不回归。
+- ✅ **REACHED v0.105 (2026-08-05)**: 供应链不变量补全—— `sigma-prove`
+  `gen_inventory_invariants` 新增两条跨操作不变量义务：INV-IN-3 入库链可加性
+  （receive 两次后 item0 = a+x+y）、INV-IN-4 出库链不超卖（ship 两次后
+  item0 ≥ 0，x≤a 且 y≤a−x），均 `PROVED (unsat)`——供应链语义从单操作定律
+  走向链式跨操作不变量证明；consensus 51/51、p0 109/109，v0.10–v0.104
+  不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.104 达成，继续 v0.105–v0.120 协议深化 + 产品增强连续推进。
+  2. （无）— v0.105 达成，继续 v0.106–v0.120 协议深化 + 产品增强连续推进。
 
 ---
 

@@ -611,8 +611,31 @@ def gen_inventory_invariants(ops):
             "(assert (= (index inv2 0) (- a q))) (assert (= (index inv2 1) b))\n"
             "; INV-IN-2: 出库后每货品 ≥ 0\n"
             "(assert (not (>= (index inv2 0) 0)))\n(check-sat)\n")
+    inv3 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const a Int) (declare-const b Int)\n"
+            "(declare-const x Int) (declare-const y Int)\n"
+            "(declare-const inv Int) (declare-const inv2 Int)\n"
+            "(assert (>= a 0)) (assert (>= b 0)) (assert (>= x 0)) (assert (>= y 0))\n"
+            "; 跨操作: receive_stock(receive_stock([a,b],0,x),0,y) 后 item0\n"
+            "(assert (= (index inv 0) (+ a x))) (assert (= (index inv 1) b))\n"
+            "(assert (= (index inv2 0) (+ (index inv 0) y))) (assert (= (index inv2 1) b))\n"
+            "; INV-IN-3 (v0.105): 入库链可加性 — item0 = a + x + y\n"
+            "(assert (not (= (index inv2 0) (+ a x y))))\n(check-sat)\n")
+    inv4 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const a Int) (declare-const b Int)\n"
+            "(declare-const x Int) (declare-const y Int)\n"
+            "(declare-const inv Int) (declare-const inv2 Int)\n"
+            "(assert (>= a 0)) (assert (>= b 0)) (assert (>= x 0)) (assert (>= y 0))\n"
+            "; 两次出库（x ≤ a 且 y ≤ a-x，不超卖）\n"
+            "(assert (<= x a)) (assert (<= y (- a x)))\n"
+            "(assert (= (index inv 0) (- a x))) (assert (= (index inv 1) b))\n"
+            "(assert (= (index inv2 0) (- (index inv 0) y))) (assert (= (index inv2 1) b))\n"
+            "; INV-IN-4 (v0.105): 出库链不超卖 — 链后 item0 ≥ 0\n"
+            "(assert (not (>= (index inv2 0) 0)))\n(check-sat)\n")
     return [("INV-IN-1 total-conserved", inv1),
-            ("INV-IN-2 no-negative-chain", inv2)]
+            ("INV-IN-2 no-negative-chain", inv2),
+            ("INV-IN-3 receive-additive-chain", inv3),
+            ("INV-IN-4 no-oversell-chain", inv4)]
 
 
 def gen_portfolio_invariants(ops):
