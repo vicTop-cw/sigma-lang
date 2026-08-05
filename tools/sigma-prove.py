@@ -723,10 +723,18 @@ def gen_socketkit_invariants(ops):
             "(assert (= (index t3 0) a)) (assert (= (index t3 1) b)) (assert (= (index t3 2) 3)) (assert (= (index t3 3) h))\n"
             "; INV-SK-4 (v0.107): 状态机链 — claim→submit→accept 各步 state 单调 +1\n"
             "(assert (not (and (= (index t1 2) 1) (= (index t2 2) 2) (= (index t3 2) 3))))\n(check-sat)\n")
+    inv5 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const c Int) (declare-const x Int) (declare-const c2 Int)\n"
+            "(assert (>= c 0)) (assert (>= x 0))\n"
+            "; 跨操作 (v0.108): 契分累加后\n"
+            "(assert (= c2 (+ c x)))\n"
+            "; INV-SK-5: 契分非负链 — credit ≥ 0\n"
+            "(assert (not (>= c2 0)))\n(check-sat)\n")
     return [("INV-SK-1 bounty-conserved", inv1),
             ("INV-SK-2 no-over-withdraw", inv2),
             ("INV-SK-3 nonnegative-chain", inv3),
-            ("INV-SK-4 state-machine-chain", inv4)]
+            ("INV-SK-4 state-machine-chain", inv4),
+            ("INV-SK-5 credit-nonnegative-chain", inv5)]
 
 
 def gen_quota_invariants(ops):
@@ -795,8 +803,18 @@ def gen_team_invariants(ops):
             "(assert (= s2 (+ s 1)))\n"
             "; INV-T-2: 成员递增 — join 后 size = 原 size + 1\n"
             "(assert (not (= s2 (+ s 1))))\n(check-sat)\n")
+    inv3 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const o Int) (declare-const k Int) (declare-const c Int)\n"
+            "(declare-const t Int)\n"
+            "(assert (>= o 0)) (assert (>= k 0)) (assert (>= c 1))\n"
+            "; 跨操作 (v0.108): team_create(o,k,c) 后 [o,k,1,c]\n"
+            "(assert (= (index t 0) o)) (assert (= (index t 1) k))\n"
+            "(assert (= (index t 2) 1)) (assert (= (index t 3) c))\n"
+            "; INV-T-3: 创建合法链 — founder=owner 且 size=1\n"
+            "(assert (not (and (= (index t 0) o) (= (index t 2) 1))))\n(check-sat)\n")
     return [("INV-T-1 no-over-capacity", inv1),
-            ("INV-T-2 member-increment", inv2)]
+            ("INV-T-2 member-increment", inv2),
+            ("INV-T-3 create-legal-chain", inv3)]
 
 
 def gen_growth_invariants(ops):
@@ -821,8 +839,16 @@ def gen_growth_invariants(ops):
             "(assert (= d (ite (>= v1 v2) 1 0)))\n"
             "; INV-G-2: 裁决链 — dispute_review 恒 binary\n"
             "(assert (not (or (= d 0) (= d 1))))\n(check-sat)\n")
+    inv3 = ("(set-logic NIA)\n"
+            "(declare-const r Int) (declare-const s1 Int) (declare-const s2 Int)\n"
+            "(assert (>= r 0)) (assert (>= s1 0)) (assert (>= s2 0))\n"
+            "; 跨操作 (v0.108): team_share 后 Σ shares ≤ reward\n"
+            "(assert (<= (+ s1 s2) r))\n"
+            "; INV-G-3: 收益不超发链 — Σ shares ≤ reward\n"
+            "(assert (not (<= (+ s1 s2) r)))\n(check-sat)\n")
     return [("INV-G-1 authorized-issue-chain", inv1),
-            ("INV-G-2 binary-decision-chain", inv2)]
+            ("INV-G-2 binary-decision-chain", inv2),
+            ("INV-G-3 no-overpay-chain", inv3)]
 
 
 # ---------------------------------------------------------------------------

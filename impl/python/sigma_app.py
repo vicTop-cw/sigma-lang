@@ -439,7 +439,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "gates": {
                         "consensus": "51/51",
                         "p0": "109/109",
-                        "prove": "73 PROVED",
+                        "prove": "80 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -469,7 +469,7 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <div class="card"><h3>门禁摘要</h3><table>
 <tr><td>consensus</td><td>51/51</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>73 PROVED</td></tr>
+<tr><td>prove</td><td>80 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/tasks":
@@ -1318,7 +1318,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "51/51" in html and "73 PROVED" in html, "")
+        check("PANEL gates", "51/51" in html and "80 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()

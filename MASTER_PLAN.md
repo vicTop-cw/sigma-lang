@@ -424,7 +424,7 @@
 - ✅ **REACHED v0.80 (2026-08-04)**: sigma-prove 全量重验（62→70+）——
   新增两条跨操作不变量义务（INV-SK-3 积分非负链——points 链 escrow/available
   ≥ 0；INV-Q-3 预支链——quota_advance 后 remaining = r+m ≥ 0），全量重验
-  **62 → 73 项 PROVED / 29 模块全绿**（> 70 达标）；sigma-accept.py 门禁 8
+  **62 → 80 项 PROVED / 29 模块全绿**（> 70 达标）；sigma-accept.py 门禁 8
   期望、health 端点 gates、README 架构数字全部同步为 73 PROVED；consensus
   51/51、p0 109/109、sigma-accept 9/9 全绿，v0.10–v0.79 不回归。
 - ✅ **REACHED v0.81 (2026-08-04)**: 找茬 API 文档—— 新建 `docs/api_zhaocha.md`
@@ -468,7 +468,7 @@
   （README Spec Version + Citation 同步升级；v0.71–v0.85 累计新增找茬服务化
   十件套（鉴权/原子写/分级日志/健康检查/启动自检/方法语义/前端剧本/双端对账/
   API 文档/开工 checklist）+ 业务规则深化（INV-Q/T/G/SK-3/Q-3 跨操作不变量
-  73 项 PROVED、--domains 47/47 十二项不变量复核），满足 0.5.0 语义面扩展）；
+  80 项 PROVED、--domains 47/47 十二项不变量复核），满足 0.5.0 语义面扩展）；
   RFC 记录：「找茬服务化（v0.71–v0.75）+ 业务规则深化（v0.76–v0.80）+
   产品配套（v0.81–v0.85）」三阶段已闭环；consensus 51/51、p0 109/109，
   v0.10–v0.85 不回归。
@@ -488,7 +488,7 @@
 - ✅ **REACHED v0.89 (2026-08-04)**: README 收官总览—— README Status 章节
   更新共识数字（41/41 → **51/51**）并新增「v0.89 收官总览」段：协议 spec
   0.5.0、三域（§SK/§PF/§IN）、consensus 51/51、p0 109/109、sigma-prove
-  73 项 PROVED、sigma-runtime 59/59 + 47/47（--domains 十二项不变量复核）、
+  80 项 PROVED、sigma-runtime 59/59 + 47/47（--domains 十二项不变量复核）、
   双端 HTTP 冒烟 36/36 逐项一致、sigma-accept 十道门禁 10/10（含 CI 回归报告
   artifact）、三端 0 warning、找茬产品落地（服务化十件套 + 文档 + checklist +
   前端剧本）——README 首页一张图看到 v0.89 全貌；consensus 51/51、p0 109/109，
@@ -496,7 +496,7 @@
 - ✅ **REACHED v0.90 (2026-08-04)**: 里程碑达成—— v0.71–v0.90 连续推进收官：
   找茬正式开工准备（服务化十件套：鉴权/原子写/分级日志/健康检查/启动自检/
   方法语义/前端剧本/双端对账/API 文档/开工 checklist）+ 业务规则深化
-  （INV-Q/T/G/SK-3/Q-3 跨操作不变量 73 项 PROVED、--domains 47/47 十二项
+  （INV-Q/T/G/SK-3/Q-3 跨操作不变量 80 项 PROVED、--domains 47/47 十二项
   不变量复核）+ 工程化收官（spec 0.5.0、CI 回归报告 artifact、贡献者指南、
   README 收官总览）；sigma-accept.py 十道门禁全绿（含 --report 回归报告）；
   consensus 51/51、p0 109/109、三端 0 warning，v0.10–v0.89 不回归——ΣLang
@@ -568,7 +568,7 @@
 - ✅ **REACHED v0.100 (2026-08-04)**: 跨百版本里程碑—— ΣLang 达到
   **v0.100**（从 v0.10 到 v0.100 里程碑链 90+ 版本完整）：三域语义（§SK 找茬 /
   §PF 金融 / §IN 供应链）+ 三端验证器共识 51/51 + 语料 51 模块 + 跨操作不变量
-  73 项 PROVED + 双端参考实现（HTTP 冒烟 36/36 逐项一致）+ 十道门禁一键验收
+  80 项 PROVED + 双端参考实现（HTTP 冒烟 36/36 逐项一致）+ 十道门禁一键验收
   + 找茬产品（前端 / --launch 一键开工 / /panel 运行面板 / --run-accept 运行
   验收 / 运行指南）——"协议 → 验证器 → 语料 → 证明 → 实现 → 产品"全链路
   闭环；上线准备基线：consensus 51/51、p0 109/109、sigma-accept 10/10、
@@ -621,9 +621,17 @@
   [author, bounty, state, hunter] 四元组链式一致），`PROVED (unsat)`——
   找茬任务从单操作定律走向完整生命周期状态机链证明；consensus 51/51、
   p0 109/109，v0.10–v0.106 不回归。
+- ✅ **REACHED v0.108 (2026-08-05)**: sigma-prove 全量重验（73→80+）——
+  新增三条跨操作不变量义务（INV-SK-5 契分非负链——credit ≥ 0；INV-G-3
+  收益不超发链——team_share 的 Σ shares ≤ reward；INV-T-3 团队创建合法链
+  ——founder=owner 且 size=1），全量重验 **73 → 80 项 PROVED / 29 模块
+  全绿**（> 80 达标）；sigma-accept.py 门禁 8 期望、health 端点 gates、/panel、
+  README/docs 数字全部同步为 80 PROVED；sigma-accept 十道门禁 10/10 全绿、
+  health-test 4/4、panel-test 5/5、自检 15/15、冒烟 36/36 不回归；
+  consensus 51/51、p0 109/109，v0.10–v0.107 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.107 达成，继续 v0.108–v0.120 协议深化 + 产品增强连续推进。
+  2. （无）— v0.108 达成，继续 v0.109–v0.120 协议深化 + 产品增强连续推进。
 
 ---
 
