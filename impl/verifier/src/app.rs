@@ -554,8 +554,30 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
             serde_json::json!({"users": users, "tasks": tasks_n,
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
-                "gates": {"consensus": "51/51", "p0": "109/109",
-                          "prove": "80 PROVED", "scenario": "16/16"}})
+                "gates": {"consensus": "52/52", "p0": "109/109",
+                          "prove": "109 PROVED", "scenario": "16/16"}})
+        }
+        "/stats" => {
+            // v0.139 — 业务统计（与 Python v0.134 对等，JSON）
+            let users = app.users.len();
+            let tasks_n = app.tasks.len();
+            let mut by_state = [0i64; 4];
+            let mut total_bounty = 0i64;
+            for t in app.tasks.values() {
+                let st = t[2] as usize;
+                if st < 4 { by_state[st] += 1; }
+                total_bounty += t[1];
+            }
+            let total_credit: i64 = app.users.keys()
+                .map(|&u| app.credit(u)).sum();
+            serde_json::json!({
+                "users": users, "tasks": tasks_n,
+                "tasks_by_state": {"0": by_state[0], "1": by_state[1],
+                                   "2": by_state[2], "3": by_state[3]},
+                "total_bounty": total_bounty,
+                "platform_points": app.points,
+                "total_credit": total_credit,
+            })
         }
         _ => return (404, serde_json::json!({"error": "unknown path"}).to_string()),
     };
@@ -783,7 +805,13 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "80 PROVED");
+           && r["gates"]["prove"] == "109 PROVED");
+
+    // 12. 业务统计 (v0.139) — 与 Python /stats 对账
+    let r = http_get(port, "/stats");
+    check!("HTTP /stats",
+           r["users"] == 1 && r["tasks"] == 1
+           && r["total_bounty"] == 100 && r["tasks_by_state"]["3"] == 1);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

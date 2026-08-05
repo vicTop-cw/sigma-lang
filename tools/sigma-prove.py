@@ -730,11 +730,24 @@ def gen_socketkit_invariants(ops):
             "(assert (= c2 (+ c x)))\n"
             "; INV-SK-5: 契分非负链 — credit ≥ 0\n"
             "(assert (not (>= c2 0)))\n(check-sat)\n")
+    inv6 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const b Int) (declare-const m Int)\n"
+            "(declare-const q Int) (declare-const q2 Int)\n"
+            "(declare-const p Int) (declare-const p2 Int)\n"
+            "(assert (>= b 0)) (assert (>= m 0)) (assert (<= b m))\n"
+            "; 联动: quota_new(m) → quota_use(b)（额度充足）→ points_hold(b)（托管）\n"
+            "(assert (= (index q 0) m)) (assert (= (index q 1) m))\n"
+            "(assert (= (index q2 0) m)) (assert (= (index q2 1) (- m b)))\n"
+            "(assert (= (index p 0) 0)) (assert (= (index p 1) 0))\n"
+            "(assert (= (index p2 0) b)) (assert (= (index p2 1) 0))\n"
+            "; INV-SK-6 (v0.136): 额度-托管联动 — remaining ≥ 0 且 escrow = bounty\n"
+            "(assert (not (and (>= (index q2 1) 0) (= (index p2 0) b))))\n(check-sat)\n")
     return [("INV-SK-1 bounty-conserved", inv1),
             ("INV-SK-2 no-over-withdraw", inv2),
             ("INV-SK-3 nonnegative-chain", inv3),
             ("INV-SK-4 state-machine-chain", inv4),
-            ("INV-SK-5 credit-nonnegative-chain", inv5)]
+            ("INV-SK-5 credit-nonnegative-chain", inv5),
+            ("INV-SK-6 quota-escrow-link", inv6)]
 
 
 def gen_quota_invariants(ops):

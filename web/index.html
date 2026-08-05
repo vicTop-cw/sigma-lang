@@ -140,6 +140,14 @@
     </div>
   </section>
 
+  <section id="stats-panel">
+    <h2>平台统计（v0.138，GET /stats）</h2>
+    <div class="row">
+      <button onclick="stats()">刷新统计</button>
+      <span id="stats-out" class="muted"></span>
+    </div>
+  </section>
+
   <section>
     <h2>操作日志（ΣLang 审计视角）</h2>
     <div id="log">等待操作…</div>
@@ -360,6 +368,17 @@ async function fillRate() {
   const j = await api("/fill_rate?shipped=6&demanded=10", "fill_rate");
   document.getElementById("s-out").textContent = "履约率 " + j.rate;
 }
+
+// v0.138 — 平台统计（GET /stats）
+async function stats() {
+  const j = await api("/stats", "stats");
+  const s = j.tasks_by_state || {};
+  const pts = j.platform_points || [0, 0];
+  document.getElementById("stats-out").textContent =
+    `用户 ${j.users} · 任务 ${j.tasks}（待接 ${s["0"]||0} / 进行 ${s["1"]||0} / 待验 ${s["2"]||0} / 完成 ${s["3"]||0}）` +
+    ` · 赏金总额 ${j.total_bounty} · 平台托管 ${pts[0]} / 可用 ${pts[1]} · 契分 ${j.total_credit}`;
+}
+stats();
 
 setBackend();
 tasks();

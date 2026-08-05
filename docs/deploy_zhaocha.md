@@ -66,7 +66,7 @@ cd impl/verifier && cargo run -q -- --app-scenario  # Rust 双端对账 16/16
 ```
 
 > 任何一项非全绿 = 部署不应放行。门禁数字以当前 milestone 为准
-> （consensus 51/51、p0 109/109、sigma-prove 62 项 PROVED）。
+> （consensus 52/52、p0 109/109、sigma-prove 62 项 PROVED）。
 
 ---
 

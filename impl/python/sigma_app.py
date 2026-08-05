@@ -437,9 +437,9 @@ class _Handler(BaseHTTPRequestHandler):
                     "auth": "enabled" if _Handler._auth_token else "disabled",
                     "log": _Handler._log_file,
                     "gates": {
-                        "consensus": "51/51",
+                        "consensus": "52/52",
                         "p0": "109/109",
-                        "prove": "80 PROVED",
+                        "prove": "109 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -467,11 +467,27 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <tr><td>数量</td><td>{by_state[0]}</td><td>{by_state[1]}</td><td>{by_state[2]}</td><td>{by_state[3]}</td></tr>
 <tr><td>赏金总额</td><td colspan="4">{total_bounty}</td></tr></table></div>
 <div class="card"><h3>门禁摘要</h3><table>
-<tr><td>consensus</td><td>51/51</td></tr>
+<tr><td>consensus</td><td>52/52</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>80 PROVED</td></tr>
+<tr><td>prove</td><td>109 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
+            if path == "/stats":
+                # v0.134 — 业务统计（JSON，程序可消费；/panel 是 HTML 版）
+                by_state = {0: 0, 1: 0, 2: 0, 3: 0}
+                total_bounty = 0
+                for t in app.tasks.values():
+                    by_state[t[2]] = by_state.get(t[2], 0) + 1
+                    total_bounty += t[1]
+                total_credit = sum(app.credit(u) for u in app.users)
+                return self._json({
+                    "users": len(app.users),
+                    "tasks": len(app.tasks),
+                    "tasks_by_state": by_state,
+                    "total_bounty": total_bounty,
+                    "platform_points": app.points,
+                    "total_credit": total_credit,
+                })
             if path == "/tasks":
                 status = self._get("status")
                 return self._json({"tasks": app.tasks_list(status)})
@@ -1064,7 +1080,7 @@ def run_health_test() -> Tuple[int, int]:
         check("HEALTH status ok", body.get("status") == "ok", f"got {body}")
         check("HEALTH app name", "找茬" in body.get("app", ""), f"got {body}")
         check("HEALTH auth field", "auth" in body, f"got {body}")
-        check("HEALTH gates", body.get("gates", {}).get("consensus") == "51/51",
+        check("HEALTH gates", body.get("gates", {}).get("consensus") == "52/52",
               f"got {body.get('gates')}")
     finally:
         server.shutdown()
@@ -1338,7 +1354,48 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "51/51" in html and "80 PROVED" in html, "")
+        check("PANEL gates", "52/52" in html and "109 PROVED" in html, "")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
+def run_stats_test() -> Tuple[int, int]:
+    """--stats-test (v0.134): GET /stats — the JSON business statistics reflect
+    the live state (users / tasks by state / bounty / platform points / credit)."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        call(f"/register?user=7&name={quote('找茬主')}")
+        call(f"/register?user=3&name={quote('找茬人')}")
+        call("/quota?user=7&monthly=50")
+        call("/post?author=7&bounty=100")
+        s = call("/stats")
+        check("STATS users", s["users"] == 2, f"got {s}")
+        check("STATS tasks", s["tasks"] == 1, f"got {s}")
+        check("STATS bounty", s["total_bounty"] == 100, f"got {s}")
+        check("STATS by_state", s["tasks_by_state"]["0"] == 1, f"got {s}")
+        check("STATS escrow", s["platform_points"][0] == 100, f"got {s}")
     finally:
         server.shutdown()
         thread.join()
@@ -1917,6 +1974,10 @@ def main(argv=None):
     if "--panel-test" in argv:
         passed, total = run_panel_test()
         print(f"sigma_app panel test (v0.95): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--stats-test" in argv:
+        passed, total = run_stats_test()
+        print(f"sigma_app stats test (v0.134): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()

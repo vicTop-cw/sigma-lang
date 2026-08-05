@@ -44,7 +44,7 @@ def main():
          os.path.join(ROOT, "impl", "elixir_rt"), "88/88"),
         ("7. 三域审计故事线", "python3 tools/sigma-runtime.py --domains", ROOT, "35/35"),
         ("8. 证明消解 (全量语料重验)",
-         "python3 tools/sigma-prove.py", ROOT, "80 PROVED"),
+         "python3 tools/sigma-prove.py", ROOT, "109 PROVED"),
         ("9. 找茬参考后端冒烟", "python3 impl/python/sigma_app.py --smoke", ROOT, "36/36"),
         ("10. Rust 后端冒烟 (v0.84 对账)",
          "cargo run -q -- --app-smoke", os.path.join(ROOT, "impl", "verifier"), "36/36"),
