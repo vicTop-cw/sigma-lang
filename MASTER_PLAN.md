@@ -581,9 +581,17 @@
   并发下不再崩溃；`--launch-test` 扩展 5→8 项（DEPLOY auth 401 / state 配置 /
   audit 配置透传生效）；自检 15/15、冒烟 36/36 不回归；consensus 51/51、
   p0 109/109，v0.10–v0.100 不回归。
+- ✅ **REACHED v0.102 (2026-08-05)**: launch 默认日志接入—— 抽出
+  `_launch_config`（--launch 配置解析 + 默认日志：未显式指定 --state/
+  --audit-log/--log-file 时自动落到 `data/state.json`、`data/audit.json`、
+  `data/app.log`，开工即有持久化、审计与访问日志；可被显式参数覆盖），
+  `run_launch` 据此自动创建 data/ 目录并透传；`--launch-test` 扩展 8→10 项
+  （LAUNCH default cfg 默认路径 / LAUNCH override cfg 显式覆盖）；自检
+  15/15、冒烟 36/36、run-accept 8/8 不回归；consensus 51/51、p0 109/109，
+  v0.10–v0.101 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.101 达成，继续 v0.102–v0.120 找茬上线化 + 协议深化连续推进。
+  2. （无）— v0.102 达成，继续 v0.103–v0.120 找茬上线化 + 协议深化连续推进。
 
 ---
 

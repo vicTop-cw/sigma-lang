@@ -798,6 +798,17 @@
       sigma-prove 73 项 PROVED、三端 0 warning，v0.10–v0.100 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.102 完成定义（launch 默认日志接入，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **_launch_config**: --launch 配置解析 + 默认日志（未指定时 data/ 默认
+      路径：state.json / audit.json / app.log），可被显式参数覆盖。
+- [x] **run_launch**: 自动创建 data/ 目录并透传默认配置。
+- [x] **--launch-test**: 8→10 项（LAUNCH default cfg / override cfg）。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、run-accept 8/8、consensus 51/51、
+      p0 109/109、sigma-prove 73 项 PROVED、三端 0 warning，v0.10–v0.101 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

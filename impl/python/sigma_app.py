@@ -1409,34 +1409,52 @@ def run_run_accept() -> Tuple[int, int]:
     return passed, total
 
 
+def _launch_config(argv=None) -> dict:
+    """v0.102 — --launch 配置解析：部署参数透传 + 默认日志接入（未显式指定
+    --state/--audit-log/--log-file 时自动落到 data/ 默认路径），保证开工
+    即有持久化、审计与访问日志。"""
+    argv = argv if argv is not None else sys.argv[1:]
+    cfg = {"port": 8080, "web_port": 8000,
+           "state": os.path.join("data", "state.json"),
+           "audit": os.path.join("data", "audit.json"),
+           "auth": None, "log": os.path.join("data", "app.log")}
+    for i, a in enumerate(argv):
+        if a == "--port" and i + 1 < len(argv):
+            cfg["port"] = int(argv[i + 1])
+        if a == "--web-port" and i + 1 < len(argv):
+            cfg["web_port"] = int(argv[i + 1])
+        if a == "--state" and i + 1 < len(argv):
+            cfg["state"] = argv[i + 1]
+        if a == "--audit-log" and i + 1 < len(argv):
+            cfg["audit"] = argv[i + 1]
+        if a == "--auth-token" and i + 1 < len(argv):
+            cfg["auth"] = argv[i + 1]
+        if a == "--log-file" and i + 1 < len(argv):
+            cfg["log"] = argv[i + 1]
+    return cfg
+
+
 def run_launch(argv=None) -> int:
     """--launch (v0.94): one-command go-live — startup self-check (§SK.6),
     then serve the backend API (--port, default 8080) and the web/ frontend
-    (--web-port, default 8000) side by side until Ctrl+C."""
+    (--web-port, default 8000) side by side until Ctrl+C.
+    v0.101 — deployment config passthrough (--state/--audit-log/--auth-token/
+    --log-file). v0.102 — default logging: unset paths fall back to data/."""
     import http.server
     import time
-    argv = argv if argv is not None else sys.argv[1:]
-    port, web_port = 8080, 8000
-    state_file = audit_file = auth_token = log_file = None
-    for i, a in enumerate(argv):
-        if a == "--port" and i + 1 < len(argv):
-            port = int(argv[i + 1])
-        if a == "--web-port" and i + 1 < len(argv):
-            web_port = int(argv[i + 1])
-        # v0.101 — 部署配置透传：--state / --audit-log / --auth-token / --log-file
-        if a == "--state" and i + 1 < len(argv):
-            state_file = argv[i + 1]
-        if a == "--audit-log" and i + 1 < len(argv):
-            audit_file = argv[i + 1]
-        if a == "--auth-token" and i + 1 < len(argv):
-            auth_token = argv[i + 1]
-        if a == "--log-file" and i + 1 < len(argv):
-            log_file = argv[i + 1]
+    cfg = _launch_config(argv)
+    port, web_port = cfg["port"], cfg["web_port"]
+    state_file, audit_file = cfg["state"], cfg["audit"]
+    auth_token, log_file = cfg["auth"], cfg["log"]
     sp, st = run_story(MVPApp())
     if sp != st:
         print(f"启动自检失败 {sp}/{st} — 拒绝开工")
         return 1
     print(f"启动自检通过 {sp}/{st}")
+    for p in (state_file, audit_file, log_file):
+        d = os.path.dirname(p)
+        if d:
+            os.makedirs(d, exist_ok=True)
     _Handler.app = MVPApp()
     if state_file and os.path.exists(state_file):
         with open(state_file, encoding="utf-8") as f:
@@ -1550,6 +1568,20 @@ def run_launch_test() -> Tuple[int, int]:
                     os.remove(p)
                 except OSError:
                     pass
+
+        # v0.102 — launch 默认日志接入：未指定时自动 data/ 默认路径，可被覆盖
+        cfg = _launch_config([])
+        check("LAUNCH default cfg",
+              cfg["state"].endswith(os.path.join("data", "state.json"))
+              and cfg["log"].endswith(os.path.join("data", "app.log"))
+              and cfg["audit"].endswith(os.path.join("data", "audit.json")),
+              f"got {cfg}")
+        cfg2 = _launch_config(["--state", "s.json", "--log-file", "l.log",
+                               "--audit-log", "a.json", "--auth-token", "t"])
+        check("LAUNCH override cfg",
+              cfg2["state"] == "s.json" and cfg2["log"] == "l.log"
+              and cfg2["audit"] == "a.json" and cfg2["auth"] == "t",
+              f"got {cfg2}")
         front.shutdown()
     finally:
         os.chdir(old_cwd)
