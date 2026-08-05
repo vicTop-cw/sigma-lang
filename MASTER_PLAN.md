@@ -662,9 +662,16 @@
   面板逐项一致；`cargo build` 0 error/0 warning、--app-smoke 37/37、
   Python panel-test 5/5 全绿；consensus 51/51、p0 109/109，
   v0.10–v0.112 不回归。
+- ✅ **REACHED v0.114 (2026-08-05)**: 前端联调剧本扩展—— `sigma_app.py`
+  `--frontend-scenario` 11 → 19 项：追加增长期（badge_issue 签发勋章 /
+  dispute 督导裁决 / team_create 建团 / team_join 入团 / team_share 分收益）
+  与供应链（inventory_new 开仓 / receive_stock 入库 / ship_stock 出库）——
+  前端 v0.110/111 新增面板会调用的端点全部纳入前端视角 HTTP 联调剧本；
+  自检 15/15、冒烟 36/36、web-test 5/5 不回归；consensus 51/51、p0 109/109，
+  v0.10–v0.113 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.113 达成，继续 v0.114–v0.120 产品增强 + 收官连续推进。
+  2. （无）— v0.114 达成，继续 v0.115–v0.120 收官连续推进。
 
 ---
 

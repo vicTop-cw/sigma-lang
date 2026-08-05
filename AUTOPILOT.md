@@ -911,6 +911,16 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.114 完成定义（前端联调剧本扩展，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **--frontend-scenario**: 11 → 19 项——追加增长期（badge_issue/dispute/
+      team_create/team_join/team_share）与供应链（inventory_new/receive_stock/
+      ship_stock）——前端新增面板的端点全部纳入联调剧本。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、web-test 5/5、consensus 51/51、
+      p0 109/109、sigma-prove 80 项 PROVED、三端 0 warning，v0.10–v0.113 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

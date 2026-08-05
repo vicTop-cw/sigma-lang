@@ -1208,6 +1208,26 @@ def run_frontend_scenario() -> Tuple[int, int]:
         # 5. 用户摘要（GET）
         r = call("/me?user=3")
         check("FE me", r["credit"] == 105, f"got {r}")
+
+        # 6. 增长期（v0.114 — 前端 v0.110 增长期面板会调用的端点）
+        r = call("/badge_issue?verifier=1001&user=3&score=105")
+        check("FE badge_issue", r["badge"] == [1001, 3, 1], f"got {r}")
+        r = call("/dispute?evidence=[[1,1,3],[2,1,2]]")
+        check("FE dispute", r["decision"] == 1, f"got {r}")
+        r = call("/team_create?owner=7&kind=0&capacity=3")
+        check("FE team_create", r["team"] == [7, 0, 1, 3], f"got {r}")
+        r = call("/team_join?team=[7,0,1,3]&member=5")
+        check("FE team_join", r["team"] == [7, 0, 2, 3], f"got {r}")
+        r = call("/team_share?contribs=[[3,2],[4,4]]&reward=6")
+        check("FE team_share", r["shares"] == [[3, 2], [4, 4]], f"got {r}")
+
+        # 7. 供应链（v0.114 — 前端 v0.111 供应链面板会调用的端点）
+        r = call("/inventory_new?qty_a=10&qty_b=20")
+        check("FE inventory_new", r["inventory"] == [10, 20], f"got {r}")
+        r = call("/receive_stock?inv=[10,20]&item=0&qty=5")
+        check("FE receive_stock", r["inventory"] == [15, 20], f"got {r}")
+        r = call("/ship_stock?inv=[15,20]&item=0&qty=4")
+        check("FE ship_stock", r["inventory"] == [11, 20], f"got {r}")
     finally:
         server.shutdown()
         thread.join()
