@@ -86,12 +86,26 @@ def main():
 
     # v0.87 — --report FILE: write the per-gate results as a JSON report
     # (CI publishes the full regression report as an artifact).
+    # v0.116 — also run the runtime acceptance (--run-accept / --deploy-accept)
+    # and record it in the report's "runtime" section.
     if report_file:
+        runtime = {}
+        for name, cmd in (
+            ("run_accept", "python3 impl/python/sigma_app.py --run-accept"),
+            ("deploy_accept", "python3 impl/python/sigma_app.py --deploy-accept"),
+        ):
+            try:
+                code, out = run(cmd, ROOT)
+                runtime[name] = {"ok": code == 0,
+                                 "detail": "" if code == 0 else out.strip()[-200:]}
+            except subprocess.TimeoutExpired:
+                runtime[name] = {"ok": False, "detail": "TIMEOUT"}
         with open(report_file, "w", encoding="utf-8") as f:
             json.dump({
                 "spec": "0.7.0",
                 "date": "2026-08-05",
                 "gates": results,
+                "runtime": runtime,
                 "passed": len(gates) - failed,
                 "total": len(gates),
                 "all_ok": failed == 0,

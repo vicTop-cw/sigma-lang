@@ -932,6 +932,15 @@
       0 warning、sigma-accept 10/10，v0.10–v0.114 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.116 完成定义（CI 报告扩展，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **--report runtime 段**: 报告生成时跑运行验收（--run-accept /
+      --deploy-accept），结果写入报告的 runtime 字段（ok/detail）。
+- [x] **不回归**: --report 10/10 全绿、runtime 双项 ok、spec 0.7.0、
+      consensus 51/51、p0 109/109、sigma-prove 80 项 PROVED、三端 0 warning，
+      v0.10–v0.115 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
