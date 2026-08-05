@@ -731,14 +731,21 @@
   80 PROVED → 一键验收 10/10 → 规则变产品（App 只委托 sigma_core）→ 检查
   清单 + 下一步——"用 ΣLang 从零定义一个业务域"的完整上手路径；自检 15/15、
   冒烟 36/36 不回归；consensus 51/51、p0 109/109，v0.10–v0.123 不回归。
-- ✅ **REACHED v0.125 (2026-08-05)**: Release 准备—— README「怎么用它」用法 1
-  加依赖说明（Python 3.8+，可选 Rust/Elixir）；打发布 tag（v0.125）+ 全量版本
-  记录（教程/Release 入口进 MASTER_PLAN、AUTOPILOT、README 版本行）——别人
-  clone 即用，GitHub 有 Release 入口；consensus 51/51、p0 109/109，
-  v0.10–v0.124 不回归。
+- ✅ **REACHED v0.126 (2026-08-05)**: Python 包化—— 新建 `pyproject.toml`
+  （setuptools 配置：把 `impl/python/sigma_core.py` 打包为 `sigma-lang` 库，
+  `pip install sigma-lang` 后即可 `import sigma_core`，零第三方依赖）；README
+  用法 3 更新为 pip 安装入口（装完直接 import，去掉 sys.path 手动插入）——
+  使用门槛从"clone 仓库"降到"一条 pip install"；consensus 51/51、p0 109/109，
+  v0.10–v0.125 不回归。
+- ✅ **REACHED v0.127 (2026-08-05)**: 打包验证—— 本地 `pip install -e .`
+  成功（pip 26.1.2），`import sigma_core` 独立可用（task_create →
+  [7,100,0,0]、accept_task → [7,100,1,3]、task_accept → [7,100,3,3]、
+  inventory_new → [10,20]），装包后 repo 内验证器不受影响（自检 15/15、
+  冒烟 36/36、py_compile OK）——"pip install 即用"验证通过；
+  consensus 51/51、p0 109/109，v0.10–v0.126 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.125 达成，找茬使用引导（导读/用法/教程/USAGE）全套齐。
+  2. （无）— v0.127 达成，打包发布链路（pyproject/验证/README 入口）闭环。
 
 ---
 

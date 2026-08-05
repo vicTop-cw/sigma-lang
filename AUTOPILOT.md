@@ -1023,6 +1023,22 @@
       0 warning，v0.10–v0.124 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.126 完成定义（Python 包化，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **pyproject.toml**: sigma_core 打包为 sigma-lang 库（pip install 即用，
+      零第三方依赖）；README 用法 3 更新为 pip 安装入口。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 80 项 PROVED、三端
+      0 warning，v0.10–v0.125 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+### v0.127 完成定义（打包验证，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **pip install 验证**: `pip install -e .` 成功，`import sigma_core` 独立
+      可用（四类操作输出正确），装包后 repo 验证器不受影响（15/15、36/36）。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 80 项 PROVED、三端
+      0 warning，v0.10–v0.126 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
