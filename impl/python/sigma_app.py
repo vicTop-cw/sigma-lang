@@ -1356,12 +1356,16 @@ def run_concurrency_test() -> Tuple[int, int]:
             return e.code, {}
 
     try:
+        # 第一批：并发注册 + 开户（无依赖）
         reqs = [f"/register?user={i}&name=u{i}" for i in range(20)]
         reqs += [f"/quota?user={i}&monthly=50" for i in range(20)]
-        reqs += [f"/post?author={i}&bounty=100" for i in range(10)]
-        reqs += ["/tasks"] * 20
         with ThreadPoolExecutor(max_workers=16) as ex:
-            results = list(ex.map(call, reqs))
+            list(ex.map(call, reqs))
+        # 第二批：并发发单（依赖额度已满足）+ 查询
+        reqs2 = [f"/post?author={i}&bounty=100" for i in range(10)]
+        reqs2 += ["/tasks"] * 20
+        with ThreadPoolExecutor(max_workers=16) as ex:
+            results = list(ex.map(call, reqs2))
         bad = sum(1 for s, _ in results if s != 200)
         check("CONC all 200", bad == 0, f"{bad} non-200 responses")
         check("CONC users", len(_Handler.app.users) == 20,
@@ -1374,6 +1378,106 @@ def run_concurrency_test() -> Tuple[int, int]:
     finally:
         server.shutdown()
         thread.join()
+    return passed, total
+
+
+def run_deploy_accept() -> Tuple[int, int]:
+    """--deploy-accept (v0.104): go-live deployment acceptance — the launch
+    form (backend + frontend + data/ default persistence/audit/log from
+    v0.102) verified end to end: startup self-check, dual services online,
+    full business flow, the data/ files generated, live /panel, and the
+    service alive afterwards."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    import http.server
+    sp, st = run_story(MVPApp())
+    check("DEPLOY-ACCEPT self-check", sp == st == 15, f"got {sp}/{st}")
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_dir = os.path.join(root, "data")
+    state_path = os.path.join(data_dir, "state.json")
+    audit_path = os.path.join(data_dir, "audit.json")
+    log_path = os.path.join(data_dir, "app.log")
+    os.makedirs(data_dir, exist_ok=True)
+    for p in (state_path, audit_path, log_path):
+        if os.path.exists(p):
+            try:
+                os.remove(p)
+            except OSError:
+                pass
+    _Handler.app = MVPApp()
+    _Handler._state_file = state_path
+    _Handler._audit_file = audit_path
+    _Handler._log_file = log_path
+    api_server = HTTPServer(("127.0.0.1", 0), _Handler)
+    api_port = api_server.server_address[1]
+    threading.Thread(target=api_server.serve_forever, daemon=True).start()
+    web_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "web")
+    old_cwd = os.getcwd()
+    try:
+        os.chdir(web_dir)
+        front = HTTPServer(("127.0.0.1", 0), http.server.SimpleHTTPRequestHandler)
+        front_port = front.server_address[1]
+        threading.Thread(target=front.serve_forever, daemon=True).start()
+        base = f"http://127.0.0.1:{api_port}"
+        fbase = f"http://127.0.0.1:{front_port}"
+
+        # 双服务在线
+        with urllib.request.urlopen(fbase + "/", timeout=10) as r:
+            html = r.read().decode("utf-8")
+        check("DEPLOY-ACCEPT front", r.status == 200 and "找茬" in html,
+              f"status {r.status}")
+        with urllib.request.urlopen(base + "/health", timeout=10) as r:
+            h = json.loads(r.read().decode("utf-8"))
+        check("DEPLOY-ACCEPT api", h.get("status") == "ok", f"got {h}")
+
+        # 全链路业务流（上线形态的真实使用）
+        def call(p: str) -> dict:
+            with urllib.request.urlopen(base + p, timeout=10) as r:
+                return json.loads(r.read().decode("utf-8"))
+        call(f"/register?user=7&name={quote('找茬主')}")
+        call(f"/register?user=3&name={quote('找茬人')}")
+        call("/quota?user=7&monthly=50")
+        r = call("/post?author=7&bounty=100")
+        tid = r["task_id"]
+        call(f"/claim?task={tid}&hunter=3")
+        call(f"/submit?task={tid}")
+        r = call(f"/accept?task={tid}&caller=7")
+        check("DEPLOY-ACCEPT flow accept", r["task"] == [7, 100, 3, 3],
+              f"got {r}")
+        call("/withdraw?user=3&amount=100")
+
+        # data/ 文件生成（持久化 / 审计 / 访问日志）
+        check("DEPLOY-ACCEPT state file",
+              os.path.exists(state_path) and os.path.getsize(state_path) > 0, "")
+        check("DEPLOY-ACCEPT audit file",
+              os.path.exists(audit_path) and os.path.getsize(audit_path) > 0, "")
+        check("DEPLOY-ACCEPT log file",
+              os.path.exists(log_path) and os.path.getsize(log_path) > 0, "")
+
+        # /panel 实时数据 + 服务存活
+        with urllib.request.urlopen(base + "/panel", timeout=10) as r:
+            panel = r.read().decode("utf-8")
+        check("DEPLOY-ACCEPT panel", "用户数" in panel and ">2<" in panel, "")
+        st2, h2 = call("/health"), None
+        check("DEPLOY-ACCEPT alive", st2.get("status") == "ok", f"got {st2}")
+        front.shutdown()
+    finally:
+        os.chdir(old_cwd)
+        api_server.shutdown()
+        for p in (state_path, audit_path, log_path):
+            if os.path.exists(p):
+                try:
+                    os.remove(p)
+                except OSError:
+                    pass
     return passed, total
 
 
@@ -1691,6 +1795,10 @@ def main(argv=None):
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()
         print(f"sigma_app concurrency test (v0.103): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--deploy-accept" in argv:
+        passed, total = run_deploy_accept()
+        print(f"sigma_app deploy accept (v0.104): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--run-accept" in argv:
         passed, total = run_run_accept()

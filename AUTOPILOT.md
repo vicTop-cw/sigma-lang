@@ -819,6 +819,16 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.104 完成定义（上线验收，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **--deploy-accept**: 上线形态端到端验收 9 项——启动自检 / 双服务在线 /
+      全链路业务流 / data/ 三文件生成（state/audit/log）/ /panel / 服务存活。
+- [x] **并发依赖修复**: --concurrency-test 分批（先并发开户，再并发发单）。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、launch-test 10/10、concurrency-test
+      4/4、consensus 51/51、p0 109/109、sigma-prove 73 项 PROVED、三端
+      0 warning，v0.10–v0.103 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
