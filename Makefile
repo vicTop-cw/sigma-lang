@@ -8,11 +8,13 @@
 #   make rust     # Rust 编译 + §SK 自检
 #   make elixir   # Elixir §SK 自检
 #   make app      # 找茬 App 全测试（自检/持久化/审计/冒烟）
+#   make ready    # 生产就绪检查（--launch-ready 一次性确认，v0.121）
+#   make deploy   # 生产启动（就绪通过后 --launch 前后端，Ctrl+C 停止，v0.122）
 #   make all      # 全部（= accept）
 
 PYTHON ?= python3
 
-.PHONY: accept check story prove rust elixir app all
+.PHONY: accept check story prove rust elixir app ready deploy all
 
 accept: ## 九道门禁一键验收（CI 与本地同一条命令）
 	$(PYTHON) tools/sigma-accept.py
@@ -39,5 +41,11 @@ app: ## 找茬 App 全测试（自检 / 持久化 / 审计 / 冒烟）
 	$(PYTHON) impl/python/sigma_app.py --persist-test
 	$(PYTHON) impl/python/sigma_app.py --audit-test
 	$(PYTHON) impl/python/sigma_app.py --smoke
+
+ready: ## 生产就绪检查（--launch-ready 一次性确认环境，v0.121）
+	$(PYTHON) impl/python/sigma_app.py --launch-ready
+
+deploy: ## 生产启动（就绪检查通过后 --launch 前后端，Ctrl+C 停止，v0.122）
+	$(PYTHON) impl/python/sigma_app.py --launch-ready && $(PYTHON) impl/python/sigma_app.py --launch
 
 all: accept ## 全部（= 九道门禁一键验收）
