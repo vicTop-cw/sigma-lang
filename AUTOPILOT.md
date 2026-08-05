@@ -979,6 +979,15 @@
       --bench 基线、三端 0 warning，v0.10–v0.119 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.121 完成定义（上线就绪检查，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **--launch-ready**: 生产就绪度一次性检查 7 项——Python 依赖 / data/ 可写 /
+      默认端口 8080+8000 可用 / §SK.6 自检 / 前端文件 / 门禁基线。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、bench 4/4、consensus 51/51、
+      p0 109/109、sigma-prove 80 项 PROVED、三端 0 warning，v0.10–v0.120 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

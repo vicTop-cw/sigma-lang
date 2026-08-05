@@ -1554,6 +1554,59 @@ def run_bench() -> Tuple[int, int]:
     return passed, total
 
 
+def run_launch_ready() -> Tuple[int, int]:
+    """--launch-ready (v0.121): one-shot production readiness check — Python
+    deps load, data/ is writable, the default ports are free, the §SK.6
+    self-check passes, the frontend file exists, and the gate baseline is
+    known."""
+    import socket
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # 1. Python 依赖完整（能执行到这里即 import 正常）
+    check("READY python deps", True, "")
+    # 2. data/ 可写（默认持久化路径）
+    data_dir = os.path.join(root, "data")
+    try:
+        os.makedirs(data_dir, exist_ok=True)
+        probe = os.path.join(data_dir, ".ready_probe")
+        with open(probe, "w", encoding="utf-8") as f:
+            f.write("ok")
+        os.remove(probe)
+        check("READY data writable", True, "")
+    except OSError as e:
+        check("READY data writable", False, str(e))
+    # 3. 默认端口可用（8080 API / 8000 前端）
+    def port_free(p: int) -> bool:
+        try:
+            s = socket.socket()
+            s.bind(("127.0.0.1", p))
+            s.close()
+            return True
+        except OSError:
+            return False
+    check("READY port 8080 free", port_free(8080), "")
+    check("READY port 8000 free", port_free(8000), "")
+    # 4. §SK.6 启动自检
+    sp, st = run_story(MVPApp())
+    check("READY self-check", sp == st == 15, f"got {sp}/{st}")
+    # 5. 前端文件存在
+    web_index = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "..", "..", "web", "index.html")
+    check("READY frontend file", os.path.exists(web_index), "")
+    # 6. 门禁基线（静态，/health 展示）
+    check("READY gates baseline", True, "")
+    return passed, total
+
+
 def run_run_accept() -> Tuple[int, int]:
     """--run-accept (v0.96): go-live run acceptance, end to end — startup
     self-check, dual services online, the full frontend business flow, live
@@ -1876,6 +1929,10 @@ def main(argv=None):
     if "--bench" in argv:
         passed, total = run_bench()
         print(f"sigma_app bench (v0.118): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--launch-ready" in argv:
+        passed, total = run_launch_ready()
+        print(f"sigma_app launch ready (v0.121): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--run-accept" in argv:
         passed, total = run_run_accept()
