@@ -846,6 +846,14 @@
       0 warning，v0.10–v0.105 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.107 完成定义（任务生命周期不变量，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **跨操作不变量**: `gen_socketkit_invariants` 新增 INV-SK-4 状态机链
+      （claim 0→1 / submit 1→2 / accept 2→3 单调 +1 不跳步），PROVED (unsat)。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 77 项 PROVED、三端
+      0 warning，v0.10–v0.106 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

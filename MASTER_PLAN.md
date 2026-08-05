@@ -615,9 +615,15 @@
   cash ≥ 0 且 shares ≥ 0，q1 ≤ cash、q2 ≤ 持有，链式不出现负资产），
   `PROVED (unsat)`——金融语义从单操作定律走向链式跨操作不变量证明；
   consensus 51/51、p0 109/109，v0.10–v0.105 不回归。
+- ✅ **REACHED v0.107 (2026-08-05)**: 任务生命周期不变量—— `sigma-prove`
+  `gen_socketkit_invariants` 新增 INV-SK-4 状态机链（任务状态机合法迁移：
+  claim(state 0→1)、submit(1→2)、accept(2→3) 各步 state 单调 +1 不跳步，
+  [author, bounty, state, hunter] 四元组链式一致），`PROVED (unsat)`——
+  找茬任务从单操作定律走向完整生命周期状态机链证明；consensus 51/51、
+  p0 109/109，v0.10–v0.106 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.106 达成，继续 v0.107–v0.120 协议深化 + 产品增强连续推进。
+  2. （无）— v0.107 达成，继续 v0.108–v0.120 协议深化 + 产品增强连续推进。
 
 ---
 

@@ -712,9 +712,21 @@ def gen_socketkit_invariants(ops):
             "(assert (= (index p 0) e)) (assert (= (index p 1) a))\n"
             "; INV-SK-3 (v0.80): 积分非负链 — escrow ≥ 0 ∧ available ≥ 0\n"
             "(assert (not (and (>= (index p 0) 0) (>= (index p 1) 0))))\n(check-sat)\n")
+    inv4 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const a Int) (declare-const b Int) (declare-const h Int)\n"
+            "(declare-const t0 Int) (declare-const t1 Int) (declare-const t2 Int) (declare-const t3 Int)\n"
+            "(assert (>= a 0)) (assert (>= b 0)) (assert (>= h 0))\n"
+            "; 任务状态机链: [author, bounty, state, hunter]\n"
+            "(assert (= (index t0 0) a)) (assert (= (index t0 1) b)) (assert (= (index t0 2) 0)) (assert (= (index t0 3) 0))\n"
+            "(assert (= (index t1 0) a)) (assert (= (index t1 1) b)) (assert (= (index t1 2) 1)) (assert (= (index t1 3) h))\n"
+            "(assert (= (index t2 0) a)) (assert (= (index t2 1) b)) (assert (= (index t2 2) 2)) (assert (= (index t2 3) h))\n"
+            "(assert (= (index t3 0) a)) (assert (= (index t3 1) b)) (assert (= (index t3 2) 3)) (assert (= (index t3 3) h))\n"
+            "; INV-SK-4 (v0.107): 状态机链 — claim→submit→accept 各步 state 单调 +1\n"
+            "(assert (not (and (= (index t1 2) 1) (= (index t2 2) 2) (= (index t3 2) 3))))\n(check-sat)\n")
     return [("INV-SK-1 bounty-conserved", inv1),
             ("INV-SK-2 no-over-withdraw", inv2),
-            ("INV-SK-3 nonnegative-chain", inv3)]
+            ("INV-SK-3 nonnegative-chain", inv3),
+            ("INV-SK-4 state-machine-chain", inv4)]
 
 
 def gen_quota_invariants(ops):
