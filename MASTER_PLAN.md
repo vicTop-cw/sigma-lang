@@ -762,9 +762,15 @@
   description 为完整 README——**`pip install sigma-lang` 全球可用**；
   README 用法 3 安装说明更新为"已在 PyPI 发布"；consensus 51/51、
   p0 109/109，v0.10–v0.129 不回归。
+- ✅ **REACHED v0.131 (2026-08-05)**: 发布链补全（PyPI 自动化）—— 用户配置新
+  PyPI token 到 GitHub Actions secret（PYPI_TOKEN）后，`publish.yml` 激活
+  PyPI 发布步骤（pypa/gh-action-pypi-publish@release/v1 + secrets.PYPI_TOKEN）：
+  打 tag 发布全链变为 **构建 → 冒烟 → GitHub Release → PyPI 全自动**（不再需要
+  手工 twine/token）；workflow 4 步骤验证齐全；consensus 51/51、p0 109/109，
+  v0.10–v0.130 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.130 达成，打包发布链路（pyproject/验证/workflow/Release/PyPI）全闭环。
+  2. （无）— v0.131 达成，发布链（构建/workflow/Release/PyPI 全自动）闭环；下次打 tag 即全自动发布验证。
 
 ---
 

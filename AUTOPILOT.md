@@ -1065,6 +1065,14 @@
       0 warning，v0.10–v0.129 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.131 完成定义（发布链补全 PyPI 自动化，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **PyPI 步骤激活**: publish.yml 启用 pypa/gh-action-pypi-publish +
+      secrets.PYPI_TOKEN——打 tag 发布全链自动（构建/冒烟/Release/PyPI）。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 80 项 PROVED、三端
+      0 warning，v0.10–v0.130 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

@@ -1,9 +1,10 @@
-# ΣLang 发布 workflow (v0.129)
+# ΣLang 发布 workflow (v0.131)
 # push 形如 v* 的 tag 时自动触发：
 #   1. 构建 Python 包（sdist + wheel，pyproject.toml 打包 sigma_core）
 #   2. 冒烟测试构建产物（装 wheel 后 import sigma_core）
 #   3. 创建 GitHub Release 并附上构建产物
-# PyPI 发布预留：配好 PYPI_TOKEN secret（或启用 trusted publishing）后取消注释。
+#   4. 发布到 PyPI（使用 GitHub secret PYPI_TOKEN，配置在
+#      Settings → Secrets and variables → Actions；v0.131 激活）
 
 name: Publish ΣLang release
 
@@ -41,9 +42,6 @@ jobs:
           files: dist/*
           generate_release_notes: true
 
-      # PyPI 发布（可选）：配好 PYPI_TOKEN secret 后取消注释
-      # - name: Publish to PyPI
-      #   uses: pypa/gh-action-pypi-publish@release/v1
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
