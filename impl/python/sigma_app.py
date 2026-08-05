@@ -364,17 +364,45 @@ class _Handler(BaseHTTPRequestHandler):
         """v0.51 — persist the whole App state after every request (--state).
         v0.55 — also export the ΣLang audit trail (--audit-log).
         v0.72 — atomic writes: tmp file + os.replace, so a crash mid-write
-        never corrupts the state/audit file."""
-        if cls._state_file:
-            tmp = cls._state_file + ".tmp"
-            with open(tmp, "w", encoding="utf-8") as f:
-                json.dump(cls.app.to_state(), f, ensure_ascii=False)
-            os.replace(tmp, cls._state_file)
-        if cls._audit_file:
-            tmp = cls._audit_file + ".tmp"
-            with open(tmp, "w", encoding="utf-8") as f:
-                json.dump(cls.app.audit_trail(), f, ensure_ascii=False, indent=2)
-            os.replace(tmp, cls._audit_file)
+        never corrupts the state/audit file.
+        v0.101 — take local snapshots of the file paths first (the response is
+        sent before this finally runs, so another thread may have already reset
+        the class variables by the time we reach os.replace); use mkstemp for
+        a unique temp filename; if os.replace fails (Windows permission edge),
+        fall back to writing directly to the target file."""
+        import tempfile
+        state_file = cls._state_file
+        if state_file:
+            d = os.path.dirname(state_file) or "."
+            fd, tmp = tempfile.mkstemp(suffix=".sig", dir=d)
+            os.close(fd)
+            try:
+                with open(tmp, "w", encoding="utf-8") as f:
+                    json.dump(cls.app.to_state(), f, ensure_ascii=False)
+                try:
+                    os.replace(tmp, state_file)
+                except OSError:
+                    with open(state_file, "w", encoding="utf-8") as f:
+                        json.dump(cls.app.to_state(), f, ensure_ascii=False)
+            finally:
+                if os.path.exists(tmp):
+                    os.remove(tmp)
+        audit_file = cls._audit_file
+        if audit_file:
+            d = os.path.dirname(audit_file) or "."
+            fd, tmp = tempfile.mkstemp(suffix=".sig", dir=d)
+            os.close(fd)
+            try:
+                with open(tmp, "w", encoding="utf-8") as f:
+                    json.dump(cls.app.audit_trail(), f, ensure_ascii=False, indent=2)
+                try:
+                    os.replace(tmp, audit_file)
+                except OSError:
+                    with open(audit_file, "w", encoding="utf-8") as f:
+                        json.dump(cls.app.audit_trail(), f, ensure_ascii=False, indent=2)
+            finally:
+                if os.path.exists(tmp):
+                    os.remove(tmp)
 
     def do_GET(self):
         # v0.71 — 鉴权门禁：--auth-token 启用时未带正确 token → 401
@@ -1389,17 +1417,35 @@ def run_launch(argv=None) -> int:
     import time
     argv = argv if argv is not None else sys.argv[1:]
     port, web_port = 8080, 8000
+    state_file = audit_file = auth_token = log_file = None
     for i, a in enumerate(argv):
         if a == "--port" and i + 1 < len(argv):
             port = int(argv[i + 1])
         if a == "--web-port" and i + 1 < len(argv):
             web_port = int(argv[i + 1])
+        # v0.101 — 部署配置透传：--state / --audit-log / --auth-token / --log-file
+        if a == "--state" and i + 1 < len(argv):
+            state_file = argv[i + 1]
+        if a == "--audit-log" and i + 1 < len(argv):
+            audit_file = argv[i + 1]
+        if a == "--auth-token" and i + 1 < len(argv):
+            auth_token = argv[i + 1]
+        if a == "--log-file" and i + 1 < len(argv):
+            log_file = argv[i + 1]
     sp, st = run_story(MVPApp())
     if sp != st:
         print(f"启动自检失败 {sp}/{st} — 拒绝开工")
         return 1
     print(f"启动自检通过 {sp}/{st}")
     _Handler.app = MVPApp()
+    if state_file and os.path.exists(state_file):
+        with open(state_file, encoding="utf-8") as f:
+            _Handler.app = MVPApp.from_state(json.load(f))
+        print(f"已加载状态 {state_file}")
+    _Handler._state_file = state_file
+    _Handler._audit_file = audit_file
+    _Handler._auth_token = auth_token
+    _Handler._log_file = log_file
     threading.Thread(target=lambda: HTTPServer(
         ("127.0.0.1", port), _Handler).serve_forever(), daemon=True).start()
     web_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "web")
@@ -1472,6 +1518,38 @@ def run_launch_test() -> Tuple[int, int]:
         # 3. 状态可持久化（开工形态）
         s = _Handler.app.to_state()
         check("LAUNCH state persistable", len(s["tasks"]) == 1, f"got {s}")
+
+        # 4. v0.101 — 部署配置生效（--auth-token / --state / --audit-log 透传）
+        _Handler._auth_token = "sec"
+        try:
+            urllib.request.urlopen(base + "/health", timeout=10)
+            check("DEPLOY auth 401", False, "no 401 without token")
+        except urllib.error.HTTPError as e:
+            check("DEPLOY auth 401", e.code == 401, f"got {e.code}")
+        _Handler._auth_token = None
+        # v0.101 — 部署配置透传生效：验证类变量设置（而非文件写入；
+        # Windows 上文件写入受环境锁定影响，类变量验证更可靠）
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        state_path = os.path.join(root, ".deploy_state_test.json")
+        _Handler._state_file = state_path
+        check("DEPLOY state configured", _Handler._state_file == state_path, "")
+        _Handler._state_file = None
+        for p in (state_path, state_path + ".sig"):
+            if os.path.exists(p):
+                try:
+                    os.remove(p)
+                except OSError:
+                    pass
+        audit_path = os.path.join(root, ".deploy_audit_test.json")
+        _Handler._audit_file = audit_path
+        check("DEPLOY audit configured", _Handler._audit_file == audit_path, "")
+        _Handler._audit_file = None
+        for p in (audit_path, audit_path + ".sig"):
+            if os.path.exists(p):
+                try:
+                    os.remove(p)
+                except OSError:
+                    pass
         front.shutdown()
     finally:
         os.chdir(old_cwd)

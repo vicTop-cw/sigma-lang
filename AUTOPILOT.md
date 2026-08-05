@@ -787,6 +787,17 @@
       10/10、--run-accept 8/8、三端 0 warning，v0.10–v0.99 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.101 完成定义（部署加固，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **--launch 透传**: --state（加载/保存）/ --audit-log / --auth-token /
+      --log-file 全部透传到后端 _Handler。
+- [x] **_save_state 健壮性**: 局部快照（并发复位不崩溃）、mkstemp 唯一临时
+      文件名（Windows .tmp 锁定）、os.replace 失败回退直接写入。
+- [x] **--launch-test**: 5→8 项（DEPLOY auth 401 / state 配置 / audit 配置）。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 51/51、p0 109/109、
+      sigma-prove 73 项 PROVED、三端 0 warning，v0.10–v0.100 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

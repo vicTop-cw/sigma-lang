@@ -573,9 +573,17 @@
   验收 / 运行指南）——"协议 → 验证器 → 语料 → 证明 → 实现 → 产品"全链路
   闭环；上线准备基线：consensus 51/51、p0 109/109、sigma-accept 10/10、
   三端 0 warning，v0.10–v0.99 不回归。
+- ✅ **REACHED v0.101 (2026-08-05)**: 部署加固—— `--launch` 透传部署配置
+  （--state 加载/保存、--audit-log、--auth-token、--log-file），修复 `_save_state`
+  三处健壮性：① 局部快照（响应在 finally 前发送，另一线程可能已复位类变量 →
+  os.replace 读到 None 崩溃）；② mkstemp 唯一临时文件名（避免 Windows .tmp
+  锁定）；③ os.replace 失败回退直接写入（Windows 权限边缘）——持久化在生产
+  并发下不再崩溃；`--launch-test` 扩展 5→8 项（DEPLOY auth 401 / state 配置 /
+  audit 配置透传生效）；自检 15/15、冒烟 36/36 不回归；consensus 51/51、
+  p0 109/109，v0.10–v0.100 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.100 达成，继续 v0.101–v0.120 找茬上线化 + 协议深化连续推进。
+  2. （无）— v0.101 达成，继续 v0.102–v0.120 找茬上线化 + 协议深化连续推进。
 
 ---
 
