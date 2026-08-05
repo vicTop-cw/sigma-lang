@@ -35,7 +35,14 @@
 ```json
 {"status":"ok","app":"找茬 MVP 参考实现 (sigma_app)",
  "state":null,"auth":"disabled","log":null,
- "gates":{"consensus":"51/51","p0":"109/109","prove":"73 PROVED","scenario":"16/16"}}
+ "gates":{"consensus":"51/51","p0":"109/109","prove":"80 PROVED","scenario":"16/16"}}
+```
+
+### 1.2 GET /panel — 运行状态面板（v0.95）
+
+运行状态 HTML 面板页：服务信息（用户数/任务数）、业务摘要（各状态任务数/
+赏金总额）、门禁摘要（consensus 51/51 / p0 109/109 / prove 80 PROVED /
+scenario 16/16）。
 ```
 
 ---
@@ -173,6 +180,10 @@ python3 impl/python/sigma_app.py --scenario      # CLI 业务流剧本 16/16
 python3 impl/python/sigma_app.py --smoke         # HTTP 全链路 36/36（覆盖上述端点）
 python3 impl/python/sigma_app.py --auth-test     # 鉴权 4/4
 python3 impl/python/sigma_app.py --health-test   # /health 4/4
+python3 impl/python/sigma_app.py --run-accept        # 运行验收 8/8（v0.96）
+python3 impl/python/sigma_app.py --deploy-accept     # 上线验收 9/9（v0.104）
+python3 impl/python/sigma_app.py --launch-test       # launch 形态 10/10（v0.94/101/102）
+python3 impl/python/sigma_app.py --concurrency-test  # 并发安全 4/4（v0.103）
 cd impl/verifier && cargo run -q -- --app-smoke  # Rust HTTP 冒烟对账
 ```
 

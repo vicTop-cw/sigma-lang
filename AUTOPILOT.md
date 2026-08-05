@@ -894,6 +894,14 @@
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.112 完成定义（API 文档同步，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **docs/api_zhaocha.md 同步**: /health gates 数字（73 → 80 PROVED）、
+      新增 §1.2 /panel、§7 验收清单加 v0.96–0.104 新命令。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 80 项 PROVED、三端
+      0 warning、sigma-accept 10/10，v0.10–v0.111 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
