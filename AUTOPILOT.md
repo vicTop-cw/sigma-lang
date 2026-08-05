@@ -967,6 +967,18 @@
       0 warning、sigma-accept 10/10，v0.10–v0.118 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.120 完成定义（里程碑达成，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **收官**: v0.100–v0.120 连续推进收官——上线化（--launch 透传/默认日志/
+      并发验证/上线验收）+ 协议深化（链式不变量 80 PROVED、--domains 55/55）+
+      产品增强（前端三域面板/双端 /panel 对账/联调剧本 19 项）+ 工程化收官
+      （spec 0.7.0/CI runtime 段/上线指南/性能基线/收官总览）全部达成。
+- [x] **门禁**: consensus 51/51、p0 109/109、sigma-prove 80 项 PROVED、
+      sigma-runtime 59/59 + 55/55、双端冒烟 37/37、sigma-accept 十道门禁
+      10/10（含 --report runtime 段）、--run-accept 8/8、--deploy-accept 9/9、
+      --bench 基线、三端 0 warning，v0.10–v0.119 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
