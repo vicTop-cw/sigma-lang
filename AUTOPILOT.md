@@ -864,6 +864,18 @@
       warning，v0.10–v0.107 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.109 完成定义（三域 story 不变量段扩展 47→55，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **不变量段扩展**: `run_invariant_checks` 追加 8 条链——INV-Q-3 预支链 /
+      INV-T-3 创建合法链 / INV-G-3 收益不超发链 / INV-SK-4 状态机链 /
+      INV-SK-5 契分非负链 / INV-PF-3 资产非负链 / INV-IN-3 入库可加链 /
+      INV-IN-4 出库不超卖链。
+- [x] **--domains**: 47/47 → 55/55（不变量复核从 12 项扩到 20 项）。
+- [x] **不回归**: trace 59/59、--growth 11/11、--inventory 6/6、consensus 51/51、
+      p0 109/109、sigma-prove 80 项 PROVED、三端 0 warning，v0.10–v0.108 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

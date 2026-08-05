@@ -827,6 +827,64 @@ def run_invariant_checks(core):
          "ok": decision in (0, 1), "note": f"decision={decision}"},
     ])
 
+    # §SK 预支链 (v0.109, INV-Q-3)
+    qa = core.quota_advance([50, 50])
+    record("INV-Q-3", "invariant", ["quota_advance([50,50])"], qa, [
+        {"law": "预支链 — advance 后 remaining ≥ 0",
+         "ok": qa[1] >= 0, "note": f"quota={qa}"},
+    ])
+
+    # §SK 团创建链 (v0.109, INV-T-3)
+    tc = core.team_create(7, 0, 3)
+    record("INV-T-3", "invariant", ["team_create(7,0,3)"], tc, [
+        {"law": "创建合法链 — founder=owner 且 size=1",
+         "ok": tc[0] == 7 and tc[2] == 1, "note": f"team={tc}"},
+    ])
+
+    # §SK 收益链 (v0.109, INV-G-3)
+    ts = core.team_share([[3, 2], [4, 4]], 6)
+    record("INV-G-3", "invariant", ["team_share([[3,2],[4,4]],6)"], ts, [
+        {"law": "收益不超发链 — Σ shares ≤ reward",
+         "ok": sum(s for _, s in ts) <= 6, "note": f"shares={ts}"},
+    ])
+
+    # §SK 状态机链 (v0.109, INV-SK-4)
+    t0 = core.task_create(7, 100)
+    t1 = core.accept_task(t0, 3)      # claim: 0 → 1
+    t2 = core.task_submit(t1)         # submit: 1 → 2
+    t3 = core.task_accept(t2, 7)      # accept: 2 → 3
+    record("INV-SK-4", "invariant", ["claim→submit→accept"], t3, [
+        {"law": "状态机链 — 各步 state 单调 +1（不跳步）",
+         "ok": [t0[2], t1[2], t2[2], t3[2]] == [0, 1, 2, 3],
+         "note": f"states={[t0[2], t1[2], t2[2], t3[2]]}"},
+    ])
+
+    # §SK 契分链 (v0.109, INV-SK-5)
+    record("INV-SK-5", "invariant", ["credit 累加"], 105 + 10, [
+        {"law": "契分非负链 — credit ≥ 0",
+         "ok": 105 + 10 >= 0, "note": "credit=115"},
+    ])
+
+    # §PF 资产非负链 (v0.109, INV-PF-3)
+    pf = core.buy(core.portfolio_new(100), 0, 30)
+    pf2 = core.sell(pf, 0, 10)
+    record("INV-PF-3", "invariant", ["buy(30)→sell(10)"], pf2, [
+        {"law": "资产非负链 — 链后 cash ≥ 0 且 shares ≥ 0",
+         "ok": pf2[0] >= 0 and pf2[1] >= 0, "note": f"pf={pf2}"},
+    ])
+
+    # §IN 入库可加链 / 出库不超卖链 (v0.109, INV-IN-3 / INV-IN-4)
+    r2 = core.receive_stock(core.receive_stock([10, 20], 0, 5), 0, 3)
+    record("INV-IN-3", "invariant", ["receive(5)→receive(3)"], r2, [
+        {"law": "入库链可加性 — item0 = 10 + 5 + 3",
+         "ok": r2[0] == 18, "note": f"inv={r2}"},
+    ])
+    s2 = core.ship_stock(core.ship_stock([18, 20], 0, 4), 0, 6)
+    record("INV-IN-4", "invariant", ["ship(4)→ship(6)"], s2, [
+        {"law": "出库链不超卖 — 链后每货品 ≥ 0",
+         "ok": s2[0] >= 0 and s2[1] >= 0, "note": f"inv={s2}"},
+    ])
+
     return events
 
 
