@@ -1005,6 +1005,24 @@
       0 warning，v0.10–v0.122 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.124 完成定义（入门教程，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **docs/TUTORIAL.md**: 144 行命令级可复现教程——环境准备 / 读规则 /
+      加规则（含故意加错演示）/ 三端验证 / 数学证明 / 一键验收 / 规则变产品 /
+      检查清单 / 下一步。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 51/51、p0 109/109、
+      sigma-prove 80 项 PROVED、三端 0 warning，v0.10–v0.123 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+### v0.125 完成定义（Release 准备，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **安装入口**: README 用法 1 加依赖说明（Python 3.8+，可选 Rust/Elixir）。
+- [x] **发布 tag**: 打 v0.125 发布 tag，全量版本记录（MASTER_PLAN/AUTOPILOT/
+      README）——GitHub 有 Release 入口，clone 即用。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 80 项 PROVED、三端
+      0 warning，v0.10–v0.124 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
