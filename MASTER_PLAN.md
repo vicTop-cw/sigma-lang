@@ -768,9 +768,16 @@
   打 tag 发布全链变为 **构建 → 冒烟 → GitHub Release → PyPI 全自动**（不再需要
   手工 twine/token）；workflow 4 步骤验证齐全；consensus 51/51、p0 109/109，
   v0.10–v0.130 不回归。
+- ✅ **REACHED v0.132 (2026-08-05)**: 发布链端到端验证成功—— pyproject 版本
+  升至 **0.7.1**，打 tag `v0.132` 推送后 GitHub Actions 全自动发布
+  （run #31000989560，job 全部 7 步 success：checkout→setup-python→构建
+  sdist+wheel→冒烟→创建 Release→**Publish to PyPI**），PyPI 确认出现
+  **0.7.1**（wheel + sdist）——新 token 的自动化发布链（打 tag 即全自动发
+  PyPI）端到端跑通；`pip install sigma-lang==0.7.1` 可用；consensus 51/51、
+  p0 109/109，v0.10–v0.131 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.131 达成，发布链（构建/workflow/Release/PyPI 全自动）闭环；下次打 tag 即全自动发布验证。
+  2. （无）— v0.132 达成，发布链（构建/workflow/Release/PyPI 全自动）端到端验证闭环；未来发布 = 升版本 + 打 tag。
 
 ---
 
