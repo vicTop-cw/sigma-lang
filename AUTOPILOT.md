@@ -1056,6 +1056,15 @@
       0 warning，v0.10–v0.128 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.130 完成定义（PyPI 发布成功，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **twine upload**: 用用户 PyPI token 发布 sigma_lang-0.7.0（sdist + wheel）
+      到 PyPI；API 查询确认包可见、description 为完整 README。
+- [x] **pip install 全球可用**: README 用法 3 安装说明更新为"已在 PyPI 发布"。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 80 项 PROVED、三端
+      0 warning，v0.10–v0.129 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

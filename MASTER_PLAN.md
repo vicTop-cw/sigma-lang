@@ -756,9 +756,15 @@
   （run #30997898776，event=push）并 **conclusion: success**（构建 + 冒烟 +
   Release 创建全通过）——"打 tag 即发布"全流程验证跑通，GitHub Releases
   页面已有 v0.129 版本；consensus 51/51、p0 109/109，v0.10–v0.128 不回归。
+- ✅ **REACHED v0.130 (2026-08-05)**: PyPI 发布成功—— 用用户提供的 PyPI token
+  执行 `twine upload` 把 `sigma_lang-0.7.0`（sdist 71 KB + wheel 33 KB）发布到
+  PyPI（https://pypi.org/project/sigma-lang/0.7.0/），API 查询确认包可见且
+  description 为完整 README——**`pip install sigma-lang` 全球可用**；
+  README 用法 3 安装说明更新为"已在 PyPI 发布"；consensus 51/51、
+  p0 109/109，v0.10–v0.129 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.129 达成，打包发布链路（pyproject/验证/workflow/Release）全闭环。
+  2. （无）— v0.130 达成，打包发布链路（pyproject/验证/workflow/Release/PyPI）全闭环。
 
 ---
 
