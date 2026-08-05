@@ -838,6 +838,14 @@
       0 warning，v0.10–v0.104 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.106 完成定义（金融不变量补全，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **跨操作不变量**: `gen_portfolio_invariants` 新增 INV-PF-3 资产非负链
+      （buy→sell 链后 cash ≥ 0 且 shares ≥ 0），PROVED (unsat)。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 76 项 PROVED、三端
+      0 warning，v0.10–v0.105 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）

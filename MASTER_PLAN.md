@@ -610,9 +610,14 @@
   item0 ≥ 0，x≤a 且 y≤a−x），均 `PROVED (unsat)`——供应链语义从单操作定律
   走向链式跨操作不变量证明；consensus 51/51、p0 109/109，v0.10–v0.104
   不回归。
+- ✅ **REACHED v0.106 (2026-08-05)**: 金融不变量补全—— `sigma-prove`
+  `gen_portfolio_invariants` 新增 INV-PF-3 资产非负链（buy→sell 链后
+  cash ≥ 0 且 shares ≥ 0，q1 ≤ cash、q2 ≤ 持有，链式不出现负资产），
+  `PROVED (unsat)`——金融语义从单操作定律走向链式跨操作不变量证明；
+  consensus 51/51、p0 109/109，v0.10–v0.105 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.105 达成，继续 v0.106–v0.120 协议深化 + 产品增强连续推进。
+  2. （无）— v0.106 达成，继续 v0.107–v0.120 协议深化 + 产品增强连续推进。
 
 ---
 
