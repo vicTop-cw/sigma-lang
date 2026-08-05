@@ -696,9 +696,17 @@
   （实测 /health 99 req/s avg 10.12 ms、/tasks 270 req/s avg 3.70 ms），
   4 项验证（吞吐 > 0 / 延迟 < 100 ms）——上线后的性能基线；自检 15/15、
   冒烟 36/36 不回归；consensus 51/51、p0 109/109，v0.10–v0.117 不回归。
+- ✅ **REACHED v0.119 (2026-08-05)**: README 收官总览更新—— README Status
+  章节新增「v0.119 收官总览」段（spec 0.7.0 / 三域 / consensus 51/51 /
+  p0 109/109 / sigma-prove 80 项 PROVED / --domains 55/55 二十项链式不变量 /
+  双端冒烟 37/37 含 /panel 对账 / 十道门禁含 --report runtime 段 /
+  --bench 性能基线 / 找茬产品可上线：--launch + 默认持久化审计日志 + 前端
+  三域面板 + --deploy-accept + 上线指南 + /panel + 并发性能兜底）——
+  README 首页一张图看到 v0.119 全貌；consensus 51/51、p0 109/109，
+  v0.10–v0.118 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.118 达成，继续 v0.119–v0.120 收官。
+  2. （无）— v0.119 达成，进入 v0.120 里程碑收官。
 
 ---
 

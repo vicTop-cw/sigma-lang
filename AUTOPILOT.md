@@ -958,6 +958,15 @@
       sigma-prove 80 项 PROVED、三端 0 warning，v0.10–v0.117 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
+### v0.119 完成定义（README 收官总览更新，2026-08-05 立项 → 2026-08-05 达成）
+
+- [x] **收官总览**: README Status 章节新增「v0.119 收官总览」段——spec 0.7.0 /
+      三域 / 51/51 / 109/109 / 80 PROVED / --domains 55/55 / 双端 37/37 /
+      十道门禁含 runtime / --bench 基线 / 找茬产品可上线，首页一张图看全貌。
+- [x] **不回归**: consensus 51/51、p0 109/109、sigma-prove 80 项 PROVED、三端
+      0 warning、sigma-accept 10/10，v0.10–v0.118 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
 ---
 
 ## 1. 自主性授权（明确给你）
