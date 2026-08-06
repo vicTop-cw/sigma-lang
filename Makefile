@@ -14,7 +14,7 @@
 
 PYTHON ?= python3
 
-.PHONY: accept check story prove rust elixir app stats portfolio ready deploy all
+.PHONY: accept check story prove rust elixir app stats portfolio inventory ready deploy all
 
 accept: ## 九道门禁一键验收（CI 与本地同一条命令）
 	$(PYTHON) tools/sigma-accept.py
@@ -50,6 +50,11 @@ portfolio: ## 金融市场对账（Python /portfolio-test + Rust 43/43 + Elixir 
 	$(PYTHON) impl/python/sigma_app.py --portfolio-test
 	cd impl/verifier && cargo run -q -- --app-smoke
 	cd impl/elixir_rt && elixir sigma_verify.exs --sk-portfolio
+	cd impl/elixir_rt && elixir sigma_verify.exs --sk-inventory
+
+inventory: ## 供应链对账（Python /inventory-test + Rust 44/44 + Elixir §IN 7/7，v0.161）
+	$(PYTHON) impl/python/sigma_app.py --inventory-test
+	cd impl/verifier && cargo run -q -- --app-smoke
 	cd impl/elixir_rt && elixir sigma_verify.exs --sk-inventory
 
 ready: ## 生产就绪检查（--launch-ready 一次性确认环境，v0.121）

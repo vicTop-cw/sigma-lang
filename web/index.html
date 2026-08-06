@@ -136,6 +136,7 @@
       <button onclick="ship()">出库</button>
       <button onclick="stockLevel()">水位</button>
       <button onclick="fillRate()">履约率</button>
+      <button onclick="invChain()">联动演示</button>
       <span id="s-out" class="muted"></span>
     </div>
   </section>
@@ -382,6 +383,21 @@ async function stockLevel() {
 async function fillRate() {
   const j = await api("/fill_rate?shipped=6&demanded=10", "fill_rate");
   document.getElementById("s-out").textContent = "履约率 " + j.rate;
+}
+
+// v0.158 — 供应链联动演示（开仓→入库→出库→水位→履约率 完整链）
+async function invChain() {
+  const j1 = await api("/inventory_new?qty_a=10&qty_b=20", "inv_new");
+  let inv = j1.inventory;
+  const j2 = await api(`/receive_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=0&qty=5`, "inv_receive");
+  inv = j2.inventory;
+  const j3 = await api(`/ship_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=0&qty=4`, "inv_ship");
+  inv = j3.inventory;
+  const j4 = await api(`/stock_level?inv=${encodeURIComponent(JSON.stringify(inv))}&item=0`, "inv_level");
+  const j5 = await api("/fill_rate?shipped=6&demanded=10", "inv_fill");
+  document.getElementById("s-inv").value = JSON.stringify(inv);
+  document.getElementById("s-out").textContent =
+    `链: 开仓[10,20] → 入库[15,20] → 出库[11,20] → 水位 ${j4.level} → 履约率 ${j5.rate}`;
 }
 
 // v0.138 — 平台统计（GET /stats）

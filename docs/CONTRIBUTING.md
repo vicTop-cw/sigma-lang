@@ -45,7 +45,7 @@ python3 tools/sigma-accept.py --report acceptance.json   # 期望 10/10
 ## 3. 门禁要求（必须全绿）
 
 ```sh
-python3 tools/sigma-accept.py        # 10/10：consensus 53/53 / p0 109/109 /
+python3 tools/sigma-accept.py        # 10/10：consensus 54/54 / p0 109/109 /
                                       # 三端自检与编译 / 三域审计 47/47 /
                                       # 证明 73 PROVED / 双端冒烟 36/36
 python3 impl/python/sigma_app.py     # App 自检 15/15（改了 App 层才需要）

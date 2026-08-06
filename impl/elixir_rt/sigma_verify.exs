@@ -2130,7 +2130,9 @@ defmodule SigmaVerify do
       # §IN.3.4 库存水位
       {"stock_level", stock_level([11, 20], 0) == {:ok, 11}},
       # §IN.3.5 履约率
-      {"fill_rate", fill_rate(6, 10) == {:ok, 0.6}}
+      {"fill_rate", fill_rate(6, 10) == {:ok, 0.6}},
+      # §IN 联动链（v0.160）— receive→ship 链（与 Python --inventory-test 对应）
+      {"supply_chain_chain", ship_stock(elem(receive_stock([10, 20], 0, 5), 1), 0, 4) == {:ok, [11, 20]}}
     ]
 
     failed = Enum.filter(checks, fn {_name, ok} -> not ok end)

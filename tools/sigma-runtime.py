@@ -900,6 +900,13 @@ def run_invariant_checks(core):
          "ok": q6[1] >= 0 and p6[0] == 100, "note": f"q={q6} p={p6}"},
     ])
 
+    # §IN 混合货品可加链 (v0.155, INV-IN-5)
+    inv5 = core.receive_stock(core.receive_stock([10, 20], 0, 5), 1, 3)
+    record("INV-IN-5", "invariant", ["receive(0,5)→receive(1,3)"], inv5, [
+        {"law": "混合货品可加链 — item0=10+5 且 item1=20+3",
+         "ok": inv5[0] == 15 and inv5[1] == 23, "note": f"inv={inv5}"},
+    ])
+
     return events
 
 

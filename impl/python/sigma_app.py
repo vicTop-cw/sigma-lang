@@ -437,9 +437,9 @@ class _Handler(BaseHTTPRequestHandler):
                     "auth": "enabled" if _Handler._auth_token else "disabled",
                     "log": _Handler._log_file,
                     "gates": {
-                        "consensus": "53/53",
+                        "consensus": "54/54",
                         "p0": "109/109",
-                        "prove": "110 PROVED",
+                        "prove": "125 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -467,9 +467,9 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <tr><td>数量</td><td>{by_state[0]}</td><td>{by_state[1]}</td><td>{by_state[2]}</td><td>{by_state[3]}</td></tr>
 <tr><td>赏金总额</td><td colspan="4">{total_bounty}</td></tr></table></div>
 <div class="card"><h3>门禁摘要</h3><table>
-<tr><td>consensus</td><td>53/53</td></tr>
+<tr><td>consensus</td><td>54/54</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>110 PROVED</td></tr>
+<tr><td>prove</td><td>125 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/stats":
@@ -1109,7 +1109,7 @@ def run_health_test() -> Tuple[int, int]:
         check("HEALTH status ok", body.get("status") == "ok", f"got {body}")
         check("HEALTH app name", "找茬" in body.get("app", ""), f"got {body}")
         check("HEALTH auth field", "auth" in body, f"got {body}")
-        check("HEALTH gates", body.get("gates", {}).get("consensus") == "53/53",
+        check("HEALTH gates", body.get("gates", {}).get("consensus") == "54/54",
               f"got {body.get('gates')}")
     finally:
         server.shutdown()
@@ -1383,7 +1383,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "53/53" in html and "110 PROVED" in html, "")
+        check("PANEL gates", "54/54" in html and "125 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -1466,6 +1466,48 @@ def run_portfolio_test() -> Tuple[int, int]:
         check("PF value", r["value"] == 100, f"got {r}")
         r = call("/portfolio_risk?pf=[90,10,0]")
         check("PF risk", r["risk"] == 10, f"got {r}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
+def run_inventory_test() -> Tuple[int, int]:
+    """--inventory-test (v0.157): §IN supply-chain chain over HTTP — open →
+    receive → ship → level → fill_rate, results match the inventory
+    semantics (mirrors --portfolio-test)."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        r = call("/inventory_new?qty_a=10&qty_b=20")
+        check("INV new", r["inventory"] == [10, 20], f"got {r}")
+        r = call("/receive_stock?inv=[10,20]&item=0&qty=5")
+        check("INV receive", r["inventory"] == [15, 20], f"got {r}")
+        r = call("/ship_stock?inv=[15,20]&item=0&qty=4")
+        check("INV ship", r["inventory"] == [11, 20], f"got {r}")
+        r = call("/stock_level?inv=[11,20]&item=0")
+        check("INV level", r["level"] == 11, f"got {r}")
+        r = call("/fill_rate?shipped=6&demanded=10")
+        check("INV fill", abs(r["rate"] - 0.6) < 1e-9, f"got {r}")
     finally:
         server.shutdown()
         thread.join()
@@ -2052,6 +2094,10 @@ def main(argv=None):
     if "--portfolio-test" in argv:
         passed, total = run_portfolio_test()
         print(f"sigma_app portfolio test (v0.147): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--inventory-test" in argv:
+        passed, total = run_inventory_test()
+        print(f"sigma_app inventory test (v0.157): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()

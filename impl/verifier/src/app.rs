@@ -554,8 +554,8 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
             serde_json::json!({"users": users, "tasks": tasks_n,
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
-                "gates": {"consensus": "53/53", "p0": "109/109",
-                          "prove": "110 PROVED", "scenario": "16/16"}})
+                "gates": {"consensus": "54/54", "p0": "109/109",
+                          "prove": "125 PROVED", "scenario": "16/16"}})
         }
         "/stats" => {
             // v0.139 — 业务统计（与 Python v0.134 对等，JSON）
@@ -873,7 +873,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "110 PROVED");
+           && r["gates"]["prove"] == "125 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -892,6 +892,14 @@ pub fn run_smoke() -> (usize, usize) {
     check!("HTTP /portfolio_value", r["value"] == 100);
     let r = http_get(port, "/portfolio_risk?pf=[90,10,0]");
     check!("HTTP /portfolio_risk", r["risk"] == 10);
+
+    // 14. 供应链链式对账 (v0.159) — receive→ship 链（与 Python --inventory-test 对应）
+    let r = http_get(port, "/receive_stock?inv=[10,20]&item=0&qty=5");
+    let inv = r["inventory"].clone();
+    let r = http_get(port, &format!("/ship_stock?inv={}&item=0&qty=4",
+        serde_json::to_string(&inv).unwrap_or_default()));
+    check!("HTTP /supply_chain chain",
+           r["inventory"] == serde_json::json!([11, 20]));
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

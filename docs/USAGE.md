@@ -148,10 +148,10 @@ python3 impl/python/sigma_app.py --launch          # 启动前后端（生产）
 python3 impl/python/sigma_app.py --launch-ready    # 生产就绪检查
 python3 impl/python/sigma_app.py --deploy-accept   # 上线验收 9/9
 python3 impl/python/sigma_app.py --bench           # 性能基线
-python3 verify_consensus.py                        # 三端共识 53/53
+python3 verify_consensus.py                        # 三端共识 54/54
 python3 verify_p0.py                               # 算法正确性 109/109
-python3 tools/sigma-prove.py                       # z3 证明 110 项 PROVED
-python3 tools/sigma-runtime.py --domains           # 三域审计 57/57
+python3 tools/sigma-prove.py                       # z3 证明 125 项 PROVED
+python3 tools/sigma-runtime.py --domains           # 三域审计 58/58
 python3 tools/sigma-accept.py                      # 十道门禁一键验收
 make deploy                                       # = ready + launch
 ```
