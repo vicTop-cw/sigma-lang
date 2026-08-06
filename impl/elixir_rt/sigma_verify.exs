@@ -2200,6 +2200,19 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ ERR.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_points_story do
+    checks = [
+      # §SK 积分链 (v0.190) — 托管→释放→提现（与 --points-test / INV-SK-8 对应）
+      {"pts_hold", points_hold(points_new(), 100) == [100, 0]},
+      {"pts_release", points_release(points_hold(points_new(), 100), 100) == {:ok, [0, 100]}},
+      {"pts_withdraw", points_withdraw(elem(points_release(points_hold(points_new(), 100), 100), 1), 100) == {:ok, [0, 0]}}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ PTS.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2240,6 +2253,11 @@ case System.argv() do
   ["--sk-errors" | _] ->
     {passed, total} = SigmaVerify.sk_errors_story()
     IO.puts("sigma_core errors story (错误边界): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-points" | _] ->
+    {passed, total} = SigmaVerify.sk_points_story()
+    IO.puts("sigma_core points story (积分链): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

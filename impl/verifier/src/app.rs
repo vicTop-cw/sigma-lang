@@ -555,7 +555,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "171 PROVED", "scenario": "16/16"}})
+                          "prove": "214 PROVED", "scenario": "16/16"}})
         }
         "/stats" => {
             // v0.139 — 业务统计（与 Python v0.134 对等，JSON）
@@ -873,7 +873,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "171 PROVED");
+           && r["gates"]["prove"] == "214 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -906,6 +906,15 @@ pub fn run_smoke() -> (usize, usize) {
     check!("HTTP /xd pf", r["portfolio"] == serde_json::json!([70, 30, 0]));
     let r = http_get(port, "/ship_stock?inv=[10,20]&item=0&qty=4");
     check!("HTTP /xd inv", r["inventory"] == serde_json::json!([6, 20]));
+
+    // 17. 积分链对账 (v0.189) — post→claim→submit→accept（与 Python --points-test 对应）
+    let r = http_get(port, "/post?author=7&bounty=100");
+    check!("HTTP /points_chain escrow", r["points"] == serde_json::json!([100, 0]));
+    let tid2 = r["task_id"].as_u64().unwrap_or(0);
+    let _ = http_get(port, &format!("/claim?task={tid2}&hunter=3"));
+    let _ = http_get(port, &format!("/submit?task={tid2}"));
+    let r = http_get(port, &format!("/accept?task={tid2}&caller=7"));
+    check!("HTTP /points_chain release", r["points"] == serde_json::json!([0, 100]));
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

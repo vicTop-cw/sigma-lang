@@ -443,7 +443,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "gates": {
                         "consensus": "56/56",
                         "p0": "109/109",
-                        "prove": "171 PROVED",
+                        "prove": "214 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -473,7 +473,7 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <div class="card"><h3>门禁摘要</h3><table>
 <tr><td>consensus</td><td>56/56</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>171 PROVED</td></tr>
+<tr><td>prove</td><td>214 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/stats":
@@ -1387,7 +1387,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "56/56" in html and "171 PROVED" in html, "")
+        check("PANEL gates", "56/56" in html and "214 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -1620,6 +1620,50 @@ def run_errors_test() -> Tuple[int, int]:
         check("ERR unknown item", st == 409, f"got {st} {r}")
         st, r = get_status("/fill_rate?shipped=6&demanded=0")
         check("ERR divzero", st == 409, f"got {st} {r}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
+def run_points_test() -> Tuple[int, int]:
+    """--points-test (v0.187): points-flow chain over HTTP — post (escrow 100)
+    → claim → submit → accept (release to available) → withdraw, matching the
+    INV-SK-8 bounty-points link semantics."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        call(f"/register?user=7&name={quote('找茬主')}")
+        call(f"/register?user=3&name={quote('找茬人')}")
+        call("/quota?user=7&monthly=50")
+        r = call("/post?author=7&bounty=100")
+        check("PTS escrow", r["points"] == [100, 0], f"got {r}")
+        tid = r["task_id"]
+        call(f"/claim?task={tid}&hunter=3")
+        call(f"/submit?task={tid}")
+        r = call(f"/accept?task={tid}&caller=7")
+        check("PTS release", r["points"] == [0, 100], f"got {r}")
+        r = call("/withdraw?user=3&amount=100")
+        check("PTS withdraw", r["points"] == [0, 0], f"got {r}")
     finally:
         server.shutdown()
         thread.join()
@@ -2218,6 +2262,10 @@ def main(argv=None):
     if "--errors-test" in argv:
         passed, total = run_errors_test()
         print(f"sigma_app errors test (v0.177): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--points-test" in argv:
+        passed, total = run_points_test()
+        print(f"sigma_app points test (v0.187): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()

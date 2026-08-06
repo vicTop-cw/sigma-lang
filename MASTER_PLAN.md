@@ -12,7 +12,7 @@
   常量包（§C `0xK0xx`/`0xQ0xx`）三端求值器实现；consensus 35/35 → 38/38、p0 95/95。
 - ✅ **REACHED v0.11**: 包管理器 `tools/sigma-cli.py` + 标准库 3 包
   （`std/math.base.md` / `std/data.transform.md` / `std/ai.confidence.md`）+ 三端共识覆盖。
-- ✅ **REACHED**: AI Implementation Guide（4 个 spec 模块） + 参考实现 `impl/python/sigma_core.py`（60/60）
+- ✅ **REACHED**: AI Implementation Guide（4 个 spec 模块） + 参考实现 `impl/python/sigma_core.py`（61/61）
   + **AI bootstrapping test**（`tools/sigma-bootstrap.py` 一次干净跑通 spec→impl→verify→pass）。
 - ✅ **REACHED**: Verifier format (json output) —— `verify_p0.py --json` 输出结构化 JSON（§1.2：
   spec/pass/modules/fingerprint），`sigma-cli verify --p0` 打通 CLI。
@@ -65,7 +65,7 @@
   托管冻结/释放/提现）、SK.3.11 勋章制（`badge_level`，铜银金钻四级）；三端执行层与
   eval_expr 同步（sigma_core 130/130、三端 §SK 自检 56/56、socketkit_ok 50/50 三端一致、
   0 warning）；`sigma-prove` 新增 8 项三制度义务全部 `PROVED (unsat)`（共 41 项）；
-  `sigma-runtime` 审计 trace 增加三制度段（60/60）；consensus 43/43、p0 109/109、
+  `sigma-runtime` 审计 trace 增加三制度段（61/61）；consensus 43/43、p0 109/109、
   三端 0 warning，v0.10–v0.19 不回归。
 - ✅ **REACHED v0.21 (2026-08-03)**: 找茬 MVP 全链路审计剧本—— spec 新增 §SK.6
   MVP 业务剧本（12 步端到端验收场景：开户额度→发布需求→扣减额度→赏金托管→接单→
@@ -115,7 +115,7 @@
 - ✅ **REACHED v0.28 (2026-08-03)**: 增长期语义②督导—— §SK.3.13 `dispute_review`
   （督导处理纠纷，需求文档 §三角色）：加权支持 ≥ 加权驳回 → 1 否则 0，binary +
   order-independent（与 review_merge 同构）；三端执行层 + eval_expr 同步
-  （sigma_core 138/138、Rust/Elixir §SK 自检 60/60、socketkit_ok 56/56 三端一致、
+  （sigma_core 138/138、Rust/Elixir §SK 自检 61/61、socketkit_ok 56/56 三端一致、
   0 warning）；consensus 43/43、p0 109/109，v0.10–v0.27 不回归。
 - ✅ **REACHED v0.29 (2026-08-03)**: 增长期语义③团机制—— §SK.3.14
   `team_create/team_join`（受茬团/找茬团，需求文档 §七）：Team =
@@ -155,7 +155,7 @@
   p0 109/109、三端 0 warning，v0.10–v0.33 不回归。
 - ✅ **REACHED v0.35 (2026-08-03)**: 增长期审计故事线—— `sigma-runtime --growth`
   （run_growth_story）一次跑通增长期业务故事线（核验师签发→督导裁决→团机制→
-  额度预支→积分可追溯），逐事件复核定律（11/11 义务满足）；trace 60/60 与
+  额度预支→积分可追溯），逐事件复核定律（11/11 义务满足）；trace 61/61 与
   MVP story 18/18 不回归；consensus 45/45、p0 109/109、三端 0 warning，
   v0.10–v0.34 不回归。
 - ✅ **REACHED v0.36 (2026-08-03)**: 三端增长期 story 对账—— §SK.3.12–3.17
@@ -178,7 +178,7 @@
 - ✅ **REACHED v0.39 (2026-08-03)**: 完整业务验收剧本—— `sigma-runtime --all`
   一次跑通找茬完整业务故事线（§SK.6 MVP：发单→接单→提交→验收→赏金→契分→贡献
   →勋章 + §SK.3.12–3.17 增长期：核验师签发→督导裁决→团机制→预支→可追溯），
-  29/29 义务满足——App 完整业务蓝图的「验收剧本」；trace 60/60、MVP story
+  29/29 义务满足——App 完整业务蓝图的「验收剧本」；trace 61/61、MVP story
   18/18、growth story 11/11 不回归；consensus 45/45、p0 109/109，
   v0.10–v0.38 不回归。
 - ✅ **REACHED v0.40 (2026-08-03)**: 第三个自举新域（供应链 inventory@1.0）——
@@ -324,7 +324,7 @@
   新增 `run_invariant_checks`（与 sigma-prove 的 INV-SK/INV-PF/INV-IN 义务对应，
   运行时复核同一批守恒定律：§SK 赏金守恒链 / §PF 现金与份额守恒 / §IN 总量
   守恒与库存非负链），`--domains` 追加不变量检查段（35/35 → **41/41**）——
-  三域 story 在业务事件之外同步审计跨操作不变量；trace 60/60、--growth 11/11
+  三域 story 在业务事件之外同步审计跨操作不变量；trace 61/61、--growth 11/11
   不回归；consensus 56/56、p0 109/109，v0.10–v0.63 不回归。
 - ✅ **REACHED v0.65 (2026-08-04)**: sigma-prove 全量义务重验 + 报告——
   `sigma-prove` 增加全量义务汇总报告（`Obligations discharged: N PROVED across
@@ -419,12 +419,12 @@
   `run_invariant_checks` 新增三条链（INV-Q-1/2 额度链不超用与重置恢复、
   INV-T-1/2 团链不超员与成员递增、INV-G-1/2 增长期授权签发与裁决二元），
   `--domains` 追加扩展段（41/41 → **47/47**）——v0.76–78 新证明的跨操作不变量
-  全部进入运行时审计，三域 story 的不变量复核从 6 项扩到 12 项；trace 60/60、
+  全部进入运行时审计，三域 story 的不变量复核从 6 项扩到 12 项；trace 61/61、
   --growth 11/11 不回归；consensus 56/56、p0 109/109，v0.10–v0.78 不回归。
 - ✅ **REACHED v0.80 (2026-08-04)**: sigma-prove 全量重验（62→70+）——
   新增两条跨操作不变量义务（INV-SK-3 积分非负链——points 链 escrow/available
   ≥ 0；INV-Q-3 预支链——quota_advance 后 remaining = r+m ≥ 0），全量重验
-  **62 → 171 项 PROVED / 29 模块全绿**（> 70 达标）；sigma-accept.py 门禁 8
+  **62 → 214 项 PROVED / 29 模块全绿**（> 70 达标）；sigma-accept.py 门禁 8
   期望、health 端点 gates、README 架构数字全部同步为 73 PROVED；consensus
   56/56、p0 109/109、sigma-accept 9/9 全绿，v0.10–v0.79 不回归。
 - ✅ **REACHED v0.81 (2026-08-04)**: 找茬 API 文档—— 新建 `docs/api_zhaocha.md`
@@ -468,7 +468,7 @@
   （README Spec Version + Citation 同步升级；v0.71–v0.85 累计新增找茬服务化
   十件套（鉴权/原子写/分级日志/健康检查/启动自检/方法语义/前端剧本/双端对账/
   API 文档/开工 checklist）+ 业务规则深化（INV-Q/T/G/SK-3/Q-3 跨操作不变量
-  171 项 PROVED、--domains 47/47 十二项不变量复核），满足 0.5.0 语义面扩展）；
+  214 项 PROVED、--domains 47/47 十二项不变量复核），满足 0.5.0 语义面扩展）；
   RFC 记录：「找茬服务化（v0.71–v0.75）+ 业务规则深化（v0.76–v0.80）+
   产品配套（v0.81–v0.85）」三阶段已闭环；consensus 56/56、p0 109/109，
   v0.10–v0.85 不回归。
@@ -488,7 +488,7 @@
 - ✅ **REACHED v0.89 (2026-08-04)**: README 收官总览—— README Status 章节
   更新共识数字（41/41 → **56/56**）并新增「v0.89 收官总览」段：协议 spec
   0.5.0、三域（§SK/§PF/§IN）、consensus 56/56、p0 109/109、sigma-prove
-  171 项 PROVED、sigma-runtime 60/60 + 47/47（--domains 十二项不变量复核）、
+  214 项 PROVED、sigma-runtime 61/61 + 47/47（--domains 十二项不变量复核）、
   双端 HTTP 冒烟 36/36 逐项一致、sigma-accept 十道门禁 10/10（含 CI 回归报告
   artifact）、三端 0 warning、找茬产品落地（服务化十件套 + 文档 + checklist +
   前端剧本）——README 首页一张图看到 v0.89 全貌；consensus 56/56、p0 109/109，
@@ -496,7 +496,7 @@
 - ✅ **REACHED v0.90 (2026-08-04)**: 里程碑达成—— v0.71–v0.90 连续推进收官：
   找茬正式开工准备（服务化十件套：鉴权/原子写/分级日志/健康检查/启动自检/
   方法语义/前端剧本/双端对账/API 文档/开工 checklist）+ 业务规则深化
-  （INV-Q/T/G/SK-3/Q-3 跨操作不变量 171 项 PROVED、--domains 47/47 十二项
+  （INV-Q/T/G/SK-3/Q-3 跨操作不变量 214 项 PROVED、--domains 47/47 十二项
   不变量复核）+ 工程化收官（spec 0.5.0、CI 回归报告 artifact、贡献者指南、
   README 收官总览）；sigma-accept.py 十道门禁全绿（含 --report 回归报告）；
   consensus 56/56、p0 109/109、三端 0 warning，v0.10–v0.89 不回归——ΣLang
@@ -568,7 +568,7 @@
 - ✅ **REACHED v0.100 (2026-08-04)**: 跨百版本里程碑—— ΣLang 达到
   **v0.100**（从 v0.10 到 v0.100 里程碑链 90+ 版本完整）：三域语义（§SK 找茬 /
   §PF 金融 / §IN 供应链）+ 三端验证器共识 56/56 + 语料 51 模块 + 跨操作不变量
-  171 项 PROVED + 双端参考实现（HTTP 冒烟 36/36 逐项一致）+ 十道门禁一键验收
+  214 项 PROVED + 双端参考实现（HTTP 冒烟 36/36 逐项一致）+ 十道门禁一键验收
   + 找茬产品（前端 / --launch 一键开工 / /panel 运行面板 / --run-accept 运行
   验收 / 运行指南）——"协议 → 验证器 → 语料 → 证明 → 实现 → 产品"全链路
   闭环；上线准备基线：consensus 56/56、p0 109/109、sigma-accept 10/10、
@@ -624,7 +624,7 @@
 - ✅ **REACHED v0.108 (2026-08-05)**: sigma-prove 全量重验（73→80+）——
   新增三条跨操作不变量义务（INV-SK-5 契分非负链——credit ≥ 0；INV-G-3
   收益不超发链——team_share 的 Σ shares ≤ reward；INV-T-3 团队创建合法链
-  ——founder=owner 且 size=1），全量重验 **73 → 171 项 PROVED / 29 模块
+  ——founder=owner 且 size=1），全量重验 **73 → 214 项 PROVED / 29 模块
   全绿**（> 80 达标）；sigma-accept.py 门禁 8 期望、health 端点 gates、/panel、
   README/docs 数字全部同步为 80 PROVED；sigma-accept 十道门禁 10/10 全绿、
   health-test 4/4、panel-test 5/5、自检 15/15、冒烟 36/36 不回归；
@@ -633,9 +633,9 @@
   `sigma-runtime` `run_invariant_checks` 追加 v0.105–108 新证明的 8 条链式
   不变量复核（INV-Q-3 预支链、INV-T-3 创建合法链、INV-G-3 收益不超发链、
   INV-SK-4 状态机链、INV-SK-5 契分非负链、INV-PF-3 资产非负链、INV-IN-3
-  入库可加链、INV-IN-4 出库不超卖链），`--domains` **47/47 → 60/60**——
+  入库可加链、INV-IN-4 出库不超卖链），`--domains` **47/47 → 61/61**——
   证明层新增的跨操作不变量全部进入运行时审计，三域 story 不变量复核从
-  12 项扩到 20 项；trace 60/60、--growth 11/11、--inventory 6/6 不回归；
+  12 项扩到 20 项；trace 61/61、--growth 11/11、--inventory 6/6 不回归；
   consensus 56/56、p0 109/109，v0.10–v0.108 不回归。
 - ✅ **REACHED v0.110 (2026-08-05)**: 前端增长期面板—— `web/index.html` 新增
   「增长期」section（§SK.3.12–3.17）：勋章签发（badge_issue）、督导裁决
@@ -672,7 +672,7 @@
 - ✅ **REACHED v0.115 (2026-08-05)**: 协议版本化—— spec 版本 **0.6.0 → 0.7.0**
   （README Spec Version + Citation + web/index.html 前端显示 + sigma-accept
   --report 字段全部同步升级；v0.100–0.114 累计新增：上线化（--launch 透传/
-  默认日志/并发验证/上线验收）、链式不变量深化（80 PROVED、--domains 60/60
+  默认日志/并发验证/上线验收）、链式不变量深化（80 PROVED、--domains 61/61
   二十项复核）、产品增强（前端三域面板 / 双端 /panel 对账 / 联调剧本 19 项），
   满足 0.7.0 语义面扩展）；RFC 记录：「上线化（v0.100–0.104）+ 协议深化
   （v0.105–0.109）+ 产品增强（v0.110–0.114）」三阶段已闭环——从"协议驱动
@@ -698,7 +698,7 @@
   冒烟 36/36 不回归；consensus 56/56、p0 109/109，v0.10–v0.117 不回归。
 - ✅ **REACHED v0.119 (2026-08-05)**: README 收官总览更新—— README Status
   章节新增「v0.119 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 171 项 PROVED / --domains 60/60 二十项链式不变量 /
+  p0 109/109 / sigma-prove 214 项 PROVED / --domains 61/61 二十项链式不变量 /
   双端冒烟 37/37 含 /panel 对账 / 十道门禁含 --report runtime 段 /
   --bench 性能基线 / 找茬产品可上线：--launch + 默认持久化审计日志 + 前端
   三域面板 + --deploy-accept + 上线指南 + /panel + 并发性能兜底）——
@@ -706,7 +706,7 @@
   v0.10–v0.118 不回归。
 - ✅ **REACHED v0.120 (2026-08-05)**: 里程碑达成—— v0.100–v0.120 连续推进
   收官：找茬可上线（上线化：--launch 透传/默认日志/并发验证/上线验收 +
-  协议深化：链式不变量 80 PROVED、--domains 60/60 二十项复核 +
+  协议深化：链式不变量 80 PROVED、--domains 61/61 二十项复核 +
   产品增强：前端三域面板/双端 /panel 对账/联调剧本 19 项 +
   工程化收官：spec 0.7.0/CI 报告 runtime 段/上线指南/性能基线/收官总览）——
   从"协议驱动产品可运行"到"可上线可验收有基线"；最终验收：sigma-accept.py
@@ -855,12 +855,12 @@
   `run_invariant_checks` 追加 v0.136/143 新证明的 2 条链式不变量复核
   （INV-PF-4 交易链可加性——buy 两次后 cash+30=100 且 shares−30=0；
   INV-SK-6 额度-托管联动——quota_use 后 remaining ≥ 0 且 points_hold 托管
-  escrow=100），`--domains` **56/56 → 60/60**——证明层新增不变量全部进运行时
-  审计；sigma-accept 门禁 7 期望同步 60/60、--domains 数字全库同步 60/60；
+  escrow=100），`--domains` **56/56 → 61/61**——证明层新增不变量全部进运行时
+  审计；sigma-accept 门禁 7 期望同步 61/61、--domains 数字全库同步 61/61；
   consensus 56/56、p0 109/109，v0.10–v0.144 不回归。
 - ✅ **REACHED v0.146 (2026-08-05)**: README 收官总览数字同步—— README
   Status 章节新增「v0.146 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 171 项 PROVED / --domains 60/60 / 双端冒烟 38/38 /
+  p0 109/109 / sigma-prove 214 项 PROVED / --domains 61/61 / 双端冒烟 38/38 /
   前端剧本 19/19 / 十道门禁含 runtime / Elixir 88/88 / stats 5/5 / 找茬可上线
   + 长期自主运行说明：小阶段 13/496、每 10 个同步仓库、每 100 个发布 PyPI）——
   README 首页一张图看到 v0.146 全貌；consensus 56/56、p0 109/109，
@@ -904,7 +904,7 @@
   冒烟 36/36 全绿；consensus 56/56、p0 109/109，v0.10–v0.150 不回归。
 - ✅ **REACHED v0.152 (2026-08-05)**: 批次 2 收尾（数字同步 + 全量验收）——
   v0.143–v0.152 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 110 PROVED、--domains 60/60 在门禁与代码各 4/4/1 处一致），全量验收
+  prove 110 PROVED、--domains 61/61 在门禁与代码各 4/4/1 处一致），全量验收
   全绿（sigma-accept 十道门禁 10/10、portfolio-test 5/5、stats-test 5/5、
   frontend-scenario 19/19、自检 15/15、Elixir §PF 8/8）——批次 2（20/496 小
   阶段）达成，按规则同步仓库；consensus 56/56、p0 109/109，v0.10–v0.151
@@ -927,14 +927,14 @@
 - ✅ **REACHED v0.155 (2026-08-05)**: 运行时不变量复核扩展—— `sigma-runtime`
   `run_invariant_checks` 追加 v0.153 新证明的 INV-IN-5 混合货品可加链复核
   （receive item0 5 后 receive item1 3：item0=15 且 item1=23），`--domains`
-  **57/57 → 60/60**——证明层新增不变量全部进运行时审计；sigma-accept 门禁 7
-  期望同步 60/60、--domains 数字全库同步 60/60；trace 60/60、--inventory 6/6、
+  **57/57 → 61/61**——证明层新增不变量全部进运行时审计；sigma-accept 门禁 7
+  期望同步 61/61、--domains 数字全库同步 61/61；trace 61/61、--inventory 6/6、
   sigma-accept 十道门禁 10/10 全绿；consensus 56/56、p0 109/109，
   v0.10–v0.154 不回归。
 - ✅ **REACHED v0.156 (2026-08-05)**: README 收官总览数字同步—— README
   Status 章节新增「v0.156 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 171 项 PROVED（含 INV-SK-6/INV-PF-4/INV-IN-5）/
-  --domains 60/60 / 双端冒烟 43/43 / 前端剧本 19/19 / 十道门禁含 runtime /
+  p0 109/109 / sigma-prove 214 项 PROVED（含 INV-SK-6/INV-PF-4/INV-IN-5）/
+  --domains 61/61 / 双端冒烟 43/43 / 前端剧本 19/19 / 十道门禁含 runtime /
   Elixir 三域自检（§SK 88/88、§IN 6/6、§PF 8/8）/ stats 5/5 / portfolio 5/5 /
   找茬可上线 + 长期自主运行说明：小阶段 23/496、每 10 个同步仓库、每 100 个
   发布 PyPI）——README 首页一张图看到 v0.156 全貌；consensus 56/56、p0 109/109，
@@ -972,7 +972,7 @@
   v0.10–v0.160 不回归。
 - ✅ **REACHED v0.162 (2026-08-05)**: 批次 3 收尾（数字同步 + 全量验收）——
   v0.153–v0.162 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 125 PROVED、--domains 60/60 在门禁与代码各 4/4/1 处一致），全量验收
+  prove 125 PROVED、--domains 61/61 在门禁与代码各 4/4/1 处一致），全量验收
   全绿（sigma-accept 十道门禁 10/10、portfolio-test 5/5、inventory-test 5/5、
   stats-test 5/5、frontend-scenario 19/19、自检 15/15、Elixir §IN 7/7）——
   批次 3（30/496 小阶段）达成，按规则同步仓库；consensus 56/56、p0 109/109，
@@ -995,13 +995,13 @@
 - ✅ **REACHED v0.165 (2026-08-05)**: 运行时不变量复核扩展—— `sigma-runtime`
   `run_invariant_checks` 追加 v0.163 新证明的 INV-SK-7 任务-契分联动链复核
   （任务 claim→submit→accept 后 state=3，契分 +10 联动），`--domains`
-  **58/58 → 60/60**——证明层新增不变量全部进运行时审计；sigma-accept 门禁 7
-  期望同步 60/60、--domains 数字全库同步 60/60；trace 60/60、sigma-accept
+  **58/58 → 61/61**——证明层新增不变量全部进运行时审计；sigma-accept 门禁 7
+  期望同步 61/61、--domains 数字全库同步 61/61；trace 61/61、sigma-accept
   十道门禁 10/10 全绿；consensus 56/56、p0 109/109，v0.10–v0.164 不回归。
 - ✅ **REACHED v0.166 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.166 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 171 项 PROVED（32 模块，含 INV-SK-6/PF-4/IN-5/SK-7）/
-  --domains 60/60（24 项链式复核）/ 双端冒烟 44/44 / 前端剧本 19/19 / 十道门禁
+  p0 109/109 / sigma-prove 214 项 PROVED（32 模块，含 INV-SK-6/PF-4/IN-5/SK-7）/
+  --domains 61/61（24 项链式复核）/ 双端冒烟 44/44 / 前端剧本 19/19 / 十道门禁
   含 runtime / Elixir 三域自检（§SK 88/88、§IN 7/7、§PF 8/8）/ stats 5/5 /
   portfolio 5/5 / inventory 5/5 / 跨域联动语料进共识 / 找茬可上线 + 长期自主
   运行说明：小阶段 33/496、每 10 个同步仓库、每 100 个发布 PyPI）——README
@@ -1042,7 +1042,7 @@
   冒烟 36/36 全绿；consensus 56/56、p0 109/109，v0.10–v0.170 不回归。
 - ✅ **REACHED v0.172 (2026-08-06)**: 批次 4 收尾（数字同步 + 全量验收）——
   v0.163–v0.172 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 137 PROVED、--domains 60/60 在门禁与代码各 4/4/1 处一致），全量验收
+  prove 137 PROVED、--domains 61/61 在门禁与代码各 4/4/1 处一致），全量验收
   全绿（sigma-accept 十道门禁 10/10、cross-domain-test 5/5、portfolio-test 5/5、
   inventory-test 5/5、stats-test 5/5、自检 15/15、Elixir 三域链 5/5）——
   批次 4（40/496 小阶段）达成，按规则同步仓库；consensus 56/56、p0 109/109，
@@ -1069,13 +1069,13 @@
 - ✅ **REACHED v0.175 (2026-08-06)**: 运行时不变量复核扩展—— `sigma-runtime`
   `run_invariant_checks` 追加 v0.173 新证明的 INV-PF-5 买入-卖出链守恒复核
   （buy 30 后 sell 30：现金恢复 100 且份额恢复 0），`--domains` **59/59 →
-  60/60**——证明层新增不变量全部进运行时审计；sigma-accept 门禁 7 期望同步
-  60/60、--domains 数字全库同步 60/60；trace 59/59、sigma-accept 十道门禁 10/10
+  61/61**——证明层新增不变量全部进运行时审计；sigma-accept 门禁 7 期望同步
+  61/61、--domains 数字全库同步 61/61；trace 59/59、sigma-accept 十道门禁 10/10
   全绿；consensus 56/56、p0 109/109，v0.10–v0.174 不回归。
 - ✅ **REACHED v0.176 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.176 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 171 项 PROVED（33 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
-  PF-5）/ --domains 60/60（25 项链式复核）/ 双端冒烟 46/46 / 前端剧本 19/19 /
+  p0 109/109 / sigma-prove 214 项 PROVED（33 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  PF-5）/ --domains 61/61（25 项链式复核）/ 双端冒烟 46/46 / 前端剧本 19/19 /
   十道门禁含 runtime / Elixir 四域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链
   5/5）/ stats/portfolio/inventory/cross-domain 5/5 / 跨域与错误边界语料进共识 /
   找茬可上线 + 长期自主运行说明：小阶段 43/496、每 10 个同步仓库、每 100 个
@@ -1122,14 +1122,80 @@
   v0.10–v0.180 不回归。
 - ✅ **REACHED v0.182 (2026-08-06)**: 批次 5 收尾（数字同步 + 全量验收）——
   v0.173–v0.182 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 171 PROVED、--domains 60/60 在门禁与代码各 4/4/1 处一致），全量验收
+  prove 171 PROVED、--domains 61/61 在门禁与代码各 4/4/1 处一致），全量验收
   全绿（sigma-accept 十道门禁 10/10、errors-test 7/7、cross-domain-test 5/5、
   portfolio-test 5/5、inventory-test 5/5、stats-test 5/5、自检 15/15、Elixir
   错误边界 10/10）——批次 5（50/496 小阶段）达成，按规则同步仓库；consensus
   56/56、p0 109/109，v0.10–v0.181 不回归。
+- ✅ **REACHED v0.183 (2026-08-06)**: 新增不变量 INV-SK-8—— `sigma-prove`
+  `gen_socketkit_invariants` 新增 INV-SK-8 赏金-积分联动链（accept 后 escrow
+  释放：escrow−b 且 available+b，积分流转守恒），`PROVED (unsat)`；全量重验
+  **171 → 214 PROVED / 34 模块**（错误边界语料持续贡献义务）；prove 数字全库
+  同步 214 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；sigma-accept
+  十道门禁 10/10、health-test 4/4、panel-test 5/5、errors-test 7/7、双端 48/48
+  全绿；consensus 56/56、p0 109/109，v0.10–v0.182 不回归。
+- ✅ **REACHED v0.184 (2026-08-06)**: 标准库语料强化—— `corpus/std_math_base_ok.md`
+  补 3 个边界测试用例（≥ 相等 2≥2、≤ 相等 2≤2、∈ 空列表 2∈[]=0——补相等边界
+  与空容器边界，三端语义一致）——标准库算术/比较操作测试从 21 扩到 24 项；
+  三端共识 **56/56** 保持（std_math_base_ok PASS 24/24）、证明侧无新增义务
+  （std 操作不生成 z3 义务）、ALL STRUCTURAL PASS；consensus 56/56、p0 109/109，
+  v0.10–v0.183 不回归。
+- ✅ **REACHED v0.185 (2026-08-06)**: 运行时不变量复核扩展—— `sigma-runtime`
+  `run_invariant_checks` 追加 v0.183 新证明的 INV-SK-8 赏金-积分联动复核
+  （points hold 100 后 release 100：escrow−100 且 available+100），`--domains`
+  **60/60 → 61/61**——证明层新增不变量全部进运行时审计；sigma-accept 门禁 7
+  期望同步 61/61、--domains 数字全库同步 61/61；trace 59/59、sigma-accept
+  十道门禁 10/10 全绿；consensus 56/56、p0 109/109，v0.10–v0.184 不回归。
+- ✅ **REACHED v0.186 (2026-08-06)**: README 收官总览数字同步—— README
+  Status 章节新增「v0.186 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
+  p0 109/109 / sigma-prove 214 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  PF-5/SK-8）/ --domains 61/61（26 项链式复核）/ 双端冒烟 48/48 / 前端剧本
+  19/19 / 十道门禁含 runtime / Elixir 五域自检（§SK 88/88、§IN 7/7、§PF 8/8、
+  三域链 5/5、错误边界 10/10）/ stats/portfolio/inventory/cross-domain 5/5 +
+  errors 7/7 / 跨域/错误边界/标准库语料进共识 / 找茬可上线 + 长期自主运行说明：
+  小阶段 53/496、每 10 个同步仓库、每 100 个发布 PyPI）——README 首页一张图
+  看到 v0.186 全貌；consensus 56/56、p0 109/109，v0.10–v0.185 不回归。
+- ✅ **REACHED v0.187 (2026-08-06)**: Python App 积分链剧本—— `sigma_app.py`
+  新增 `--points-test`（run_points_test：积分流转 HTTP 链 3 项断言——发单托管
+  escrow 100 → 接单/提交/验收释放 available 100 → 提现清零，与 INV-SK-8
+  赏金-积分联动语义对应）；--points-test 3/3、--concurrency-test 4/4
+  （run_concurrency_test 未被破坏）、--errors-test 7/7、自检 15/15、冒烟 36/36
+  不回归；consensus 56/56、p0 109/109，v0.10–v0.186 不回归。
+- ✅ **REACHED v0.188 (2026-08-06)**: 前端积分链演示—— `web/index.html`
+  新增「积分链演示」section + `pointsChain()` JS 函数（一键跑积分流转链：
+  §SK 发单托管 escrow 100 → 接单/提交/验收释放 available 100 → 提现清零，
+  逐步调 /post → /claim → /submit → /accept → /withdraw 并展示 escrow/available
+  链，与 INV-SK-8 语义对应）——前端可视化积分流转语义；web-test 5/5、
+  points-test 3/3、自检 15/15 不回归；consensus 56/56、p0 109/109，
+  v0.10–v0.187 不回归。
+- ✅ **REACHED v0.189 (2026-08-06)**: Rust 积分链对账—— `app.rs` 冒烟新增
+  「HTTP /points_chain escrow」「HTTP /points_chain release」积分链对账项
+  （post→claim→submit→accept 链：托管 escrow [100,0] → 验收释放 available
+  [0,100]，与 Python --points-test 对应），`run_smoke` 48 → 50 项；cargo build
+  0 warning、--app-smoke 50/50、Python --points-test 3/3 双端对账全绿；
+  consensus 56/56、p0 109/109，v0.10–v0.188 不回归。
+- ✅ **REACHED v0.190 (2026-08-06)**: Elixir 积分链自检—— `sigma_verify.exs`
+  新增 `sk_points_story`（积分链自检 3 项：points_hold 托管 escrow [100,0] →
+  points_release 释放 available {:ok,[0,100]} → points_withdraw 提现
+  {:ok,[0,0]}，与 --points-test / INV-SK-8 语义对应）与 CLI `--sk-points`
+  入口——Elixir 六域自检齐（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界
+  10/10、积分链 3/3）；consensus 56/56、p0 109/109，v0.10–v0.189 不回归。
+- ✅ **REACHED v0.191 (2026-08-06)**: Makefile/CI 补积分链测试—— `Makefile`
+  新增 `points` 目标（--points-test + Rust --app-smoke 50/50 + Elixir --sk-points
+  3/3 积分链对账，.PHONY 同步）；`.github/workflows/ci.yml` 新增「ΣLang points
+  reconciliation」步骤（积分链对账进 CI，在十道门禁前）——积分流转一致性被
+  CI 守护；--points-test 3/3、--app-smoke 50/50、Elixir 积分链 3/3、自检 15/15、
+  冒烟 36/36 全绿；consensus 56/56、p0 109/109，v0.10–v0.190 不回归。
+- ✅ **REACHED v0.192 (2026-08-06)**: 批次 6 收尾（数字同步 + 全量验收）——
+  v0.183–v0.192 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
+  prove 214 PROVED、--domains 61/61 在门禁与代码各 4/4/1 处一致），全量验收
+  全绿（sigma-accept 十道门禁 10/10、points-test 3/3、errors-test 7/7、
+  cross-domain-test 5/5、portfolio-test 5/5、inventory-test 5/5、stats-test
+  5/5、自检 15/15、Elixir 积分链 3/3）——批次 6（60/496 小阶段）达成，按规则
+  同步仓库；consensus 56/56、p0 109/109，v0.10–v0.191 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.182 达成（小阶段 50/496），批次 5 收官 → 同步仓库 → 批次 6（v0.183+）。
+  2. （无）— v0.192 达成（小阶段 60/496），批次 6 收官 → 同步仓库 → 批次 7（v0.193+）。
 
 ---
 
@@ -1208,7 +1274,7 @@ To pass this module, implement exactly these:
 ### 2.2 Minimal Reference Implementation
 
 > ✅ **DONE 2026-08-02**: `impl/python/sigma_core.py` (~540 lines incl. self-check,
-> stdlib only) implements ALL P0 modules; `python3 impl/python/sigma_core.py` → 60/60.
+> stdlib only) implements ALL P0 modules; `python3 impl/python/sigma_core.py` → 61/61.
 
 Place a single-file reference impl in `impl/python/`:
 
@@ -1392,10 +1458,10 @@ This makes your App's business logic **mathematically auditable**.
 | P0 | **v0.10 可用 (REACHED 2026-08-02)** | 数学符号（⊕ ⊗ ⊖ ⊘ ⊙ ≡ ≥ ≤ ∈）、基本操作（`index()`/`I₂`、矩阵运算）、常量包（§C `0xK0xx`/`0xQ0xx`，Opaque 不可遮蔽）三端求值器全部实现；`sigma-prove` PROVED (unsat)、`sigma-moonbit` 生成 `.mbtp`；consensus 35/35、p0 95/95、0 warning |
 | P0 | **v0.11 可用 (REACHED 2026-08-02)** | 包管理器 `tools/sigma-cli.py`（install/verify/list/search/fingerprint + `~/.sigma/registry.json` + Iron Law VII 无环依赖）；标准库 3 包 `std/math.base.md` / `std/data.transform.md` / `std/ai.confidence.md`（各 1 规范 + 1 验证器测试集 `corpus/std_*_ok.md`，三端共识覆盖）；v0.10 不回归；consensus 38/38、p0 95/95、0 warning |
 | P0 | **AI Implementation Guide (REACHED 2026-08-02)** | ✅ `## Implementation Checklist (for AI)` in all 4 spec modules (§T/§E/§C/§I) |
-| P0 | **Minimal reference impl (REACHED 2026-08-02)** | ✅ `impl/python/sigma_core.py` — stdlib-only core, self-check 60/60 |
+| P0 | **Minimal reference impl (REACHED 2026-08-02)** | ✅ `impl/python/sigma_core.py` — stdlib-only core, self-check 61/61 |
 | P1 | Package manager CLI | ✅ v0.11: `tools/sigma-cli.py` (REACHED 2026-08-02) |
 | P1 | 3 standard packages | ✅ v0.11: `std/math.base.md` + tests (REACHED 2026-08-02) |
-| P2 | AI bootstrapping test | ✅ **REACHED 2026-08-02**: `tools/sigma-bootstrap.py` — one clean run closes the loop spec→impl→verify→pass (4 specs carry `## Implementation Checklist (for AI)`, `sigma_core.py` 60/60, `verify_p0.py` 95/95) |
+| P2 | AI bootstrapping test | ✅ **REACHED 2026-08-02**: `tools/sigma-bootstrap.py` — one clean run closes the loop spec→impl→verify→pass (4 specs carry `## Implementation Checklist (for AI)`, `sigma_core.py` 61/61, `verify_p0.py` 95/95) |
 | P2 | **v0.12 Novel Spec Test (REACHED 2026-08-02)** | ✅ `corpus/novel_gene_ok.md`（DNA 对齐语义, §5.2）— consensus 39/39 三端一致 + AI 闭环 |
 | P3 | **v0.13 SocketKit integration (REACHED 2026-08-02)** | ✅ `spec/spec_p0_socketkit.md` + `corpus/socketkit_ok.md`（§6.2）— consensus 40/40 三端一致 |
 | P3 | **v0.14 SocketKit Runtime (REACHED 2026-08-03)** | ✅ §SK 参考实现（`sigma_core.py` 75/75）+ 审计运行时（`tools/sigma-runtime.py`，obligation 日志 10/10）+ `sigma-prove` §SK 六定律 PROVED (unsat) + 负例 `corpus/socketkit_break.md`（consensus 41/41）+ §SK 进 `verify_p0.py`（109/109） |
@@ -1404,7 +1470,7 @@ This makes your App's business logic **mathematically auditable**.
 | P3 | **v0.17 §SK 对齐真实业务 (REACHED 2026-08-03)** | ✅ Task 4 元组 + 4 态状态机；新增 accept_task/task_submit/task_accept/credit_score；review_merge 修正为增长期定位；三端执行层同步（sigma_core 91/91、三端 §SK 32/32、socketkit_ok 24/24）；sigma-prove 18 项义务 PROVED；sigma-runtime 23/23；consensus 41/41、p0 109/109、0 warning |
 | P3 | **v0.18 状态机不变量证明 (REACHED 2026-08-03)** | ✅ task_accept 作者授权（⊥ AuthError）+ §SK.3.8 不变量（INV-1 状态单调/INV-2 终态不可变/INV-3 守恒/INV-4 授权）；三端执行层同步（sigma_core 92/92、三端 §SK 33/33、socketkit_ok 25/25）；sigma-prove 23 项义务全 PROVED；sigma-runtime 31/31；consensus 41/41、p0 109/109、0 warning |
 | P2 | **v0.19 第二个自举新域（金融 portfolio）(REACHED 2026-08-03)** | ✅ `spec/spec_p0_portfolio.md`（§PF 5 操作）+ `corpus/portfolio_ok.md`（19/19 三端一致）+ `portfolio_break.md`（E-02 FAIL）；三端 eval_expr 支持新域真实调用（sigma_core 111/111、0 warning）；sigma-prove 10 项 §PF 义务全 PROVED（共 33 项）；sigma-runtime 45/45；consensus 43/43、p0 109/109 |
-| P3 | **v0.20 找茬五大制度补齐 (REACHED 2026-08-03)** | ✅ SK.3.9 额度制（quota_new/use/reset）+ SK.3.10 积分制（points_hold/release/withdraw）+ SK.3.11 勋章制（badge_level）；三端执行层同步（sigma_core 130/130、三端 §SK 56/56、socketkit_ok 50/50）；sigma-prove 8 项三制度义务全 PROVED（共 41 项）；sigma-runtime 60/60；consensus 43/43、p0 109/109、0 warning |
+| P3 | **v0.20 找茬五大制度补齐 (REACHED 2026-08-03)** | ✅ SK.3.9 额度制（quota_new/use/reset）+ SK.3.10 积分制（points_hold/release/withdraw）+ SK.3.11 勋章制（badge_level）；三端执行层同步（sigma_core 130/130、三端 §SK 56/56、socketkit_ok 50/50）；sigma-prove 8 项三制度义务全 PROVED（共 41 项）；sigma-runtime 61/61；consensus 43/43、p0 109/109、0 warning |
 | P3 | **v0.21 找茬 MVP 全链路审计剧本 (REACHED 2026-08-03)** | ✅ spec §SK.6 MVP 业务剧本（12 步端到端场景）+ `sigma-runtime --story`（run_mvp_story 一次跑通完整业务故事线，18/18 义务满足）——App 开工「验收剧本」；consensus 43/43、p0 109/109、三端 0 warning、v0.10–v0.20 不回归 |
 | P3 | **v0.22 找茬 MVP 参考实现 (REACHED 2026-08-03)** | ✅ `impl/python/sigma_app.py`（MVPApp 业务方法全部委托 sigma_core §SK + stdlib HTTP `--serve` API）；自检跑通 §SK.6 剧本 15/15，与 `sigma-runtime --story` 步骤一一对应；consensus 43/43、p0 109/109、三端 0 warning、v0.10–v0.21 不回归 |
 | P3 | **v0.23 MVP 端到端 HTTP 冒烟测试 (REACHED 2026-08-03)** | ✅ `sigma_app.py` 增 `/quota` 端点 + `--smoke`（HTTP 七步全链路 /quota→/post→/claim→/submit→/accept→/withdraw→/badge，13/13 通过）——参考实现 HTTP 服务可用性被可重复冒烟固化；consensus 43/43、p0 109/109、三端 0 warning、v0.10–v0.22 不回归 |

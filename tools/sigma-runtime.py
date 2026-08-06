@@ -925,6 +925,14 @@ def run_invariant_checks(core):
          "ok": pf5b[0] == 100 and pf5b[1] == 0, "note": f"pf={pf5b}"},
     ])
 
+    # §SK 赏金-积分联动 (v0.185, INV-SK-8)
+    p8 = core.points_hold(core.points_new(), 100)
+    p8b = core.points_release(p8, 100)
+    record("INV-SK-8", "invariant", ["hold(100)→release(100)"], p8b, [
+        {"law": "赏金-积分联动 — release 后 escrow−100 且 available+100",
+         "ok": p8b[0] == 0 and p8b[1] == 100, "note": f"points={p8b}"},
+    ])
+
     return events
 
 
