@@ -2228,6 +2228,21 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ INVC.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_credit_story do
+    checks = [
+      # §SK 信用链 (v0.210) — 契分制: base 100 + 每次完成 +5（与 --credit-test / INV-SK-7 对应）
+      {"credit_base", credit_score([]) == 100},
+      {"credit_complete", credit_score([[0, 1]]) == 105},
+      {"credit_two_complete", credit_score([[0, 1], [0, 1]]) == 110},
+      {"credit_breach", credit_score([[1, 1]]) == 70},
+      {"credit_badge", badge_level(credit_score([[0, 1]])) == 1}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ CRED.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2278,6 +2293,11 @@ case System.argv() do
   ["--sk-invchain" | _] ->
     {passed, total} = SigmaVerify.sk_inventory_chain_story()
     IO.puts("sigma_core inventory chain story (库存链): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-credit" | _] ->
+    {passed, total} = SigmaVerify.sk_credit_story()
+    IO.puts("sigma_core credit story (信用链): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->
