@@ -443,7 +443,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "gates": {
                         "consensus": "56/56",
                         "p0": "109/109",
-                        "prove": "274 PROVED",
+                        "prove": "278 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -473,7 +473,7 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <div class="card"><h3>门禁摘要</h3><table>
 <tr><td>consensus</td><td>56/56</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>274 PROVED</td></tr>
+<tr><td>prove</td><td>278 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/audit":
@@ -1393,7 +1393,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "56/56" in html and "274 PROVED" in html, "")
+        check("PANEL gates", "56/56" in html and "278 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -2314,6 +2314,50 @@ def run_accept_points_credit_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_dual_asset_test() -> Tuple[int, int]:
+    """--dual-asset-test (v0.347): dual-asset mixed trade chain valuation
+    conservation over HTTP — buy asset0 q1 → buy asset1 q2 → sell asset0 q3 →
+    sell asset1 q4 leaves valuation cash+qA+qB = initial cash (conserved) with
+    qA, qB, cash ≥ 0, matching INV-PF-10 valuation conservation semantics."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        j0 = call("/portfolio_new?cash=100")
+        pf = j0["portfolio"]
+        pf = call(f"/portfolio_buy?pf={quote(json.dumps(pf))}&asset=0&qty=30")["portfolio"]
+        pf = call(f"/portfolio_buy?pf={quote(json.dumps(pf))}&asset=1&qty=20")["portfolio"]
+        pf = call(f"/portfolio_sell?pf={quote(json.dumps(pf))}&asset=0&qty=10")["portfolio"]
+        pf = call(f"/portfolio_sell?pf={quote(json.dumps(pf))}&asset=1&qty=5")["portfolio"]
+        v = call(f"/portfolio_value?pf={quote(json.dumps(pf))}")["value"]
+        check("DA value conserved", v == 100, f"got {pf} v={v}")
+        check("DA cash nonneg", pf[0] >= 0, f"got {pf}")
+        check("DA qA nonneg", pf[1] >= 0, f"got {pf}")
+        check("DA qB nonneg", pf[2] >= 0, f"got {pf}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
 def run_concurrency_test() -> Tuple[int, int]:
     """--concurrency-test (v0.103): concurrent requests keep the state
     consistent — parallel clients (register / quota / post / tasks mix) all
@@ -2970,6 +3014,10 @@ def main(argv=None):
     if "--accept-points-credit-test" in argv:
         passed, total = run_accept_points_credit_test()
         print(f"sigma_app accept points credit test (v0.337): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--dual-asset-test" in argv:
+        passed, total = run_dual_asset_test()
+        print(f"sigma_app dual asset test (v0.347): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()

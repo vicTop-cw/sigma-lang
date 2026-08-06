@@ -2461,6 +2461,31 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ APC.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_dual_asset_story do
+    # §PF 双资产混合交易链估值守恒 (v0.350) — buy asset0 q1 → buy asset1 q2 →
+    # sell asset0 q3 → sell asset1 q4，链后估值 cash+qA+qB 守恒且 cash/qA/qB
+    # ≥ 0（与 --dual-asset-test / INV-PF-10 对应）
+    {:ok, pf0} = portfolio_new(100)
+    {:ok, pf1} = buy(pf0, 0, 30)
+    {:ok, pf2} = buy(pf1, 1, 20)
+    {:ok, pf3} = sell(pf2, 0, 10)
+    {:ok, pf4} = sell(pf3, 1, 5)
+    {:ok, v} = portfolio_value(pf4)
+    cash = Enum.at(pf4, 0)
+    qa = Enum.at(pf4, 1)
+    qb = Enum.at(pf4, 2)
+    checks = [
+      {"da_value_conserved", v == 100},
+      {"da_cash_nonneg", cash >= 0},
+      {"da_qa_nonneg", qa >= 0},
+      {"da_qb_nonneg", qb >= 0}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ DA.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2581,6 +2606,11 @@ case System.argv() do
   ["--sk-apc" | _] ->
     {passed, total} = SigmaVerify.sk_accept_points_credit_story()
     IO.puts("sigma_core accept-points-credit story (验收-积分-契分三维联动): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-da" | _] ->
+    {passed, total} = SigmaVerify.sk_dual_asset_story()
+    IO.puts("sigma_core dual-asset story (双资产交易链估值守恒): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "274 PROVED", "scenario": "16/16"}})
+                          "prove": "278 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "274 PROVED");
+           && r["gates"]["prove"] == "278 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1120,6 +1120,26 @@ pub fn run_smoke() -> (usize, usize) {
     check!("HTTP /apc_chain credit",
            r15["credit"].as_i64().unwrap_or(0) >= 100 + 5);
     check!("HTTP /apc_chain contribution", r15["contribution"].as_i64().unwrap_or(0) >= 10);
+
+    // 33. 双资产混合交易链估值守恒对账 (v0.349) — buy(0,30)→buy(1,20)→
+    //     sell(0,10)→sell(1,5) 后估值 cash+qA+qB 守恒且 cash/qA/qB ≥ 0
+    //     （与 Python --dual-asset-test 对应，INV-PF-10 语义）
+    let mut pfd = http_get(port, "/portfolio_new?cash=100")["portfolio"].clone();
+    pfd = http_get(port, &format!("/portfolio_buy?pf={}&asset=0&qty=30",
+        serde_json::to_string(&pfd).unwrap_or_default()))["portfolio"].clone();
+    pfd = http_get(port, &format!("/portfolio_buy?pf={}&asset=1&qty=20",
+        serde_json::to_string(&pfd).unwrap_or_default()))["portfolio"].clone();
+    pfd = http_get(port, &format!("/portfolio_sell?pf={}&asset=0&qty=10",
+        serde_json::to_string(&pfd).unwrap_or_default()))["portfolio"].clone();
+    pfd = http_get(port, &format!("/portfolio_sell?pf={}&asset=1&qty=5",
+        serde_json::to_string(&pfd).unwrap_or_default()))["portfolio"].clone();
+    let vd = http_get(port, &format!("/portfolio_value?pf={}",
+        serde_json::to_string(&pfd).unwrap_or_default()))["value"].as_i64().unwrap_or(0);
+    let cd = pfd[0].as_i64().unwrap_or(-1);
+    let qa = pfd[1].as_i64().unwrap_or(-1);
+    let qb = pfd[2].as_i64().unwrap_or(-1);
+    check!("HTTP /da_chain value", vd == 100);
+    check!("HTTP /da_chain nonneg", cd >= 0 && qa >= 0 && qb >= 0);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

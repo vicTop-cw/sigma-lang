@@ -269,6 +269,14 @@
     </div>
   </section>
 
+  <section id="da-panel">
+    <h2>双资产交易链演示（v0.348，估值守恒）</h2>
+    <div class="row">
+      <button onclick="daChain()">跑交易链</button>
+      <span id="da-out" class="muted"></span>
+    </div>
+  </section>
+
   <section id="pf-panel">
     <h2>金融市场（§PF，v0.148）</h2>
     <div class="row">
@@ -745,6 +753,19 @@ async function apcChain() {
   const j1 = await api("/accept?task=0&caller=7", "apc_accept");
   document.getElementById("apc-out").textContent =
     `验收后: 积分 ${j1.points[0]}托管/${j1.points[1]}可用（释放 100）· 契分 ${j1.credit}（100+5×1）· 贡献分 ${j1.contribution}（10×1）`;
+}
+
+// v0.348 — 双资产混合交易链估值守恒演示（与 --dual-asset-test / INV-PF-10 语义对应）
+async function daChain() {
+  const j0 = await api("/portfolio_new?cash=100", "da_new");
+  let pf = j0.portfolio;
+  pf = (await api(`/portfolio_buy?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=0&qty=30`, "da_buy0")).portfolio;
+  pf = (await api(`/portfolio_buy?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=1&qty=20`, "da_buy1")).portfolio;
+  pf = (await api(`/portfolio_sell?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=0&qty=10`, "da_sell0")).portfolio;
+  pf = (await api(`/portfolio_sell?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=1&qty=5`, "da_sell1")).portfolio;
+  const jv = await api(`/portfolio_value?pf=${encodeURIComponent(JSON.stringify(pf))}`, "da_value");
+  document.getElementById("da-out").textContent =
+    `估值 ${jv.value}（总额守恒）· 组合 ${JSON.stringify(pf)}（cash/qA/qB ≥ 0）`;
 }
 
 // v0.148 — 金融市场（§PF）

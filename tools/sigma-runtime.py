@@ -1053,6 +1053,18 @@ def run_invariant_checks(core):
          "ok": p15 == [0, 100] and c15 == 110 and v15 == 20, "note": f"p={p15} c={c15} v={v15}"},
     ])
 
+    # §PF 双资产混合交易链估值守恒 (v0.345, INV-PF-10)
+    pf10 = core.buy(core.portfolio_new(100), 0, 30)
+    pf10b = core.buy(pf10, 1, 20)
+    pf10c = core.sell(pf10b, 0, 10)
+    pf10d = core.sell(pf10c, 1, 5)
+    v10 = core.portfolio_value(pf10d)
+    record("INV-PF-10", "invariant", ["buy(0,30)→buy(1,20)→sell(0,10)→sell(1,5)"], pf10d, [
+        {"law": "双资产混合交易链估值守恒 — 链后估值 cash+qA+qB=100（总额守恒）且 qA、qB、cash ≥ 0",
+         "ok": v10 == 100 and pf10d[0] >= 0 and pf10d[1] >= 0 and pf10d[2] >= 0,
+         "note": f"pf={pf10d} v={v10}"},
+    ])
+
     return events
 
 
