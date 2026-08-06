@@ -85,6 +85,10 @@ jobs:
       - name: ΣLang inventory-flow reconciliation (v0.271)
         run: python3 impl/python/sigma_app.py --inventory-flow-test
 
+      # v0.281 — 组合流转对账进 CI（Python /portfolio-flow-test）
+      - name: ΣLang portfolio-flow reconciliation (v0.281)
+        run: python3 impl/python/sigma_app.py --portfolio-flow-test
+
       # v0.56 — 九道门禁一键验收：consensus / p0 / 三端自检与编译 / 三域审计 /
       # 证明消解 / 找茬冒烟，一条命令在 CI 上全绿才算通过。
       # v0.87 — --report 输出全量回归报告（JSON），作为 CI artifact 保存。

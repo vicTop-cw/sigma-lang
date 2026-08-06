@@ -443,7 +443,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "gates": {
                         "consensus": "56/56",
                         "p0": "109/109",
-                        "prove": "246 PROVED",
+                        "prove": "250 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -473,7 +473,7 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <div class="card"><h3>门禁摘要</h3><table>
 <tr><td>consensus</td><td>56/56</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>246 PROVED</td></tr>
+<tr><td>prove</td><td>250 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/audit":
@@ -1393,7 +1393,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "56/56" in html and "246 PROVED" in html, "")
+        check("PANEL gates", "56/56" in html and "250 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -2015,6 +2015,48 @@ def run_inventory_flow_test() -> Tuple[int, int]:
         check("INVFLOW ship1", r["inventory"] == [6, 12], f"got {r}")
         r = call("/stock_level?inv=[6,12]&item=1")
         check("INVFLOW level", r["level"] == 12, f"got {r}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
+def run_portfolio_flow_test() -> Tuple[int, int]:
+    """--portfolio-flow-test (v0.277): portfolio-flow chain over HTTP — open →
+    buy both assets → sell → value/risk, covering the §PF mixed-asset lifecycle
+    matching INV-PF-8 mixed-asset-chain semantics."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        r = call("/portfolio_new?cash=100")
+        check("PFFLOW open", r["portfolio"] == [100, 0, 0], f"got {r}")
+        r = call("/portfolio_buy?pf=[100,0,0]&asset=0&qty=20")
+        check("PFFLOW buy0", r["portfolio"] == [80, 20, 0], f"got {r}")
+        r = call("/portfolio_buy?pf=[80,20,0]&asset=1&qty=10")
+        check("PFFLOW buy1", r["portfolio"] == [70, 20, 10], f"got {r}")
+        r = call("/portfolio_sell?pf=[70,20,10]&asset=1&qty=5")
+        check("PFFLOW sell", r["portfolio"] == [75, 20, 5], f"got {r}")
+        r = call("/portfolio_value?pf=[75,20,5]")
+        check("PFFLOW value", r["value"] == 100, f"got {r}")
     finally:
         server.shutdown()
         thread.join()
@@ -2649,6 +2691,10 @@ def main(argv=None):
     if "--inventory-flow-test" in argv:
         passed, total = run_inventory_flow_test()
         print(f"sigma_app inventory flow test (v0.267): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--portfolio-flow-test" in argv:
+        passed, total = run_portfolio_flow_test()
+        print(f"sigma_app portfolio flow test (v0.277): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()

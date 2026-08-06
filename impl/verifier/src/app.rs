@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "246 PROVED", "scenario": "16/16"}})
+                          "prove": "250 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "246 PROVED");
+           && r["gates"]["prove"] == "250 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1019,6 +1019,19 @@ pub fn run_smoke() -> (usize, usize) {
         serde_json::to_string(&inv).unwrap_or_default()));
     check!("HTTP /inventory_flow chain", inv == serde_json::json!([6, 12]));
     check!("HTTP /inventory_flow level", r["level"] == 12);
+
+    // 26. 组合流转对账 (v0.279) — 开户→买入双资产→卖出→估值（与 Python --portfolio-flow-test 对应）
+    let mut pf = http_get(port, "/portfolio_new?cash=100")["portfolio"].clone();
+    pf = http_get(port, &format!("/portfolio_buy?pf={}&asset=0&qty=20",
+        serde_json::to_string(&pf).unwrap_or_default()))["portfolio"].clone();
+    pf = http_get(port, &format!("/portfolio_buy?pf={}&asset=1&qty=10",
+        serde_json::to_string(&pf).unwrap_or_default()))["portfolio"].clone();
+    pf = http_get(port, &format!("/portfolio_sell?pf={}&asset=1&qty=5",
+        serde_json::to_string(&pf).unwrap_or_default()))["portfolio"].clone();
+    let r = http_get(port, &format!("/portfolio_value?pf={}",
+        serde_json::to_string(&pf).unwrap_or_default()));
+    check!("HTTP /portfolio_flow chain", pf == serde_json::json!([75, 20, 5]));
+    check!("HTTP /portfolio_flow value", r["value"] == 100);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

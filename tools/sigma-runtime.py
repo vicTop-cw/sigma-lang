@@ -994,6 +994,13 @@ def run_invariant_checks(core):
          "ok": inv8[0] == 6 and inv8[1] == 12 and inv8[1] >= 0, "note": f"inv={inv8}"},
     ])
 
+    # §PF 混合资产链完整性 (v0.275, INV-PF-8)
+    pf8 = core.buy(core.buy(core.portfolio_new(100), 0, 20), 1, 10)
+    record("INV-PF-8", "invariant", ["buy(0,20)→buy(1,10)"], pf8, [
+        {"law": "混合资产链完整性 — buy 双资产后 cash+qA+qB=100（总额守恒）",
+         "ok": pf8[0] + pf8[1] + pf8[2] == 100, "note": f"pf={pf8}"},
+    ])
+
     return events
 
 

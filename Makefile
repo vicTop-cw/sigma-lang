@@ -14,7 +14,7 @@
 
 PYTHON ?= python3
 
-.PHONY: accept check story prove rust elixir app stats portfolio inventory cross-domain errors points invchain credit full audit contribution quota badge invflow ready deploy all
+.PHONY: accept check story prove rust elixir app stats portfolio inventory cross-domain errors points invchain credit full audit contribution quota badge invflow pfflow ready deploy all
 
 accept: ## 九道门禁一键验收（CI 与本地同一条命令）
 	$(PYTHON) tools/sigma-accept.py
@@ -111,6 +111,11 @@ invflow: ## 库存流转对账（Python /inventory-flow-test + Rust 65/65 + Elix
 	$(PYTHON) impl/python/sigma_app.py --inventory-flow-test
 	cd impl/verifier && cargo run -q -- --app-smoke
 	cd impl/elixir_rt && elixir sigma_verify.exs --sk-invflow
+
+pfflow: ## 组合流转对账（Python /portfolio-flow-test + Rust 67/67 + Elixir 组合流转 5/5，v0.281）
+	$(PYTHON) impl/python/sigma_app.py --portfolio-flow-test
+	cd impl/verifier && cargo run -q -- --app-smoke
+	cd impl/elixir_rt && elixir sigma_verify.exs --sk-pfflow
 
 ready: ## 生产就绪检查（--launch-ready 一次性确认环境，v0.121）
 	$(PYTHON) impl/python/sigma_app.py --launch-ready

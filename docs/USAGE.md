@@ -150,8 +150,8 @@ python3 impl/python/sigma_app.py --deploy-accept   # 上线验收 9/9
 python3 impl/python/sigma_app.py --bench           # 性能基线
 python3 verify_consensus.py                        # 三端共识 56/56
 python3 verify_p0.py                               # 算法正确性 109/109
-python3 tools/sigma-prove.py                       # z3 证明 246 项 PROVED
-python3 tools/sigma-runtime.py --domains           # 三域审计 69/69
+python3 tools/sigma-prove.py                       # z3 证明 250 项 PROVED
+python3 tools/sigma-runtime.py --domains           # 三域审计 70/70
 python3 tools/sigma-accept.py                      # 十道门禁一键验收
 make deploy                                       # = ready + launch
 ```

@@ -2327,6 +2327,21 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ INVFLOW.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_portfolio_flow_story do
+    checks = [
+      # §PF 组合流转链 (v0.280) — 开户→买入双资产→卖出→估值（与 --portfolio-flow-test / INV-PF-8 对应）
+      {"pfflow_open", portfolio_new(100) == {:ok, [100, 0, 0]}},
+      {"pfflow_buy0", buy([100, 0, 0], 0, 20) == {:ok, [80, 20, 0]}},
+      {"pfflow_buy1", buy([80, 20, 0], 1, 10) == {:ok, [70, 20, 10]}},
+      {"pfflow_sell", sell([70, 20, 10], 1, 5) == {:ok, [75, 20, 5]}},
+      {"pfflow_value", portfolio_value([75, 20, 5]) == {:ok, 100}}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ PFFLOW.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2412,6 +2427,11 @@ case System.argv() do
   ["--sk-invflow" | _] ->
     {passed, total} = SigmaVerify.sk_inventory_flow_story()
     IO.puts("sigma_core inventory flow story (库存流转): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-pfflow" | _] ->
+    {passed, total} = SigmaVerify.sk_portfolio_flow_story()
+    IO.puts("sigma_core portfolio flow story (组合流转): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->
