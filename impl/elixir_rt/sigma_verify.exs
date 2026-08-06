@@ -2423,6 +2423,25 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ VR.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_stock_fillrate_story do
+    # §IN 库存-履约联动 (v0.330) — 入库 q1 后出库 q2（q2 ≤ 需求），
+    # stock_level ≥ 0 且履约率 ≤ 1（与 --stock-fillrate-test / INV-IN-9 对应）
+    {:ok, inv0} = inventory_new(10, 20)
+    {:ok, inv1} = receive_stock(inv0, 0, 5)
+    {:ok, inv2} = ship_stock(inv1, 0, 3)
+    {:ok, lvl} = stock_level(inv2, 0)
+    {:ok, fr} = fill_rate(3, 4)
+    checks = [
+      {"sf_stock_nonneg", lvl == 12 and lvl >= 0},
+      {"sf_fillrate_bounded", fr <= 1.0 and fr >= 0.0},
+      {"sf_stock_a_q1_q2", lvl == 10 + 5 - 3}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ SF.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2533,6 +2552,11 @@ case System.argv() do
   ["--sk-vr" | _] ->
     {passed, total} = SigmaVerify.sk_valuation_risk_story()
     IO.puts("sigma_core valuation-risk story (估值-风险联动): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-sf" | _] ->
+    {passed, total} = SigmaVerify.sk_stock_fillrate_story()
+    IO.puts("sigma_core stock-fillrate story (库存-履约联动): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

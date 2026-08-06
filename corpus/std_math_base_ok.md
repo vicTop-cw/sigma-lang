@@ -53,6 +53,8 @@ Fingerprint: 0xA030
 | [1] ⊖ [1,2] | ⊥ ShapeError |
 | [1,2,3,4] ⊖ [1,2,3] | ⊥ ShapeError |
 | [1,2,3,4,5] ⊖ [1,2,3,4] | ⊥ ShapeError |
+| [1,2,3,4,5,6] ⊖ [1,2,3,4,5] | ⊥ ShapeError |
+| [1,2,3,4,5,6] ⊖ [1,2,3,4,5,6,7] | ⊥ ShapeError |
 
 ## Operation: ⊘ (Div)
 
@@ -105,6 +107,8 @@ Fingerprint: 0xA032
 | [1,2,3,4] ⊙ [1,2,3] | ⊥ ShapeError |
 | [1,2,3,4,5] ⊙ [1,2,3,4] | ⊥ ShapeError |
 | [1] ⊙ [1,2] | ⊥ ShapeError |
+| [1,2,3,4,5,6] ⊙ [1,2,3,4,5] | ⊥ ShapeError |
+| [1,2,3,4,5,6] ⊙ [1,2,3,4,5,6,7] | ⊥ ShapeError |
 
 ## Operation: ≡ (Eq)
 

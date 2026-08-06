@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "266 PROVED", "scenario": "16/16"}})
+                          "prove": "270 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "266 PROVED");
+           && r["gates"]["prove"] == "270 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1090,6 +1090,17 @@ pub fn run_smoke() -> (usize, usize) {
     let cash9 = pf9[0].as_i64().unwrap_or(-1);
     check!("HTTP /vr_chain value", v9 == 100);
     check!("HTTP /vr_chain risk", v9 >= r9 && cash9 >= 0);
+
+    // 31. 库存-履约联动对账 (v0.329) — 入库 5 后出库 3，stock_level ≥ 0 且
+    //     履约率 ≤ 1（与 Python --stock-fillrate-test 对应，INV-IN-9 语义）
+    let _ = http_get(port, "/inventory_new?qty_a=10&qty_b=20");
+    let inv9 = http_get(port, "/receive_stock?inv=[10,20]&item=0&qty=5")["inventory"].clone();
+    let inv9b = http_get(port, &format!("/ship_stock?inv={}&item=0&qty=3",
+        serde_json::to_string(&inv9).unwrap_or_default()))["inventory"].clone();
+    let fr9 = http_get(port, "/fill_rate?shipped=3&demanded=4")["rate"].as_f64().unwrap_or(-1.0);
+    let stock9 = inv9b[0].as_i64().unwrap_or(-1);
+    check!("HTTP /sf_chain stock", stock9 == 12 && stock9 >= 0);
+    check!("HTTP /sf_chain fillrate", (0.0..=1.0).contains(&fr9));
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

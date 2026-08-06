@@ -253,6 +253,14 @@
     </div>
   </section>
 
+  <section id="sf-panel">
+    <h2>库存-履约联动演示（v0.328，供应链）</h2>
+    <div class="row">
+      <button onclick="sfChain()">跑联动</button>
+      <span id="sf-out" class="muted"></span>
+    </div>
+  </section>
+
   <section id="pf-panel">
     <h2>金融市场（§PF，v0.148）</h2>
     <div class="row">
@@ -706,6 +714,16 @@ async function vrChain() {
   const jr = await api(`/portfolio_risk?pf=${encodeURIComponent(JSON.stringify(pf))}`, "vr_risk");
   document.getElementById("vr-out").textContent =
     `估值 ${jv.value}（总额守恒）· 风险 ${jr.risk}（≤ 估值）· 组合 ${JSON.stringify(pf)}`;
+}
+
+// v0.328 — 库存-履约联动演示（与 --stock-fillrate-test / INV-IN-9 语义对应）
+async function sfChain() {
+  await api("/inventory_new?qty_a=10&qty_b=20", "sf_new");
+  let inv = (await api("/receive_stock?inv=[10,20]&item=0&qty=5", "sf_receive")).inventory;
+  inv = (await api(`/ship_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=0&qty=3`, "sf_ship")).inventory;
+  const jf = await api("/fill_rate?shipped=3&demanded=4", "sf_fillrate");
+  document.getElementById("sf-out").textContent =
+    `库存 ${inv[0]}（=10+5−3 ≥0）· 履约率 ${jf.rate}（≤ 1）· 库存 ${JSON.stringify(inv)}`;
 }
 
 // v0.148 — 金融市场（§PF）

@@ -1037,6 +1037,13 @@ def run_invariant_checks(core):
          "ok": v9 == 100 and v9 >= r9 and pf9c[0] >= 0, "note": f"pf={pf9c} v={v9} r={r9}"},
     ])
 
+    # §IN 库存-履约联动 (v0.325, INV-IN-9)
+    inv9 = core.ship_stock(core.receive_stock([10, 20], 0, 5), 0, 3)
+    record("INV-IN-9", "invariant", ["receive(0,5)→ship(0,3)"], inv9, [
+        {"law": "库存-履约联动 — 入库 5 后出库 3，stock_level=12 ≥0 且出库 3 ≤ 需求（履约率 ≤ 1）",
+         "ok": inv9[0] == 12 and inv9[0] >= 0, "note": f"inv={inv9}"},
+    ])
+
     return events
 
 

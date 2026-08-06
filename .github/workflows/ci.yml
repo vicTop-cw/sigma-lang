@@ -105,6 +105,10 @@ jobs:
       - name: ΣLang valuation-risk reconciliation (v0.321)
         run: python3 impl/python/sigma_app.py --valuation-risk-test
 
+      # v0.331 — 库存-履约联动对账进 CI（Python /stock-fillrate-test）
+      - name: ΣLang stock-fillrate reconciliation (v0.331)
+        run: python3 impl/python/sigma_app.py --stock-fillrate-test
+
       # v0.56 — 九道门禁一键验收：consensus / p0 / 三端自检与编译 / 三域审计 /
       # 证明消解 / 找茬冒烟，一条命令在 CI 上全绿才算通过。
       # v0.87 — --report 输出全量回归报告（JSON），作为 CI artifact 保存。
