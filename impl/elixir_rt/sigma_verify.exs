@@ -2299,6 +2299,20 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ QUOTA.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_badge_story do
+    checks = [
+      # §SK 勋章链 (v0.260) — 契分档位 → 勋章（与 --badge-test / INV-SK-11 对应）
+      {"badge_base", badge_level(100) == 1},
+      {"badge_one", badge_level(credit_score([[0, 1]])) == 1},
+      {"badge_120", badge_level(credit_score([[0, 1], [0, 1], [0, 1], [0, 1]])) == 1},
+      {"badge_high", badge_level(300) == 2}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ BADGE.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2374,6 +2388,11 @@ case System.argv() do
   ["--sk-quota" | _] ->
     {passed, total} = SigmaVerify.sk_quota_story()
     IO.puts("sigma_core quota story (额度链): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-badge" | _] ->
+    {passed, total} = SigmaVerify.sk_badge_story()
+    IO.puts("sigma_core badge story (勋章链): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

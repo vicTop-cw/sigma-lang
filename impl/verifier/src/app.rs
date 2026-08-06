@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "238 PROVED", "scenario": "16/16"}})
+                          "prove": "242 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "238 PROVED");
+           && r["gates"]["prove"] == "242 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -998,6 +998,16 @@ pub fn run_smoke() -> (usize, usize) {
     let _ = http_get(port, "/post?author=7&bounty=100");
     let r = http_get(port, "/quota?user=7&monthly=50");
     check!("HTTP /quota_flow reset", r["quota"] == serde_json::json!([50, 50]));
+
+    // 24. 勋章链对账 (v0.259) — 契分档位 → 勋章（与 Python --badge-test 对应）
+    let r = http_get(port, "/post?author=7&bounty=100");
+    let tid7 = r["task_id"].as_u64().unwrap_or(0);
+    let _ = http_get(port, &format!("/claim?task={tid7}&hunter=3"));
+    let _ = http_get(port, &format!("/submit?task={tid7}"));
+    let r = http_get(port, &format!("/accept?task={tid7}&caller=7"));
+    check!("HTTP /badge_chain accept", r["credit"].as_i64().unwrap_or(0) >= 100);
+    let r = http_get(port, "/badge?user=3");
+    check!("HTTP /badge_chain badge", r["badge"] == 1);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

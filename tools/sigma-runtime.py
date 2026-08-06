@@ -979,6 +979,14 @@ def run_invariant_checks(core):
          "ok": c10 == 110 and v10 == 20, "note": f"c={c10} v={v10}"},
     ])
 
+    # §SK 契分-勋章联动 (v0.255, INV-SK-11)
+    c11 = core.credit_score([[0, 1], [0, 1], [0, 1], [0, 1]])
+    b11 = core.badge_level(c11)
+    record("INV-SK-11", "invariant", ["credit×4→badge"], c11, [
+        {"law": "契分-勋章联动 — 契分=120（<300）时勋章=1",
+         "ok": c11 == 120 and b11 == 1, "note": f"c={c11} b={b11}"},
+    ])
+
     return events
 
 

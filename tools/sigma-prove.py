@@ -863,6 +863,15 @@ def gen_socketkit_invariants(ops):
              "(assert (= v2 (* 10 n)))\n"
              "; INV-SK-10 (v0.243): 契分-贡献联动 — 验收 n 后契分=100+5n 且贡献分=10n\n"
              "(assert (not (and (= c2 (+ 100 (* 5 n))) (= v2 (* 10 n)))))\n(check-sat)\n")
+    inv11 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+             "(declare-const n Int)\n"
+             "(declare-const c2 Int) (declare-const b2 Int)\n"
+             "(assert (>= n 0))\n"
+             "; 验收 n 次后契分 = 100+5n，勋章按档位（<300→1、≥300→2）\n"
+             "(assert (= c2 (+ 100 (* 5 n))))\n"
+             "(assert (= b2 (ite (< c2 300) 1 2)))\n"
+             "; INV-SK-11 (v0.253): 契分-勋章联动 — 契分档位与勋章等级联动\n"
+             "(assert (not (and (= c2 (+ 100 (* 5 n))) (= b2 (ite (< c2 300) 1 2)))))\n(check-sat)\n")
     return [("INV-SK-1 bounty-conserved", inv1),
             ("INV-SK-2 no-over-withdraw", inv2),
             ("INV-SK-3 nonnegative-chain", inv3),
@@ -872,7 +881,8 @@ def gen_socketkit_invariants(ops):
             ("INV-SK-7 task-credit-link", inv7),
             ("INV-SK-8 bounty-points-link", inv8),
             ("INV-SK-9 quota-credit-link", inv9),
-            ("INV-SK-10 credit-contribution-link", inv10)]
+            ("INV-SK-10 credit-contribution-link", inv10),
+            ("INV-SK-11 credit-badge-link", inv11)]
 
 
 def gen_quota_invariants(ops):
