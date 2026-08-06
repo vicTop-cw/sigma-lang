@@ -1044,6 +1044,15 @@ def run_invariant_checks(core):
          "ok": inv9[0] == 12 and inv9[0] >= 0, "note": f"inv={inv9}"},
     ])
 
+    # §SK 验收-积分-契分三维联动 (v0.335, INV-SK-15)
+    p15 = core.points_release(core.points_hold(core.points_new(), 100), 100)
+    c15 = core.credit_score([[0, 1], [0, 1]])
+    v15 = core.contribution_score([[3, 1, 10], [3, 1, 10]])
+    record("INV-SK-15", "invariant", ["hold(100)→release(100)×2 accept"], p15, [
+        {"law": "验收-积分-契分三维联动 — 验收后 escrow=0 且 available=100 且契分=110 且贡献分=20",
+         "ok": p15 == [0, 100] and c15 == 110 and v15 == 20, "note": f"p={p15} c={c15} v={v15}"},
+    ])
+
     return events
 
 

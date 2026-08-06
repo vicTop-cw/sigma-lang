@@ -2442,6 +2442,25 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ SF.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_accept_points_credit_story do
+    # §SK 验收-积分-契分三维联动 (v0.340) — 验收 n 次后 escrow 释放入
+    # available（n×b）且契分=100+5n、贡献分=10n（与 --accept-points-credit-test
+    # / INV-SK-15 对应）
+    {:ok, p0} = points_release(points_hold(points_new(), 100), 100)
+    c = credit_score([[0, 1]])
+    v = contribution_score([[3, 1, 10]])
+    checks = [
+      {"apc_escrow_zero", Enum.at(p0, 0) == 0},
+      {"apc_available_released", Enum.at(p0, 1) == 100},
+      {"apc_credit", c == 105},
+      {"apc_contribution", v == 10}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ APC.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2557,6 +2576,11 @@ case System.argv() do
   ["--sk-sf" | _] ->
     {passed, total} = SigmaVerify.sk_stock_fillrate_story()
     IO.puts("sigma_core stock-fillrate story (库存-履约联动): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-apc" | _] ->
+    {passed, total} = SigmaVerify.sk_accept_points_credit_story()
+    IO.puts("sigma_core accept-points-credit story (验收-积分-契分三维联动): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

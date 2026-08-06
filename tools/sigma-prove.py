@@ -950,6 +950,17 @@ def gen_socketkit_invariants(ops):
              "(assert (= (index p2 0) (* n b))) (assert (= (index p2 1) 0))\n"
              "; INV-SK-14 (v0.303): 任务-积分-配额三维联动 — 任务数=n 且 remaining=m−n ≥0 且 escrow=n×b\n"
              "(assert (not (and (= t2 n) (>= (index q2 1) 0) (= (index p2 0) (* n b)))))\n(check-sat)\n")
+    inv15 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+             "(declare-const n Int) (declare-const b Int)\n"
+             "(declare-const p2 Int) (declare-const c2 Int) (declare-const v2 Int)\n"
+             "(assert (>= n 0)) (assert (>= b 0))\n"
+             "; 验收 n 次（每次释放 escrow b 入 available + 契分 +5 + 贡献分 +10）: escrow=0、available=n×b\n"
+             "(assert (= (index p2 0) 0)) (assert (= (index p2 1) (* n b)))\n"
+             "(assert (= c2 (+ 100 (* 5 n))))\n"
+             "(assert (= v2 (* 10 n)))\n"
+             "; INV-SK-15 (v0.333): 验收-积分-契分三维联动 — escrow=0 且 available=n×b 且契分=100+5n 且贡献分=10n\n"
+             "(assert (not (and (= (index p2 0) 0) (= (index p2 1) (* n b))\n"
+             "                 (= c2 (+ 100 (* 5 n))) (= v2 (* 10 n)))))\n(check-sat)\n")
     return [("INV-SK-1 bounty-conserved", inv1),
             ("INV-SK-2 no-over-withdraw", inv2),
             ("INV-SK-3 nonnegative-chain", inv3),
@@ -963,7 +974,8 @@ def gen_socketkit_invariants(ops):
             ("INV-SK-11 credit-badge-link", inv11),
             ("INV-SK-12 credit-contribution-badge-link", inv12),
             ("INV-SK-13 points-quota-link", inv13),
-            ("INV-SK-14 task-points-quota-link", inv14)]
+            ("INV-SK-14 task-points-quota-link", inv14),
+            ("INV-SK-15 accept-points-credit-link", inv15)]
 
 
 def gen_quota_invariants(ops):

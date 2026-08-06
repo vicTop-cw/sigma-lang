@@ -109,6 +109,10 @@ jobs:
       - name: ΣLang stock-fillrate reconciliation (v0.331)
         run: python3 impl/python/sigma_app.py --stock-fillrate-test
 
+      # v0.341 — 验收-积分-契分三维联动对账进 CI（Python /accept-points-credit-test）
+      - name: ΣLang accept-points-credit reconciliation (v0.341)
+        run: python3 impl/python/sigma_app.py --accept-points-credit-test
+
       # v0.56 — 九道门禁一键验收：consensus / p0 / 三端自检与编译 / 三域审计 /
       # 证明消解 / 找茬冒烟，一条命令在 CI 上全绿才算通过。
       # v0.87 — --report 输出全量回归报告（JSON），作为 CI artifact 保存。

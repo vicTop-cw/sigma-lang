@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "270 PROVED", "scenario": "16/16"}})
+                          "prove": "274 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "270 PROVED");
+           && r["gates"]["prove"] == "274 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1101,6 +1101,25 @@ pub fn run_smoke() -> (usize, usize) {
     let stock9 = inv9b[0].as_i64().unwrap_or(-1);
     check!("HTTP /sf_chain stock", stock9 == 12 && stock9 >= 0);
     check!("HTTP /sf_chain fillrate", (0.0..=1.0).contains(&fr9));
+
+    // 32. 验收-积分-契分三维对账 (v0.339) — 验收后 escrow 释放入 available 且
+    //     契分/贡献分联动（与 Python --accept-points-credit-test 对应，INV-SK-15
+    //     语义；共享冒烟应用用 delta：post 托管 +100 后 accept 释放 100，
+    //     净 escrow 不变、available+100）
+    let escrow_before3 = http_get(port, "/stats")["platform_points"][0].as_i64().unwrap_or(0);
+    let avail_before3 = http_get(port, "/stats")["platform_points"][1].as_i64().unwrap_or(0);
+    let r15p = http_get(port, "/post?author=7&bounty=100");
+    let tid15 = r15p["task_id"].as_u64().unwrap_or(0);
+    let _ = http_get(port, &format!("/claim?task={tid15}&hunter=3"));
+    let _ = http_get(port, &format!("/submit?task={tid15}"));
+    let r15 = http_get(port, &format!("/accept?task={tid15}&caller=7"));
+    let p15 = r15["points"].clone();
+    check!("HTTP /apc_chain points",
+           p15[0].as_i64().unwrap_or(-1) == escrow_before3
+           && p15[1].as_i64().unwrap_or(-1) == avail_before3 + 100);
+    check!("HTTP /apc_chain credit",
+           r15["credit"].as_i64().unwrap_or(0) >= 100 + 5);
+    check!("HTTP /apc_chain contribution", r15["contribution"].as_i64().unwrap_or(0) >= 10);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");
