@@ -2506,6 +2506,24 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ RSF.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_withdraw_credit_story do
+    # §SK 提现-契分联动 (v0.370) — 验收 n 次（escrow 全释放入 available=n×b）
+    # 后提现 w（w ≤ available），available=n×b−w ≥ 0 且 escrow=0 且契分=100+5n
+    # （与 --withdraw-credit-test / INV-SK-16 对应）
+    {:ok, p1} = points_release(points_hold(points_new(), 100), 100)
+    {:ok, p0} = points_withdraw(p1, 40)
+    c = credit_score([[0, 1]])
+    checks = [
+      {"wc_available_nonneg", Enum.at(p0, 1) == 60 and Enum.at(p0, 1) >= 0},
+      {"wc_escrow_zero", Enum.at(p0, 0) == 0},
+      {"wc_credit", c == 105}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ WC.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2636,6 +2654,11 @@ case System.argv() do
   ["--sk-rsf" | _] ->
     {passed, total} = SigmaVerify.sk_receive_ship_fillrate_story()
     IO.puts("sigma_core receive-ship-fillrate story (入库-出库-水位-履约四链联动): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-wc" | _] ->
+    {passed, total} = SigmaVerify.sk_withdraw_credit_story()
+    IO.puts("sigma_core withdraw-credit story (提现-契分联动): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

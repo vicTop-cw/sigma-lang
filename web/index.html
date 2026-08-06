@@ -285,6 +285,14 @@
     </div>
   </section>
 
+  <section id="wc-panel">
+    <h2>提现-契分联动演示（v0.368）</h2>
+    <div class="row">
+      <button onclick="wcChain()">跑联动</button>
+      <span id="wc-out" class="muted"></span>
+    </div>
+  </section>
+
   <section id="pf-panel">
     <h2>金融市场（§PF，v0.148）</h2>
     <div class="row">
@@ -784,6 +792,21 @@ async function rsfChain() {
   const jf = await api("/fill_rate?shipped=3&demanded=5", "rsf_fillrate");
   document.getElementById("rsf-out").textContent =
     `库存 ${inv[0]}（=10+5−3 ≥0）· 履约率 ${jf.rate}（3/5 ≤ 1）· 库存 ${JSON.stringify(inv)}`;
+}
+
+// v0.368 — 提现-契分联动演示（与 --withdraw-credit-test / INV-SK-16 语义对应）
+async function wcChain() {
+  await api(`/register?user=7&name=${encodeURIComponent("找茬主")}`, "wc_reg_a");
+  await api(`/register?user=3&name=${encodeURIComponent("找茬人")}`, "wc_reg_b");
+  await api("/quota?user=7&monthly=50", "wc_quota");
+  await api("/post?author=7&bounty=100", "wc_post");
+  await api("/claim?task=0&hunter=3", "wc_claim");
+  await api("/submit?task=0", "wc_submit");
+  await api("/accept?task=0&caller=7", "wc_accept");
+  const jw = await api("/withdraw?user=3&amount=40", "wc_withdraw");
+  const jc = await api("/badge?user=3", "wc_badge");
+  document.getElementById("wc-out").textContent =
+    `提现后: 积分 ${jw.points[0]}托管/${jw.points[1]}可用（100−40 ≥0）· 契分 ${jc.credit}（100+5×1）`;
 }
 
 // v0.148 — 金融市场（§PF）

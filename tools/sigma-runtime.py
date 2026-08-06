@@ -1072,6 +1072,14 @@ def run_invariant_checks(core):
          "ok": inv10[0] == 12 and inv10[0] >= 0 and 3 <= 5, "note": f"inv={inv10}"},
     ])
 
+    # §SK 提现-契分联动 (v0.365, INV-SK-16)
+    p16 = core.points_withdraw(core.points_release(core.points_hold(core.points_new(), 100), 100), 40)
+    c16 = core.credit_score([[0, 1]])
+    record("INV-SK-16", "invariant", ["hold(100)→release(100)→withdraw(40)"], p16, [
+        {"law": "提现-契分联动 — 提现 40 后 available=60 ≥0 且 escrow=0 且契分=105",
+         "ok": p16 == [0, 60] and c16 == 105, "note": f"p={p16} c={c16}"},
+    ])
+
     return events
 
 

@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "282 PROVED", "scenario": "16/16"}})
+                          "prove": "286 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "282 PROVED");
+           && r["gates"]["prove"] == "286 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1152,6 +1152,27 @@ pub fn run_smoke() -> (usize, usize) {
     let stock10 = inv10b[0].as_i64().unwrap_or(-1);
     check!("HTTP /rsf_chain stock", stock10 == 12 && stock10 >= 0);
     check!("HTTP /rsf_chain fillrate", (0.0..=1.0).contains(&fr10));
+
+    // 35. 提现-契分联动对账 (v0.369) — 验收后提现 w：available 增加
+    //     n×b−w、escrow 净不变（post +100 后 accept −100）、契分联动
+    //     （与 Python --withdraw-credit-test 对应，INV-SK-16 语义）
+    let escrow_before4 = http_get(port, "/stats")["platform_points"][0].as_i64().unwrap_or(0);
+    let avail_before4 = http_get(port, "/stats")["platform_points"][1].as_i64().unwrap_or(0);
+    let _ = http_get(port, "/post?author=7&bounty=100");
+    let tid16 = http_get(port, "/tasks")["tasks"].as_array()
+        .and_then(|a| a.last())
+        .map(|t| t["task_id"].as_u64().unwrap_or(0)).unwrap_or(0);
+    let _ = http_get(port, &format!("/claim?task={tid16}&hunter=3"));
+    let _ = http_get(port, &format!("/submit?task={tid16}"));
+    let _ = http_get(port, &format!("/accept?task={tid16}&caller=7"));
+    let w16 = http_get(port, "/withdraw?user=3&amount=40");
+    let p16 = w16["points"].clone();
+    let c16 = http_get(port, "/badge?user=3")["credit"].as_i64().unwrap_or(0);
+    check!("HTTP /wc_chain available",
+           p16[1].as_i64().unwrap_or(-1) == avail_before4 + 60
+           && p16[1].as_i64().unwrap_or(-1) >= 0);
+    check!("HTTP /wc_chain escrow", p16[0].as_i64().unwrap_or(-1) == escrow_before4);
+    check!("HTTP /wc_chain credit", c16 >= 100 + 5);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");
