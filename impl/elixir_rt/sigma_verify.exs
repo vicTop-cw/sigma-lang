@@ -2243,6 +2243,22 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ CRED.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_full_story do
+    checks = [
+      # §SK 全流程 (v0.220) — 发单→接单→提交→验收→勋章→提现（与 --full-test 对应）
+      {"full_post", task_create(7, 100) == {:ok, [7, 100, 0, 0]}},
+      {"full_claim", accept_task([7, 100, 0, 0], 3) == {:ok, [7, 100, 1, 3]}},
+      {"full_submit", task_submit([7, 100, 1, 3]) == {:ok, [7, 100, 2, 3]}},
+      {"full_accept", task_accept([7, 100, 2, 3], 7) == {:ok, [7, 100, 3, 3]}},
+      {"full_withdraw", points_withdraw([0, 100], 100) == {:ok, [0, 0]}},
+      {"full_badge", badge_level(105) == 1}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ FULL.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2298,6 +2314,11 @@ case System.argv() do
   ["--sk-credit" | _] ->
     {passed, total} = SigmaVerify.sk_credit_story()
     IO.puts("sigma_core credit story (信用链): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-full" | _] ->
+    {passed, total} = SigmaVerify.sk_full_story()
+    IO.puts("sigma_core full story (全流程): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

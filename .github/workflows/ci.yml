@@ -61,6 +61,10 @@ jobs:
       - name: ΣLang credit reconciliation (v0.211)
         run: python3 impl/python/sigma_app.py --credit-test
 
+      # v0.221 — 全流程对账进 CI（Python /full-test）
+      - name: ΣLang full-flow reconciliation (v0.221)
+        run: python3 impl/python/sigma_app.py --full-test
+
       # v0.56 — 九道门禁一键验收：consensus / p0 / 三端自检与编译 / 三域审计 /
       # 证明消解 / 找茬冒烟，一条命令在 CI 上全绿才算通过。
       # v0.87 — --report 输出全量回归报告（JSON），作为 CI artifact 保存。

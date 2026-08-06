@@ -555,7 +555,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "222 PROVED", "scenario": "16/16"}})
+                          "prove": "226 PROVED", "scenario": "16/16"}})
         }
         "/stats" => {
             // v0.139 — 业务统计（与 Python v0.134 对等，JSON）
@@ -873,7 +873,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "222 PROVED");
+           && r["gates"]["prove"] == "226 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -939,6 +939,19 @@ pub fn run_smoke() -> (usize, usize) {
     check!("HTTP /credit_chain credit", r["credit"] == credit_before + 5);
     let r = http_get(port, "/badge?user=3");
     check!("HTTP /credit_chain badge", r["badge"] == 1);
+
+    // 20. 全流程对账 (v0.219) — register→quota→post→claim→submit→accept→badge→withdraw（与 Python --full-test 对应）
+    let r = http_get(port, "/post?author=7&bounty=100");
+    let tid4 = r["task_id"].as_u64().unwrap_or(0);
+    let _ = http_get(port, &format!("/claim?task={tid4}&hunter=3"));
+    let _ = http_get(port, &format!("/submit?task={tid4}"));
+    let r = http_get(port, &format!("/accept?task={tid4}&caller=7"));
+    check!("HTTP /full_flow accept", r["task"][2] == 3);
+    let r = http_get(port, "/badge?user=3");
+    check!("HTTP /full_flow badge", r["badge"] == 1);
+    let avail_before = http_get(port, "/stats")["platform_points"][1].as_i64().unwrap_or(0);
+    let r = http_get(port, "/withdraw?user=3&amount=100");
+    check!("HTTP /full_flow withdraw", r["points"][1] == avail_before - 100);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

@@ -821,6 +821,15 @@ def gen_socketkit_invariants(ops):
             "(assert (= (index p2 0) (- e b))) (assert (= (index p2 1) (+ a b)))\n"
             "; INV-SK-8 (v0.183): 赏金-积分联动 — 释放后 escrow−b 且 available+b（守恒）\n"
             "(assert (not (and (= (index p2 0) (- e b)) (= (index p2 1) (+ a b)))))\n(check-sat)\n")
+    inv9 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const m Int) (declare-const n Int)\n"
+            "(declare-const q2 Int) (declare-const c2 Int)\n"
+            "(assert (>= m 0)) (assert (>= n 0)) (assert (<= n m))\n"
+            "; 发单 n 次（每次扣 1 额度）+ 验收 n 次（每次契分 +5）: remaining=m−n, credit=100+5n\n"
+            "(assert (= (index q2 0) m)) (assert (= (index q2 1) (- m n)))\n"
+            "(assert (= c2 (+ 100 (* 5 n))))\n"
+            "; INV-SK-9 (v0.213): 额度-契分联动 — 发单 n 后 remaining=m−n ≥0 且契分=100+5n\n"
+            "(assert (not (and (>= (index q2 1) 0) (= c2 (+ 100 (* 5 n))))))\n(check-sat)\n")
     return [("INV-SK-1 bounty-conserved", inv1),
             ("INV-SK-2 no-over-withdraw", inv2),
             ("INV-SK-3 nonnegative-chain", inv3),
@@ -828,7 +837,8 @@ def gen_socketkit_invariants(ops):
             ("INV-SK-5 credit-nonnegative-chain", inv5),
             ("INV-SK-6 quota-escrow-link", inv6),
             ("INV-SK-7 task-credit-link", inv7),
-            ("INV-SK-8 bounty-points-link", inv8)]
+            ("INV-SK-8 bounty-points-link", inv8),
+            ("INV-SK-9 quota-credit-link", inv9)]
 
 
 def gen_quota_invariants(ops):

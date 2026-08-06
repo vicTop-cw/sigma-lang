@@ -948,6 +948,14 @@ def run_invariant_checks(core):
          "ok": pf6b[0] == 80 and pf6b[1] == 20, "note": f"pf={pf6b}"},
     ])
 
+    # §SK 额度-契分联动 (v0.215, INV-SK-9)
+    q9 = core.quota_use(core.quota_new(50), 1)
+    c9 = core.credit_score([[0, 1]])
+    record("INV-SK-9", "invariant", ["quota_use(1)→credit(105)"], c9, [
+        {"law": "额度-契分联动 — 发单扣额度 remaining≥0 且验收契分=100+5",
+         "ok": q9[1] >= 0 and c9 == 105, "note": f"q={q9} c={c9}"},
+    ])
+
     return events
 
 

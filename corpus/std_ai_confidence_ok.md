@@ -46,6 +46,8 @@ Fingerprint: 0xC020
 | 0 ⊕ 0 | 0 |
 | 0 ⊕ 1 | 1 |
 | [1] ⊕ [1,2] | ⊥ ShapeError |
+| [1,2] ⊕ [1] | ⊥ ShapeError |
+| [1,2,3] ⊕ [1,2] | ⊥ ShapeError |
 
 ## Operation: combine (Confidence Union)
 
@@ -72,3 +74,5 @@ Fingerprint: 0xC021
 | 0 ⊕ 0 | 0 |
 | 0 ⊕ 1 | 1 |
 | [1] ⊕ [1,2] | ⊥ ShapeError |
+| [1,2] ⊕ [1] | ⊥ ShapeError |
+| [1,2,3] ⊕ [1,2] | ⊥ ShapeError |
