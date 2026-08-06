@@ -2259,6 +2259,19 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ FULL.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_audit_story do
+    checks = [
+      # §SK 审计链 (v0.230) — 台账可追溯 + 契分链（与 --audit-test 可追溯语义对应）
+      {"audit_ledger", points_ledger([[0, 100, 1]]) == {:ok, [[1, 1, 100]]}},
+      {"audit_credit_chain", credit_score([[0, 1], [0, 1]]) == 110},
+      {"audit_badge", badge_level(credit_score([[0, 1], [0, 1]])) == 1}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ AUD.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2319,6 +2332,11 @@ case System.argv() do
   ["--sk-full" | _] ->
     {passed, total} = SigmaVerify.sk_full_story()
     IO.puts("sigma_core full story (全流程): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-audit" | _] ->
+    {passed, total} = SigmaVerify.sk_audit_story()
+    IO.puts("sigma_core audit story (审计链): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

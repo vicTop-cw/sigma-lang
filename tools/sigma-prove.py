@@ -653,12 +653,24 @@ def gen_inventory_invariants(ops):
             "(assert (= (index inv2 0) (- (index inv 0) q2))) (assert (= (index inv2 1) b))\n"
             "; INV-IN-6 (v0.193): 入库-出库联动 — receive 加 q1 后 ship q2，item0=a+q1−q2 且 ≥0\n"
             "(assert (not (and (= (index inv2 0) (- (+ a q1) q2)) (>= (index inv2 0) 0))))\n(check-sat)\n")
+    inv7 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const a Int) (declare-const b Int)\n"
+            "(declare-const q1 Int) (declare-const q2 Int)\n"
+            "(declare-const inv Int) (declare-const inv2 Int)\n"
+            "(assert (>= a 0)) (assert (>= b 0)) (assert (>= q1 0)) (assert (>= q2 0))\n"
+            "(assert (<= q2 b))\n"
+            "; receive item0 q1 后 ship item1 q2: item0 = a+q1, item1 = b−q2\n"
+            "(assert (= (index inv 0) (+ a q1))) (assert (= (index inv 1) b))\n"
+            "(assert (= (index inv2 0) (+ a q1))) (assert (= (index inv2 1) (- b q2)))\n"
+            "; INV-IN-7 (v0.223): 混合货品联动 — item0=a+q1 且 item1=b−q2 ≥0\n"
+            "(assert (not (and (= (index inv2 0) (+ a q1)) (= (index inv2 1) (- b q2)) (>= (index inv2 1) 0))))\n(check-sat)\n")
     return [("INV-IN-1 total-conserved", inv1),
             ("INV-IN-2 no-negative-chain", inv2),
             ("INV-IN-3 receive-additive-chain", inv3),
             ("INV-IN-4 no-oversell-chain", inv4),
             ("INV-IN-5 mixed-additive-chain", inv5),
-            ("INV-IN-6 receive-ship-link", inv6)]
+            ("INV-IN-6 receive-ship-link", inv6),
+            ("INV-IN-7 mixed-item-link", inv7)]
 
 
 def gen_portfolio_invariants(ops):

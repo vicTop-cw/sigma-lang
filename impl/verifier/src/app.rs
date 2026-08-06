@@ -48,6 +48,8 @@ impl MVPApp {
     pub fn open_quota(&mut self, user: i64, monthly: i64) -> Vec<i64> {
         let q = sk::quota_new(monthly).expect("monthly ≥ 0");
         self.quotas.insert(user, q.clone());
+        self.audit.push(serde_json::json!({"op": "quota_new",
+            "input": [user, monthly], "output": q.clone()}));
         q
     }
 
@@ -61,6 +63,8 @@ impl MVPApp {
         let tid = self.next_task;
         self.next_task += 1;
         self.tasks.insert(tid, task.clone());
+        self.audit.push(serde_json::json!({"op": "task_create",
+            "input": [author, bounty], "output": task.clone()}));
         (tid, task, quota, self.points.clone())
     }
 
@@ -68,6 +72,8 @@ impl MVPApp {
     pub fn claim_task(&mut self, task_id: u64, hunter: i64) -> Vec<i64> {
         let task = sk::accept_task(&self.tasks[&task_id], hunter).expect("task open");
         self.tasks.insert(task_id, task.clone());
+        self.audit.push(serde_json::json!({"op": "accept_task",
+            "input": [task_id, hunter], "output": task.clone()}));
         task
     }
 
@@ -75,6 +81,8 @@ impl MVPApp {
     pub fn submit_work(&mut self, task_id: u64) -> Vec<i64> {
         let task = sk::task_submit(&self.tasks[&task_id]).expect("task in_progress");
         self.tasks.insert(task_id, task.clone());
+        self.audit.push(serde_json::json!({"op": "task_submit",
+            "input": [task_id], "output": task.clone()}));
         task
     }
 
@@ -97,6 +105,8 @@ impl MVPApp {
     /// §SK.6.9 提现 — delegates `points_withdraw`.
     pub fn withdraw(&mut self, _user: i64, amount: i64) -> Vec<i64> {
         self.points = sk::points_withdraw(&self.points, amount).expect("available sufficient");
+        self.audit.push(serde_json::json!({"op": "points_withdraw",
+            "input": [_user, amount], "output": self.points.clone()}));
         self.points.clone()
     }
 
@@ -555,7 +565,14 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "226 PROVED", "scenario": "16/16"}})
+                          "prove": "230 PROVED", "scenario": "16/16"}})
+        }
+        "/audit" => {
+            // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
+            let events: Vec<serde_json::Value> = app.audit.iter().map(|e| {
+                serde_json::json!({"kind": e["op"], "input": e["input"], "output": e["output"]})
+            }).collect();
+            serde_json::json!({"events": events})
         }
         "/stats" => {
             // v0.139 — 业务统计（与 Python v0.134 对等，JSON）
@@ -873,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "226 PROVED");
+           && r["gates"]["prove"] == "230 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -952,6 +969,14 @@ pub fn run_smoke() -> (usize, usize) {
     let avail_before = http_get(port, "/stats")["platform_points"][1].as_i64().unwrap_or(0);
     let r = http_get(port, "/withdraw?user=3&amount=100");
     check!("HTTP /full_flow withdraw", r["points"][1] == avail_before - 100);
+
+    // 21. 审计对账 (v0.229) — 与 Python --audit-test 对应
+    let r = http_get(port, "/audit");
+    let evs = r["events"].as_array().map(|a| a.len()).unwrap_or(0);
+    check!("HTTP /audit trail", evs >= 6);
+    let has_task_create = r["events"].as_array().map(|a| a.iter().any(
+        |e| e["kind"] == "task_create")).unwrap_or(false);
+    check!("HTTP /audit task_create", has_task_create);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

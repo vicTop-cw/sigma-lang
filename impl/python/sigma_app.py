@@ -443,7 +443,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "gates": {
                         "consensus": "56/56",
                         "p0": "109/109",
-                        "prove": "226 PROVED",
+                        "prove": "230 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -473,9 +473,15 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <div class="card"><h3>门禁摘要</h3><table>
 <tr><td>consensus</td><td>56/56</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>226 PROVED</td></tr>
+<tr><td>prove</td><td>230 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
+            if path == "/audit":
+                # v0.227 — 审计轨迹（ΣLang audit trail，事件含 kind/input/output）
+                return self._json({"events": [
+                    {"kind": e["op"], "input": e["input"], "output": e["output"]}
+                    for e in app.audit
+                ]})
             if path == "/stats":
                 # v0.134 — 业务统计（JSON，程序可消费；/panel 是 HTML 版）
                 by_state = {0: 0, 1: 0, 2: 0, 3: 0}
@@ -1387,7 +1393,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "56/56" in html and "226 PROVED" in html, "")
+        check("PANEL gates", "56/56" in html and "230 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -1798,6 +1804,52 @@ def run_full_test() -> Tuple[int, int]:
         check("FULL withdraw", r["points"] == [0, 0], f"got {r}")
         r = call("/me?user=3")
         check("FULL me", r["credit"] == 105, f"got {r}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
+def run_audit_test() -> Tuple[int, int]:
+    """--audit-test (v0.227): audit-log flow over HTTP — every mutating action
+    appends to the audit trail, the trail reflects the full business chain
+    (register/quota/post/claim/submit/accept/withdraw)."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        call(f"/register?user=7&name={quote('找茬主')}")
+        call(f"/register?user=3&name={quote('找茬人')}")
+        call("/quota?user=7&monthly=50")
+        call("/post?author=7&bounty=100")
+        call("/claim?task=0&hunter=3")
+        call("/submit?task=0")
+        call("/accept?task=0&caller=7")
+        call("/withdraw?user=3&amount=100")
+        r = call("/audit")
+        kinds = [e.get("kind") for e in r.get("events", [])]
+        check("AUDIT trail", len(r.get("events", [])) >= 6, f"got {len(r.get('events', []))}")
+        for k in ("quota_new", "task_create", "accept_task", "task_accept",
+                  "points_withdraw"):
+            check(f"AUDIT {k}", k in kinds, f"got {kinds}")
     finally:
         server.shutdown()
         thread.join()
@@ -2412,6 +2464,10 @@ def main(argv=None):
     if "--full-test" in argv:
         passed, total = run_full_test()
         print(f"sigma_app full test (v0.217): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--audit-test" in argv:
+        passed, total = run_audit_test()
+        print(f"sigma_app audit test (v0.227): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()

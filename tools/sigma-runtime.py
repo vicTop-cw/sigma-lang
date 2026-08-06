@@ -956,6 +956,13 @@ def run_invariant_checks(core):
          "ok": q9[1] >= 0 and c9 == 105, "note": f"q={q9} c={c9}"},
     ])
 
+    # §IN 混合货品联动 (v0.225, INV-IN-7)
+    inv7 = core.ship_stock(core.receive_stock([10, 20], 0, 5), 1, 8)
+    record("INV-IN-7", "invariant", ["receive(0,5)→ship(1,8)"], inv7, [
+        {"law": "混合货品联动 — receive item0 5 后 ship item1 8，item0=15 且 item1=12 ≥0",
+         "ok": inv7[0] == 15 and inv7[1] == 12 and inv7[1] >= 0, "note": f"inv={inv7}"},
+    ])
+
     return events
 
 
