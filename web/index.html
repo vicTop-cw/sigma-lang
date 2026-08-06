@@ -301,6 +301,14 @@
     </div>
   </section>
 
+  <section id="di-panel">
+    <h2>双货品四链联动演示（v0.388，供应链）</h2>
+    <div class="row">
+      <button onclick="diChain()">跑四链</button>
+      <span id="di-out" class="muted"></span>
+    </div>
+  </section>
+
   <section id="pf-panel">
     <h2>金融市场（§PF，v0.148）</h2>
     <div class="row">
@@ -829,6 +837,19 @@ async function dvrChain() {
   const jr = await api(`/portfolio_risk?pf=${encodeURIComponent(JSON.stringify(pf))}`, "dvr_risk");
   document.getElementById("dvr-out").textContent =
     `估值 ${jv.value}（总额守恒）· 风险 ${jr.risk}（≤ 估值）· 组合 ${JSON.stringify(pf)}（cash/qA/qB ≥ 0）`;
+}
+
+// v0.388 — 双货品入库-出库-水位-履约四链联动演示（与 --dual-item-four-link-test / INV-IN-11 语义对应）
+async function diChain() {
+  await api("/inventory_new?qty_a=10&qty_b=20", "di_new");
+  let inv = (await api("/receive_stock?inv=[10,20]&item=0&qty=5", "di_receive0")).inventory;
+  inv = (await api(`/receive_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=1&qty=6`, "di_receive1")).inventory;
+  inv = (await api(`/ship_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=0&qty=3`, "di_ship0")).inventory;
+  inv = (await api(`/ship_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=1&qty=4`, "di_ship1")).inventory;
+  const jf0 = await api("/fill_rate?shipped=3&demanded=5", "di_fr0");
+  const jf1 = await api("/fill_rate?shipped=4&demanded=6", "di_fr1");
+  document.getElementById("di-out").textContent =
+    `库存 ${JSON.stringify(inv)}（item0=12 · item1=22 ≥0）· 履约率 ${jf0.rate}/${jf1.rate}（≤ 1）`;
 }
 
 // v0.148 — 金融市场（§PF）

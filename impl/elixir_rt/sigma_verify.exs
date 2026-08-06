@@ -2550,6 +2550,32 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ DVR.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_dual_item_four_link_story do
+    # §IN 双货品入库-出库-水位-履约四链联动 (v0.390) — receive item0 q1 →
+    # receive item1 q2 → ship item0 q3 → ship item1 q4（q3 ≤ q1、q4 ≤ q2），
+    # item0/item1 ≥ 0 且履约率 ≤ 1（与 --dual-item-four-link-test / INV-IN-11
+    # 对应）
+    {:ok, inv0} = inventory_new(10, 20)
+    {:ok, inv1} = receive_stock(inv0, 0, 5)
+    {:ok, inv2} = receive_stock(inv1, 1, 6)
+    {:ok, inv3} = ship_stock(inv2, 0, 3)
+    {:ok, inv4} = ship_stock(inv3, 1, 4)
+    it0 = Enum.at(inv4, 0)
+    it1 = Enum.at(inv4, 1)
+    {:ok, fr0} = fill_rate(3, 5)
+    {:ok, fr1} = fill_rate(4, 6)
+    checks = [
+      {"di_item0_nonneg", it0 == 12 and it0 >= 0},
+      {"di_item1_nonneg", it1 == 22 and it1 >= 0},
+      {"di_fillrate0_bounded", fr0 <= 1.0 and fr0 >= 0.0},
+      {"di_fillrate1_bounded", fr1 <= 1.0 and fr1 >= 0.0}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ DI.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2690,6 +2716,11 @@ case System.argv() do
   ["--sk-dvr" | _] ->
     {passed, total} = SigmaVerify.sk_dual_asset_vr_story()
     IO.puts("sigma_core dual-asset-vr story (双资产买卖-估值-风险四链联动): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-di" | _] ->
+    {passed, total} = SigmaVerify.sk_dual_item_four_link_story()
+    IO.puts("sigma_core dual-item-four-link story (双货品四链联动): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

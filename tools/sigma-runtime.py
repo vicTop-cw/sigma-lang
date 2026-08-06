@@ -1093,6 +1093,14 @@ def run_invariant_checks(core):
          "note": f"pf={pf11d} v={v11} r={r11}"},
     ])
 
+    # §IN 双货品入库-出库-水位-履约四链联动 (v0.385, INV-IN-11)
+    inv11 = core.ship_stock(core.ship_stock(core.receive_stock(core.receive_stock([10, 20], 0, 5), 1, 6), 0, 3), 1, 4)
+    record("INV-IN-11", "invariant", ["receive(0,5)→receive(1,6)→ship(0,3)→ship(1,4)"], inv11, [
+        {"law": "双货品四链联动 — item0=12（=10+5−3）≥0 且 item1=22（=20+6−4）≥0 且 3 ≤ 5、4 ≤ 6（履约率 ≤ 1）",
+         "ok": inv11[0] == 12 and inv11[1] == 22 and inv11[0] >= 0 and inv11[1] >= 0,
+         "note": f"inv={inv11}"},
+    ])
+
     return events
 
 

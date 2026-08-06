@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "290 PROVED", "scenario": "16/16"}})
+                          "prove": "294 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "290 PROVED");
+           && r["gates"]["prove"] == "294 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1195,6 +1195,24 @@ pub fn run_smoke() -> (usize, usize) {
     let qb2 = pfd2[2].as_i64().unwrap_or(-1);
     check!("HTTP /dvr_chain value", vd2 == 100);
     check!("HTTP /dvr_chain risk", vd2 >= rd2 && cd2 >= 0 && qa2 >= 0 && qb2 >= 0);
+
+    // 37. 双货品入库-出库-水位-履约四链联动对账 (v0.389) — receive(0,5)→
+    //     receive(1,6)→ship(0,3)→ship(1,4) 后 item0/item1 ≥ 0 且履约率 ≤ 1
+    //     （与 Python --dual-item-four-link-test 对应，INV-IN-11 语义）
+    let _ = http_get(port, "/inventory_new?qty_a=10&qty_b=20");
+    let inv11 = http_get(port, "/receive_stock?inv=[10,20]&item=0&qty=5")["inventory"].clone();
+    let inv11b = http_get(port, &format!("/receive_stock?inv={}&item=1&qty=6",
+        serde_json::to_string(&inv11).unwrap_or_default()))["inventory"].clone();
+    let inv11c = http_get(port, &format!("/ship_stock?inv={}&item=0&qty=3",
+        serde_json::to_string(&inv11b).unwrap_or_default()))["inventory"].clone();
+    let inv11d = http_get(port, &format!("/ship_stock?inv={}&item=1&qty=4",
+        serde_json::to_string(&inv11c).unwrap_or_default()))["inventory"].clone();
+    let fr0 = http_get(port, "/fill_rate?shipped=3&demanded=5")["rate"].as_f64().unwrap_or(-1.0);
+    let fr1 = http_get(port, "/fill_rate?shipped=4&demanded=6")["rate"].as_f64().unwrap_or(-1.0);
+    let it0 = inv11d[0].as_i64().unwrap_or(-1);
+    let it1 = inv11d[1].as_i64().unwrap_or(-1);
+    check!("HTTP /di_chain stock", it0 == 12 && it1 == 22 && it0 >= 0 && it1 >= 0);
+    check!("HTTP /di_chain fillrate", (0.0..=1.0).contains(&fr0) && (0.0..=1.0).contains(&fr1));
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

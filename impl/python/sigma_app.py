@@ -443,7 +443,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "gates": {
                         "consensus": "56/56",
                         "p0": "109/109",
-                        "prove": "290 PROVED",
+                        "prove": "294 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -473,7 +473,7 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <div class="card"><h3>门禁摘要</h3><table>
 <tr><td>consensus</td><td>56/56</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>290 PROVED</td></tr>
+<tr><td>prove</td><td>294 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/audit":
@@ -1393,7 +1393,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "56/56" in html and "290 PROVED" in html, "")
+        check("PANEL gates", "56/56" in html and "294 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -2489,6 +2489,51 @@ def run_dual_asset_vr_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_dual_item_four_link_test() -> Tuple[int, int]:
+    """--dual-item-four-link-test (v0.387): dual-item receive-ship-stock-fillrate
+    four-link chain over HTTP — receive item0 q1 → receive item1 q2 → ship
+    item0 q3 → ship item1 q4 (q3 ≤ q1, q4 ≤ q2) leaves item0 = a+q1−q3 ≥ 0 and
+    item1 = b+q2−q4 ≥ 0 with fill rates ≤ 1, matching INV-IN-11 four-link
+    semantics."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        call("/inventory_new?qty_a=10&qty_b=20")
+        inv = call("/receive_stock?inv=[10,20]&item=0&qty=5")["inventory"]
+        inv = call("/receive_stock?inv=" + quote(json.dumps(inv)) + "&item=1&qty=6")["inventory"]
+        inv = call("/ship_stock?inv=" + quote(json.dumps(inv)) + "&item=0&qty=3")["inventory"]
+        inv = call("/ship_stock?inv=" + quote(json.dumps(inv)) + "&item=1&qty=4")["inventory"]
+        fr0 = call("/fill_rate?shipped=3&demanded=5")["rate"]
+        fr1 = call("/fill_rate?shipped=4&demanded=6")["rate"]
+        check("DI item0 nonneg", inv[0] == 12 and inv[0] >= 0, f"got {inv}")
+        check("DI item1 nonneg", inv[1] == 22 and inv[1] >= 0, f"got {inv}")
+        check("DI fillrate0 <= 1", 0 <= fr0 <= 1, f"got {fr0}")
+        check("DI fillrate1 <= 1", 0 <= fr1 <= 1, f"got {fr1}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
 def run_concurrency_test() -> Tuple[int, int]:
     """--concurrency-test (v0.103): concurrent requests keep the state
     consistent — parallel clients (register / quota / post / tasks mix) all
@@ -3161,6 +3206,10 @@ def main(argv=None):
     if "--dual-asset-vr-test" in argv:
         passed, total = run_dual_asset_vr_test()
         print(f"sigma_app dual asset vr test (v0.377): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--dual-item-four-link-test" in argv:
+        passed, total = run_dual_item_four_link_test()
+        print(f"sigma_app dual item four link test (v0.387): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()
