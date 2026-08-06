@@ -2285,6 +2285,20 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ CONTRIB.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_quota_story do
+    checks = [
+      # §SK 额度链 (v0.250) — 开户→扣用→重置→预支（与 --quota-flow-test 对应）
+      {"quota_open", quota_new(50) == {:ok, [50, 50]}},
+      {"quota_spend", quota_use([50, 50], 1) == {:ok, [50, 49]}},
+      {"quota_reset", quota_reset([50, 49]) == [50, 50]},
+      {"quota_advance", quota_advance([50, 49]) == [50, 99]}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ QUOTA.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2355,6 +2369,11 @@ case System.argv() do
   ["--sk-contribution" | _] ->
     {passed, total} = SigmaVerify.sk_contribution_story()
     IO.puts("sigma_core contribution story (贡献分): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-quota" | _] ->
+    {passed, total} = SigmaVerify.sk_quota_story()
+    IO.puts("sigma_core quota story (额度链): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

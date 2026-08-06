@@ -854,6 +854,15 @@ def gen_socketkit_invariants(ops):
             "(assert (= c2 (+ 100 (* 5 n))))\n"
             "; INV-SK-9 (v0.213): 额度-契分联动 — 发单 n 后 remaining=m−n ≥0 且契分=100+5n\n"
             "(assert (not (and (>= (index q2 1) 0) (= c2 (+ 100 (* 5 n))))))\n(check-sat)\n")
+    inv10 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+             "(declare-const n Int)\n"
+             "(declare-const c2 Int) (declare-const v2 Int)\n"
+             "(assert (>= n 0))\n"
+             "; 验收 n 次后: 契分 = 100+5n（每次 +5），贡献分 = 10n（每次 +10）\n"
+             "(assert (= c2 (+ 100 (* 5 n))))\n"
+             "(assert (= v2 (* 10 n)))\n"
+             "; INV-SK-10 (v0.243): 契分-贡献联动 — 验收 n 后契分=100+5n 且贡献分=10n\n"
+             "(assert (not (and (= c2 (+ 100 (* 5 n))) (= v2 (* 10 n)))))\n(check-sat)\n")
     return [("INV-SK-1 bounty-conserved", inv1),
             ("INV-SK-2 no-over-withdraw", inv2),
             ("INV-SK-3 nonnegative-chain", inv3),
@@ -862,7 +871,8 @@ def gen_socketkit_invariants(ops):
             ("INV-SK-6 quota-escrow-link", inv6),
             ("INV-SK-7 task-credit-link", inv7),
             ("INV-SK-8 bounty-points-link", inv8),
-            ("INV-SK-9 quota-credit-link", inv9)]
+            ("INV-SK-9 quota-credit-link", inv9),
+            ("INV-SK-10 credit-contribution-link", inv10)]
 
 
 def gen_quota_invariants(ops):

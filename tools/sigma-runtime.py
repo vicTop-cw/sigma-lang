@@ -971,6 +971,14 @@ def run_invariant_checks(core):
          "ok": pf7b[0] + pf7b[1] == 100, "note": f"pf={pf7b}"},
     ])
 
+    # §SK 契分-贡献联动 (v0.245, INV-SK-10)
+    c10 = core.credit_score([[0, 1], [0, 1]])
+    v10 = core.contribution_score([[3, 1, 10], [3, 1, 10]])
+    record("INV-SK-10", "invariant", ["credit×2→contribution×2"], c10, [
+        {"law": "契分-贡献联动 — 两次验收后契分=110 且贡献分=20",
+         "ok": c10 == 110 and v10 == 20, "note": f"c={c10} v={v10}"},
+    ])
+
     return events
 
 

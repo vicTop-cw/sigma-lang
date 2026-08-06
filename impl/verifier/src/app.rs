@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "234 PROVED", "scenario": "16/16"}})
+                          "prove": "238 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "234 PROVED");
+           && r["gates"]["prove"] == "238 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -992,6 +992,12 @@ pub fn run_smoke() -> (usize, usize) {
     let _ = http_get(port, &format!("/submit?task={tid6}"));
     let r = http_get(port, &format!("/accept?task={tid6}&caller=7"));
     check!("HTTP /contrib task2", r["contribution"] == contrib1 + 10);
+
+    // 23. 额度链对账 (v0.249) — 开户→扣用→重置（与 Python --quota-flow-test 对应）
+    let _ = http_get(port, "/quota?user=7&monthly=50");
+    let _ = http_get(port, "/post?author=7&bounty=100");
+    let r = http_get(port, "/quota?user=7&monthly=50");
+    check!("HTTP /quota_flow reset", r["quota"] == serde_json::json!([50, 50]));
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");
