@@ -1995,9 +1995,26 @@
   5/5、portfolio-test 5/5、inventory-test 5/5、stats-test 5/5、自检 15/15、
   Elixir 积分-配额联动 3/3）——小阶段 **168/496** 达成，按规则同步仓库；
   consensus 56/56、p0 109/109，v0.10–v0.299 不回归。
+- ✅ **REACHED v0.301 (2026-08-06)**: Makefile/CI 补积分-配额联动测试——
+  `Makefile` 新增 `pq` 目标（--points-quota-test + Rust --app-smoke 72/72 +
+  Elixir --sk-pq 3/3 积分-配额联动对账，.PHONY 同步）；`.github/workflows/ci.yml`
+  新增「ΣLang points-quota reconciliation」步骤（积分-配额联动对账进 CI，在
+  十道门禁前）——积分-配额联动一致性被 CI 守护；--points-quota-test 2/2、
+  --app-smoke 72/72、Elixir 积分-配额联动 3/3、自检 15/15、冒烟 36/36 全绿；
+  consensus 56/56、p0 109/109，v0.10–v0.300 不回归。
+- ✅ **REACHED v0.302 (2026-08-06)**: 批次 17 收尾（数字同步 + 全量验收）——
+  v0.293–v0.302 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
+  prove 258 PROVED、--domains 72/72 在门禁与代码各 4/4/1 处一致），全量验收
+  全绿（sigma-accept 十道门禁 10/10、points-quota-test 2/2、credit-badge-test
+  3/3、portfolio-flow-test 5/5、inventory-flow-test 4/4、badge-test 2/2、
+  quota-flow-test 2/2、contribution-test 2/2、audit-test 6/6、full-test 5/5、
+  credit-test 3/3、inventory-chain-test 5/5、points-test 3/3、errors-test 7/7、
+  cross-domain-test 5/5、portfolio-test 5/5、inventory-test 5/5、stats-test
+  5/5、自检 15/15、Elixir 积分-配额联动 3/3）——批次 17（170/496 小阶段）
+  达成，按规则同步仓库；consensus 56/56、p0 109/109，v0.10–v0.301 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.300 达成（小阶段 168/496），批次 17 进行中（v0.301–v0.302）。
+  2. （无）— v0.302 达成（小阶段 170/496），批次 17 收官 → 同步仓库 → 批次 18（v0.303+）。
 
 ---
 
