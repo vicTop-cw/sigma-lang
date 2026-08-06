@@ -49,6 +49,8 @@ Fingerprint: 0xC020
 | [1,2] ⊕ [1] | ⊥ ShapeError |
 | [1,2,3] ⊕ [1,2] | ⊥ ShapeError |
 | [1,2,3,4] ⊕ [1,2,3] | ⊥ ShapeError |
+| [1,2,3,4,5] ⊕ [1,2,3,4] | ⊥ ShapeError |
+| [1,2,3,4,5] ⊕ [1,2,3,4,5,6] | ⊥ ShapeError |
 | [1,2,3,4] ⊕ [1,2,3,4,5] | ⊥ ShapeError |
 
 ## Operation: combine (Confidence Union)
@@ -79,4 +81,6 @@ Fingerprint: 0xC021
 | [1,2] ⊕ [1] | ⊥ ShapeError |
 | [1,2,3] ⊕ [1,2] | ⊥ ShapeError |
 | [1,2,3,4] ⊕ [1,2,3] | ⊥ ShapeError |
+| [1,2,3,4,5] ⊕ [1,2,3,4] | ⊥ ShapeError |
+| [1,2,3,4,5] ⊕ [1,2,3,4,5,6] | ⊥ ShapeError |
 | [1,2,3,4] ⊕ [1,2,3,4,5] | ⊥ ShapeError |

@@ -2342,6 +2342,19 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ PFFLOW.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_credit_badge_story do
+    checks = [
+      # §SK 三链联动 (v0.290) — 契分+贡献分+勋章（与 --credit-badge-test / INV-SK-12 对应）
+      {"cb_credit", credit_score([[0, 1]]) == 105},
+      {"cb_contribution", contribution_score([[3, 1, 10]]) == 10},
+      {"cb_badge", badge_level(credit_score([[0, 1]])) == 1}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ CB.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2432,6 +2445,11 @@ case System.argv() do
   ["--sk-pfflow" | _] ->
     {passed, total} = SigmaVerify.sk_portfolio_flow_story()
     IO.puts("sigma_core portfolio flow story (组合流转): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-cb" | _] ->
+    {passed, total} = SigmaVerify.sk_credit_badge_story()
+    IO.puts("sigma_core credit-badge story (三链联动): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

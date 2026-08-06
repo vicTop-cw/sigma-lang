@@ -1001,6 +1001,15 @@ def run_invariant_checks(core):
          "ok": pf8[0] + pf8[1] + pf8[2] == 100, "note": f"pf={pf8}"},
     ])
 
+    # §SK 契分-贡献-勋章三链联动 (v0.285, INV-SK-12)
+    c12 = core.credit_score([[0, 1], [0, 1], [0, 1], [0, 1]])
+    v12 = core.contribution_score([[3, 1, 10], [3, 1, 10], [3, 1, 10], [3, 1, 10]])
+    b12 = core.badge_level(c12)
+    record("INV-SK-12", "invariant", ["credit×4→contribution×4→badge"], c12, [
+        {"law": "契分-贡献-勋章三链联动 — 契分=120、贡献分=40 且勋章=1（<300）",
+         "ok": c12 == 120 and v12 == 40 and b12 == 1, "note": f"c={c12} v={v12} b={b12}"},
+    ])
+
     return events
 
 
