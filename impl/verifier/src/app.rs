@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "262 PROVED", "scenario": "16/16"}})
+                          "prove": "266 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "262 PROVED");
+           && r["gates"]["prove"] == "266 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1073,6 +1073,23 @@ pub fn run_smoke() -> (usize, usize) {
            r["quota"][1] == quota_before2 - 3
            && r["quota"][1].as_i64().unwrap_or(-1) >= 0);
     check!("HTTP /tpq_chain points", r["points"][0] == escrow_before2 + 300);
+
+    // 30. 估值-风险联动对账 (v0.319) — 组合交易链后估值 cash+qA+qB 守恒且
+    //     估值 ≥ 风险（与 Python --valuation-risk-test 对应，INV-PF-9 语义）
+    let mut pf9 = http_get(port, "/portfolio_new?cash=100")["portfolio"].clone();
+    pf9 = http_get(port, &format!("/portfolio_buy?pf={}&asset=0&qty=30",
+        serde_json::to_string(&pf9).unwrap_or_default()))["portfolio"].clone();
+    pf9 = http_get(port, &format!("/portfolio_buy?pf={}&asset=1&qty=20",
+        serde_json::to_string(&pf9).unwrap_or_default()))["portfolio"].clone();
+    pf9 = http_get(port, &format!("/portfolio_sell?pf={}&asset=0&qty=10",
+        serde_json::to_string(&pf9).unwrap_or_default()))["portfolio"].clone();
+    let v9 = http_get(port, &format!("/portfolio_value?pf={}",
+        serde_json::to_string(&pf9).unwrap_or_default()))["value"].as_i64().unwrap_or(0);
+    let r9 = http_get(port, &format!("/portfolio_risk?pf={}",
+        serde_json::to_string(&pf9).unwrap_or_default()))["risk"].as_i64().unwrap_or(0);
+    let cash9 = pf9[0].as_i64().unwrap_or(-1);
+    check!("HTTP /vr_chain value", v9 == 100);
+    check!("HTTP /vr_chain risk", v9 >= r9 && cash9 >= 0);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

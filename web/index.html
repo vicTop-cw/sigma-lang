@@ -245,6 +245,14 @@
     </div>
   </section>
 
+  <section id="vr-panel">
+    <h2>估值-风险联动演示（v0.318，金融市场）</h2>
+    <div class="row">
+      <button onclick="vrChain()">跑联动</button>
+      <span id="vr-out" class="muted"></span>
+    </div>
+  </section>
+
   <section id="pf-panel">
     <h2>金融市场（§PF，v0.148）</h2>
     <div class="row">
@@ -685,6 +693,19 @@ async function tpqChain() {
   const jt = await api("/tasks", "tpq_tasks");
   document.getElementById("tpq-out").textContent =
     `三维: 任务数 ${jt.tasks.length}（3）· 配额 ${j3.quota[1]}/50（50−3）· 积分托管 ${j3.points[0]}（3×100）`;
+}
+
+// v0.318 — 估值-风险联动演示（与 --valuation-risk-test / INV-PF-9 语义对应）
+async function vrChain() {
+  const j0 = await api("/portfolio_new?cash=100", "vr_new");
+  let pf = j0.portfolio;
+  pf = (await api(`/portfolio_buy?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=0&qty=30`, "vr_buy0")).portfolio;
+  pf = (await api(`/portfolio_buy?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=1&qty=20`, "vr_buy1")).portfolio;
+  pf = (await api(`/portfolio_sell?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=0&qty=10`, "vr_sell0")).portfolio;
+  const jv = await api(`/portfolio_value?pf=${encodeURIComponent(JSON.stringify(pf))}`, "vr_value");
+  const jr = await api(`/portfolio_risk?pf=${encodeURIComponent(JSON.stringify(pf))}`, "vr_risk");
+  document.getElementById("vr-out").textContent =
+    `估值 ${jv.value}（总额守恒）· 风险 ${jr.risk}（≤ 估值）· 组合 ${JSON.stringify(pf)}`;
 }
 
 // v0.148 — 金融市场（§PF）

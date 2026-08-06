@@ -1026,6 +1026,17 @@ def run_invariant_checks(core):
          "ok": q14[1] == 47 and p14[0] == 30, "note": f"quota={q14} points={p14}"},
     ])
 
+    # §PF 组合估值-风险联动 (v0.315, INV-PF-9)
+    pf9 = core.buy(core.portfolio_new(100), 0, 30)
+    pf9b = core.buy(pf9, 1, 20)
+    pf9c = core.sell(pf9b, 0, 10)
+    v9 = core.portfolio_value(pf9c)
+    r9 = core.risk_score(pf9c)
+    record("INV-PF-9", "invariant", ["buy(0,30)→buy(1,20)→sell(0,10)"], pf9c, [
+        {"law": "组合估值-风险联动 — 链后估值 cash+qA+qB=100（总额守恒）且估值 ≥ 风险（cash ≥ 0）",
+         "ok": v9 == 100 and v9 >= r9 and pf9c[0] >= 0, "note": f"pf={pf9c} v={v9} r={r9}"},
+    ])
+
     return events
 
 

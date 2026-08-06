@@ -58,6 +58,8 @@ Fingerprint: 0xD001
 | [1,2,3,4,5] ⊕ [1,2,3,4,5,6] | ⊥ ShapeError |
 | [1,2,3,4] ⊕ [1,2,3] | ⊥ ShapeError |
 | [1,2,3,4] ⊕ [1,2,3,4,5] | ⊥ ShapeError |
+| [1,2,3,4,5,6] ⊕ [1,2,3,4,5] | ⊥ ShapeError |
+| [1,2,3,4,5,6] ⊕ [1,2,3,4,5,6,7] | ⊥ ShapeError |
 
 ## Operation: filter (Filter)
 
@@ -91,6 +93,8 @@ Fingerprint: 0xD002
 | [1,2,3,4,5] ⊕ [1,2,3,4,5,6] | ⊥ ShapeError |
 | [1,2,3,4] ⊕ [1,2,3] | ⊥ ShapeError |
 | [1,2,3,4] ⊕ [1,2,3,4,5] | ⊥ ShapeError |
+| [1,2,3,4,5,6] ⊕ [1,2,3,4,5] | ⊥ ShapeError |
+| [1,2,3,4,5,6] ⊕ [1,2,3,4,5,6,7] | ⊥ ShapeError |
 
 ## Operation: reduce (Reduce)
 
@@ -148,6 +152,8 @@ Fingerprint: 0xD004
 | [1,2,3,4,5] ⊕ [1,2,3,4,5,6] | ⊥ ShapeError |
 | [1,2,3,4] ⊕ [1,2,3] | ⊥ ShapeError |
 | [1,2,3,4] ⊕ [1,2,3,4,5] | ⊥ ShapeError |
+| [1,2,3,4,5,6] ⊕ [1,2,3,4,5] | ⊥ ShapeError |
+| [1,2,3,4,5,6] ⊕ [1,2,3,4,5,6,7] | ⊥ ShapeError |
 
 ## Functions
 

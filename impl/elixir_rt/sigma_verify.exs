@@ -2402,6 +2402,27 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ TPQ.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_valuation_risk_story do
+    # §PF 估值-风险联动 (v0.320) — 组合交易链后估值 cash+qA+qB 守恒且估值 ≥
+    # 风险（与 --valuation-risk-test / INV-PF-9 对应）
+    {:ok, pf0} = portfolio_new(100)
+    {:ok, pf1} = buy(pf0, 0, 30)
+    {:ok, pf2} = buy(pf1, 1, 20)
+    {:ok, pf3} = sell(pf2, 0, 10)
+    {:ok, v} = portfolio_value(pf3)
+    {:ok, r} = risk_score(pf3)
+    cash = Enum.at(pf3, 0)
+    checks = [
+      {"vr_value_conserved", v == 100},
+      {"vr_value_ge_risk", v >= r},
+      {"vr_cash_nonneg", cash >= 0}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ VR.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2507,6 +2528,11 @@ case System.argv() do
   ["--sk-tpq" | _] ->
     {passed, total} = SigmaVerify.sk_task_points_quota_story()
     IO.puts("sigma_core task-points-quota story (三维联动): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-vr" | _] ->
+    {passed, total} = SigmaVerify.sk_valuation_risk_story()
+    IO.puts("sigma_core valuation-risk story (估值-风险联动): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->
