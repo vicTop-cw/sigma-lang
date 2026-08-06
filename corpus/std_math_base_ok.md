@@ -51,6 +51,7 @@ Fingerprint: 0xA030
 | 10 ⊖ 4 | 6 |
 | 5 ⊖ 0 | 5 |
 | [1] ⊖ [1,2] | ⊥ ShapeError |
+| [1,2,3,4] ⊖ [1,2,3] | ⊥ ShapeError |
 
 ## Operation: ⊘ (Div)
 
@@ -100,6 +101,7 @@ Fingerprint: 0xA032
 | 2 ⊙ 3 | 6 |
 | 4 ⊙ 0 | 0 |
 | [1,2] ⊙ [1] | ⊥ ShapeError |
+| [1,2,3,4] ⊙ [1,2,3] | ⊥ ShapeError |
 | [1] ⊙ [1,2] | ⊥ ShapeError |
 
 ## Operation: ≡ (Eq)

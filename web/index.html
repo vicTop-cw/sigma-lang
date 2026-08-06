@@ -213,6 +213,14 @@
     </div>
   </section>
 
+  <section id="invflow-panel">
+    <h2>库存流转演示（v0.268，混合货品出库链）</h2>
+    <div class="row">
+      <button onclick="invFlowChain()">跑库存链</button>
+      <span id="invflow-out" class="muted"></span>
+    </div>
+  </section>
+
   <section id="pf-panel">
     <h2>金融市场（§PF，v0.148）</h2>
     <div class="row">
@@ -606,6 +614,16 @@ async function badgeChain() {
   const j2 = await api("/badge?user=3", "badge_level");
   document.getElementById("badge-out").textContent =
     `勋章链: 验收契分 ${j1.credit}（<300 档位）→ 勋章 ${j2.badge}`;
+}
+
+// v0.268 — 库存流转演示（混合货品出库链，与 --inventory-flow-test 语义对应）
+async function invFlowChain() {
+  const j1 = await api("/inventory_new?qty_a=10&qty_b=20", "invflow_open");
+  const j2 = await api("/ship_stock?inv=[10,20]&item=0&qty=4", "invflow_ship0");
+  const j3 = await api("/ship_stock?inv=[6,20]&item=1&qty=8", "invflow_ship1");
+  const j4 = await api("/stock_level?inv=[6,12]&item=1", "invflow_level");
+  document.getElementById("invflow-out").textContent =
+    `库存链: 开仓 [10,20] → 出库 item0 [${j2.inventory[0]},${j2.inventory[1]}] → 出库 item1 [${j3.inventory[0]},${j3.inventory[1]}] → 水位 ${j4.level}`;
 }
 
 // v0.148 — 金融市场（§PF）

@@ -987,6 +987,13 @@ def run_invariant_checks(core):
          "ok": c11 == 120 and b11 == 1, "note": f"c={c11} b={b11}"},
     ])
 
+    # §IN 混合出库联动 (v0.265, INV-IN-8)
+    inv8 = core.ship_stock(core.ship_stock([10, 20], 0, 4), 1, 8)
+    record("INV-IN-8", "invariant", ["ship(0,4)→ship(1,8)"], inv8, [
+        {"law": "混合出库联动 — ship item0 4 后 ship item1 8，item0=6 且 item1=12 ≥0",
+         "ok": inv8[0] == 6 and inv8[1] == 12 and inv8[1] >= 0, "note": f"inv={inv8}"},
+    ])
+
     return events
 
 

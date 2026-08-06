@@ -2313,6 +2313,20 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ BADGE.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_inventory_flow_story do
+    checks = [
+      # §IN 库存流转链 (v0.270) — 开仓→出库 item0→出库 item1→水位（与 --inventory-flow-test / INV-IN-8 对应）
+      {"invflow_open", inventory_new(10, 20) == {:ok, [10, 20]}},
+      {"invflow_ship0", ship_stock([10, 20], 0, 4) == {:ok, [6, 20]}},
+      {"invflow_ship1", ship_stock([6, 20], 1, 8) == {:ok, [6, 12]}},
+      {"invflow_level", stock_level([6, 12], 1) == {:ok, 12}}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ INVFLOW.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2393,6 +2407,11 @@ case System.argv() do
   ["--sk-badge" | _] ->
     {passed, total} = SigmaVerify.sk_badge_story()
     IO.puts("sigma_core badge story (勋章链): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-invflow" | _] ->
+    {passed, total} = SigmaVerify.sk_inventory_flow_story()
+    IO.puts("sigma_core inventory flow story (库存流转): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->
