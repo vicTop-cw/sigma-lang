@@ -905,6 +905,15 @@ def gen_socketkit_invariants(ops):
              "(assert (= b2 (ite (< c2 300) 1 2)))\n"
              "; INV-SK-12 (v0.283): 契分-贡献-勋章三链联动 — 三维度联动守恒\n"
              "(assert (not (and (= c2 (+ 100 (* 5 n))) (= v2 (* 10 n)) (= b2 (ite (< c2 300) 1 2)))))\n(check-sat)\n")
+    inv13 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+             "(declare-const m Int) (declare-const n Int) (declare-const b Int)\n"
+             "(declare-const q2 Int) (declare-const p2 Int)\n"
+             "(assert (>= m 0)) (assert (>= n 0)) (assert (>= b 0)) (assert (<= n m))\n"
+             "; 发单 n 次（每次扣 1 配额 + 托管 b）: 配额 remaining=m−n ≥0、积分 escrow=n×b\n"
+             "(assert (= (index q2 0) m)) (assert (= (index q2 1) (- m n)))\n"
+             "(assert (= (index p2 0) (* n b))) (assert (= (index p2 1) 0))\n"
+             "; INV-SK-13 (v0.293): 积分-配额联动 — remaining=m−n ≥0 且 escrow=n×b\n"
+             "(assert (not (and (>= (index q2 1) 0) (= (index p2 0) (* n b)))))\n(check-sat)\n")
     return [("INV-SK-1 bounty-conserved", inv1),
             ("INV-SK-2 no-over-withdraw", inv2),
             ("INV-SK-3 nonnegative-chain", inv3),
@@ -916,7 +925,8 @@ def gen_socketkit_invariants(ops):
             ("INV-SK-9 quota-credit-link", inv9),
             ("INV-SK-10 credit-contribution-link", inv10),
             ("INV-SK-11 credit-badge-link", inv11),
-            ("INV-SK-12 credit-contribution-badge-link", inv12)]
+            ("INV-SK-12 credit-contribution-badge-link", inv12),
+            ("INV-SK-13 points-quota-link", inv13)]
 
 
 def gen_quota_invariants(ops):

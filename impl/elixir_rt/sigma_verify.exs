@@ -2355,6 +2355,27 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ CB.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_points_quota_story do
+    # §SK 积分-配额联动 (v0.299) — 发单 n 次：配额 remaining=m−n 且积分
+    # escrow=n×b（与 --points-quota-test / INV-SK-13 对应）
+    {:ok, q0} = quota_new(50)
+    {:ok, q1} = quota_use(q0, 1)
+    {:ok, q2} = quota_use(q1, 1)
+    {:ok, q3} = quota_use(q2, 1)
+    p1 = points_hold(points_new(), 10)
+    p2 = points_hold(p1, 10)
+    p3 = points_hold(p2, 10)
+    checks = [
+      {"pq_quota_remaining", q3 == [50, 47]},
+      {"pq_quota_nonneg", Enum.at(q3, 1) >= 0},
+      {"pq_points_escrow", p3 == [30, 0]}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ PQ.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2450,6 +2471,11 @@ case System.argv() do
   ["--sk-cb" | _] ->
     {passed, total} = SigmaVerify.sk_credit_badge_story()
     IO.puts("sigma_core credit-badge story (三链联动): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-pq" | _] ->
+    {passed, total} = SigmaVerify.sk_points_quota_story()
+    IO.puts("sigma_core points-quota story (积分-配额联动): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

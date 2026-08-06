@@ -1010,6 +1010,14 @@ def run_invariant_checks(core):
          "ok": c12 == 120 and v12 == 40 and b12 == 1, "note": f"c={c12} v={v12} b={b12}"},
     ])
 
+    # §SK 积分-配额联动 (v0.295, INV-SK-13)
+    q13 = core.quota_use(core.quota_use(core.quota_use(core.quota_new(50), 1), 1), 1)
+    p13 = core.points_hold(core.points_hold(core.points_hold(core.points_new(), 10), 10), 10)
+    record("INV-SK-13", "invariant", ["quota_use×3→points_hold×3"], q13, [
+        {"law": "积分-配额联动 — 发单 3 次后配额 remaining=47 ≥0 且积分 escrow=30（=3×10）",
+         "ok": q13[1] == 47 and p13[0] == 30, "note": f"quota={q13} points={p13}"},
+    ])
+
     return events
 
 
