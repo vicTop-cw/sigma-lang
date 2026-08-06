@@ -443,7 +443,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "gates": {
                         "consensus": "56/56",
                         "p0": "109/109",
-                        "prove": "278 PROVED",
+                        "prove": "282 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -473,7 +473,7 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <div class="card"><h3>门禁摘要</h3><table>
 <tr><td>consensus</td><td>56/56</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>278 PROVED</td></tr>
+<tr><td>prove</td><td>282 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/audit":
@@ -1393,7 +1393,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "56/56" in html and "278 PROVED" in html, "")
+        check("PANEL gates", "56/56" in html and "282 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -2358,6 +2358,46 @@ def run_dual_asset_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_receive_ship_fillrate_test() -> Tuple[int, int]:
+    """--receive-ship-fillrate-test (v0.357): receive-ship-stock-fillrate
+    four-link chain over HTTP — receive item0 q1 then ship item0 q2 (q2 ≤ q1)
+    leaves stock_level = a+q1−q2 ≥ 0 and fill rate q2/q1 ≤ 1, matching
+    INV-IN-10 four-link semantics."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        call("/inventory_new?qty_a=10&qty_b=20")
+        inv = call("/receive_stock?inv=[10,20]&item=0&qty=5")["inventory"]
+        inv = call("/ship_stock?inv=" + quote(json.dumps(inv)) + "&item=0&qty=3")["inventory"]
+        fr = call("/fill_rate?shipped=3&demanded=5")["rate"]
+        check("RSF stock nonneg", inv[0] == 12 and inv[0] >= 0, f"got {inv}")
+        check("RSF fill rate <= 1", 0 <= fr <= 1, f"got {fr}")
+        check("RSF stock == a+q1-q2", inv[0] == 10 + 5 - 3, f"got {inv}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
 def run_concurrency_test() -> Tuple[int, int]:
     """--concurrency-test (v0.103): concurrent requests keep the state
     consistent — parallel clients (register / quota / post / tasks mix) all
@@ -3018,6 +3058,10 @@ def main(argv=None):
     if "--dual-asset-test" in argv:
         passed, total = run_dual_asset_test()
         print(f"sigma_app dual asset test (v0.347): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--receive-ship-fillrate-test" in argv:
+        passed, total = run_receive_ship_fillrate_test()
+        print(f"sigma_app receive ship fillrate test (v0.357): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()

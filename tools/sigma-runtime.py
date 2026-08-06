@@ -1065,6 +1065,13 @@ def run_invariant_checks(core):
          "note": f"pf={pf10d} v={v10}"},
     ])
 
+    # §IN 入库-出库-水位-履约四链联动 (v0.355, INV-IN-10)
+    inv10 = core.ship_stock(core.receive_stock([10, 20], 0, 5), 0, 3)
+    record("INV-IN-10", "invariant", ["receive(0,5)→ship(0,3)"], inv10, [
+        {"law": "入库-出库-水位-履约四链联动 — 入库 5 后出库 3，stock_level=12 ≥0 且 3 ≤ 5（履约率 ≤ 1）",
+         "ok": inv10[0] == 12 and inv10[0] >= 0 and 3 <= 5, "note": f"inv={inv10}"},
+    ])
+
     return events
 
 

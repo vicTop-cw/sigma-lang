@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "278 PROVED", "scenario": "16/16"}})
+                          "prove": "282 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "278 PROVED");
+           && r["gates"]["prove"] == "282 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1140,6 +1140,18 @@ pub fn run_smoke() -> (usize, usize) {
     let qb = pfd[2].as_i64().unwrap_or(-1);
     check!("HTTP /da_chain value", vd == 100);
     check!("HTTP /da_chain nonneg", cd >= 0 && qa >= 0 && qb >= 0);
+
+    // 34. 入库-出库-水位-履约四链联动对账 (v0.359) — receive(0,5)→ship(0,3)
+    //     后 stock_level ≥ 0 且履约率 ≤ 1（与 Python --receive-ship-fillrate-test
+    //     对应，INV-IN-10 语义）
+    let _ = http_get(port, "/inventory_new?qty_a=10&qty_b=20");
+    let inv10 = http_get(port, "/receive_stock?inv=[10,20]&item=0&qty=5")["inventory"].clone();
+    let inv10b = http_get(port, &format!("/ship_stock?inv={}&item=0&qty=3",
+        serde_json::to_string(&inv10).unwrap_or_default()))["inventory"].clone();
+    let fr10 = http_get(port, "/fill_rate?shipped=3&demanded=5")["rate"].as_f64().unwrap_or(-1.0);
+    let stock10 = inv10b[0].as_i64().unwrap_or(-1);
+    check!("HTTP /rsf_chain stock", stock10 == 12 && stock10 >= 0);
+    check!("HTTP /rsf_chain fillrate", (0.0..=1.0).contains(&fr10));
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

@@ -2486,6 +2486,26 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ DA.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_receive_ship_fillrate_story do
+    # §IN 入库-出库-水位-履约四链联动 (v0.360) — receive item0 q1 后 ship
+    # item0 q2（q2 ≤ q1 履约不超收），stock_level ≥ 0 且履约率 ≤ 1（与
+    # --receive-ship-fillrate-test / INV-IN-10 对应）
+    {:ok, inv0} = inventory_new(10, 20)
+    {:ok, inv1} = receive_stock(inv0, 0, 5)
+    {:ok, inv2} = ship_stock(inv1, 0, 3)
+    {:ok, lvl} = stock_level(inv2, 0)
+    {:ok, fr} = fill_rate(3, 5)
+    checks = [
+      {"rsf_stock_nonneg", lvl == 12 and lvl >= 0},
+      {"rsf_fillrate_bounded", fr <= 1.0 and fr >= 0.0},
+      {"rsf_stock_a_q1_q2", lvl == 10 + 5 - 3}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ RSF.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2611,6 +2631,11 @@ case System.argv() do
   ["--sk-da" | _] ->
     {passed, total} = SigmaVerify.sk_dual_asset_story()
     IO.puts("sigma_core dual-asset story (双资产交易链估值守恒): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-rsf" | _] ->
+    {passed, total} = SigmaVerify.sk_receive_ship_fillrate_story()
+    IO.puts("sigma_core receive-ship-fillrate story (入库-出库-水位-履约四链联动): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->
