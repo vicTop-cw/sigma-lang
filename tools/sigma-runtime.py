@@ -1018,6 +1018,14 @@ def run_invariant_checks(core):
          "ok": q13[1] == 47 and p13[0] == 30, "note": f"quota={q13} points={p13}"},
     ])
 
+    # §SK 任务-积分-配额三维联动 (v0.305, INV-SK-14)
+    q14 = core.quota_use(core.quota_use(core.quota_use(core.quota_new(50), 1), 1), 1)
+    p14 = core.points_hold(core.points_hold(core.points_hold(core.points_new(), 10), 10), 10)
+    record("INV-SK-14", "invariant", ["task×3→quota_use×3→points_hold×3"], q14, [
+        {"law": "任务-积分-配额三维联动 — 发单 3 次后任务数=3、配额 remaining=47 ≥0 且积分 escrow=30（=3×10）",
+         "ok": q14[1] == 47 and p14[0] == 30, "note": f"quota={q14} points={p14}"},
+    ])
+
     return events
 
 

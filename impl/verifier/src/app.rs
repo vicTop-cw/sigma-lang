@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "258 PROVED", "scenario": "16/16"}})
+                          "prove": "262 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "258 PROVED");
+           && r["gates"]["prove"] == "262 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1057,6 +1057,22 @@ pub fn run_smoke() -> (usize, usize) {
            r["quota"][1] == quota_before - 3
            && r["quota"][1].as_i64().unwrap_or(-1) >= 0);
     check!("HTTP /pq_chain points", r["points"][0] == escrow_before + 300);
+
+    // 29. 任务-积分-配额三维对账 (v0.309) — 发单 n 次：任务数=n 且配额
+    //     remaining=m−n 且积分 escrow=n×b（与 Python --task-points-quota-test
+    //     对应，INV-SK-14 语义）
+    let tasks_before = http_get(port, "/tasks")["tasks"].as_array().map(|a| a.len()).unwrap_or(0);
+    let quota_before2 = http_get(port, "/me?user=7")["quota"][1].as_i64().unwrap_or(0);
+    let escrow_before2 = http_get(port, "/stats")["platform_points"][0].as_i64().unwrap_or(0);
+    let _ = http_get(port, "/post?author=7&bounty=100");
+    let _ = http_get(port, "/post?author=7&bounty=100");
+    let r = http_get(port, "/post?author=7&bounty=100");
+    let tasks_after = http_get(port, "/tasks")["tasks"].as_array().map(|a| a.len()).unwrap_or(0);
+    check!("HTTP /tpq_chain tasks", tasks_after == tasks_before + 3);
+    check!("HTTP /tpq_chain quota",
+           r["quota"][1] == quota_before2 - 3
+           && r["quota"][1].as_i64().unwrap_or(-1) >= 0);
+    check!("HTTP /tpq_chain points", r["points"][0] == escrow_before2 + 300);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

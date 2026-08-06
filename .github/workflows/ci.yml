@@ -97,6 +97,10 @@ jobs:
       - name: ΣLang points-quota reconciliation (v0.301)
         run: python3 impl/python/sigma_app.py --points-quota-test
 
+      # v0.311 — 三维联动对账进 CI（Python /task-points-quota-test）
+      - name: ΣLang task-points-quota reconciliation (v0.311)
+        run: python3 impl/python/sigma_app.py --task-points-quota-test
+
       # v0.56 — 九道门禁一键验收：consensus / p0 / 三端自检与编译 / 三域审计 /
       # 证明消解 / 找茬冒烟，一条命令在 CI 上全绿才算通过。
       # v0.87 — --report 输出全量回归报告（JSON），作为 CI artifact 保存。

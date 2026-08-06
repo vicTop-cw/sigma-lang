@@ -2376,6 +2376,32 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ PQ.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_task_points_quota_story do
+    # §SK 任务-积分-配额三维联动 (v0.310) — 发单 n 次：任务数=n、配额
+    # remaining=m−n 且积分 escrow=n×b（与 --task-points-quota-test / INV-SK-14
+    # 对应）
+    {:ok, t1} = task_create(7, 100)
+    {:ok, t2} = task_create(7, 100)
+    {:ok, t3} = task_create(7, 100)
+    {:ok, q0} = quota_new(50)
+    {:ok, q1} = quota_use(q0, 1)
+    {:ok, q2} = quota_use(q1, 1)
+    {:ok, q3} = quota_use(q2, 1)
+    p1 = points_hold(points_new(), 10)
+    p2 = points_hold(p1, 10)
+    p3 = points_hold(p2, 10)
+    checks = [
+      {"tpq_tasks", t1 != nil and t2 != nil and t3 != nil},
+      {"tpq_quota_remaining", q3 == [50, 47]},
+      {"tpq_quota_nonneg", Enum.at(q3, 1) >= 0},
+      {"tpq_points_escrow", p3 == [30, 0]}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ TPQ.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2476,6 +2502,11 @@ case System.argv() do
   ["--sk-pq" | _] ->
     {passed, total} = SigmaVerify.sk_points_quota_story()
     IO.puts("sigma_core points-quota story (积分-配额联动): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-tpq" | _] ->
+    {passed, total} = SigmaVerify.sk_task_points_quota_story()
+    IO.puts("sigma_core task-points-quota story (三维联动): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

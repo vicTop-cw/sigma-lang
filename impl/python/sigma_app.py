@@ -443,7 +443,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "gates": {
                         "consensus": "56/56",
                         "p0": "109/109",
-                        "prove": "258 PROVED",
+                        "prove": "262 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -473,7 +473,7 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <div class="card"><h3>门禁摘要</h3><table>
 <tr><td>consensus</td><td>56/56</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>258 PROVED</td></tr>
+<tr><td>prove</td><td>262 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/audit":
@@ -1393,7 +1393,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "56/56" in html and "258 PROVED" in html, "")
+        check("PANEL gates", "56/56" in html and "262 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -2147,6 +2147,47 @@ def run_points_quota_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_task_points_quota_test() -> Tuple[int, int]:
+    """--task-points-quota-test (v0.307): task-points-quota three-link chain
+    over HTTP — each posted task consumes one quota unit and escrows its bounty
+    in points, so after n posts tasks count = n, quota remaining = m−n ≥ 0 and
+    points escrow = n×b, matching INV-SK-14 three-link semantics."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        call(f"/register?user=7&name={quote('找茬主')}")
+        call("/quota?user=7&monthly=50")
+        call("/post?author=7&bounty=100")
+        call("/post?author=7&bounty=100")
+        r = call("/post?author=7&bounty=100")
+        check("TPQ tasks count", len(call("/tasks")["tasks"]) == 3, "")
+        check("TPQ quota remaining", r["quota"] == [50, 47], f"got {r}")
+        check("TPQ points escrow", r["points"] == [300, 0], f"got {r}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
 def run_concurrency_test() -> Tuple[int, int]:
     """--concurrency-test (v0.103): concurrent requests keep the state
     consistent — parallel clients (register / quota / post / tasks mix) all
@@ -2787,6 +2828,10 @@ def main(argv=None):
     if "--points-quota-test" in argv:
         passed, total = run_points_quota_test()
         print(f"sigma_app points quota test (v0.297): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--task-points-quota-test" in argv:
+        passed, total = run_task_points_quota_test()
+        print(f"sigma_app task points quota test (v0.307): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()
