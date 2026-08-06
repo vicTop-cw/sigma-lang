@@ -32,9 +32,9 @@
       Laws：等级正确 / 四级有界 / 授权核验师。
 - [x] **三端执行层**: sigma_core 134/134、Rust sk.rs / Elixir sigma_verify.exs
       参考实现 + eval_expr + 自检 56/56，`cargo build` 0 error/0 warning。
-- [x] **语料**: `corpus/socketkit_ok.md` 增 badge_issue（55/55 三端一致 PASS），
+- [x] **语料**: `corpus/socketkit_ok.md` 增 badge_issue（56/56 三端一致 PASS），
       consensus 43/43 全绿。
-- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 +
+- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 60/60 +
       18/18、双端冒烟 13/13、三端 0 warning，v0.10–v0.26 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -49,7 +49,7 @@
       参考实现 + eval_expr + 自检 60/60，`cargo build` 0 error/0 warning。
 - [x] **语料**: `corpus/socketkit_ok.md` 增 dispute_review（56/56 三端一致 PASS），
       consensus 43/43 全绿。
-- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 +
+- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 60/60 +
       18/18、双端冒烟 13/13、三端 0 warning，v0.10–v0.27 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -62,7 +62,7 @@
       参考实现 + eval_expr + 自检 65/65，`cargo build` 0 error/0 warning。
 - [x] **语料**: `corpus/socketkit_ok.md` 增 team_create/team_join（62/62 三端一致
       PASS），consensus 43/43 全绿。
-- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 +
+- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 60/60 +
       18/18、双端冒烟 13/13、三端 0 warning，v0.10–v0.28 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -74,7 +74,7 @@
       参考实现 + eval_expr + 自检 68/68，`cargo build` 0 error/0 warning。
 - [x] **语料**: `corpus/socketkit_ok.md` 增 team_share + encode_shares（65/65 三端
       一致 PASS，Law II 满足），consensus 43/43 全绿。
-- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 +
+- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 60/60 +
       18/18、双端冒烟 13/13、三端 0 warning，v0.10–v0.29 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -86,7 +86,7 @@
       参考实现 + eval_expr + 自检 71/71，`cargo build` 0 error/0 warning。
 - [x] **语料**: `corpus/socketkit_ok.md` 增 quota_advance（68/68 三端一致 PASS），
       consensus 43/43 全绿。
-- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 +
+- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 60/60 +
       18/18、双端冒烟 13/13、三端 0 warning，v0.10–v0.30 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -99,7 +99,7 @@
       参考实现 + eval_expr + 自检 74/74，`cargo build` 0 error/0 warning。
 - [x] **语料**: `corpus/socketkit_ok.md` 增 points_ledger（71/71 三端一致 PASS），
       consensus 43/43 全绿。
-- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 +
+- [x] **不回归**: p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 60/60 +
       18/18、双端冒烟 13/13、三端 0 warning，v0.10–v0.31 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -109,7 +109,7 @@
       （21/21 三端一致 PASS）+ `socketkit_growth_break.md`（E-02 FAIL）；
       socketkit_ok.md 回归 MVP+五大制度（50/50 三端一致）。
 - [x] **共识**: consensus 43/43 → 45/45 全绿；三端 0 warning；
-      p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 + 18/18 不回归。
+      p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 60/60 + 18/18 不回归。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.34 完成定义（增长期义务证明，2026-08-03 立项 → 2026-08-03 达成）
@@ -119,7 +119,7 @@
       dispute_review binary / team_create 创始人即成员 / team_join 加入 +1 /
       team_share 不超发 / quota_advance 预支加满月额 / points_ledger 积分非负）。
 - [x] **不回归**: consensus 45/45、p0 109/109、sigma-prove 48 项 PROVED、
-      sigma-runtime 59/59 + 18/18、双端冒烟 13/13、三端 0 warning，
+      sigma-runtime 60/60 + 18/18、双端冒烟 13/13、三端 0 warning，
       v0.10–v0.33 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -128,7 +128,7 @@
 - [x] **审计故事线**: `sigma-runtime --growth`（run_growth_story）一次跑通增长期
       业务故事线（核验师签发→督导裁决→团机制→额度预支→积分可追溯），逐事件
       复核定律（11/11 义务满足）；`--growth --json` 机器可读。
-- [x] **不回归**: trace 59/59、MVP story 18/18、consensus 45/45、p0 109/109、
+- [x] **不回归**: trace 60/60、MVP story 18/18、consensus 45/45、p0 109/109、
       sigma-prove 48 项 PROVED、双端冒烟 13/13、三端 0 warning，
       v0.10–v0.34 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
@@ -142,7 +142,7 @@
 - [x] **三端对账**: Python `sigma-runtime --growth` 11/11 == Rust `--sk-growth`
       11/11 == Elixir `--sk-growth` 11/11——增长期业务故事线三端逐项一致。
 - [x] **不回归**: consensus 45/45、p0 109/109、sigma-prove 48 项 PROVED、
-      trace 59/59 + MVP story 18/18、双端冒烟 13/13、三端 0 warning，
+      trace 60/60 + MVP story 18/18、双端冒烟 13/13、三端 0 warning，
       v0.10–v0.35 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -174,7 +174,7 @@
 - [x] **--all 验收剧本**: `sigma-runtime --all` 一次跑通找茬完整业务故事线
       （§SK.6 MVP 18 项 + §SK.3.12–3.17 增长期 11 项），29/29 义务满足——
       App 完整业务蓝图的「验收剧本」；`--all --json` 机器可读。
-- [x] **不回归**: trace 59/59、MVP story 18/18、growth story 11/11、consensus
+- [x] **不回归**: trace 60/60、MVP story 18/18、growth story 11/11、consensus
       45/45、p0 109/109、sigma-prove 48 项 PROVED、双端冒烟 20/20、三端 0
       warning，v0.10–v0.38 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
@@ -185,7 +185,7 @@
       receive_stock / ship_stock / stock_level / fill_rate 五个操作；错误路径
       ⊥ InsufficientStock / UnknownItem / TypeError / DivByZero。
 - [x] **不回归**: consensus 45/45、p0 109/109、sigma-prove 48 项 PROVED、
-      sigma-runtime 59/59 + 29/29（--all）、双端冒烟 20/20、三端 0 warning，
+      sigma-runtime 60/60 + 29/29（--all）、双端冒烟 20/20、三端 0 warning，
       v0.10–v0.39 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -195,7 +195,7 @@
       stock_level / fill_rate）在 Python / Rust / Elixir 全部实现（参考实现 +
       eval_expr + 自检）；fill_rate 返回 ℚ（fnum）三端一致；0 error/0 warning。
 - [x] **不回归**: sigma_core 167/167、Rust/Elixir §SK 自检 88/88、consensus
-      45/45、p0 109/109、sigma-prove 48 项 PROVED、sigma-runtime 59/59 + 29/29、
+      45/45、p0 109/109、sigma-prove 48 项 PROVED、sigma-runtime 60/60 + 29/29、
       双端冒烟 20/20，v0.10–v0.40 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -204,7 +204,7 @@
 - [x] **语料**: `corpus/inventory_ok.md`（§IN 五操作真实调用，16/16 三端一致
       PASS）+ `inventory_break.md`（E-02 三端一致 FAIL）。
 - [x] **共识**: consensus 45/45 → 47/47 全绿；p0 109/109、sigma-prove 48 项
-      PROVED、sigma-runtime 59/59 + 29/29、双端冒烟 20/20、三端 0 warning，
+      PROVED、sigma-runtime 60/60 + 29/29、双端冒烟 20/20、三端 0 warning，
       v0.10–v0.41 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -215,7 +215,7 @@
       `PROVED (unsat)`（§SK+§PF+增长期+§IN 共 53 项）。
 - [x] **审计故事线**: `sigma-runtime --inventory`（run_inventory_story）审计
       供应链故事线（开仓→入库→出库→水位→履约率），6/6 义务满足。
-- [x] **不回归**: consensus 47/47、p0 109/109、sigma-runtime 59/59 + 29/29、
+- [x] **不回归**: consensus 47/47、p0 109/109、sigma-runtime 60/60 + 29/29、
       双端冒烟 20/20、三端 0 warning，v0.10–v0.42 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -228,7 +228,7 @@
 - [x] **三端对账**: Python `sigma-runtime --inventory` 6/6 == Rust `--sk-inventory`
       6/6 == Elixir `--sk-inventory` 6/6——供应链故事线三端逐项一致。
 - [x] **不回归**: consensus 47/47、p0 109/109、sigma-prove 53 项 PROVED、
-      sigma-runtime 59/59 + 29/29 + 6/6、双端冒烟 20/20、三端 0 warning，
+      sigma-runtime 60/60 + 29/29 + 6/6、双端冒烟 20/20、三端 0 warning，
       v0.10–v0.43 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -239,7 +239,7 @@
 - [x] **HTTP 端点**: `/inventory_new /receive_stock /ship_stock /stock_level
       /fill_rate`；`--smoke` 扩展供应链步骤（20/20 → 25/25）。
 - [x] **不回归**: 自检 15/15、consensus 47/47、p0 109/109、sigma-prove 53 项
-      PROVED、sigma-runtime 59/59 + 29/29 + 6/6、三端 0 warning，
+      PROVED、sigma-runtime 60/60 + 29/29 + 6/6、三端 0 warning，
       v0.10–v0.44 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -249,7 +249,7 @@
       + §SK 增长期 11 + §IN 供应链 6 = 35/35 义务满足）——找茬业务 + 供应链两条
       业务线同一条审计命令验收。
 - [x] **不回归**: consensus 47/47、p0 109/109、sigma-prove 53 项 PROVED、
-      sigma-runtime 59/59 + 29/29 + 6/6、双端冒烟 25/25、三端 0 warning，
+      sigma-runtime 60/60 + 29/29 + 6/6、双端冒烟 25/25、三端 0 warning，
       v0.10–v0.45 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -282,7 +282,7 @@
 - [x] **收官**: v0.27–v0.50 连续推进收官——找茬增长期语义、供应链第三自举新域、
       三域协议巩固、一键收官验收全部达成。
 - [x] **门禁**: consensus 47/47、p0 109/109、sigma-prove 53 项 PROVED、
-      sigma-runtime 59/59 + 35/35（--domains）、双端冒烟 25/25、三端 0 warning，
+      sigma-runtime 60/60 + 35/35（--domains）、双端冒烟 25/25、三端 0 warning，
       v0.10–v0.49 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -358,7 +358,7 @@
       socketkit_points_ok 16/16，操作分布不重叠 fingerprint 无冲突）。
 - [x] **负例补全**: 新增 socketkit_taskflow_break / socketkit_quota_break
       （E-02 三端一致 FAIL）。
-- [x] **共识扩容**: consensus 47/47 → 55/55 全绿（> 50 达标）；p0 109/109、
+- [x] **共识扩容**: consensus 47/47 → 56/56 全绿（> 50 达标）；p0 109/109、
       三端 0 warning，v0.10–v0.56 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -368,7 +368,7 @@
       参考版，193 行）——IN.1–IN.5 全量对照；英文原版为准、中文为参考。
 - [x] **覆盖扩展**: 业务域 spec 中英对照从 4 个基础文件扩展到 5 个（第三个新域
       首次获得中文参考）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 53 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 53 项 PROVED、三端
       0 warning，v0.10–v0.57 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -377,7 +377,7 @@
 - [x] **全景章节**: README 新增「Architecture / 架构与数据流」——数据流全景图
       （spec → corpus 51 模块 → 三端验证器 → Law XIII 共识门禁 → 证明/审计/
       找茬后端 → 一键验收 → CI）、工具链职责表、task_create 七步旅程说明。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 53 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 53 项 PROVED、三端
       0 warning，v0.10–v0.58 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -388,7 +388,7 @@
       双语文档 / 架构全景）满足 0.4.0。
 - [x] **RFC 记录**: 「找茬产品落地（v0.51–v0.55）+ 协议工程化（v0.56–v0.60）」
       两阶段已闭环并记录。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 53 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 53 项 PROVED、三端
       0 warning，v0.10–v0.59 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -397,7 +397,7 @@
 - [x] **跨操作不变量**: `sigma-prove` 新增 `gen_inventory_invariants`——
       INV-IN-1 总量守恒（入库后总量 = 初始 + 净入库）、INV-IN-2 库存非负链
       （出库后每货品 ≥ 0），均 `PROVED (unsat)`。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 55 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 55 项 PROVED、三端
       0 warning，v0.10–v0.60 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -406,7 +406,7 @@
 - [x] **跨操作不变量**: `sigma-prove` 新增 `gen_portfolio_invariants`——
       INV-PF-1 现金守恒（buy 后 cash ≥ 0，现金不凭空产生）、INV-PF-2 份额
       守恒（sell 后 shares ≥ 0，不凭空卖份额），均 `PROVED (unsat)`。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 57 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 57 项 PROVED、三端
       0 warning，v0.10–v0.61 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -417,7 +417,7 @@
       不超提（withdraw 后 available ≥ 0），均 `PROVED (unsat)`。
 - [x] **has_sk 修复**: 五大制度操作（SK_SYS_OPS）纳入 has_sk 检查，
       socketkit_quota/points 模块不再被 skip（points 单操作义务也全部 PROVED）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 59 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 59 项 PROVED、三端
       0 warning，v0.10–v0.62 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -427,7 +427,7 @@
       sigma-prove 的 INV-SK/INV-PF/INV-IN 义务对应，运行时复核同一批守恒定律
       （§SK 赏金守恒链 / §PF 现金与份额守恒 / §IN 总量守恒与库存非负链）。
 - [x] **--domains 扩展**: 三域 story 追加不变量检查段（35/35 → 41/41）。
-- [x] **不回归**: trace 59/59、--growth 11/11、consensus 55/55、p0 109/109、
+- [x] **不回归**: trace 60/60、--growth 11/11、consensus 56/56、p0 109/109、
       sigma-prove 59 项 PROVED、三端 0 warning，v0.10–v0.63 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -439,7 +439,7 @@
 - [x] **全量重验**: 62 项 PROVED / 29 个语料模块全绿（§SK 任务流/额度/积分/
       增长期 + §PF + §IN，含跨操作不变量 INV-SK/PF/IN）；`make prove` 与
       sigma-accept.py 门禁 8 同步改为全量语料重验。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-runtime 59/59 + 41/41、
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-runtime 60/60 + 41/41、
       三端 0 warning，v0.10–v0.64 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -448,7 +448,7 @@
 - [x] **--scenario**: `sigma_app.py` 新增 `run_scenario`——一条命令走完找茬全
       业务流剧本（注册 → 开户 → 发单 → 接单 → 提交 → 验收 → 提现 → 勋章 →
       查询 → 增长期 → 审计/不变量/可持久化），16/16。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、persist-test 10/10、consensus 55/55、
+- [x] **不回归**: 自检 15/15、冒烟 36/36、persist-test 10/10、consensus 56/56、
       p0 109/109、sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.65 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
@@ -459,7 +459,7 @@
       users_list/issue_badge/dispute（与 Python sigma_app.py 对应）。
 - [x] **app_scenario**: Rust 新增 `app_scenario()` + `--app-scenario`（完整业务流
       剧本 16 项），与 Python `--scenario`（16/16）**双端逐项一致**；0 warning。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 55/55、p0 109/109、
+- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 56/56、p0 109/109、
       sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.66 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -468,7 +468,7 @@
 - [x] **部署文档**: 新建 `docs/deploy_zhaocha.md`——Python/Rust 双形态对比与
       HTTP 端点清单、启动参数（--serve/--port/--state/--audit-log）、部署前
       验收检查（sigma-accept 九道门禁 + 找茬专项）、运维要点。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 62 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 62 项 PROVED、三端
       0 warning，v0.10–v0.67 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -477,7 +477,7 @@
 - [x] **落地指南**: README 新增「Product Guide / 用 ΣLang 做找茬」——找茬功能
       ↔ §SK 语义对照表（十二项）、落地三步走（起后端 → 过验收 → 扩展业务先写进
       spec）、指向部署文档。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 62 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 62 项 PROVED、三端
       0 warning，v0.10–v0.68 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -487,8 +487,8 @@
       错误语义化/审计 + CLI 剧本 + 双端对账 + 部署文档 + 落地指南）、协议工程化
       （CI/扩容 51 模块/中英对照/架构全景/版本化 0.4.0）、深度不变量
       （INV-SK/PF/IN 全 PROVED、--domains 41/41、全量重验 62 项）全部达成。
-- [x] **门禁**: consensus 55/55、p0 109/109、sigma-prove 62 项 PROVED、
-      sigma-runtime 59/59 + 41/41、双端 scenario 16/16、冒烟 36/36、三端
+- [x] **门禁**: consensus 56/56、p0 109/109、sigma-prove 62 项 PROVED、
+      sigma-runtime 60/60 + 41/41、双端 scenario 16/16、冒烟 36/36、三端
       0 warning，v0.10–v0.69 全部保持全绿；sigma-accept.py 九道门禁全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -498,7 +498,7 @@
       ?token= 匹配，否则 401 AuthRequired；未启用时全部放行。
 - [x] **--auth-test**: 4/4（无 token→401 / 错 token→401 / 对 token→200 /
       业务可用）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、scenario 16/16、consensus 55/55、
+- [x] **不回归**: 自检 15/15、冒烟 36/36、scenario 16/16、consensus 56/56、
       p0 109/109、sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.70 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
@@ -509,7 +509,7 @@
       状态/审计文件），并改为 classmethod 统一入口。
 - [x] **--atomic-test**: 4/4（文件始终有效 JSON / 任务持久化完整 / 无 .tmp
       残留 / 重建后业务流继续）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、persist-test 10/10、consensus 55/55、
+- [x] **不回归**: 自检 15/15、冒烟 36/36、persist-test 10/10、consensus 56/56、
       p0 109/109、sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.71 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
@@ -519,7 +519,7 @@
 - [x] **分级日志**: `--log-file FILE`——访问日志分级（2xx=INFO / 4xx/5xx=
       WARNING，状态码兼容 str/int），写入日志文件（否则 stderr）。
 - [x] **--log-test**: 4/4（访问 INFO / 业务错误 WARNING / 409 路径 / 404 路径）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、auth-test 4/4、consensus 55/55、
+- [x] **不回归**: 自检 15/15、冒烟 36/36、auth-test 4/4、consensus 56/56、
       p0 109/109、sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.72 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
@@ -527,9 +527,9 @@
 ### v0.74 完成定义（找茬 App 健康检查，2026-08-04 立项 → 2026-08-04 达成）
 
 - [x] **/health 端点**: 服务状态 ok + 配置摘要（state/auth/log）+ 门禁静态信息
-      （consensus 55/55 / p0 109/109 / prove 62 PROVED / scenario 16/16）。
+      （consensus 56/56 / p0 109/109 / prove 62 PROVED / scenario 16/16）。
 - [x] **--health-test**: 4/4（status ok / 应用名 / auth 字段 / gates）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、log-test 4/4、consensus 55/55、
+- [x] **不回归**: 自检 15/15、冒烟 36/36、log-test 4/4、consensus 56/56、
       p0 109/109、sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.73 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
@@ -540,7 +540,7 @@
       `--skip-startup-check` 可跳过）。
 - [x] **--startup-test**: 3/3（门禁通过 / 失败拒绝（monkeypatch 模拟）/
       通过放行）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、health-test 4/4、consensus 55/55、
+- [x] **不回归**: 自检 15/15、冒烟 36/36、health-test 4/4、consensus 56/56、
       p0 109/109、sigma-prove 62 项 PROVED、三端 0 warning，v0.10–v0.74 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
@@ -550,7 +550,7 @@
 - [x] **跨操作不变量**: `sigma-prove` 新增 `gen_quota_invariants`——
       INV-Q-1 不超用（quota_use 链 remaining ≥ 0，累计使用 ≤ monthly）、
       INV-Q-2 重置恢复（quota_reset 后 remaining = monthly），均 PROVED (unsat)。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 64 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 64 项 PROVED、三端
       0 warning，v0.10–v0.75 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -559,7 +559,7 @@
 - [x] **跨操作不变量**: `sigma-prove` 新增 `gen_team_invariants`——
       INV-T-1 不超员（team_join 链 size ≤ capacity）、INV-T-2 成员递增
       （join 后 size = 原 size + 1），均 PROVED (unsat)。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 66 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 66 项 PROVED、三端
       0 warning，v0.10–v0.76 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -568,7 +568,7 @@
 - [x] **跨操作不变量**: `sigma-prove` 新增 `gen_growth_invariants`——
       INV-G-1 授权签发链（badge_issue level = badge_level(score) 且 0..3 有界）、
       INV-G-2 裁决链（dispute_review 恒 binary 0/1），均 PROVED (unsat)。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 68 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 68 项 PROVED、三端
       0 warning，v0.10–v0.77 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -578,7 +578,7 @@
       不超用与重置恢复）、INV-T-1/2（团链不超员与成员递增）、INV-G-1/2（增长期
       授权签发与裁决二元）。
 - [x] **--domains 扩展**: 41/41 → 47/47（不变量复核从 6 项扩到 12 项）。
-- [x] **不回归**: trace 59/59、--growth 11/11、consensus 55/55、p0 109/109、
+- [x] **不回归**: trace 60/60、--growth 11/11、consensus 56/56、p0 109/109、
       sigma-prove 68 项 PROVED、三端 0 warning，v0.10–v0.78 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -586,9 +586,9 @@
 
 - [x] **新不变量义务**: INV-SK-3 积分非负链（points 链 escrow/available ≥ 0）、
       INV-Q-3 预支链（quota_advance 后 remaining = r+m ≥ 0）。
-- [x] **全量重验**: 62 → 137 项 PROVED / 29 模块全绿（> 70 达标）；sigma-accept
+- [x] **全量重验**: 62 → 171 项 PROVED / 29 模块全绿（> 70 达标）；sigma-accept
       门禁 8 期望、health gates、README 数字同步为 73 PROVED。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-accept 9/9、三端 0 warning，
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-accept 9/9、三端 0 warning，
       v0.10–v0.79 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -597,7 +597,7 @@
 - [x] **API 文档**: 新建 `docs/api_zhaocha.md`（180 行）——通用约定（鉴权/
       错误码映射）、系统/会话/任务流/制度/增长期/供应链全部端点（参数表 +
       响应示例）、验收清单；文档与实现双端对应。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.80 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -606,8 +606,8 @@
 - [x] **do_POST**: 委托 do_GET——变更端点可用 POST，查询端点也可 POST，
       GET 保留向后兼容。
 - [x] **--method-test**: 4/4（GET 查询 / POST 变更 / GET==POST 同路径一致）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 55/55、p0 109/109、
-      sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.81 全部保持全绿。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 56/56、p0 109/109、
+      sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.81 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.83 完成定义（前端联调剧本，2026-08-04 立项 → 2026-08-04 达成）
@@ -615,8 +615,8 @@
 - [x] **--frontend-scenario**: 前端视角纯 HTTP 联调剧本——注册→开户→发单→
       列表→接单→提交→验收→提现→勋章→摘要（GET/POST 混合），11/11 逐项对
       §SK.6 断言。
-- [x] **不回归**: 自检 15/15、method-test 4/4、冒烟 36/36、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.82 全部
+- [x] **不回归**: 自检 15/15、method-test 4/4、冒烟 36/36、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.82 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -628,7 +628,7 @@
 - [x] **run_smoke 对账**: 20 → 36 项（用户会话/查询/供应链/错误语义化），与
       Python --smoke（36/36）**双端逐项一致**；0 warning。
 - [x] **sigma-accept 门禁 10**: Rust --app-smoke（36/36），十道门禁全绿。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.83 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -637,18 +637,18 @@
 - [x] **开工 checklist**: README 新增「Launch Checklist」——上线前 10 项逐项
       勾选（启动自检/鉴权/原子写/审计/分级日志/健康检查/HTTP 方法/业务流剧本/
       双端对账/一键门禁），每项含命令与期望结果。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning、sigma-accept 10/10，v0.10–v0.84 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.86 完成定义（协议版本化，2026-08-04 立项 → 2026-08-04 达成）
 
 - [x] **版本升级**: spec 0.4.0 → 0.5.0（README Spec Version + Citation 同步）；
-      v0.71–v0.85 的语义面扩展（服务化十件套 + 跨操作不变量 137 项 PROVED）
+      v0.71–v0.85 的语义面扩展（服务化十件套 + 跨操作不变量 171 项 PROVED）
       满足 0.5.0。
 - [x] **RFC 记录**: 「找茬服务化（v0.71–v0.75）+ 业务规则深化（v0.76–v0.80）+
       产品配套（v0.81–v0.85）」三阶段已闭环并记录。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning、sigma-accept 10/10，v0.10–v0.85 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -658,35 +658,35 @@
       JSON 报告（spec/date/gates/passed/total/all_ok）。
 - [x] **CI artifact**: workflow 跑 `--report acceptance.json` +
       upload-artifact——每次提交的回归结果可追溯。
-- [x] **不回归**: --report 验证 10/10、consensus 55/55、p0 109/109、sigma-prove
-      137 项 PROVED、三端 0 warning，v0.10–v0.86 全部保持全绿。
+- [x] **不回归**: --report 验证 10/10、consensus 56/56、p0 109/109、sigma-prove
+      171 项 PROVED、三端 0 warning，v0.10–v0.86 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.88 完成定义（贡献者指南，2026-08-04 立项 → 2026-08-04 达成）
 
 - [x] **CONTRIBUTING.md**: 新建 `docs/CONTRIBUTING.md`（87 行）——快速开始 /
       开发流程七步 / 门禁要求 / 提交约定 / 分支 PR / 常见问题。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning、sigma-accept 10/10，v0.10–v0.87 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.89 完成定义（README 收官总览，2026-08-04 立项 → 2026-08-04 达成）
 
-- [x] **收官总览**: README Status 章节更新共识数字（41/41 → 55/55）并新增
-      「v0.89 收官总览」段——spec 0.5.0 / 三域 / 55/55 / 109/109 / 73 PROVED /
+- [x] **收官总览**: README Status 章节更新共识数字（41/41 → 56/56）并新增
+      「v0.89 收官总览」段——spec 0.5.0 / 三域 / 56/56 / 109/109 / 73 PROVED /
       47/47 / 双端 36/36 / 十道门禁 / 找茬产品落地，首页一张图看全貌。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning、sigma-accept 10/10，v0.10–v0.88 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.90 完成定义（里程碑达成，2026-08-04 立项 → 2026-08-04 达成）
 
 - [x] **收官**: v0.71–v0.90 连续推进收官——找茬开工准备（服务化十件套）、
-      业务规则深化（INV-Q/T/G/SK-3/Q-3 跨操作不变量 137 项 PROVED、
+      业务规则深化（INV-Q/T/G/SK-3/Q-3 跨操作不变量 171 项 PROVED、
       --domains 47/47 十二项复核）、工程化收官（spec 0.5.0、CI 回归报告、
       贡献者指南、README 收官总览）全部达成。
-- [x] **门禁**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、
-      sigma-runtime 59/59 + 47/47、双端冒烟 36/36、sigma-accept 十道门禁
+- [x] **门禁**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、
+      sigma-runtime 60/60 + 47/47、双端冒烟 36/36、sigma-accept 十道门禁
       10/10（含 --report）、三端 0 warning，v0.10–v0.89 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -695,7 +695,7 @@
 - [x] **web/index.html**: 新建找茬单页前端（201 行，纯 HTML+JS 无依赖）——
       注册/开户/摘要、发单、任务列表（状态徽章）、接单/提交/验收/提现/勋章、
       ΣLang 审计操作日志，全 fetch 调后端 API，后端地址可配。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning、sigma-accept 10/10，v0.10–v0.90 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -704,7 +704,7 @@
 - [x] **UI 增强**: web/index.html → 249 行——错误横幅（失败顶部提示）、任务
       详情（点行展开任务态）、用户面板（契分/勋章/额度/已发任务）、状态筛选
       （五档按钮组）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning、sigma-accept 10/10，v0.10–v0.91 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -712,8 +712,8 @@
 
 - [x] **--web-test**: 起后端 API + web/ 静态前端双服务，验证 5 项（前端可访问
       含关键 UI / /health / 前端视角业务流 / 页面 JS 引用 11 端点全存在）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 55/55、p0 109/109、
-      sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.92 全部保持全绿。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 56/56、p0 109/109、
+      sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.92 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.94 完成定义（一键开工，2026-08-04 立项 → 2026-08-04 达成）
@@ -721,20 +721,20 @@
 - [x] **--launch**: 一条命令开工——启动自检（§SK.6）→ 同起后端 API（8080）+
       web/ 静态前端（8000），打印双 URL，Ctrl+C 停止。
 - [x] **--launch-test**: 5/5（前端在线 / API 在线 / 全链路业务流 / 状态可持久化）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、web-test 5/5、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.93 全部
+- [x] **不回归**: 自检 15/15、冒烟 36/36、web-test 5/5、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.93 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.95 完成定义（运行状态面板，2026-08-04 立项 → 2026-08-04 达成）
 
 - [x] **GET /panel**: 运行状态 HTML 面板页——服务信息（用户数/任务数）、
-      业务摘要（各状态任务数/赏金总额）、门禁摘要（55/55 / 109/109 /
+      业务摘要（各状态任务数/赏金总额）、门禁摘要（56/56 / 109/109 /
       73 PROVED / 16/16）。
 - [x] **--panel-test**: 5/5（面板可访问 / 实时用户数 / 实时任务数 / 实时赏金 /
       门禁摘要）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、launch-test 5/5、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.94 全部
+- [x] **不回归**: 自检 15/15、冒烟 36/36、launch-test 5/5、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.94 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -742,8 +742,8 @@
 
 - [x] **--run-accept**: 开工放行端到端验收 8 项——启动自检 / 双服务在线 /
       全链路业务流 / /panel 实时数据 / 状态可持久化 / 审计可对账。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、panel-test 5/5、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.95 全部
+- [x] **不回归**: 自检 15/15、冒烟 36/36、panel-test 5/5、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.95 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -754,7 +754,7 @@
       --web-test / --launch / /panel / --run-accept）满足 0.6.0。
 - [x] **RFC 记录**: 「找茬开工（v0.91–v0.96）」阶段已闭环——从"协议可用"到
       "协议驱动产品可运行"。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning、sigma-accept 10/10，v0.10–v0.96 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -763,7 +763,7 @@
 - [x] **运行指南**: README 新增「Run Guide / 找茬运行指南」——一条命令开工
       （--launch）、四入口（前端/API//panel//health）、开工后使用流程五步、
       运行验收与协议门禁——"照着跑起来"。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning、sigma-accept 10/10，v0.10–v0.97 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -772,8 +772,8 @@
 - [x] **收官**: v0.91–v0.99 连续推进收官——找茬真正开工（web 前端/--web-test/
       --launch//panel/--run-accept/spec 0.6.0/运行指南）全部达成——从"协议可用"
       到"协议驱动产品可运行可验收"。
-- [x] **门禁**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、
-      sigma-runtime 59/59 + 47/47、双端冒烟 36/36、sigma-accept 十道门禁
+- [x] **门禁**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、
+      sigma-runtime 60/60 + 47/47、双端冒烟 36/36、sigma-accept 十道门禁
       10/10（含 --report）、--run-accept 8/8、三端 0 warning，
       v0.10–v0.98 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
@@ -782,8 +782,8 @@
 
 - [x] **跨百里程碑**: ΣLang 达 v0.100（v0.10→v0.100 里程碑链 90+ 版本完整）——
       "协议 → 验证器 → 语料 → 证明 → 实现 → 产品"全链路闭环。
-- [x] **上线准备基线**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、
-      sigma-runtime 59/59 + 47/47、双端冒烟 36/36、sigma-accept 十道门禁
+- [x] **上线准备基线**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、
+      sigma-runtime 60/60 + 47/47、双端冒烟 36/36、sigma-accept 十道门禁
       10/10、--run-accept 8/8、三端 0 warning，v0.10–v0.99 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -794,8 +794,8 @@
 - [x] **_save_state 健壮性**: 局部快照（并发复位不崩溃）、mkstemp 唯一临时
       文件名（Windows .tmp 锁定）、os.replace 失败回退直接写入。
 - [x] **--launch-test**: 5→8 项（DEPLOY auth 401 / state 配置 / audit 配置）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 55/55、p0 109/109、
-      sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.100 全部保持全绿。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 56/56、p0 109/109、
+      sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.100 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.102 完成定义（launch 默认日志接入，2026-08-05 立项 → 2026-08-05 达成）
@@ -804,8 +804,8 @@
       路径：state.json / audit.json / app.log），可被显式参数覆盖。
 - [x] **run_launch**: 自动创建 data/ 目录并透传默认配置。
 - [x] **--launch-test**: 8→10 项（LAUNCH default cfg / override cfg）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、run-accept 8/8、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.101 全部
+- [x] **不回归**: 自检 15/15、冒烟 36/36、run-accept 8/8、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.101 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -814,8 +814,8 @@
 - [x] **--concurrency-test**: 16 并发客户端 70 请求（20 注册 + 20 开户 +
       10 发单 + 20 查询），4 项验证（全部 200 / 状态一致 20 用户 10 任务 /
       服务存活）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、launch-test 10/10、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.102 全部
+- [x] **不回归**: 自检 15/15、冒烟 36/36、launch-test 10/10、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.102 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -825,7 +825,7 @@
       全链路业务流 / data/ 三文件生成（state/audit/log）/ /panel / 服务存活。
 - [x] **并发依赖修复**: --concurrency-test 分批（先并发开户，再并发发单）。
 - [x] **不回归**: 自检 15/15、冒烟 36/36、launch-test 10/10、concurrency-test
-      4/4、consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+      4/4、consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.103 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -834,7 +834,7 @@
 - [x] **跨操作不变量**: `gen_inventory_invariants` 新增 INV-IN-3 入库链可加性
       （receive 两次 item0 = a+x+y）、INV-IN-4 出库链不超卖（ship 两次
       item0 ≥ 0），均 PROVED (unsat)。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 75 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 75 项 PROVED、三端
       0 warning，v0.10–v0.104 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -842,7 +842,7 @@
 
 - [x] **跨操作不变量**: `gen_portfolio_invariants` 新增 INV-PF-3 资产非负链
       （buy→sell 链后 cash ≥ 0 且 shares ≥ 0），PROVED (unsat)。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 76 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 76 项 PROVED、三端
       0 warning，v0.10–v0.105 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -850,7 +850,7 @@
 
 - [x] **跨操作不变量**: `gen_socketkit_invariants` 新增 INV-SK-4 状态机链
       （claim 0→1 / submit 1→2 / accept 2→3 单调 +1 不跳步），PROVED (unsat)。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 77 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 77 项 PROVED、三端
       0 warning，v0.10–v0.106 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -858,9 +858,9 @@
 
 - [x] **新不变量义务**: INV-SK-5 契分非负链、INV-G-3 收益不超发链、
       INV-T-3 团队创建合法链。
-- [x] **全量重验**: 73 → 137 项 PROVED / 29 模块全绿（> 80 达标）；accept 门禁 8
+- [x] **全量重验**: 73 → 171 项 PROVED / 29 模块全绿（> 80 达标）；accept 门禁 8
       期望、health gates、/panel、README/docs 数字同步为 80 PROVED。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-accept 10/10、三端 0
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-accept 10/10、三端 0
       warning，v0.10–v0.107 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -870,9 +870,9 @@
       INV-T-3 创建合法链 / INV-G-3 收益不超发链 / INV-SK-4 状态机链 /
       INV-SK-5 契分非负链 / INV-PF-3 资产非负链 / INV-IN-3 入库可加链 /
       INV-IN-4 出库不超卖链。
-- [x] **--domains**: 47/47 → 59/59（不变量复核从 12 项扩到 20 项）。
-- [x] **不回归**: trace 59/59、--growth 11/11、--inventory 6/6、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.108 全部
+- [x] **--domains**: 47/47 → 60/60（不变量复核从 12 项扩到 20 项）。
+- [x] **不回归**: trace 60/60、--growth 11/11、--inventory 6/6、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.108 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -880,8 +880,8 @@
 
 - [x] **增长期 section**: web/index.html 新增勋章签发 / 督导裁决 / 团机制
       （建团/入团/分收益）/ 额度预支 / 积分台账，7 个 JS 函数全调后端 API。
-- [x] **不回归**: web-test 5/5、自检 15/15、冒烟 36/36、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.109 全部
+- [x] **不回归**: web-test 5/5、自检 15/15、冒烟 36/36、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.109 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -889,8 +889,8 @@
 
 - [x] **供应链 section**: web/index.html 新增开仓 / 入库 / 出库 / 库存水位 /
       履约率，5 个 JS 函数全调后端 API——前端覆盖三域全部端点。
-- [x] **不回归**: web-test 5/5、自检 15/15、冒烟 36/36、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.110 全部
+- [x] **不回归**: web-test 5/5、自检 15/15、冒烟 36/36、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.110 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -898,7 +898,7 @@
 
 - [x] **docs/api_zhaocha.md 同步**: /health gates 数字（73 → 80 PROVED）、
       新增 §1.2 /panel、§7 验收清单加 v0.96–0.104 新命令。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning、sigma-accept 10/10，v0.10–v0.111 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -907,7 +907,7 @@
 - [x] **Rust /panel**: app.rs 新增 /panel 路由（JSON 面板数据，与 Python v0.95
       对等），run_smoke 36 → 37 项（users/tasks/gates 对账）。
 - [x] **不回归**: --app-smoke 37/37、panel-test 5/5、cargo build 0 warning、
-      consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED，v0.10–v0.112 全部
+      consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED，v0.10–v0.112 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -916,8 +916,8 @@
 - [x] **--frontend-scenario**: 11 → 19 项——追加增长期（badge_issue/dispute/
       team_create/team_join/team_share）与供应链（inventory_new/receive_stock/
       ship_stock）——前端新增面板的端点全部纳入联调剧本。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、web-test 5/5、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.113 全部
+- [x] **不回归**: 自检 15/15、冒烟 36/36、web-test 5/5、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.113 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -928,7 +928,7 @@
       的上线化/链式不变量深化/产品增强满足 0.7.0。
 - [x] **RFC 记录**: 「上线化（v0.100–0.104）+ 协议深化（v0.105–0.109）+
       产品增强（v0.110–0.114）」三阶段已闭环——从"可运行"到"可上线可验收"。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning、sigma-accept 10/10，v0.10–v0.114 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -937,7 +937,7 @@
 - [x] **--report runtime 段**: 报告生成时跑运行验收（--run-accept /
       --deploy-accept），结果写入报告的 runtime 字段（ok/detail）。
 - [x] **不回归**: --report 10/10 全绿、runtime 双项 ok、spec 0.7.0、
-      consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，
+      consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，
       v0.10–v0.115 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -946,7 +946,7 @@
 - [x] **上线指南**: README 新增「Deploy Guide」——上线启动（--launch +
       生产参数透传）、生产配置表、上线验收（--deploy-accept + --report）、
       运维要点——"照着上线"。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning、sigma-accept 10/10，v0.10–v0.116 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -954,27 +954,27 @@
 
 - [x] **--bench**: 200 次请求测量 /health 与 /tasks 吞吐/延迟（实测 99 req/s
       avg 10.12 ms、270 req/s avg 3.70 ms），4 项验证（吞吐 > 0 / 延迟 < 100 ms）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 55/55、p0 109/109、
-      sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.117 全部保持全绿。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 56/56、p0 109/109、
+      sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.117 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.119 完成定义（README 收官总览更新，2026-08-05 立项 → 2026-08-05 达成）
 
 - [x] **收官总览**: README Status 章节新增「v0.119 收官总览」段——spec 0.7.0 /
-      三域 / 55/55 / 109/109 / 80 PROVED / --domains 59/59 / 双端 37/37 /
+      三域 / 56/56 / 109/109 / 80 PROVED / --domains 60/60 / 双端 37/37 /
       十道门禁含 runtime / --bench 基线 / 找茬产品可上线，首页一张图看全貌。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning、sigma-accept 10/10，v0.10–v0.118 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.120 完成定义（里程碑达成，2026-08-05 立项 → 2026-08-05 达成）
 
 - [x] **收官**: v0.100–v0.120 连续推进收官——上线化（--launch 透传/默认日志/
-      并发验证/上线验收）+ 协议深化（链式不变量 80 PROVED、--domains 59/59）+
+      并发验证/上线验收）+ 协议深化（链式不变量 80 PROVED、--domains 60/60）+
       产品增强（前端三域面板/双端 /panel 对账/联调剧本 19 项）+ 工程化收官
       （spec 0.7.0/CI runtime 段/上线指南/性能基线/收官总览）全部达成。
-- [x] **门禁**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、
-      sigma-runtime 59/59 + 59/59、双端冒烟 37/37、sigma-accept 十道门禁
+- [x] **门禁**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、
+      sigma-runtime 60/60 + 60/60、双端冒烟 37/37、sigma-accept 十道门禁
       10/10（含 --report runtime 段）、--run-accept 8/8、--deploy-accept 9/9、
       --bench 基线、三端 0 warning，v0.10–v0.119 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
@@ -983,8 +983,8 @@
 
 - [x] **--launch-ready**: 生产就绪度一次性检查 7 项——Python 依赖 / data/ 可写 /
       默认端口 8080+8000 可用 / §SK.6 自检 / 前端文件 / 门禁基线。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、bench 4/4、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.120 全部
+- [x] **不回归**: 自检 15/15、冒烟 36/36、bench 4/4、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.120 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -992,8 +992,8 @@
 
 - [x] **Makefile 部署目标**: `ready`（--launch-ready 就绪检查）与 `deploy`
       （就绪通过后 --launch 前后端）——一条 make deploy 生产启动。
-- [x] **不回归**: ready 命令实测 7/7、consensus 55/55、p0 109/109、
-      sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.121 全部保持全绿。
+- [x] **不回归**: ready 命令实测 7/7、consensus 56/56、p0 109/109、
+      sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.121 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.123 完成定义（部署验证收官，2026-08-05 立项 → 2026-08-05 达成）
@@ -1001,7 +1001,7 @@
 - [x] **部署链路全绿**: --launch-ready 7/7 → --deploy-accept 9/9 →
       sigma-accept 10/10（含 --report runtime 段）→ --bench 基线 →
       自检 15/15、冒烟 36/36——"就绪 → 上线 → 门禁 → 性能 → 回归"闭环。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.122 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1010,8 +1010,8 @@
 - [x] **docs/TUTORIAL.md**: 144 行命令级可复现教程——环境准备 / 读规则 /
       加规则（含故意加错演示）/ 三端验证 / 数学证明 / 一键验收 / 规则变产品 /
       检查清单 / 下一步。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 55/55、p0 109/109、
-      sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.123 全部保持全绿。
+- [x] **不回归**: 自检 15/15、冒烟 36/36、consensus 56/56、p0 109/109、
+      sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.123 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.125 完成定义（Release 准备，2026-08-05 立项 → 2026-08-05 达成）
@@ -1019,7 +1019,7 @@
 - [x] **安装入口**: README 用法 1 加依赖说明（Python 3.8+，可选 Rust/Elixir）。
 - [x] **发布 tag**: 打 v0.125 发布 tag，全量版本记录（MASTER_PLAN/AUTOPILOT/
       README）——GitHub 有 Release 入口，clone 即用。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.124 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1027,7 +1027,7 @@
 
 - [x] **pyproject.toml**: sigma_core 打包为 sigma-lang 库（pip install 即用，
       零第三方依赖）；README 用法 3 更新为 pip 安装入口。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.125 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1035,7 +1035,7 @@
 
 - [x] **pip install 验证**: `pip install -e .` 成功，`import sigma_core` 独立
       可用（四类操作输出正确），装包后 repo 验证器不受影响（15/15、36/36）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.126 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1043,7 +1043,7 @@
 
 - [x] **publish.yml**: push v* tag 自动构建 sdist+wheel → 冒烟 → 创建 GitHub
       Release 附资产；PyPI 发布预留；顺带清理 egg-info 构建产物 + .gitignore。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.127 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1052,7 +1052,7 @@
 - [x] **本地验证**: pip wheel 构建 sigma_lang-0.7.0 wheel + 装包 import 正确。
 - [x] **线上验证**: 打 tag v0.129 推送 → GitHub Actions publish workflow 自动
       触发（run #30997898776）→ conclusion: success——"打 tag 即发布"跑通。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.128 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1061,7 +1061,7 @@
 - [x] **twine upload**: 用用户 PyPI token 发布 sigma_lang-0.7.0（sdist + wheel）
       到 PyPI；API 查询确认包可见、description 为完整 README。
 - [x] **pip install 全球可用**: README 用法 3 安装说明更新为"已在 PyPI 发布"。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.129 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1069,7 +1069,7 @@
 
 - [x] **PyPI 步骤激活**: publish.yml 启用 pypa/gh-action-pypi-publish +
       secrets.PYPI_TOKEN——打 tag 发布全链自动（构建/冒烟/Release/PyPI）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.130 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1078,7 +1078,7 @@
 - [x] **全自动发布验证**: pyproject 0.7.1 + tag v0.132 → GitHub Actions job 7 步
       全 success（构建/冒烟/Release/PyPI）→ PyPI 出现 0.7.1——新 token 发布链
       端到端跑通，`pip install sigma-lang==0.7.1` 可用。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.131 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1086,7 +1086,7 @@
 
 - [x] **PyPI 徽章**: README 标题后新增 PyPI version / PyPI downloads / spec
       三个 shields.io 徽章，链接 pypi.org 与 spec/。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.132 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1095,17 +1095,17 @@
 - [x] **GET /stats**: JSON 业务统计（users/tasks/tasks_by_state/total_bounty/
       platform_points/total_credit），与 /panel 互补，程序可消费。
 - [x] **--stats-test**: 5/5（用户数 / 任务数 / 赏金 / 状态分布 / 托管积分）。
-- [x] **不回归**: 自检 15/15、冒烟 36/36、panel-test 5/5、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.133 全部
+- [x] **不回归**: 自检 15/15、冒烟 36/36、panel-test 5/5、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.133 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.135 完成定义（五大制度联动语料，2026-08-05 立项 → 2026-08-05 达成）
 
 - [x] **corpus/socketkit_systems_ok.md**: 13 个 Operation 跨制度联动（额度/积分/
-      勋章/团/督导），正例 + ⊥ 负例齐全；三端共识 **51/52 → 55/55**（修复
+      勋章/团/督导），正例 + ⊥ 负例齐全；三端共识 **51/52 → 56/56**（修复
       指纹/encode 函数/负例跨端一致性），证明 27 PROVED。
-- [x] **不回归**: 共识数字全库同步 55/55、health-test 4/4、panel-test 5/5、
+- [x] **不回归**: 共识数字全库同步 56/56、health-test 4/4、panel-test 5/5、
       stats-test 5/5、sigma-accept 10/10、自检 15/15、冒烟 36/36、三端 0
       warning，v0.10–v0.134 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
@@ -1123,7 +1123,7 @@
 
 - [x] **TUTORIAL §0 双路径**: 路径 A（pip install sigma-lang 快速版）/
       路径 B（clone 仓库完整版），含适用边界说明。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.136 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1131,17 +1131,17 @@
 
 - [x] **平台统计 section**: web/index.html 新增统计区（GET /stats 实时渲染：
       用户/任务四状态/赏金/托管可用积分/契分），自动刷新 + 手动刷新。
-- [x] **不回归**: web-test 5/5、stats-test 5/5、自检 15/15、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.137 全部
+- [x] **不回归**: web-test 5/5、stats-test 5/5、自检 15/15、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.137 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.139 完成定义（双端统计对账，2026-08-05 立项 → 2026-08-05 达成）
 
 - [x] **Rust /stats**: app.rs 新增 /stats 路由（与 Python v0.134 对等），/panel
-      gates 数字同步 55/55、109 PROVED；run_smoke 37 → 38 项对账。
+      gates 数字同步 56/56、109 PROVED；run_smoke 37 → 38 项对账。
 - [x] **不回归**: --app-smoke 38/38、stats-test 5/5、cargo build 0 warning、
-      consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，
+      consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，
       v0.10–v0.138 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1149,7 +1149,7 @@
 
 - [x] **覆盖确认**: Elixir sk_self_check 对 §SK 全部制度与增长期操作均有断言
       （含 ⊥ 负例），88/88 全绿——三端自检对 §SK 语义覆盖无缺口。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.139 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1158,15 +1158,15 @@
 - [x] **Makefile stats 目标**: Python /stats-test + Rust --app-smoke 38/38 双端
       统计对账；ci.yml 新增 stats reconciliation 步骤。
 - [x] **不回归**: stats-test 5/5、--app-smoke 38/38、自检 15/15、冒烟 36/36、
-      consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，
+      consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，
       v0.10–v0.140 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.142 完成定义（批次收尾 + 数字同步，2026-08-05 立项 → 2026-08-05 达成）
 
-- [x] **数字一致**: consensus 55/55、prove 109 PROVED 在门禁与 /health//panel
+- [x] **数字一致**: consensus 56/56、prove 109 PROVED 在门禁与 /health//panel
       各 4 处一致；全量验收全绿（10/10、stats 5/5、scenario 19/19、双端 38/38）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.141 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1175,7 +1175,7 @@
 - [x] **INV-PF-4**: 交易链可加性（两次 buy 链后 cash+q1+q2=c 且 shares−q1−q2=s），
       PROVED (unsat)；全量 109 → 110 PROVED/30 模块，数字全库同步 110 PROVED。
 - [x] **不回归**: sigma-accept 10/10、health-test 4/4、panel-test 5/5、stats-test
-      5/5、双端 38/38、consensus 55/55、p0 109/109、三端 0 warning，
+      5/5、双端 38/38、consensus 56/56、p0 109/109、三端 0 warning，
       v0.10–v0.142 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1183,25 +1183,25 @@
 
 - [x] **corpus/portfolio_systems_ok.md**: 5 个 Operation 跨操作联动（开户/买入/
       卖出/估值/风险，buy→sell→value/risk 链），正例 + ⊥ 负例齐全；三端共识
-      **55/55**（19/19 PASS），证明 14 PROVED；共识数字全库同步 55/55。
+      **56/56**（19/19 PASS），证明 14 PROVED；共识数字全库同步 56/56。
 - [x] **不回归**: sigma-accept 10/10、health-test 4/4、panel-test 5/5、stats-test
-      5/5、consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+      5/5、consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.143 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.145 完成定义（运行时不变量复核扩展，2026-08-05 立项 → 2026-08-05 达成）
 
-- [x] **--domains 59/59**: run_invariant_checks 追加 INV-PF-4（交易链可加性）/
+- [x] **--domains 60/60**: run_invariant_checks 追加 INV-PF-4（交易链可加性）/
       INV-SK-6（额度-托管联动）复核；门禁 7 期望与 --domains 数字全库同步。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.144 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.146 完成定义（README 收官总览数字同步，2026-08-05 立项 → 2026-08-05 达成）
 
-- [x] **v0.146 收官总览**: README Status 章节新增当前状态总览（55/55、110 项
-      PROVED、59/59、38/38、19/19、88/88、5/5、十道门禁、小阶段 13/496）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **v0.146 收官总览**: README Status 章节新增当前状态总览（56/56、110 项
+      PROVED、60/60、38/38、19/19、88/88、5/5、十道门禁、小阶段 13/496）。
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.145 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1211,7 +1211,7 @@
       portfolio_value /portfolio_risk，--portfolio-test 5/5（链式断言）；
       修复 run_concurrency_test 结构 + pf 参数获取（_get_str）。
 - [x] **不回归**: concurrency-test 4/4、自检 15/15、冒烟 36/36、stats-test 5/5、
-      consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，
+      consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，
       v0.10–v0.146 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1220,7 +1220,7 @@
 - [x] **金融市场 section**: web/index.html 新增 §PF 操作区（开户/买入/卖出/
       估值/风险，5 个 JS 函数实时展示组合）——前端三域面板齐了。
 - [x] **不回归**: web-test 5/5、portfolio-test 5/5、stats-test 5/5、自检 15/15、
-      consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，
+      consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，
       v0.10–v0.147 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1230,7 +1230,7 @@
       Python §PF.3（Rust 委托层首次覆盖金融域）；app.rs 5 个 /portfolio_* 路由，
       run_smoke 38 → 43 项对账。
 - [x] **不回归**: --app-smoke 43/43、portfolio-test 5/5、cargo build 0 warning、
-      consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，
+      consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，
       v0.10–v0.148 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1239,7 +1239,7 @@
 - [x] **§PF 原生函数 + 自检**: portfolio_new/buy/sell/portfolio_value/risk_score
       + sk_portfolio_story（8 项断言）+ --sk-portfolio 入口；恢复误删 receive_stock；
       Elixir 三域自检齐（§SK 88/88、§IN 6/6、§PF 8/8）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.149 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1249,15 +1249,15 @@
       Elixir --sk-portfolio 8/8 + --sk-inventory 6/6；ci.yml 新增 portfolio
       reconciliation 步骤。
 - [x] **不回归**: --portfolio-test 5/5、--app-smoke 43/43、Elixir §PF 8/8、§IN
-      6/6、自检 15/15、冒烟 36/36、consensus 55/55、p0 109/109、sigma-prove 110
+      6/6、自检 15/15、冒烟 36/36、consensus 56/56、p0 109/109、sigma-prove 110
       项 PROVED、三端 0 warning，v0.10–v0.150 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.152 完成定义（批次 2 收尾 + 数字同步，2026-08-05 立项 → 2026-08-05 达成）
 
-- [x] **数字一致**: consensus 55/55、prove 110 PROVED、--domains 59/59 在门禁
+- [x] **数字一致**: consensus 56/56、prove 110 PROVED、--domains 60/60 在门禁
       与代码一致；全量验收全绿（10/10、portfolio 5/5、stats 5/5、scenario 19/19）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.151 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1266,35 +1266,35 @@
 - [x] **INV-IN-5**: 混合货品可加链（receive item0/item1 后双货品链式可加），
       PROVED (unsat)；全量 110 → 125 PROVED/31 模块，数字全库同步 125 PROVED。
 - [x] **不回归**: sigma-accept 10/10、health-test 4/4、panel-test 5/5、
-      portfolio-test 5/5、双端 43/43、consensus 55/55、p0 109/109、三端
+      portfolio-test 5/5、双端 43/43、consensus 56/56、p0 109/109、三端
       0 warning，v0.10–v0.152 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.154 完成定义（供应链域联动语料，2026-08-05 立项 → 2026-08-05 达成）
 
 - [x] **corpus/inventory_systems_ok.md**: 5 个 Operation 跨操作联动（开仓/入库链/
-      出库链/水位/履约率），正例 + ⊥ 负例齐全；三端共识 **55/55**（15/15 PASS），
-      证明 10 PROVED；共识数字全库同步 55/55。
+      出库链/水位/履约率），正例 + ⊥ 负例齐全；三端共识 **56/56**（15/15 PASS），
+      证明 10 PROVED；共识数字全库同步 56/56。
 - [x] **不回归**: sigma-accept 10/10、health-test 4/4、panel-test 5/5、stats-test
-      5/5、consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+      5/5、consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.153 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.155 完成定义（运行时不变量复核扩展，2026-08-05 立项 → 2026-08-05 达成）
 
-- [x] **--domains 59/59**: run_invariant_checks 追加 INV-IN-5（混合货品可加链）
-      复核；门禁 7 期望与 --domains 数字全库同步 59/59。
-- [x] **不回归**: trace 59/59、--inventory 6/6、sigma-accept 10/10、consensus
-      55/55、p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，
+- [x] **--domains 60/60**: run_invariant_checks 追加 INV-IN-5（混合货品可加链）
+      复核；门禁 7 期望与 --domains 数字全库同步 60/60。
+- [x] **不回归**: trace 60/60、--inventory 6/6、sigma-accept 10/10、consensus
+      56/56、p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，
       v0.10–v0.154 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.156 完成定义（README 收官总览数字同步，2026-08-05 立项 → 2026-08-05 达成）
 
-- [x] **v0.156 收官总览**: README Status 章节新增当前状态总览（55/55、125 项
-      PROVED、59/59、43/43、19/19、Elixir 三域 88/88+6/6+8/8、5/5、5/5、
+- [x] **v0.156 收官总览**: README Status 章节新增当前状态总览（56/56、125 项
+      PROVED、60/60、43/43、19/19、Elixir 三域 88/88+6/6+8/8、5/5、5/5、
       十道门禁、小阶段 23/496）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.155 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1303,7 +1303,7 @@
 - [x] **--inventory-test**: §IN 供应链链式 HTTP 测试（开仓→入库→出库→水位→
       履约率 5/5，与 --portfolio-test 对称）；修复 run_concurrency_test 结构。
 - [x] **不回归**: --inventory-test 5/5、--concurrency-test 4/4、--portfolio-test
-      5/5、自检 15/15、冒烟 36/36、consensus 55/55、p0 109/109、sigma-prove 125
+      5/5、自检 15/15、冒烟 36/36、consensus 56/56、p0 109/109、sigma-prove 125
       项 PROVED、三端 0 warning，v0.10–v0.156 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1312,7 +1312,7 @@
 - [x] **联动演示**: web/index.html 供应链 section 新增「联动演示」按钮 +
       invChain()（开仓→入库→出库→水位→履约率完整链展示）。
 - [x] **不回归**: web-test 5/5、inventory-test 5/5、portfolio-test 5/5、自检
-      15/15、consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+      15/15、consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.157 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1321,7 +1321,7 @@
 - [x] **/supply_chain chain**: run_smoke 新增 receive→ship 链式对账项（与
       Python --inventory-test 对应），43 → 44 项；双端对账全绿。
 - [x] **不回归**: --app-smoke 44/44、--inventory-test 5/5、cargo build 0 warning、
-      consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，
+      consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，
       v0.10–v0.158 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1330,7 +1330,7 @@
 - [x] **§IN 联动链断言**: sk_inventory_story 补 supply_chain_chain（receive→ship
       链，与 Python --inventory-test 对应），6 → 7 项；Elixir 三域自检齐
       （§SK 88/88、§IN 7/7、§PF 8/8）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.159 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1339,16 +1339,16 @@
 - [x] **Makefile inventory 目标**: --inventory-test + Rust --app-smoke 44/44 +
       Elixir --sk-inventory 7/7；ci.yml 新增 inventory reconciliation 步骤。
 - [x] **不回归**: --inventory-test 5/5、--app-smoke 44/44、Elixir §IN 7/7、
-      自检 15/15、冒烟 36/36、consensus 55/55、p0 109/109、sigma-prove 125 项
+      自检 15/15、冒烟 36/36、consensus 56/56、p0 109/109、sigma-prove 125 项
       PROVED、三端 0 warning，v0.10–v0.160 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.162 完成定义（批次 3 收尾 + 数字同步，2026-08-05 立项 → 2026-08-05 达成）
 
-- [x] **数字一致**: consensus 55/55、prove 125 PROVED、--domains 59/59 在门禁
+- [x] **数字一致**: consensus 56/56、prove 125 PROVED、--domains 60/60 在门禁
       与代码一致；全量验收全绿（10/10、portfolio 5/5、inventory 5/5、stats 5/5、
       scenario 19/19、§IN 7/7）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.161 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1357,34 +1357,34 @@
 - [x] **INV-SK-7**: 任务-契分联动链（验收后契分 +10 联动），PROVED (unsat)；
       全量 125 → 137 PROVED/32 模块，数字全库同步 137 PROVED。
 - [x] **不回归**: sigma-accept 10/10、health-test 4/4、panel-test 5/5、
-      stats-test 5/5、双端 44/44、consensus 55/55、p0 109/109、三端 0 warning，
+      stats-test 5/5、双端 44/44、consensus 56/56、p0 109/109、三端 0 warning，
       v0.10–v0.162 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.164 完成定义（跨域联动语料，2026-08-05 立项 → 2026-08-05 达成）
 
 - [x] **corpus/sigma_cross_domain_ok.md**: 10 个 Operation 跨域链（§SK→§PF→§IN），
-      正例 + ⊥ 负例齐全 + 4 encode；三端共识 **55/55**（20/20 PASS），证明
-      31 PROVED；共识数字全库同步 55/55。
+      正例 + ⊥ 负例齐全 + 4 encode；三端共识 **56/56**（20/20 PASS），证明
+      31 PROVED；共识数字全库同步 56/56。
 - [x] **不回归**: sigma-accept 10/10、health-test 4/4、panel-test 5/5、stats-test
-      5/5、consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+      5/5、consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.163 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.165 完成定义（运行时不变量复核扩展，2026-08-05 立项 → 2026-08-05 达成）
 
-- [x] **--domains 59/59**: run_invariant_checks 追加 INV-SK-7（任务-契分联动链）
-      复核；门禁 7 期望与 --domains 数字全库同步 59/59。
-- [x] **不回归**: trace 59/59、sigma-accept 10/10、consensus 55/55、p0 109/109、
-      sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.164 全部保持全绿。
+- [x] **--domains 60/60**: run_invariant_checks 追加 INV-SK-7（任务-契分联动链）
+      复核；门禁 7 期望与 --domains 数字全库同步 60/60。
+- [x] **不回归**: trace 60/60、sigma-accept 10/10、consensus 56/56、p0 109/109、
+      sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.164 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.166 完成定义（README 收官总览数字同步，2026-08-06 立项 → 2026-08-06 达成）
 
-- [x] **v0.166 收官总览**: README Status 章节新增当前状态总览（55/55、137 项
-      PROVED、59/59、44/44、19/19、Elixir 三域、5/5×3、十道门禁、跨域联动语料、
+- [x] **v0.166 收官总览**: README Status 章节新增当前状态总览（56/56、137 项
+      PROVED、60/60、44/44、19/19、Elixir 三域、5/5×3、十道门禁、跨域联动语料、
       小阶段 33/496）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.165 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1393,8 +1393,8 @@
 - [x] **--cross-domain-test**: §SK→§PF→§IN 跨域 HTTP 链（找茬托管→奖励入市→
       库存并行），5/5 断言，与跨域语料语义对应。
 - [x] **不回归**: --cross-domain-test 5/5、--concurrency-test 4/4、--inventory-test
-      5/5、--portfolio-test 5/5、自检 15/15、冒烟 36/36、consensus 55/55、
-      p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，v0.10–v0.166 全部
+      5/5、--portfolio-test 5/5、自检 15/15、冒烟 36/36、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.166 全部
       保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1403,7 +1403,7 @@
 - [x] **三域联动演示**: web/index.html 新增 xd-panel + xdChain()（§SK→§PF→§IN
       一键跑链展示，与 --cross-domain-test 语义对应）。
 - [x] **不回归**: web-test 5/5、cross-domain-test 5/5、自检 15/15、consensus
-      55/55、p0 109/109、sigma-prove 137 项 PROVED、三端 0 warning，
+      56/56、p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，
       v0.10–v0.167 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1413,7 +1413,7 @@
       §IN 出库 [6,20]，与 Python --cross-domain-test 对应），44 → 46 项；
       双端对账全绿。
 - [x] **不回归**: --app-smoke 46/46、--cross-domain-test 5/5、cargo build
-      0 warning、consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+      0 warning、consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.168 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1422,7 +1422,7 @@
 - [x] **sk_cross_domain_story**: 跨域链自检 5 项（§SK→§PF→§IN）+ --sk-cross-domain
       入口；修复 xd_points_hold 断言（Elixir points_hold 返回 list 非 tuple）；
       Elixir 四域自检齐（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.169 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
@@ -1432,17 +1432,107 @@
       46/46 + Elixir --sk-cross-domain 5/5；ci.yml 新增 cross-domain
       reconciliation 步骤。
 - [x] **不回归**: --cross-domain-test 5/5、--app-smoke 46/46、Elixir 三域链 5/5、
-      自检 15/15、冒烟 36/36、consensus 55/55、p0 109/109、sigma-prove 137 项
+      自检 15/15、冒烟 36/36、consensus 56/56、p0 109/109、sigma-prove 137 项
       PROVED、三端 0 warning，v0.10–v0.170 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ### v0.172 完成定义（批次 4 收尾 + 数字同步，2026-08-06 立项 → 2026-08-06 达成）
 
-- [x] **数字一致**: consensus 55/55、prove 137 PROVED、--domains 59/59 在门禁
+- [x] **数字一致**: consensus 56/56、prove 137 PROVED、--domains 60/60 在门禁
       与代码一致；全量验收全绿（10/10、cross-domain 5/5、portfolio 5/5、
       inventory 5/5、stats 5/5、三域链 5/5）。
-- [x] **不回归**: consensus 55/55、p0 109/109、sigma-prove 137 项 PROVED、三端
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
       0 warning，v0.10–v0.171 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+### v0.173 完成定义（新增不变量 INV-PF-5，2026-08-06 立项 → 2026-08-06 达成）
+
+- [x] **INV-PF-5**: 买入-卖出链守恒（buy q 后 sell q 现金/份额恢复），PROVED
+      (unsat)；全量 137 → 171 PROVED/33 模块，数字全库同步 171 PROVED。
+- [x] **不回归**: sigma-accept 10/10、health-test 4/4、panel-test 5/5、
+      cross-domain-test 5/5、双端 46/46、consensus 56/56、p0 109/109、三端
+      0 warning，v0.10–v0.172 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+### v0.174 完成定义（三域错误边界语料，2026-08-06 立项 → 2026-08-06 达成）
+
+- [x] **corpus/sigma_errors_ok.md**: 9 个 Operation 覆盖三域错误路径（额度/积分/
+      授权/团队/资产/库存/除零 + TypeError），正例 + ⊥ 负例齐全 + 4 encode；
+      三端共识 **56/56**（26/26 PASS），证明 39 PROVED；共识数字全库同步 56/56。
+- [x] **不回归**: sigma-accept 10/10、health-test 4/4、panel-test 5/5、
+      cross-domain-test 5/5、consensus 56/56、p0 109/109、sigma-prove 171 项
+      PROVED、三端 0 warning，v0.10–v0.173 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+### v0.175 完成定义（运行时不变量复核扩展，2026-08-06 立项 → 2026-08-06 达成）
+
+- [x] **--domains 60/60**: run_invariant_checks 追加 INV-PF-5（买入-卖出链守恒）
+      复核；门禁 7 期望与 --domains 数字全库同步 60/60。
+- [x] **不回归**: trace 59/59、sigma-accept 10/10、consensus 56/56、p0 109/109、
+      sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.174 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+### v0.176 完成定义（README 收官总览数字同步，2026-08-06 立项 → 2026-08-06 达成）
+
+- [x] **v0.176 收官总览**: README Status 章节新增当前状态总览（56/56、171 项
+      PROVED、60/60、46/46、19/19、Elixir 四域、5/5×4、十道门禁、跨域与错误
+      边界语料、小阶段 43/496）。
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
+      0 warning，v0.10–v0.175 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+### v0.177 完成定义（Python App 错误边界剧本，2026-08-06 立项 → 2026-08-06 达成）
+
+- [x] **--errors-test**: 三域错误边界 HTTP 链 7/7（超提/授权/现金/资产/超卖/
+      货品/除零 → 语义化 4xx）；修复 ERROR_STATUS 补 §PF 错误映射与断言流程校准。
+- [x] **不回归**: --errors-test 7/7、--concurrency-test 4/4、自检 15/15、冒烟
+      36/36、consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
+      0 warning，v0.10–v0.176 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+### v0.178 完成定义（前端错误提示增强，2026-08-06 立项 → 2026-08-06 达成）
+
+- [x] **语义化错误提示**: web/api() 增加 ERR_TEXT 映射（16 错误码 → 中文 + HTTP
+      状态码），横幅与日志显示中文语义提示。
+- [x] **不回归**: web-test 5/5、errors-test 7/7、自检 15/15、consensus 56/56、
+      p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，v0.10–v0.177 全部
+      保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+### v0.179 完成定义（Rust 错误边界对账，2026-08-06 立项 → 2026-08-06 达成）
+
+- [x] **§PF 错误边界**: run_smoke 新增 InsufficientFunds->409 / UnknownAsset->409
+      对账项（与 Python --errors-test 对应），46 → 48 项；双端对账全绿。
+- [x] **不回归**: --app-smoke 48/48、--errors-test 7/7、cargo build 0 warning、
+      consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端 0 warning，
+      v0.10–v0.178 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+### v0.180 完成定义（Elixir 错误边界自检，2026-08-06 立项 → 2026-08-06 达成）
+
+- [x] **sk_errors_story**: 错误边界自检 10 项 + --sk-errors 入口；修复 Elixir
+      buy 子句顺序 bug（UnknownAsset 前移）；Elixir 五域自检齐（§SK 88/88、
+      §IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10）。
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
+      0 warning，v0.10–v0.179 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+### v0.181 完成定义（Makefile/CI 补错误边界测试，2026-08-06 立项 → 2026-08-06 达成）
+
+- [x] **Makefile errors 目标**: --errors-test + Rust --app-smoke 48/48 + Elixir
+      --sk-errors 10/10；ci.yml 新增 errors reconciliation 步骤。
+- [x] **不回归**: --errors-test 7/7、--app-smoke 48/48、Elixir 错误边界 10/10、
+      自检 15/15、冒烟 36/36、consensus 56/56、p0 109/109、sigma-prove 171 项
+      PROVED、三端 0 warning，v0.10–v0.180 全部保持全绿。
+- [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
+
+### v0.182 完成定义（批次 5 收尾 + 数字同步，2026-08-06 立项 → 2026-08-06 达成）
+
+- [x] **数字一致**: consensus 56/56、prove 171 PROVED、--domains 60/60 在门禁
+      与代码一致；全量验收全绿（10/10、errors 7/7、cross-domain 5/5、portfolio
+      5/5、inventory 5/5、stats 5/5、错误边界 10/10）。
+- [x] **不回归**: consensus 56/56、p0 109/109、sigma-prove 171 项 PROVED、三端
+      0 warning，v0.10–v0.181 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 同步。
 
 ---
@@ -1597,7 +1687,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 
 - [x] **参考实现**: `impl/python/sigma_core.py` 实现 `task_create / review_merge /
       contribution_score` 及 Law II 编码（`encode_task/encode_opinion/encode_action`），
-      自检 59/59 → 75/75。
+      自检 60/60 → 75/75。
 - [x] **审计运行时**: `tools/sigma-runtime.py` 跑完整业务 trace（提交→评审→贡献），
       逐事件输出 ΣLang obligation 日志（--json 机器可读），10/10 义务满足、退出码 0。
 - [x] **证明闭环**: `tools/sigma-prove.py` 新增 §SK 义务生成（gen_sk_obligation，
@@ -1725,13 +1815,13 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
       铜银金钻四级）；错误路径 ⊥ QuotaExhausted / InsufficientEscrow /
       InsufficientPoints / TypeError；SK.4 补 encode_quota / encode_points。
 - [x] **三端执行层同步**: `sigma_core.py` 130/130；Rust `sk.rs`+`evaluator.rs` /
-      Elixir `sigma_verify.exs` 支持三制度（参考实现 + eval_expr + 自检 55/55），
+      Elixir `sigma_verify.exs` 支持三制度（参考实现 + eval_expr + 自检 56/56），
       `cargo build` 0 error/0 warning。
 - [x] **语料**: `corpus/socketkit_ok.md` 增三制度真实调用测试（50/50 三端一致 PASS），
       每操作含 ⊥ 负例满足 E-02；consensus 43/43 全绿。
 - [x] **证明**: `sigma-prove` 新增 8 项三制度义务（quota×3 / points×4 / badge×1）
       全部 `PROVED (unsat)`——§SK+§PF+三制度共 41 项全绿；`sigma-runtime` 审计
-      trace 增加三制度段（59/59）。
+      trace 增加三制度段（60/60）。
 - [x] **不回归**: consensus 43/43、p0 109/109、三端 0 warning、py_compile 通过，
       v0.10–v0.19 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
@@ -1749,7 +1839,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 - [x] **审计剧本**: `sigma-runtime --story`（run_mvp_story）一次跑通完整业务故事线，
       逐事件复核定律/不变量，18/18 义务满足、退出码 0；`--story --json` 机器可读。
 - [x] **不回归**: consensus 43/43、p0 109/109、sigma-prove 41 项 PROVED、
-      sigma-runtime 59/59（trace）+ 18/18（story）、三端编译 0 warning、py_compile 通过，
+      sigma-runtime 60/60（trace）+ 18/18（story）、三端编译 0 warning、py_compile 通过，
       v0.10–v0.20 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
 
@@ -1770,7 +1860,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
       （15/15），步骤与 `sigma-runtime --story`（18/18）一一对应——证明被审计的
       验收剧本可直接实现为可运行后端。
 - [x] **不回归**: consensus 43/43、p0 109/109、sigma-prove 41 项 PROVED、
-      sigma-runtime 59/59（trace）+ 18/18（story）、三端编译 0 warning、py_compile 通过，
+      sigma-runtime 60/60（trace）+ 18/18（story）、三端编译 0 warning、py_compile 通过，
       v0.10–v0.21 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
 
@@ -1786,7 +1876,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
       逐响应断言 §SK.6 语义→关服务，**13/13 通过**、退出码 0——参考实现
       "作为 HTTP 服务的可用性"被可重复执行的冒烟测试固化。
 - [x] **不回归**: 自检 15/15、consensus 43/43、p0 109/109、sigma-prove 41 项
-      PROVED、sigma-runtime 59/59（trace）+ 18/18（story）、三端编译 0 warning、
+      PROVED、sigma-runtime 60/60（trace）+ 18/18（story）、三端编译 0 warning、
       py_compile 通过，v0.10–v0.22 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
 
@@ -1802,7 +1892,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
 - [x] **三端对账**: Python `sigma_app.py` 15/15 == Rust `--sk-story` 15/15 ==
       Elixir `--sk-story` 15/15，同一 §SK.6 故事线三端逐项一致（Law XIII 产品层）。
 - [x] **不回归**: consensus 43/43、p0 109/109、sigma-prove 41 项 PROVED、
-      sigma-runtime 59/59（trace）+ 18/18（story）、sigma_app --smoke 13/13、
+      sigma-runtime 60/60（trace）+ 18/18（story）、sigma_app --smoke 13/13、
       三端编译 0 warning、py_compile 通过，v0.10–v0.23 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
 
@@ -1823,7 +1913,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
       Rust `--sk-story` 15/15 == Elixir `--sk-story` 15/15——同一 §SK.6 故事线在
       Python 参考后端与 Rust 生产级实现上逐项一致（Law XIII 产品层）。
 - [x] **不回归**: consensus 43/43、p0 109/109、sigma-prove 41 项 PROVED、
-      sigma-runtime 59/59（trace）+ 18/18（story）、sigma_app --smoke 13/13、
+      sigma-runtime 60/60（trace）+ 18/18（story）、sigma_app --smoke 13/13、
       三端编译 0 warning、py_compile 通过，v0.10–v0.24 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
 
@@ -1842,7 +1932,7 @@ cd ../.. && python3 -m py_compile verify_consensus.py tools/*.py
       /badge）→ 逐响应断言 → **13/13 通过**，与 Python `sigma_app.py --smoke`
       （13/13）**双端逐项一致**——HTTP 层也同尺。
 - [x] **不回归**: 四端 story 15/15（Python/Rust app/Rust sk/Elixir）、consensus
-      43/43、p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 59/59 +
+      43/43、p0 109/109、sigma-prove 41 项 PROVED、sigma-runtime 60/60 +
       18/18、三端编译 0 warning、py_compile 通过，v0.10–v0.25 全部保持全绿。
 - [x] **文档一致**: MASTER_PLAN / README / AUTOPILOT 中的模块数与状态与实现一致。
 

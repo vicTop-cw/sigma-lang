@@ -554,8 +554,8 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
             serde_json::json!({"users": users, "tasks": tasks_n,
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
-                "gates": {"consensus": "55/55", "p0": "109/109",
-                          "prove": "137 PROVED", "scenario": "16/16"}})
+                "gates": {"consensus": "56/56", "p0": "109/109",
+                          "prove": "171 PROVED", "scenario": "16/16"}})
         }
         "/stats" => {
             // v0.139 — 业务统计（与 Python v0.134 对等，JSON）
@@ -873,7 +873,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "137 PROVED");
+           && r["gates"]["prove"] == "171 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -914,6 +914,12 @@ pub fn run_smoke() -> (usize, usize) {
     check!("HTTP err AuthError->403", st == 403);
     let (st, _) = http_get_status(port, "/fill_rate?shipped=6&demanded=0");
     check!("HTTP err DivByZero->409", st == 409);
+
+    // 16. §PF 错误边界 (v0.179) — 与 Python --errors-test 对账
+    let (st, _) = http_get_status(port, "/portfolio_buy?pf=[10,0,0]&asset=0&qty=30");
+    check!("HTTP err InsufficientFunds->409", st == 409);
+    let (st, _) = http_get_status(port, "/portfolio_buy?pf=[100,0,0]&asset=2&qty=30");
+    check!("HTTP err UnknownAsset->409", st == 409);
 
     (passed, total)
 }

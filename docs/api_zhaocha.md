@@ -35,13 +35,13 @@
 ```json
 {"status":"ok","app":"找茬 MVP 参考实现 (sigma_app)",
  "state":null,"auth":"disabled","log":null,
- "gates":{"consensus":"55/55","p0":"109/109","prove":"80 PROVED","scenario":"16/16"}}
+ "gates":{"consensus":"56/56","p0":"109/109","prove":"80 PROVED","scenario":"16/16"}}
 ```
 
 ### 1.2 GET /panel — 运行状态面板（v0.95）
 
 运行状态 HTML 面板页：服务信息（用户数/任务数）、业务摘要（各状态任务数/
-赏金总额）、门禁摘要（consensus 55/55 / p0 109/109 / prove 80 PROVED /
+赏金总额）、门禁摘要（consensus 56/56 / p0 109/109 / prove 80 PROVED /
 scenario 16/16）。
 ```
 

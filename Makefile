@@ -14,7 +14,7 @@
 
 PYTHON ?= python3
 
-.PHONY: accept check story prove rust elixir app stats portfolio inventory cross-domain ready deploy all
+.PHONY: accept check story prove rust elixir app stats portfolio inventory cross-domain errors ready deploy all
 
 accept: ## 九道门禁一键验收（CI 与本地同一条命令）
 	$(PYTHON) tools/sigma-accept.py
@@ -61,6 +61,11 @@ cross-domain: ## 跨域链对账（Python /cross-domain-test + Rust 46/46 + Elix
 	$(PYTHON) impl/python/sigma_app.py --cross-domain-test
 	cd impl/verifier && cargo run -q -- --app-smoke
 	cd impl/elixir_rt && elixir sigma_verify.exs --sk-cross-domain
+
+errors: ## 错误边界对账（Python /errors-test + Rust 48/48 + Elixir 错误边界 10/10，v0.181）
+	$(PYTHON) impl/python/sigma_app.py --errors-test
+	cd impl/verifier && cargo run -q -- --app-smoke
+	cd impl/elixir_rt && elixir sigma_verify.exs --sk-errors
 
 ready: ## 生产就绪检查（--launch-ready 一次性确认环境，v0.121）
 	$(PYTHON) impl/python/sigma_app.py --launch-ready

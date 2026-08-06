@@ -39,6 +39,10 @@ ERROR_STATUS: Dict[str, int] = {
     "InsufficientPoints": 409,
     "InsufficientStock": 409,
     "TeamFull": 409,
+    # §PF (v0.177) — 金融市场错误边界
+    "InsufficientFunds": 409,
+    "UnknownAsset": 409,
+    "InsufficientShares": 409,
     "UnknownItem": 409,
     "DivByZero": 409,
     "NotTraceable": 409,
@@ -437,9 +441,9 @@ class _Handler(BaseHTTPRequestHandler):
                     "auth": "enabled" if _Handler._auth_token else "disabled",
                     "log": _Handler._log_file,
                     "gates": {
-                        "consensus": "55/55",
+                        "consensus": "56/56",
                         "p0": "109/109",
-                        "prove": "137 PROVED",
+                        "prove": "171 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -467,9 +471,9 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <tr><td>数量</td><td>{by_state[0]}</td><td>{by_state[1]}</td><td>{by_state[2]}</td><td>{by_state[3]}</td></tr>
 <tr><td>赏金总额</td><td colspan="4">{total_bounty}</td></tr></table></div>
 <div class="card"><h3>门禁摘要</h3><table>
-<tr><td>consensus</td><td>55/55</td></tr>
+<tr><td>consensus</td><td>56/56</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>137 PROVED</td></tr>
+<tr><td>prove</td><td>171 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/stats":
@@ -1109,7 +1113,7 @@ def run_health_test() -> Tuple[int, int]:
         check("HEALTH status ok", body.get("status") == "ok", f"got {body}")
         check("HEALTH app name", "找茬" in body.get("app", ""), f"got {body}")
         check("HEALTH auth field", "auth" in body, f"got {body}")
-        check("HEALTH gates", body.get("gates", {}).get("consensus") == "55/55",
+        check("HEALTH gates", body.get("gates", {}).get("consensus") == "56/56",
               f"got {body.get('gates')}")
     finally:
         server.shutdown()
@@ -1383,7 +1387,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "55/55" in html and "137 PROVED" in html, "")
+        check("PANEL gates", "56/56" in html and "171 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -1555,6 +1559,67 @@ def run_cross_domain_test() -> Tuple[int, int]:
         check("XD inv new", r["inventory"] == [10, 20], f"got {r}")
         r = call("/ship_stock?inv=[10,20]&item=0&qty=4")
         check("XD inv ship", r["inventory"] == [6, 20], f"got {r}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
+def run_errors_test() -> Tuple[int, int]:
+    """--errors-test (v0.177): three-domain error boundaries over HTTP — every
+    error path returns the semantic 4xx code, matching sigma_errors_ok corpus."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    def get_status(p: str):
+        try:
+            with urllib.request.urlopen(base + p, timeout=10) as r:
+                return r.status, json.loads(r.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            return e.code, json.loads(e.read().decode("utf-8"))
+
+    try:
+        call(f"/register?user=7&name={quote('找茬主')}")
+        call(f"/register?user=3&name={quote('找茬人')}")
+        call("/quota?user=7&monthly=50")
+        call("/post?author=7&bounty=100")
+        call("/claim?task=0&hunter=3")
+        call("/submit?task=0")
+        # §SK 错误边界
+        st, r = get_status("/withdraw?user=3&amount=1000")
+        check("ERR withdraw", st == 409, f"got {st} {r}")
+        st, r = get_status("/accept?task=0&caller=3")
+        check("ERR auth", st == 403, f"got {st} {r}")
+        # §PF 错误边界
+        st, r = get_status("/portfolio_buy?pf=[10,0,0]&asset=0&qty=30")
+        check("ERR funds", st == 409, f"got {st} {r}")
+        st, r = get_status("/portfolio_buy?pf=[100,0,0]&asset=2&qty=30")
+        check("ERR asset", st == 409, f"got {st} {r}")
+        # §IN 错误边界
+        st, r = get_status("/ship_stock?inv=[10,20]&item=0&qty=99")
+        check("ERR oversell", st == 409, f"got {st} {r}")
+        st, r = get_status("/ship_stock?inv=[10,20]&item=2&qty=1")
+        check("ERR unknown item", st == 409, f"got {st} {r}")
+        st, r = get_status("/fill_rate?shipped=6&demanded=0")
+        check("ERR divzero", st == 409, f"got {st} {r}")
     finally:
         server.shutdown()
         thread.join()
@@ -2149,6 +2214,10 @@ def main(argv=None):
     if "--cross-domain-test" in argv:
         passed, total = run_cross_domain_test()
         print(f"sigma_app cross-domain test (v0.167): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--errors-test" in argv:
+        passed, total = run_errors_test()
+        print(f"sigma_app errors test (v0.177): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()

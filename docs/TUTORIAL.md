@@ -23,7 +23,7 @@ python3 -c "import sigma_core; print(sigma_core.task_create(7, 100))"
 git clone https://github.com/vicTop-cw/sigma-lang.git
 cd sigma-lang
 python3 --version        # 需要 Python 3.8+
-python3 verify_consensus.py | tail -1   # 确认基线：55/55
+python3 verify_consensus.py | tail -1   # 确认基线：56/56
 ```
 
 > 路径 A 只能调用 sigma_core 纯函数（本教程 §5 之后的产品部分用不到）；
@@ -73,7 +73,7 @@ python3 verify_consensus.py | tail -1   # 确认基线：55/55
 
 ```sh
 python3 verify_consensus.py
-# 预期：55/55 —— 新测试在三个验证器上结论一致（全绿）
+# 预期：56/56 —— 新测试在三个验证器上结论一致（全绿）
 ```
 
 > 如果红了：说明三端实现里有一个算出的 `index(...,2)` 不是 3——找到那个
@@ -107,7 +107,7 @@ python3 tools/sigma-accept.py
 # 预期：10/10 项全部通过 — ΣLang 全链路可验收
 ```
 
-十道门禁一次跑完：三端共识 55/55、算法 109/109、三端自检、三域审计 59/59、
+十道门禁一次跑完：三端共识 56/56、算法 109/109、三端自检、三域审计 60/60、
 证明 80 PROVED、双端冒烟 36/36。
 
 ---
@@ -135,7 +135,7 @@ python3 impl/python/sigma_app.py --launch         # 启动前后端
 
 | 步骤 | 命令 | 预期 |
 |------|------|------|
-| 基线确认 | `python3 verify_consensus.py` | 55/55 |
+| 基线确认 | `python3 verify_consensus.py` | 56/56 |
 | 改规则后共识 | 同上 | 仍全绿（或按 §2 红→修实现） |
 | 数学证明 | `python3 tools/sigma-prove.py` | 80 PROVED |
 | 一键验收 | `python3 tools/sigma-accept.py` | 10/10 |

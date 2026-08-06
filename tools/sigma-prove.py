@@ -698,10 +698,21 @@ def gen_portfolio_invariants(ops):
             "(assert (= (index p2 0) (- (index p 0) q2))) (assert (= (index p2 1) (+ (index p 1) q2))) (assert (= (index p2 2) 0))\n"
             "; INV-PF-4 (v0.143): 交易链可加性 — 链后 cash+q1+q2=c 且 shares−q1−q2=s\n"
             "(assert (not (and (= (+ (index p2 0) q1 q2) c) (= (- (index p2 1) q1 q2) s))))\n(check-sat)\n")
+    inv5 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+            "(declare-const c Int) (declare-const s Int)\n"
+            "(declare-const q Int)\n"
+            "(declare-const p Int) (declare-const p2 Int)\n"
+            "(assert (>= c 0)) (assert (>= s 0)) (assert (>= q 0)) (assert (<= q c))\n"
+            "; buy q 后 sell q（份额足够）: 现金/份额恢复\n"
+            "(assert (= (index p 0) (- c q))) (assert (= (index p 1) (+ s q))) (assert (= (index p 2) 0))\n"
+            "(assert (= (index p2 0) (+ (index p 0) q))) (assert (= (index p2 1) (- (index p 1) q))) (assert (= (index p2 2) 0))\n"
+            "; INV-PF-5 (v0.173): 买入-卖出链守恒 — buy q 后 sell q，现金/份额恢复\n"
+            "(assert (not (and (= (index p2 0) c) (= (index p2 1) s))))\n(check-sat)\n")
     return [("INV-PF-1 cash-conserved", inv1),
             ("INV-PF-2 shares-conserved", inv2),
             ("INV-PF-3 nonnegative-chain", inv3),
-            ("INV-PF-4 additive-trade-chain", inv4)]
+            ("INV-PF-4 additive-trade-chain", inv4),
+            ("INV-PF-5 buy-sell-roundtrip", inv5)]
 
 
 def gen_socketkit_invariants(ops):

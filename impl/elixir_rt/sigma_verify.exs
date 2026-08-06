@@ -1867,8 +1867,8 @@ defmodule SigmaVerify do
   @doc "买入: 花现金买仓位（单价 1）. §PF.3.2 — 现金不足 InsufficientFunds; 未知资产 UnknownAsset."
   def buy([cash, qa, qb], asset, qty) when qty >= 0 and asset in [0, 1] and qty <= cash,
     do: if(asset == 0, do: {:ok, [cash - qty, qa + qty, qb]}, else: {:ok, [cash - qty, qa, qb + qty]})
-  def buy([_cash, _, _], _, qty) when qty > 0, do: {:error, "InsufficientFunds"}
   def buy(_, asset, _) when asset not in [0, 1], do: {:error, "UnknownAsset"}
+  def buy([_cash, _, _], _, qty) when qty > 0, do: {:error, "InsufficientFunds"}
   def buy(_, _, _), do: {:error, "TypeError"}
 
   @doc "卖出: 平仓变现（单价 1）. §PF.3.3 — 仓位不足 InsufficientShares; 未知资产 UnknownAsset."
@@ -2178,6 +2178,28 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ XD.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_errors_story do
+    checks = [
+      # §SK 错误边界 (v0.180)
+      {"err_quota_exhausted", quota_use([50, 1], 2) == {:error, "QuotaExhausted"}},
+      {"err_points_insufficient", points_withdraw([0, 5], 10) == {:error, "InsufficientPoints"}},
+      {"err_auth", task_accept([7, 100, 2, 3], 5) == {:error, "AuthError"}},
+      {"err_team_full", team_join([7, 0, 3, 3], 5) == {:error, "TeamFull"}},
+      # §PF 错误边界
+      {"err_funds", buy([10, 0, 0], 0, 30) == {:error, "InsufficientFunds"}},
+      {"err_asset", buy([100, 0, 0], 2, 30) == {:error, "UnknownAsset"}},
+      {"err_shares", sell([70, 30, 0], 0, 40) == {:error, "InsufficientShares"}},
+      # §IN 错误边界
+      {"err_stock", ship_stock([10, 20], 0, 11) == {:error, "InsufficientStock"}},
+      {"err_item", ship_stock([10, 20], 2, 4) == {:error, "UnknownItem"}},
+      {"err_divzero", fill_rate(6, 0) == {:error, "DivByZero"}}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ ERR.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2213,6 +2235,11 @@ case System.argv() do
   ["--sk-cross-domain" | _] ->
     {passed, total} = SigmaVerify.sk_cross_domain_story()
     IO.puts("sigma_core cross-domain story (三域链): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-errors" | _] ->
+    {passed, total} = SigmaVerify.sk_errors_story()
+    IO.puts("sigma_core errors story (错误边界): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

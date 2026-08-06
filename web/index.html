@@ -200,6 +200,26 @@ function showError(msg) {
 
 let currentFilter = "all";  // v0.92 — 状态筛选
 
+// v0.178 — 语义化错误提示（错误码 → 中文文案 + HTTP 状态码）
+const ERR_TEXT = {
+  "AuthError": "无权限（403）",
+  "TypeError": "参数类型错误（422）",
+  "ShapeError": "参数形状错误（422）",
+  "BountyErr": "赏金异常（409）",
+  "StateError": "状态冲突（409）",
+  "QuotaExhausted": "额度不足（409）",
+  "InsufficientEscrow": "托管不足（409）",
+  "InsufficientPoints": "积分不足（409）",
+  "InsufficientFunds": "资金不足（409）",
+  "InsufficientShares": "份额不足（409）",
+  "InsufficientStock": "库存不足（409）",
+  "TeamFull": "团队已满（409）",
+  "UnknownItem": "未知货品（409）",
+  "UnknownAsset": "未知资产（409）",
+  "DivByZero": "除零错误（409）",
+  "NotTraceable": "不可追溯（409）",
+};
+
 async function api(path, label) {
   const r = await fetch(BASE + path);
   const j = await r.json().catch(() => ({}));
@@ -207,8 +227,10 @@ async function api(path, label) {
   log(`[${label || path}] HTTP ${status} → ${JSON.stringify(j).slice(0, 120)}`,
       status >= 400 ? "err" : "ok");
   if (status >= 400) {
-    showError((j.error || "HTTP " + status) + " — " + (label || path));
-    throw new Error(j.error || "HTTP " + status);
+    const code = j.error || ("HTTP " + status);
+    const text = ERR_TEXT[code] || code;
+    showError(text + " — " + (label || path));
+    throw new Error(code);
   }
   return j;
 }

@@ -64,7 +64,7 @@ It is a **contract between intelligences**.
 时说的"验收"就是同一个"验收"。
 
 **现在做到哪了**：三块业务语义（找茬 / 金融 / 供应链）已全链路打通——
-三端共识 55/55、数学证明 137 项 PROVED、找茬产品一条命令就能启动上线
+三端共识 56/56、数学证明 171 项 PROVED、找茬产品一条命令就能启动上线
 （`python3 impl/python/sigma_app.py --launch`）。
 
 ---
@@ -147,7 +147,7 @@ Python / Rust / Elixir 三个独立验证器必须给出完全一样的结论。
 python3 verify_consensus.py                  # 三端共识门禁（47/47 全绿）
 python3 verify_p0.py                         # 算法正确性（109/109）
 python3 tools/sigma-runtime.py --domains     # 三域审计故事线一次跑通（35/35）
-python3 tools/sigma-prove.py corpus/socketkit_ok.md corpus/portfolio_ok.md corpus/inventory_ok.md  # z3 义务消解（137 项 PROVED）
+python3 tools/sigma-prove.py corpus/socketkit_ok.md corpus/portfolio_ok.md corpus/inventory_ok.md  # z3 义务消解（171 项 PROVED）
 python3 impl/python/sigma_app.py --smoke     # 找茬 MVP 参考后端 HTTP 冒烟（25/25）
 ```
 
@@ -183,11 +183,11 @@ python3 tools/sigma-runtime.py --domains       # 35/35
   corpus/ 语料（51 个模块：ok 期望 PASS，break 期望 FAIL）
    │  三端验证器独立解析 + 求值（eval_expr 真实调用 §SK/§PF/§IN）
    ├──▶ Python verify_consensus.py ─┐
-   ├──▶ Rust  impl/verifier        ├──▶ Law XIII 共识门禁（55/55 全绿）
+   ├──▶ Rust  impl/verifier        ├──▶ Law XIII 共识门禁（56/56 全绿）
    └──▶ Elixir impl/elixir_rt      ─┘
    │
-   ├──▶ tools/sigma-prove.py     z3 义务消解（137 项 PROVED）
-   ├──▶ tools/sigma-runtime.py   审计运行时（trace 59/59 + --domains 35/35）
+   ├──▶ tools/sigma-prove.py     z3 义务消解（171 项 PROVED）
+   ├──▶ tools/sigma-runtime.py   审计运行时（trace 60/60 + --domains 35/35）
    ├──▶ impl/python/sigma_app.py 找茬参考后端（自检 15/15 + 冒烟 36/36 + 持久化/审计）
    └──▶ tools/sigma-accept.py    一键验收（9 道门禁）→ GitHub Actions CI
 ```
@@ -196,10 +196,10 @@ python3 tools/sigma-runtime.py --domains       # 35/35
 
 | 工具 | 职责 | 结果 |
 |------|------|------|
-| `verify_consensus.py` | 三端验证器对 51 个语料模块独立判定（Python/Rust/Elixir/Expected） | 55/55 一致 |
+| `verify_consensus.py` | 三端验证器对 51 个语料模块独立判定（Python/Rust/Elixir/Expected） | 56/56 一致 |
 | `verify_p0.py` | 算法正确性（含 §SK 语义检查） | 109/109 |
-| `tools/sigma-prove.py` | 把语料定律编码为 z3 义务并消解 | 137 项 PROVED |
-| `tools/sigma-runtime.py` | 审计运行时：逐事件复核定律（trace / --story / --growth / --inventory / --domains） | 59/59 + 35/35 |
+| `tools/sigma-prove.py` | 把语料定律编码为 z3 义务并消解 | 171 项 PROVED |
+| `tools/sigma-runtime.py` | 审计运行时：逐事件复核定律（trace / --story / --growth / --inventory / --domains） | 60/60 + 35/35 |
 | `impl/python/sigma_app.py` | 找茬 MVP 参考后端：业务全委托 §SK，App 只管状态 | 自检 15/15 + 冒烟 36/36 |
 | `tools/sigma-accept.py` | 九道门禁一键验收（本地与 CI 同一条命令） | 9/9 |
 | `.github/workflows/ci.yml` | push/PR 自动验收，全绿才算过 | CI 门禁 |
@@ -267,7 +267,7 @@ python3 tools/sigma-runtime.py --domains       # 35/35
 | 3 | 状态持久化（v0.51/72） | `--state state.json` | 重启不丢；原子写崩溃不损坏 |
 | 4 | 审计日志（v0.55） | `--audit-log audit.json` | 每个业务动作的 ΣLang 事件，可对账 |
 | 5 | 访问日志（v0.73） | `--log-file app.log` | 2xx=INFO / 4xx=WARNING 分级 |
-| 6 | 健康检查（v0.74） | `GET /health` | status ok + 门禁摘要（55/55、73 PROVED） |
+| 6 | 健康检查（v0.74） | `GET /health` | status ok + 门禁摘要（56/56、73 PROVED） |
 | 7 | HTTP 方法（v0.82） | 前端用 POST 变更、GET 查询 | 变更/查询端点双方法可用 |
 | 8 | 业务流剧本 | `--scenario`（16/16）+ `--frontend-scenario`（11/11） | CLI 与前端视角全绿 |
 | 9 | 双端对账（v0.84） | Python `--smoke` 与 Rust `--app-smoke` | 双端 36/36 逐项一致 |
@@ -351,20 +351,20 @@ v0.104）→ `python3 tools/sigma-accept.py --report acceptance.json`（十道�
 | §SK SocketKit Protocol / SocketKit 协议 | 14/14 | ✅ |
 | **Total / 总计** | **109/109** | **✅** |
 
-Verifier Consensus / 验证器共识: **55/55** corpus modules agree across Python / Rust / Elixir verifiers.
-55/55 语料库模块在 Python / Rust / Elixir 三个验证器上达成一致。
+Verifier Consensus / 验证器共识: **56/56** corpus modules agree across Python / Rust / Elixir verifiers.
+56/56 语料库模块在 Python / Rust / Elixir 三个验证器上达成一致。
 
 **v0.89 收官总览 (2026-08-04)**: 协议 **spec 0.5.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **55/55**、p0 **109/109**、sigma-prove
-**137 项 PROVED**（29 模块）、sigma-runtime **59/59 + 47/47**（--domains 含
+§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
+**171 项 PROVED**（29 模块）、sigma-runtime **60/60 + 47/47**（--domains 含
 12 项跨操作不变量复核）、双端 HTTP 冒烟 **36/36 逐项一致**、sigma-accept
 **十道门禁 10/10**（含 CI 回归报告 artifact）、三端 0 warning；找茬产品落地
 （服务化十件套 + API 文档 + 部署文档 + 开工 checklist + 前端联调剧本）——
 从 v0.10 到 v0.89 里程碑链完整。
 
 **v0.119 收官总览 (2026-08-05)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **55/55**、p0 **109/109**、sigma-prove
-**137 项 PROVED**（29 模块）、sigma-runtime **59/59 + 59/59**（--domains 含
+§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
+**171 项 PROVED**（29 模块）、sigma-runtime **60/60 + 60/60**（--domains 含
 20 项链式不变量复核）、双端 HTTP 冒烟 **37/37 逐项一致**（含 /panel 对账）、
 sigma-accept **十道门禁 10/10**（含 --report 运行验收 runtime 段）、
 --bench 性能基线（/health 99 req/s、/tasks 270 req/s）、三端 0 warning；
@@ -373,9 +373,9 @@ sigma-accept **十道门禁 10/10**（含 --report 运行验收 runtime 段）�
 从 v0.10 到 v0.119 里程碑链完整。
 
 **v0.146 收官总览 (2026-08-05)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **55/55**、p0 **109/109**、sigma-prove
-**137 项 PROVED**（30 模块，含 INV-SK-6 额度-托管联动 / INV-PF-4 交易链可加性）、
-sigma-runtime **59/59 + 59/59**（--domains 含 22 项链式不变量复核）、双端 HTTP
+§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
+**171 项 PROVED**（30 模块，含 INV-SK-6 额度-托管联动 / INV-PF-4 交易链可加性）、
+sigma-runtime **60/60 + 60/60**（--domains 含 22 项链式不变量复核）、双端 HTTP
 冒烟 **38/38 逐项一致**（含 /panel 与 /stats 对账）、前端联调剧本 **19/19**、
 sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir 自检 **88/88**、
 stats-test **5/5**、三端 0 warning；找茬产品可上线（--launch 一键开工 + 默认
@@ -384,9 +384,9 @@ stats-test **5/5**、三端 0 warning；找茬产品可上线（--launch 一键�
 中，每 10 个同步仓库、每 100 个发布 PyPI）。
 
 **v0.156 收官总览 (2026-08-05)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **55/55**、p0 **109/109**、sigma-prove
-**137 项 PROVED**（31 模块，含 INV-SK-6 额度-托管联动 / INV-PF-4 交易链可加性 /
-INV-IN-5 混合货品可加链）、sigma-runtime **59/59 + 59/59**（--domains 含 23 项
+§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
+**171 项 PROVED**（31 模块，含 INV-SK-6 额度-托管联动 / INV-PF-4 交易链可加性 /
+INV-IN-5 混合货品可加链）、sigma-runtime **60/60 + 60/60**（--domains 含 23 项
 链式不变量复核）、双端 HTTP 冒烟 **43/43 逐项一致**（含 /panel、/stats 与
 /portfolio_* 对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**
 （含 --report runtime 段）、Elixir 三域自检（§SK 88/88、§IN 6/6、§PF 8/8）、
@@ -397,25 +397,41 @@ stats-test **5/5**、portfolio-test **5/5**、三端 0 warning；找茬产品可
 发布 PyPI）。
 
 **v0.166 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **55/55**、p0 **109/109**、sigma-prove
-**137 项 PROVED**（32 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动）、sigma-runtime **59/59 +
-59/59**（--domains 含 24 项链式不变量复核）、双端 HTTP 冒烟 **44/44 逐项一致**
+§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
+**171 项 PROVED**（32 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
+INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动）、sigma-runtime **60/60 +
+60/60**（--domains 含 24 项链式不变量复核）、双端 HTTP 冒烟 **44/44 逐项一致**
 （含 /panel、/stats、/portfolio_* 与供应链链对账）、前端联调剧本 **19/19**、
 sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir 三域自检
 （§SK 88/88、§IN 7/7、§PF 8/8）、stats-test **5/5**、portfolio-test **5/5**、
 inventory-test **5/5**、三端 0 warning；跨域联动语料（§SK→§PF→§IN 三域链
-sigma_cross_domain_ok）进共识 55/55；找茬产品可上线（--launch 一键开工 + 默认
+sigma_cross_domain_ok）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认
 持久化/审计/日志 + 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* +
 供应链联动演示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.166 里程碑
 链完整（长期自主运行小阶段 33/496 推进中，每 10 个同步仓库、每 100 个发布
+PyPI）。
+
+**v0.176 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
+§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
+**171 项 PROVED**（33 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
+INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒）、
+sigma-runtime **60/60 + 60/60**（--domains 含 25 项链式不变量复核）、双端 HTTP
+冒烟 **46/46 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链与跨域链对账）、
+前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime
+段）、Elixir 四域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5）、stats-test
+**5/5**、portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test
+**5/5**、三端 0 warning；跨域联动语料与三域错误边界语料（§SK→§PF→§IN 链 +
+错误路径强化）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/
+审计/日志 + 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/
+三域联动演示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.176 里程碑链
+完整（长期自主运行小阶段 43/496 推进中，每 10 个同步仓库、每 100 个发布
 PyPI）。
 
 **v0.10 可用 (2026-08-02)**: 数学符号（⊕ ⊗ ⊖ ⊘ ⊙ ≡ ≥ ≤ ∈）、基本操作（`index()`/`I₂`、元素级/矩阵运算）、常量包（§C `0xK0xx`/`0xQ0xx` 按指纹解析，Opaque 类不可遮蔽）已在三个验证器求值器全部实现并有语料覆盖；`sigma-prove` 义务消解 `PROVED (unsat)`，`sigma-moonbit` 生成 `.mbtp`；共识门禁 35/35 全绿。
 
 **v0.11 可用 (2026-08-02)**: 包管理器 `tools/sigma-cli.py`（install/verify/list/search/fingerprint，`~/.sigma/registry.json` 注册表，Iron Law VII 无环依赖解析）+ 标准库 3 包（`std/math.base.md` / `std/data.transform.md` / `std/ai.confidence.md`，各配 `corpus/std_*_ok.md` 验证器测试集）；共识门禁 38/38 全绿、p0 95/95、三端 0 warning，v0.10 不回归。见 `MASTER_PLAN.md` Phase 3–4 与 `AUTOPILOT.md` §6。
 
-**AI Bootstrapping Test (P2, 2026-08-02)**: `tools/sigma-bootstrap.py` — 一键闭环验证 spec→impl→verify→pass：4 个 P0 spec 均携带 `## Implementation Checklist (for AI)`、`impl/python/sigma_core.py` 自检 59/59、`verify_p0.py` 95/95。证明「新鲜 AI 只凭规范+验证器即可从零实现并通过验证」。见 `MASTER_PLAN.md` Phase 5。
+**AI Bootstrapping Test (P2, 2026-08-02)**: `tools/sigma-bootstrap.py` — 一键闭环验证 spec→impl→verify→pass：4 个 P0 spec 均携带 `## Implementation Checklist (for AI)`、`impl/python/sigma_core.py` 自检 60/60、`verify_p0.py` 95/95。证明「新鲜 AI 只凭规范+验证器即可从零实现并通过验证」。见 `MASTER_PLAN.md` Phase 5。
 
 **v0.12 Novel Spec Test (2026-08-02)**: `corpus/novel_gene_ok.md`（DNA 对齐语义）三端验证器一致（consensus 39/39），跑通 AI 读 spec → 写实现 → 验证 → 发布的完整闭环。见 `MASTER_PLAN.md` Phase 5.2。
 
@@ -433,7 +449,7 @@ PyPI）。
 
 **v0.19 第二个自举新域（金融 portfolio@1.0）(2026-08-03)**: 验证 ΣLang 协议泛化性——第二个全新领域（金融投资组合）走通 spec→三端→语料→证明 全流程：`spec/spec_p0_portfolio.md`（§PF：portfolio_new / buy / sell / portfolio_value / risk_score，单位价格 1 使总资产守恒可证）+ `corpus/portfolio_ok.md`（19/19 三端一致 PASS）与 `corpus/portfolio_break.md`（E-02 三端一致 FAIL）；三端 eval_expr 支持新域真实调用（sigma_core 111/111、0 warning）；sigma-prove 新增 10 项 §PF 义务全部 `PROVED (unsat)`（§SK+§PF 共 33 项）；sigma-runtime 审计 trace 增加 §PF 段（45/45）；consensus 43/43、p0 109/109，v0.10–v0.18 不回归。
 
-**v0.20 找茬五大制度补齐 (2026-08-03)**: 依据找茬需求文档（`D:\Desktop\来找茬_需求文档.md` §四）把剩余三制度纳入 §SK——**SK.3.9 额度制**（`quota_new/quota_use/quota_reset`：月额/扣减/月底清零）、**SK.3.10 积分制**（`points_hold/points_release/points_withdraw`：托管冻结/释放/提现，⊥ InsufficientEscrow / InsufficientPoints）、**SK.3.11 勋章制**（`badge_level`：铜银金钻四级）。三端执行层与 eval_expr 同步（sigma_core 130/130、三端 §SK 自检 55/55、socketkit_ok 50/50 三端一致、0 warning），sigma-prove 新增 8 项三制度义务全部 `PROVED (unsat)`（共 41 项），sigma-runtime 审计 trace 增加三制度段（59/59）；consensus 43/43、p0 109/109，v0.10–v0.19 不回归。
+**v0.20 找茬五大制度补齐 (2026-08-03)**: 依据找茬需求文档（`D:\Desktop\来找茬_需求文档.md` §四）把剩余三制度纳入 §SK——**SK.3.9 额度制**（`quota_new/quota_use/quota_reset`：月额/扣减/月底清零）、**SK.3.10 积分制**（`points_hold/points_release/points_withdraw`：托管冻结/释放/提现，⊥ InsufficientEscrow / InsufficientPoints）、**SK.3.11 勋章制**（`badge_level`：铜银金钻四级）。三端执行层与 eval_expr 同步（sigma_core 130/130、三端 §SK 自检 56/56、socketkit_ok 50/50 三端一致、0 warning），sigma-prove 新增 8 项三制度义务全部 `PROVED (unsat)`（共 41 项），sigma-runtime 审计 trace 增加三制度段（60/60）；consensus 43/43、p0 109/109，v0.10–v0.19 不回归。
 
 **v0.21 找茬 MVP 全链路审计剧本 (2026-08-03)**: spec 新增 **§SK.6 MVP 业务剧本**——12 步端到端验收场景（开户额度→发布需求→扣减额度→赏金托管→接单→提交成果→验收确认→释放赏金→找茬人提现→契分奖励→贡献累计→勋章升级）；`sigma-runtime --story`（run_mvp_story）一次跑通完整业务故事线并逐事件复核不变量（INV-1 状态单调 / INV-3 守恒 / INV-4 作者授权 / 额度扣减 / 积分托管守恒），**18/18 义务满足**——作为 App 开工的「验收剧本」；consensus 43/43、p0 109/109、三端 0 warning，v0.10–v0.20 不回归。
 
@@ -668,7 +684,7 @@ The following files have been moved to `archive/` as they are superseded by newe
 
 ## Version / 版本
 
-- **Milestone / 里程碑**: **v0.172 批次 4 收尾 (2026-08-06)** — 小阶段 40/496 · 数字同步 + 全量验收全绿 · **v0.171 Makefile/CI 补跨域测试 (2026-08-06)** — make cross-domain + CI 对账 · **v0.170 Elixir 跨域自检 (2026-08-06)** — 四域自检齐 · **v0.169 Rust 跨域链对账 (2026-08-06)** — 冒烟 46/46 跨域链 · **v0.168 前端三域联动演示 (2026-08-06)** — web 三域链展示 · **v0.167 Python App 三域联动剧本 (2026-08-06)** — --cross-domain-test 5/5 · **v0.166 README 收官总览数字同步 (2026-08-06)** — Status v0.166 全貌 · **v0.165 运行时不变量复核扩展 (2026-08-05)** — --domains 59/59 · **v0.164 跨域联动语料 (2026-08-05)** — corpus 三域链 10 操作 · consensus 55/55 · **v0.163 新增不变量 INV-SK-7 (2026-08-05)** — 任务-契分联动链 PROVED · 全量 137 PROVED · **v0.162 批次 3 收尾 (2026-08-05)** — 小阶段 30/496 · 数字同步 + 全量验收全绿 · **v0.161 Makefile/CI 补供应链测试 (2026-08-05)** — make inventory + CI 对账 · **v0.160 Elixir §IN 自检补全 (2026-08-05)** — 三域自检含联动链 · **v0.159 Rust 供应链链式对账 (2026-08-05)** — 冒烟 44/44 链式 · **v0.158 前端供应链联动演示 (2026-08-05)** — web 联动链展示 · **v0.157 Python App 供应链联动测试 (2026-08-05)** — --inventory-test 5/5 · **v0.156 README 收官总览数字同步 (2026-08-05)** — Status v0.156 全貌 · **v0.155 运行时不变量复核扩展 (2026-08-05)** — --domains 59/59 · **v0.154 供应链域联动语料 (2026-08-05)** — corpus 5 操作联动 · consensus 55/55 · **v0.153 新增不变量 INV-IN-5 (2026-08-05)** — 混合货品可加链 PROVED · 全量 125 PROVED · **v0.152 批次 2 收尾 (2026-08-05)** — 小阶段 20/496 · 数字同步 + 全量验收全绿 · **v0.151 Makefile/CI 补金融测试 (2026-08-05)** — make portfolio + CI 对账 · **v0.150 Elixir §IN/§PF 自检补全 (2026-08-05)** — §PF 原生函数 + 三域自检齐 · **v0.149 Rust 金融市场端点 (2026-08-05)** — sk §PF 实现 + 冒烟 43/43 · **v0.148 前端金融市场面板 (2026-08-05)** — web §PF 全操作 · 三域面板齐 · **v0.147 Python App portfolio 市场端点 (2026-08-05)** — §PF 5 端点 · --portfolio-test 5/5 · **v0.146 README 收官总览数字同步 (2026-08-05)** — Status v0.146 全貌 · **v0.145 运行时不变量复核扩展 (2026-08-05)** — --domains 59/59 · **v0.144 金融域联动语料 (2026-08-05)** — corpus 5 操作联动 · consensus 55/55 · **v0.143 新增不变量 INV-PF-4 (2026-08-05)** — 交易链可加性 PROVED · 全量 110 PROVED · **v0.142 批次收尾 (2026-08-05)** — 小阶段 10/496 · 数字同步 + 全量验收全绿 · **v0.141 Makefile/CI 补 stats (2026-08-05)** — make stats + CI 统计对账 · **v0.140 Elixir 自检覆盖确认 (2026-08-05)** — §SK 全操作 88/88 · **v0.139 双端统计对账 (2026-08-05)** — Rust /stats 与 Python 对等 · 冒烟 38/38 · **v0.138 前端统计显示 (2026-08-05)** — web /stats 平台统计 · **v0.137 教程补 pip 安装 (2026-08-05)** — TUTORIAL 双路径 A/B · **v0.136 新增不变量 INV-SK-6 (2026-08-05)** — 额度-托管联动链 PROVED · 全量 109 PROVED · **v0.135 五大制度联动语料 (2026-08-05)** — corpus 13 操作联动 · consensus 55/55 · **v0.134 业务统计端点 (2026-08-05)** — GET /stats JSON 统计 · **v0.133 README PyPI 徽章 (2026-08-05)** — PyPI version/downloads 徽章 · **v0.132 发布链端到端验证成功 (2026-08-05)** — 打 tag 全自动发布 PyPI 0.7.1 · **v0.131 发布链补全 (2026-08-05)** — 打 tag 全自动发布到 PyPI · **v0.130 PyPI 发布成功 (2026-08-05)** — pip install sigma-lang 全球可用 · **v0.129 发布验证成功 (2026-08-05)** — 打 tag 即发布 · GitHub Actions success · **v0.128 发布 workflow (2026-08-05)** — publish.yml tag 触发构建+Release · **v0.127 打包验证 (2026-08-05)** — pip install 即用 import 验证通过 · **v0.126 Python 包化 (2026-08-05)** — pyproject.toml 打包 sigma_core · **v0.124 入门教程 (2026-08-05)** — docs/TUTORIAL.md 30 分钟上手 · **v0.122 生产启动脚本 (2026-08-05)** — make ready/deploy 一条命令上线 · **v0.121 上线就绪检查 (2026-08-05)** — --launch-ready 环境一键确认 · **v0.120 里程碑达成 (2026-08-05)** — v0.100–v0.120 连续推进收官 · **v0.119 README 收官总览更新 (2026-08-05)** — Status v0.119 全貌 · **v0.118 性能基准 (2026-08-05)** — --bench 吞吐/延迟基线 · **v0.117 README 上线指南 (2026-08-05)** — Deploy Guide 上线启动+运维要点 · **v0.116 CI 报告扩展 (2026-08-05)** — --report 含运行验收段 · **v0.115 协议版本化 (2026-08-05)** — spec 0.7.0 + RFC 记录 · **v0.114 前端联调剧本扩展 (2026-08-05)** — --frontend-scenario 19/19 覆盖三域 · **v0.113 双端面板对账 (2026-08-05)** — Rust /panel 与 Python 对等 · **v0.112 API 文档同步 (2026-08-05)** — docs/api_zhaocha.md /panel + 新命令 · **v0.111 前端供应链面板 (2026-08-05)** — web inventory 全操作 · **v0.110 前端增长期面板 (2026-08-05)** — web badge/dispute/team 全操作 · **v0.109 三域 story 不变量段扩展 (2026-08-05)** — --domains 59/59 含 20 项不变量复核 · **v0.108 sigma-prove 全量重验 80+ (2026-08-05)** — 137 项 PROVED / 29 模块全绿 · **v0.107 任务生命周期不变量 (2026-08-05)** — INV-SK 状态机链 PROVED · **v0.106 金融不变量补全 (2026-08-05)** — INV-PF 资产非负链 PROVED · **v0.105 供应链不变量补全 (2026-08-05)** — INV-IN 入库链可加/出库链不超卖 PROVED · **v0.104 上线验收 (2026-08-05)** — --deploy-accept 上线形态 9/9 · **v0.103 并发安全验证 (2026-08-05)** — --concurrency-test 并发 70 请求状态一致 · **v0.102 launch 默认日志接入 (2026-08-05)** — data/ 默认 state/audit/log · **v0.101 部署加固 (2026-08-05)** — --launch 透传部署配置 + 持久化健壮性 · **v0.100 跨百版本里程碑 (2026-08-04)** — v0.10→v0.100 里程碑链完整 · **v0.99 里程碑达成 (2026-08-04)** — v0.91–v0.99 连续推进收官 · **v0.98 README 找茬运行指南 (2026-08-04)** — Run Guide 一条命令开工 · **v0.97 协议版本化 (2026-08-04)** — spec 0.6.0 + RFC 记录 · **v0.96 运行验收 (2026-08-04)** — --run-accept 端到端 8/8 · **v0.95 运行状态面板 (2026-08-04)** — /panel 业务+门禁摘要页 · **v0.94 一键开工 (2026-08-04)** — --launch 前后端一条命令 · **v0.93 前端联调验证 (2026-08-04)** — --web-test 双服务 5/5 · **v0.92 前端 UI 完善 (2026-08-04)** — 错误横幅/任务详情/用户面板/状态筛选 · **v0.91 找茬静态前端 (2026-08-04)** — web/index.html 单页应用 · **v0.90 里程碑达成 (2026-08-04)** — v0.71–v0.90 连续推进收官 · **v0.89 README 收官总览 (2026-08-04)** — Status 55/55 + 收官总览段 · **v0.88 贡献者指南 (2026-08-04)** — docs/CONTRIBUTING.md 上手路径 · **v0.87 CI 全量回归报告 (2026-08-04)** — --report JSON + CI artifact · **v0.86 协议版本化 (2026-08-04)** — spec 0.5.0 + RFC 记录 · **v0.85 README 开工检查清单 (2026-08-04)** — Launch Checklist 10 项上线勾选 · **v0.84 双端 HTTP API 逐项对账 (2026-08-04)** — Rust 冒烟 36/36 与 Python 逐项一致 · **v0.83 前端联调剧本 (2026-08-04)** — `--frontend-scenario` 11/11 · **v0.82 HTTP 方法语义对齐 (2026-08-04)** — POST 变更 + GET 查询 · **v0.81 找茬 API 文档 (2026-08-04)** — docs/api_zhaocha.md 全端点文档 · **v0.80 sigma-prove 全量重验 70+ (2026-08-04)** — 137 项 PROVED / 29 模块全绿 · **v0.79 三域 story 不变量段扩展 (2026-08-04)** — --domains 47/47 含 12 项不变量复核 · **v0.78 增长期跨操作不变量 (2026-08-04)** — INV-G 授权签发/裁决链 PROVED · **v0.77 团机制跨操作不变量 (2026-08-04)** — INV-T 不超员/成员递增 PROVED · **v0.76 额度制跨操作不变量 (2026-08-04)** — INV-Q 不超用/重置恢复 PROVED · **v0.75 找茬 App 启动自检 (2026-08-04)** — --serve 先过 §SK.6 门禁再监听 · **v0.74 找茬 App 健康检查 (2026-08-04)** — `/health` 服务状态 + 门禁摘要 · **v0.73 找茬 App 分级日志 (2026-08-04)** — `--log-file` 访问/错误分级 · **v0.72 找茬 App 状态原子写 (2026-08-04)** — tmp + rename 防崩溃损坏 · **v0.71 找茬 App 鉴权层 (2026-08-04)** — `--auth-token` token 校验 401 门禁 · **v0.70 里程碑达成 (2026-08-04)** — v0.51–v0.70 连续推进收官 · **v0.69 README 产品落地指南 (2026-08-04)** — 找茬功能 ↔ §SK 对照 + 落地三步走 · **v0.68 找茬 App 部署文档 (2026-08-04)** — docs/deploy_zhaocha.md · **v0.67 找茬业务流双端对账 (2026-08-04)** — --scenario 双端 16/16 逐项一致 · **v0.66 找茬完整业务流 CLI 剧本 (2026-08-04)** — `--scenario` 16/16 · **v0.65 sigma-prove 全量义务重验 (2026-08-04)** — 62 项 PROVED / 29 模块全绿 · **v0.64 三域 story 不变量检查段 (2026-08-04)** — --domains 41/41 含不变量复核 · **v0.63 找茬跨操作不变量 (2026-08-04)** — INV-SK 赏金守恒/不超提 PROVED · **v0.62 金融跨操作不变量 (2026-08-04)** — INV-PF 现金/份额守恒 PROVED · **v0.61 供应链跨操作不变量 (2026-08-04)** — INV-IN 总量守恒/非负链 PROVED · **v0.60 协议版本化 (2026-08-04)** — spec 0.4.0 + RFC 记录 · **v0.59 README 架构数据流全景 (2026-08-04)** — 架构数据流全景章节 · **v0.58 spec 中英对照补全 (2026-08-04)** — §IN 供应链中文参考版 · **v0.57 语料扩容 (2026-08-04)** — 语料按主题拆三模块，consensus 55/55 · **v0.56 一键验收接 CI (2026-08-04)** — Makefile + GitHub Actions · **v0.55 找茬 App 审计日志 (2026-08-04)** — `--audit-log` 可对账审计追踪 · **v0.54 找茬 App HTTP 错误码语义化 (2026-08-04)** — §SK/§IN 错误 → 语义化 4xx · **v0.53 找茬 App 查询端点 (2026-08-04)** — /tasks /users 任务与用户列表 · **v0.52 找茬 App 用户会话层 (2026-08-04)** — /register /me 用户态隔离 · **v0.51 找茬 App 状态持久化 (2026-08-04)** — `--state` JSON 重启不丢 · **v0.50 里程碑达成 (2026-08-03)** — v0.27–v0.50 连续推进收官 · **v0.49 收官验收续 (2026-08-03)** — `sigma-accept.py` 9 道门禁一键验收 · **v0.48 一键收官验收 (2026-08-03)** — `sigma-accept.py` 六道门禁一键跑通 · **v0.47 README 新人上手 (2026-08-03)** — 三域概览 + 快速开始 + 验证清单 · **v0.46 三域协议巩固 (2026-08-03)** — `--domains` 35/35 · **v0.45 供应链 app 参考实现 (2026-08-03)** — §IN HTTP 端点 + 冒烟 25/25 · **v0.44 三端供应链 story 对账 (2026-08-03)** — 供应链故事线三端 6/6 逐项一致 · **v0.43 供应链证明 + runtime (2026-08-03)** — §IN 义务 PROVED + --inventory 6/6 · **v0.42 供应链语料 + 共识 (2026-08-03)** — inventory 语料进共识门禁，47/47 · **v0.41 三端供应链执行层 (2026-08-03)** — §IN 五操作三端实现 · **v0.40 第三个自举新域（供应链 inventory@1.0）(2026-08-03)** — §IN 供应链语义，泛化性三验 · **v0.39 完整业务验收剧本 (2026-08-03)** — `sigma-runtime --all` 29/29 · **v0.38 Rust app 增长期端点 + 冒烟对账 (2026-08-03)** — 增长期 HTTP 双端 20/20 逐项一致 · **v0.37 Python app 增长期端点 (2026-08-03)** — 增长期 HTTP 端点 + 冒烟 20/20 · **v0.36 三端增长期 story 对账 (2026-08-03)** — 增长期故事线三端 11/11 逐项一致 · **v0.35 增长期审计故事线 (2026-08-03)** — `sigma-runtime --growth` 11/11 · **v0.34 增长期义务证明 (2026-08-03)** — sigma-prove 增长期 7 项义务 PROVED · **v0.33 增长期语料模块化 (2026-08-03)** — socketkit_growth 独立语料，consensus 45/45 · **v0.32 增长期语义⑥积分可追溯 (2026-08-03)** — `points_ledger` 积分来源可追溯 · **v0.31 增长期语义⑤额度预支 (2026-08-03)** — `quota_advance` 预支下月额度 · **v0.30 增长期语义④团收益 (2026-08-03)** — `team_share` 团内收益按贡献分配 · **v0.29 增长期语义③团机制 (2026-08-03)** — `team_create/team_join` 受茬团/找茬团 · **v0.28 增长期语义②督导 (2026-08-03)** — `dispute_review` 督导处理纠纷 · **v0.27 增长期语义①核验师 (2026-08-03)** — `badge_issue` 核验师签发勋章 · **v0.26 Rust HTTP 服务 + 冒烟对账 (2026-08-03)** — HTTP 层 Python/Rust 双端同尺 · **v0.25 Rust 参考实现 (2026-08-03)** — `app.rs` 生产级后端，四端 story 逐项一致 · **v0.24 三端 §SK.6 story 一致性 (2026-08-03)** — 业务故事线 Python/Rust/Elixir 三端逐项一致 · **v0.23 MVP 端到端 HTTP 冒烟测试 (2026-08-03)** — `sigma_app --smoke` HTTP 七步全链路可重复验收 · **v0.22 找茬 MVP 参考实现 (2026-08-03)** — `sigma_app.py` 可运行后端，业务全委托 §SK 语义 · **v0.21 找茬 MVP 全链路审计剧本 (2026-08-03)** — §SK.6 十二步业务故事线 + `sigma-runtime --story`，App 开工验收剧本 · **v0.20 找茬五大制度补齐 (2026-08-03)** — 额度制/积分制/勋章制进 ΣLang，业务规则链完整可证明 · **v0.19 第二个自举新域（金融 portfolio@1.0）(2026-08-03)** — 协议泛化性再验证，consensus 43/43 · **v0.18 状态机不变量证明 (2026-08-03)** — 作者授权 + 4 项状态机不变量 z3 可证明 · **v0.17 §SK 对齐真实业务 (2026-08-03)** — Task 4 态状态机 + 契分制，MVP 全流程三端一致可执行可证明 · **v0.16 SocketKit 语料执行化 (2026-08-03)** — 业务语义进入 Law XIII 共识门禁 · **v0.15 三端 §SK 执行层 (2026-08-03)** — §SK 业务语义 Python/Rust/Elixir 三端一致可执行 · **v0.14 SocketKit Runtime (2026-08-03)** — §SK 参考实现 + 审计运行时 + z3 证明闭环，共识门禁 41/41 全绿 · **v0.13 SocketKit Protocol (2026-08-02)** — §SK 语义定义，共识门禁 40/40 全绿 · **v0.12 Novel Spec Test (2026-08-02)** — 新域自举闭环 · **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
+- **Milestone / 里程碑**: **v0.182 批次 5 收尾 (2026-08-06)** — 小阶段 50/496 · 数字同步 + 全量验收全绿 · **v0.181 Makefile/CI 补错误边界测试 (2026-08-06)** — make errors + CI 对账 · **v0.180 Elixir 错误边界自检 (2026-08-06)** — 五域自检齐 · **v0.179 Rust 错误边界对账 (2026-08-06)** — 冒烟 48/48 · **v0.178 前端错误提示增强 (2026-08-06)** — 语义化错误文案 · **v0.177 Python App 错误边界剧本 (2026-08-06)** — --errors-test 7/7 · **v0.176 README 收官总览数字同步 (2026-08-06)** — Status v0.176 全貌 · **v0.175 运行时不变量复核扩展 (2026-08-06)** — --domains 60/60 · **v0.174 三域错误边界语料 (2026-08-06)** — corpus 错误路径强化 · consensus 56/56 · **v0.173 新增不变量 INV-PF-5 (2026-08-06)** — 买入-卖出链守恒 PROVED · 全量 171 PROVED · **v0.172 批次 4 收尾 (2026-08-06)** — 小阶段 40/496 · 数字同步 + 全量验收全绿 · **v0.171 Makefile/CI 补跨域测试 (2026-08-06)** — make cross-domain + CI 对账 · **v0.170 Elixir 跨域自检 (2026-08-06)** — 四域自检齐 · **v0.169 Rust 跨域链对账 (2026-08-06)** — 冒烟 46/46 跨域链 · **v0.168 前端三域联动演示 (2026-08-06)** — web 三域链展示 · **v0.167 Python App 三域联动剧本 (2026-08-06)** — --cross-domain-test 5/5 · **v0.166 README 收官总览数字同步 (2026-08-06)** — Status v0.166 全貌 · **v0.165 运行时不变量复核扩展 (2026-08-05)** — --domains 60/60 · **v0.164 跨域联动语料 (2026-08-05)** — corpus 三域链 10 操作 · consensus 56/56 · **v0.163 新增不变量 INV-SK-7 (2026-08-05)** — 任务-契分联动链 PROVED · 全量 137 PROVED · **v0.162 批次 3 收尾 (2026-08-05)** — 小阶段 30/496 · 数字同步 + 全量验收全绿 · **v0.161 Makefile/CI 补供应链测试 (2026-08-05)** — make inventory + CI 对账 · **v0.160 Elixir §IN 自检补全 (2026-08-05)** — 三域自检含联动链 · **v0.159 Rust 供应链链式对账 (2026-08-05)** — 冒烟 44/44 链式 · **v0.158 前端供应链联动演示 (2026-08-05)** — web 联动链展示 · **v0.157 Python App 供应链联动测试 (2026-08-05)** — --inventory-test 5/5 · **v0.156 README 收官总览数字同步 (2026-08-05)** — Status v0.156 全貌 · **v0.155 运行时不变量复核扩展 (2026-08-05)** — --domains 60/60 · **v0.154 供应链域联动语料 (2026-08-05)** — corpus 5 操作联动 · consensus 56/56 · **v0.153 新增不变量 INV-IN-5 (2026-08-05)** — 混合货品可加链 PROVED · 全量 125 PROVED · **v0.152 批次 2 收尾 (2026-08-05)** — 小阶段 20/496 · 数字同步 + 全量验收全绿 · **v0.151 Makefile/CI 补金融测试 (2026-08-05)** — make portfolio + CI 对账 · **v0.150 Elixir §IN/§PF 自检补全 (2026-08-05)** — §PF 原生函数 + 三域自检齐 · **v0.149 Rust 金融市场端点 (2026-08-05)** — sk §PF 实现 + 冒烟 43/43 · **v0.148 前端金融市场面板 (2026-08-05)** — web §PF 全操作 · 三域面板齐 · **v0.147 Python App portfolio 市场端点 (2026-08-05)** — §PF 5 端点 · --portfolio-test 5/5 · **v0.146 README 收官总览数字同步 (2026-08-05)** — Status v0.146 全貌 · **v0.145 运行时不变量复核扩展 (2026-08-05)** — --domains 60/60 · **v0.144 金融域联动语料 (2026-08-05)** — corpus 5 操作联动 · consensus 56/56 · **v0.143 新增不变量 INV-PF-4 (2026-08-05)** — 交易链可加性 PROVED · 全量 110 PROVED · **v0.142 批次收尾 (2026-08-05)** — 小阶段 10/496 · 数字同步 + 全量验收全绿 · **v0.141 Makefile/CI 补 stats (2026-08-05)** — make stats + CI 统计对账 · **v0.140 Elixir 自检覆盖确认 (2026-08-05)** — §SK 全操作 88/88 · **v0.139 双端统计对账 (2026-08-05)** — Rust /stats 与 Python 对等 · 冒烟 38/38 · **v0.138 前端统计显示 (2026-08-05)** — web /stats 平台统计 · **v0.137 教程补 pip 安装 (2026-08-05)** — TUTORIAL 双路径 A/B · **v0.136 新增不变量 INV-SK-6 (2026-08-05)** — 额度-托管联动链 PROVED · 全量 109 PROVED · **v0.135 五大制度联动语料 (2026-08-05)** — corpus 13 操作联动 · consensus 56/56 · **v0.134 业务统计端点 (2026-08-05)** — GET /stats JSON 统计 · **v0.133 README PyPI 徽章 (2026-08-05)** — PyPI version/downloads 徽章 · **v0.132 发布链端到端验证成功 (2026-08-05)** — 打 tag 全自动发布 PyPI 0.7.1 · **v0.131 发布链补全 (2026-08-05)** — 打 tag 全自动发布到 PyPI · **v0.130 PyPI 发布成功 (2026-08-05)** — pip install sigma-lang 全球可用 · **v0.129 发布验证成功 (2026-08-05)** — 打 tag 即发布 · GitHub Actions success · **v0.128 发布 workflow (2026-08-05)** — publish.yml tag 触发构建+Release · **v0.127 打包验证 (2026-08-05)** — pip install 即用 import 验证通过 · **v0.126 Python 包化 (2026-08-05)** — pyproject.toml 打包 sigma_core · **v0.124 入门教程 (2026-08-05)** — docs/TUTORIAL.md 30 分钟上手 · **v0.122 生产启动脚本 (2026-08-05)** — make ready/deploy 一条命令上线 · **v0.121 上线就绪检查 (2026-08-05)** — --launch-ready 环境一键确认 · **v0.120 里程碑达成 (2026-08-05)** — v0.100–v0.120 连续推进收官 · **v0.119 README 收官总览更新 (2026-08-05)** — Status v0.119 全貌 · **v0.118 性能基准 (2026-08-05)** — --bench 吞吐/延迟基线 · **v0.117 README 上线指南 (2026-08-05)** — Deploy Guide 上线启动+运维要点 · **v0.116 CI 报告扩展 (2026-08-05)** — --report 含运行验收段 · **v0.115 协议版本化 (2026-08-05)** — spec 0.7.0 + RFC 记录 · **v0.114 前端联调剧本扩展 (2026-08-05)** — --frontend-scenario 19/19 覆盖三域 · **v0.113 双端面板对账 (2026-08-05)** — Rust /panel 与 Python 对等 · **v0.112 API 文档同步 (2026-08-05)** — docs/api_zhaocha.md /panel + 新命令 · **v0.111 前端供应链面板 (2026-08-05)** — web inventory 全操作 · **v0.110 前端增长期面板 (2026-08-05)** — web badge/dispute/team 全操作 · **v0.109 三域 story 不变量段扩展 (2026-08-05)** — --domains 60/60 含 20 项不变量复核 · **v0.108 sigma-prove 全量重验 80+ (2026-08-05)** — 171 项 PROVED / 29 模块全绿 · **v0.107 任务生命周期不变量 (2026-08-05)** — INV-SK 状态机链 PROVED · **v0.106 金融不变量补全 (2026-08-05)** — INV-PF 资产非负链 PROVED · **v0.105 供应链不变量补全 (2026-08-05)** — INV-IN 入库链可加/出库链不超卖 PROVED · **v0.104 上线验收 (2026-08-05)** — --deploy-accept 上线形态 9/9 · **v0.103 并发安全验证 (2026-08-05)** — --concurrency-test 并发 70 请求状态一致 · **v0.102 launch 默认日志接入 (2026-08-05)** — data/ 默认 state/audit/log · **v0.101 部署加固 (2026-08-05)** — --launch 透传部署配置 + 持久化健壮性 · **v0.100 跨百版本里程碑 (2026-08-04)** — v0.10→v0.100 里程碑链完整 · **v0.99 里程碑达成 (2026-08-04)** — v0.91–v0.99 连续推进收官 · **v0.98 README 找茬运行指南 (2026-08-04)** — Run Guide 一条命令开工 · **v0.97 协议版本化 (2026-08-04)** — spec 0.6.0 + RFC 记录 · **v0.96 运行验收 (2026-08-04)** — --run-accept 端到端 8/8 · **v0.95 运行状态面板 (2026-08-04)** — /panel 业务+门禁摘要页 · **v0.94 一键开工 (2026-08-04)** — --launch 前后端一条命令 · **v0.93 前端联调验证 (2026-08-04)** — --web-test 双服务 5/5 · **v0.92 前端 UI 完善 (2026-08-04)** — 错误横幅/任务详情/用户面板/状态筛选 · **v0.91 找茬静态前端 (2026-08-04)** — web/index.html 单页应用 · **v0.90 里程碑达成 (2026-08-04)** — v0.71–v0.90 连续推进收官 · **v0.89 README 收官总览 (2026-08-04)** — Status 56/56 + 收官总览段 · **v0.88 贡献者指南 (2026-08-04)** — docs/CONTRIBUTING.md 上手路径 · **v0.87 CI 全量回归报告 (2026-08-04)** — --report JSON + CI artifact · **v0.86 协议版本化 (2026-08-04)** — spec 0.5.0 + RFC 记录 · **v0.85 README 开工检查清单 (2026-08-04)** — Launch Checklist 10 项上线勾选 · **v0.84 双端 HTTP API 逐项对账 (2026-08-04)** — Rust 冒烟 36/36 与 Python 逐项一致 · **v0.83 前端联调剧本 (2026-08-04)** — `--frontend-scenario` 11/11 · **v0.82 HTTP 方法语义对齐 (2026-08-04)** — POST 变更 + GET 查询 · **v0.81 找茬 API 文档 (2026-08-04)** — docs/api_zhaocha.md 全端点文档 · **v0.80 sigma-prove 全量重验 70+ (2026-08-04)** — 171 项 PROVED / 29 模块全绿 · **v0.79 三域 story 不变量段扩展 (2026-08-04)** — --domains 47/47 含 12 项不变量复核 · **v0.78 增长期跨操作不变量 (2026-08-04)** — INV-G 授权签发/裁决链 PROVED · **v0.77 团机制跨操作不变量 (2026-08-04)** — INV-T 不超员/成员递增 PROVED · **v0.76 额度制跨操作不变量 (2026-08-04)** — INV-Q 不超用/重置恢复 PROVED · **v0.75 找茬 App 启动自检 (2026-08-04)** — --serve 先过 §SK.6 门禁再监听 · **v0.74 找茬 App 健康检查 (2026-08-04)** — `/health` 服务状态 + 门禁摘要 · **v0.73 找茬 App 分级日志 (2026-08-04)** — `--log-file` 访问/错误分级 · **v0.72 找茬 App 状态原子写 (2026-08-04)** — tmp + rename 防崩溃损坏 · **v0.71 找茬 App 鉴权层 (2026-08-04)** — `--auth-token` token 校验 401 门禁 · **v0.70 里程碑达成 (2026-08-04)** — v0.51–v0.70 连续推进收官 · **v0.69 README 产品落地指南 (2026-08-04)** — 找茬功能 ↔ §SK 对照 + 落地三步走 · **v0.68 找茬 App 部署文档 (2026-08-04)** — docs/deploy_zhaocha.md · **v0.67 找茬业务流双端对账 (2026-08-04)** — --scenario 双端 16/16 逐项一致 · **v0.66 找茬完整业务流 CLI 剧本 (2026-08-04)** — `--scenario` 16/16 · **v0.65 sigma-prove 全量义务重验 (2026-08-04)** — 62 项 PROVED / 29 模块全绿 · **v0.64 三域 story 不变量检查段 (2026-08-04)** — --domains 41/41 含不变量复核 · **v0.63 找茬跨操作不变量 (2026-08-04)** — INV-SK 赏金守恒/不超提 PROVED · **v0.62 金融跨操作不变量 (2026-08-04)** — INV-PF 现金/份额守恒 PROVED · **v0.61 供应链跨操作不变量 (2026-08-04)** — INV-IN 总量守恒/非负链 PROVED · **v0.60 协议版本化 (2026-08-04)** — spec 0.4.0 + RFC 记录 · **v0.59 README 架构数据流全景 (2026-08-04)** — 架构数据流全景章节 · **v0.58 spec 中英对照补全 (2026-08-04)** — §IN 供应链中文参考版 · **v0.57 语料扩容 (2026-08-04)** — 语料按主题拆三模块，consensus 56/56 · **v0.56 一键验收接 CI (2026-08-04)** — Makefile + GitHub Actions · **v0.55 找茬 App 审计日志 (2026-08-04)** — `--audit-log` 可对账审计追踪 · **v0.54 找茬 App HTTP 错误码语义化 (2026-08-04)** — §SK/§IN 错误 → 语义化 4xx · **v0.53 找茬 App 查询端点 (2026-08-04)** — /tasks /users 任务与用户列表 · **v0.52 找茬 App 用户会话层 (2026-08-04)** — /register /me 用户态隔离 · **v0.51 找茬 App 状态持久化 (2026-08-04)** — `--state` JSON 重启不丢 · **v0.50 里程碑达成 (2026-08-03)** — v0.27–v0.50 连续推进收官 · **v0.49 收官验收续 (2026-08-03)** — `sigma-accept.py` 9 道门禁一键验收 · **v0.48 一键收官验收 (2026-08-03)** — `sigma-accept.py` 六道门禁一键跑通 · **v0.47 README 新人上手 (2026-08-03)** — 三域概览 + 快速开始 + 验证清单 · **v0.46 三域协议巩固 (2026-08-03)** — `--domains` 35/35 · **v0.45 供应链 app 参考实现 (2026-08-03)** — §IN HTTP 端点 + 冒烟 25/25 · **v0.44 三端供应链 story 对账 (2026-08-03)** — 供应链故事线三端 6/6 逐项一致 · **v0.43 供应链证明 + runtime (2026-08-03)** — §IN 义务 PROVED + --inventory 6/6 · **v0.42 供应链语料 + 共识 (2026-08-03)** — inventory 语料进共识门禁，47/47 · **v0.41 三端供应链执行层 (2026-08-03)** — §IN 五操作三端实现 · **v0.40 第三个自举新域（供应链 inventory@1.0）(2026-08-03)** — §IN 供应链语义，泛化性三验 · **v0.39 完整业务验收剧本 (2026-08-03)** — `sigma-runtime --all` 29/29 · **v0.38 Rust app 增长期端点 + 冒烟对账 (2026-08-03)** — 增长期 HTTP 双端 20/20 逐项一致 · **v0.37 Python app 增长期端点 (2026-08-03)** — 增长期 HTTP 端点 + 冒烟 20/20 · **v0.36 三端增长期 story 对账 (2026-08-03)** — 增长期故事线三端 11/11 逐项一致 · **v0.35 增长期审计故事线 (2026-08-03)** — `sigma-runtime --growth` 11/11 · **v0.34 增长期义务证明 (2026-08-03)** — sigma-prove 增长期 7 项义务 PROVED · **v0.33 增长期语料模块化 (2026-08-03)** — socketkit_growth 独立语料，consensus 45/45 · **v0.32 增长期语义⑥积分可追溯 (2026-08-03)** — `points_ledger` 积分来源可追溯 · **v0.31 增长期语义⑤额度预支 (2026-08-03)** — `quota_advance` 预支下月额度 · **v0.30 增长期语义④团收益 (2026-08-03)** — `team_share` 团内收益按贡献分配 · **v0.29 增长期语义③团机制 (2026-08-03)** — `team_create/team_join` 受茬团/找茬团 · **v0.28 增长期语义②督导 (2026-08-03)** — `dispute_review` 督导处理纠纷 · **v0.27 增长期语义①核验师 (2026-08-03)** — `badge_issue` 核验师签发勋章 · **v0.26 Rust HTTP 服务 + 冒烟对账 (2026-08-03)** — HTTP 层 Python/Rust 双端同尺 · **v0.25 Rust 参考实现 (2026-08-03)** — `app.rs` 生产级后端，四端 story 逐项一致 · **v0.24 三端 §SK.6 story 一致性 (2026-08-03)** — 业务故事线 Python/Rust/Elixir 三端逐项一致 · **v0.23 MVP 端到端 HTTP 冒烟测试 (2026-08-03)** — `sigma_app --smoke` HTTP 七步全链路可重复验收 · **v0.22 找茬 MVP 参考实现 (2026-08-03)** — `sigma_app.py` 可运行后端，业务全委托 §SK 语义 · **v0.21 找茬 MVP 全链路审计剧本 (2026-08-03)** — §SK.6 十二步业务故事线 + `sigma-runtime --story`，App 开工验收剧本 · **v0.20 找茬五大制度补齐 (2026-08-03)** — 额度制/积分制/勋章制进 ΣLang，业务规则链完整可证明 · **v0.19 第二个自举新域（金融 portfolio@1.0）(2026-08-03)** — 协议泛化性再验证，consensus 43/43 · **v0.18 状态机不变量证明 (2026-08-03)** — 作者授权 + 4 项状态机不变量 z3 可证明 · **v0.17 §SK 对齐真实业务 (2026-08-03)** — Task 4 态状态机 + 契分制，MVP 全流程三端一致可执行可证明 · **v0.16 SocketKit 语料执行化 (2026-08-03)** — 业务语义进入 Law XIII 共识门禁 · **v0.15 三端 §SK 执行层 (2026-08-03)** — §SK 业务语义 Python/Rust/Elixir 三端一致可执行 · **v0.14 SocketKit Runtime (2026-08-03)** — §SK 参考实现 + 审计运行时 + z3 证明闭环，共识门禁 41/41 全绿 · **v0.13 SocketKit Protocol (2026-08-02)** — §SK 语义定义，共识门禁 40/40 全绿 · **v0.12 Novel Spec Test (2026-08-02)** — 新域自举闭环 · **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
 - **Spec Version / 规范版本**: 0.7.0
 - **Date / 日期**: 2026-08-05
 - **License / 许可证**: MIT

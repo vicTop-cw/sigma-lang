@@ -917,6 +917,14 @@ def run_invariant_checks(core):
          "ok": t7c[2] == 3, "note": f"task={t7c}"},
     ])
 
+    # §PF 买入-卖出链守恒 (v0.175, INV-PF-5)
+    pf5 = core.buy(core.portfolio_new(100), 0, 30)
+    pf5b = core.sell(pf5, 0, 30)
+    record("INV-PF-5", "invariant", ["buy(30)→sell(30)"], pf5b, [
+        {"law": "买入-卖出链守恒 — buy q 后 sell q，现金/份额恢复",
+         "ok": pf5b[0] == 100 and pf5b[1] == 0, "note": f"pf={pf5b}"},
+    ])
+
     return events
 
 
