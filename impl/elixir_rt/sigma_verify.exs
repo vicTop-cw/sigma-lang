@@ -2161,6 +2161,23 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ PF.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_cross_domain_story do
+    checks = [
+      # §SK 托管（跨域链起点，v0.170）
+      {"xd_points_hold", points_hold(points_new(), 100) == [100, 0]},
+      # §PF 奖励入市
+      {"xd_portfolio_new", portfolio_new(100) == {:ok, [100, 0, 0]}},
+      {"xd_buy", buy(elem(portfolio_new(100), 1), 0, 30) == {:ok, [70, 30, 0]}},
+      # §IN 库存并行
+      {"xd_inventory_new", inventory_new(10, 20) == {:ok, [10, 20]}},
+      {"xd_ship", ship_stock([10, 20], 0, 4) == {:ok, [6, 20]}}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ XD.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2191,6 +2208,11 @@ case System.argv() do
   ["--sk-portfolio" | _] ->
     {passed, total} = SigmaVerify.sk_portfolio_story()
     IO.puts("sigma_core portfolio story (§PF): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-cross-domain" | _] ->
+    {passed, total} = SigmaVerify.sk_cross_domain_story()
+    IO.puts("sigma_core cross-domain story (三域链): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

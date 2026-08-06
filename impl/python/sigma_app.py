@@ -437,9 +437,9 @@ class _Handler(BaseHTTPRequestHandler):
                     "auth": "enabled" if _Handler._auth_token else "disabled",
                     "log": _Handler._log_file,
                     "gates": {
-                        "consensus": "54/54",
+                        "consensus": "55/55",
                         "p0": "109/109",
-                        "prove": "125 PROVED",
+                        "prove": "137 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -467,9 +467,9 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <tr><td>数量</td><td>{by_state[0]}</td><td>{by_state[1]}</td><td>{by_state[2]}</td><td>{by_state[3]}</td></tr>
 <tr><td>赏金总额</td><td colspan="4">{total_bounty}</td></tr></table></div>
 <div class="card"><h3>门禁摘要</h3><table>
-<tr><td>consensus</td><td>54/54</td></tr>
+<tr><td>consensus</td><td>55/55</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>125 PROVED</td></tr>
+<tr><td>prove</td><td>137 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/stats":
@@ -1109,7 +1109,7 @@ def run_health_test() -> Tuple[int, int]:
         check("HEALTH status ok", body.get("status") == "ok", f"got {body}")
         check("HEALTH app name", "找茬" in body.get("app", ""), f"got {body}")
         check("HEALTH auth field", "auth" in body, f"got {body}")
-        check("HEALTH gates", body.get("gates", {}).get("consensus") == "54/54",
+        check("HEALTH gates", body.get("gates", {}).get("consensus") == "55/55",
               f"got {body.get('gates')}")
     finally:
         server.shutdown()
@@ -1383,7 +1383,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "54/54" in html and "125 PROVED" in html, "")
+        check("PANEL gates", "55/55" in html and "137 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -1508,6 +1508,53 @@ def run_inventory_test() -> Tuple[int, int]:
         check("INV level", r["level"] == 11, f"got {r}")
         r = call("/fill_rate?shipped=6&demanded=10")
         check("INV fill", abs(r["rate"] - 0.6) < 1e-9, f"got {r}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
+def run_cross_domain_test() -> Tuple[int, int]:
+    """--cross-domain-test (v0.167): §SK→§PF→§IN cross-domain chain over HTTP —
+    bounty escrow (找茬) → reward into portfolio (§PF) → parallel inventory
+    movement (§IN), matching the sigma_cross_domain_ok corpus semantics."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        # §SK 找茬托管（发单 → 赏金托管 escrow=100）
+        call(f"/register?user=7&name={quote('找茬主')}")
+        call("/quota?user=7&monthly=50")
+        r = call("/post?author=7&bounty=100")
+        check("XD post escrow", r["points"] == [100, 0], f"got {r}")
+        # §PF 奖励入市（开组合 → 买入）
+        r = call("/portfolio_new?cash=100")
+        check("XD pf new", r["portfolio"] == [100, 0, 0], f"got {r}")
+        r = call("/portfolio_buy?pf=[100,0,0]&asset=0&qty=30")
+        check("XD pf buy", r["portfolio"] == [70, 30, 0], f"got {r}")
+        # §IN 库存并行（开仓 → 出库）
+        r = call("/inventory_new?qty_a=10&qty_b=20")
+        check("XD inv new", r["inventory"] == [10, 20], f"got {r}")
+        r = call("/ship_stock?inv=[10,20]&item=0&qty=4")
+        check("XD inv ship", r["inventory"] == [6, 20], f"got {r}")
     finally:
         server.shutdown()
         thread.join()
@@ -2098,6 +2145,10 @@ def main(argv=None):
     if "--inventory-test" in argv:
         passed, total = run_inventory_test()
         print(f"sigma_app inventory test (v0.157): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--cross-domain-test" in argv:
+        passed, total = run_cross_domain_test()
+        print(f"sigma_app cross-domain test (v0.167): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()

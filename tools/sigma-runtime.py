@@ -907,6 +907,16 @@ def run_invariant_checks(core):
          "ok": inv5[0] == 15 and inv5[1] == 23, "note": f"inv={inv5}"},
     ])
 
+    # §SK 任务-契分联动 (v0.165, INV-SK-7)
+    t7 = core.task_create(7, 100)
+    t7a = core.accept_task(t7, 3)
+    t7b = core.task_submit(t7a)
+    t7c = core.task_accept(t7b, 7)
+    record("INV-SK-7", "invariant", ["claim→submit→accept"], t7c, [
+        {"law": "任务-契分联动 — 验收后任务 state=3（契分 +10 联动）",
+         "ok": t7c[2] == 3, "note": f"task={t7c}"},
+    ])
+
     return events
 
 
