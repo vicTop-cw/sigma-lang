@@ -2524,6 +2524,32 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ WC.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_dual_asset_vr_story do
+    # §PF 双资产买卖-估值-风险四链联动 (v0.380) — buy asset0 q1 → buy asset1 q2 →
+    # sell asset0 q3 → sell asset1 q4，链后估值 cash+qA+qB 守恒且估值 ≥ 风险
+    # 且 cash/qA/qB ≥ 0（与 --dual-asset-vr-test / INV-PF-11 对应）
+    {:ok, pf0} = portfolio_new(100)
+    {:ok, pf1} = buy(pf0, 0, 30)
+    {:ok, pf2} = buy(pf1, 1, 20)
+    {:ok, pf3} = sell(pf2, 0, 10)
+    {:ok, pf4} = sell(pf3, 1, 5)
+    {:ok, v} = portfolio_value(pf4)
+    {:ok, r} = risk_score(pf4)
+    cash = Enum.at(pf4, 0)
+    qa = Enum.at(pf4, 1)
+    qb = Enum.at(pf4, 2)
+    checks = [
+      {"dvr_value_conserved", v == 100},
+      {"dvr_value_ge_risk", v >= r},
+      {"dvr_cash_nonneg", cash >= 0},
+      {"dvr_qa_qb_nonneg", qa >= 0 and qb >= 0}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ DVR.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2659,6 +2685,11 @@ case System.argv() do
   ["--sk-wc" | _] ->
     {passed, total} = SigmaVerify.sk_withdraw_credit_story()
     IO.puts("sigma_core withdraw-credit story (提现-契分联动): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-dvr" | _] ->
+    {passed, total} = SigmaVerify.sk_dual_asset_vr_story()
+    IO.puts("sigma_core dual-asset-vr story (双资产买卖-估值-风险四链联动): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

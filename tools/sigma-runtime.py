@@ -1080,6 +1080,19 @@ def run_invariant_checks(core):
          "ok": p16 == [0, 60] and c16 == 105, "note": f"p={p16} c={c16}"},
     ])
 
+    # §PF 双资产买卖-估值-风险四链联动 (v0.375, INV-PF-11)
+    pf11 = core.buy(core.portfolio_new(100), 0, 30)
+    pf11b = core.buy(pf11, 1, 20)
+    pf11c = core.sell(pf11b, 0, 10)
+    pf11d = core.sell(pf11c, 1, 5)
+    v11 = core.portfolio_value(pf11d)
+    r11 = core.risk_score(pf11d)
+    record("INV-PF-11", "invariant", ["buy(0,30)→buy(1,20)→sell(0,10)→sell(1,5)"], pf11d, [
+        {"law": "双资产买卖-估值-风险四链联动 — 链后估值 cash+qA+qB=100 且估值 ≥ 风险 且 qA、qB、cash ≥ 0",
+         "ok": v11 == 100 and v11 >= r11 and pf11d[0] >= 0 and pf11d[1] >= 0 and pf11d[2] >= 0,
+         "note": f"pf={pf11d} v={v11} r={r11}"},
+    ])
+
     return events
 
 

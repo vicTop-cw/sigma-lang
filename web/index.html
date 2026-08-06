@@ -293,6 +293,14 @@
     </div>
   </section>
 
+  <section id="dvr-panel">
+    <h2>双资产估值-风险演示（v0.378，四链联动）</h2>
+    <div class="row">
+      <button onclick="dvrChain()">跑四链</button>
+      <span id="dvr-out" class="muted"></span>
+    </div>
+  </section>
+
   <section id="pf-panel">
     <h2>金融市场（§PF，v0.148）</h2>
     <div class="row">
@@ -807,6 +815,20 @@ async function wcChain() {
   const jc = await api("/badge?user=3", "wc_badge");
   document.getElementById("wc-out").textContent =
     `提现后: 积分 ${jw.points[0]}托管/${jw.points[1]}可用（100−40 ≥0）· 契分 ${jc.credit}（100+5×1）`;
+}
+
+// v0.378 — 双资产买卖-估值-风险四链联动演示（与 --dual-asset-vr-test / INV-PF-11 语义对应）
+async function dvrChain() {
+  const j0 = await api("/portfolio_new?cash=100", "dvr_new");
+  let pf = j0.portfolio;
+  pf = (await api(`/portfolio_buy?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=0&qty=30`, "dvr_buy0")).portfolio;
+  pf = (await api(`/portfolio_buy?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=1&qty=20`, "dvr_buy1")).portfolio;
+  pf = (await api(`/portfolio_sell?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=0&qty=10`, "dvr_sell0")).portfolio;
+  pf = (await api(`/portfolio_sell?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=1&qty=5`, "dvr_sell1")).portfolio;
+  const jv = await api(`/portfolio_value?pf=${encodeURIComponent(JSON.stringify(pf))}`, "dvr_value");
+  const jr = await api(`/portfolio_risk?pf=${encodeURIComponent(JSON.stringify(pf))}`, "dvr_risk");
+  document.getElementById("dvr-out").textContent =
+    `估值 ${jv.value}（总额守恒）· 风险 ${jr.risk}（≤ 估值）· 组合 ${JSON.stringify(pf)}（cash/qA/qB ≥ 0）`;
 }
 
 // v0.148 — 金融市场（§PF）
