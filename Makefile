@@ -14,7 +14,7 @@
 
 PYTHON ?= python3
 
-.PHONY: accept check story prove rust elixir app stats portfolio inventory cross-domain errors points ready deploy all
+.PHONY: accept check story prove rust elixir app stats portfolio inventory cross-domain errors points invchain ready deploy all
 
 accept: ## 九道门禁一键验收（CI 与本地同一条命令）
 	$(PYTHON) tools/sigma-accept.py
@@ -71,6 +71,11 @@ points: ## 积分链对账（Python /points-test + Rust 50/50 + Elixir 积分链
 	$(PYTHON) impl/python/sigma_app.py --points-test
 	cd impl/verifier && cargo run -q -- --app-smoke
 	cd impl/elixir_rt && elixir sigma_verify.exs --sk-points
+
+invchain: ## 库存链对账（Python /inventory-chain-test + Rust 51/51 + Elixir 库存链 5/5，v0.201）
+	$(PYTHON) impl/python/sigma_app.py --inventory-chain-test
+	cd impl/verifier && cargo run -q -- --app-smoke
+	cd impl/elixir_rt && elixir sigma_verify.exs --sk-invchain
 
 ready: ## 生产就绪检查（--launch-ready 一次性确认环境，v0.121）
 	$(PYTHON) impl/python/sigma_app.py --launch-ready

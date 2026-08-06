@@ -933,6 +933,13 @@ def run_invariant_checks(core):
          "ok": p8b[0] == 0 and p8b[1] == 100, "note": f"points={p8b}"},
     ])
 
+    # §IN 入库-出库联动 (v0.195, INV-IN-6)
+    inv6 = core.ship_stock(core.receive_stock([10, 20], 0, 5), 0, 4)
+    record("INV-IN-6", "invariant", ["receive(5)→ship(4)"], inv6, [
+        {"law": "入库-出库联动 — receive 加 5 后 ship 4，item0=10+5−4=11 且 ≥0",
+         "ok": inv6[0] == 11 and inv6[0] >= 0, "note": f"inv={inv6}"},
+    ])
+
     return events
 
 

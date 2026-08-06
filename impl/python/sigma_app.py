@@ -443,7 +443,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "gates": {
                         "consensus": "56/56",
                         "p0": "109/109",
-                        "prove": "214 PROVED",
+                        "prove": "218 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -473,7 +473,7 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <div class="card"><h3>门禁摘要</h3><table>
 <tr><td>consensus</td><td>56/56</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>214 PROVED</td></tr>
+<tr><td>prove</td><td>218 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/stats":
@@ -1387,7 +1387,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "56/56" in html and "214 PROVED" in html, "")
+        check("PANEL gates", "56/56" in html and "218 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -1664,6 +1664,48 @@ def run_points_test() -> Tuple[int, int]:
         check("PTS release", r["points"] == [0, 100], f"got {r}")
         r = call("/withdraw?user=3&amount=100")
         check("PTS withdraw", r["points"] == [0, 0], f"got {r}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
+def run_inventory_chain_test() -> Tuple[int, int]:
+    """--inventory-chain-test (v0.197): supply-chain flow over HTTP — open →
+    receive → ship → level → fill_rate chain, matching the INV-IN-6
+    receive-ship link semantics."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        r = call("/inventory_new?qty_a=10&qty_b=20")
+        check("INVC open", r["inventory"] == [10, 20], f"got {r}")
+        r = call("/receive_stock?inv=[10,20]&item=0&qty=5")
+        check("INVC receive", r["inventory"] == [15, 20], f"got {r}")
+        r = call("/ship_stock?inv=[15,20]&item=0&qty=4")
+        check("INVC ship", r["inventory"] == [11, 20], f"got {r}")
+        r = call("/stock_level?inv=[11,20]&item=0")
+        check("INVC level", r["level"] == 11, f"got {r}")
+        r = call("/fill_rate?shipped=6&demanded=10")
+        check("INVC fill", abs(r["rate"] - 0.6) < 1e-9, f"got {r}")
     finally:
         server.shutdown()
         thread.join()
@@ -2266,6 +2308,10 @@ def main(argv=None):
     if "--points-test" in argv:
         passed, total = run_points_test()
         print(f"sigma_app points test (v0.187): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--inventory-chain-test" in argv:
+        passed, total = run_inventory_chain_test()
+        print(f"sigma_app inventory chain test (v0.197): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()

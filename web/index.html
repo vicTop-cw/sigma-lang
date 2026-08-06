@@ -423,21 +423,23 @@ async function fillRate() {
   document.getElementById("s-out").textContent = "履约率 " + j.rate;
 }
 
-// v0.158 — 供应链联动演示（开仓→入库→出库→水位→履约率 完整链）
+// v0.158/0.198 — 供应链联动演示（开仓→入库→出库→水位→履约率，各步明细）
 async function invChain() {
   const j1 = await api("/inventory_new?qty_a=10&qty_b=20", "inv_new");
   let inv = j1.inventory;
+  log("链 开仓: " + JSON.stringify(inv));
   const j2 = await api(`/receive_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=0&qty=5`, "inv_receive");
   inv = j2.inventory;
+  log("链 入库+5: " + JSON.stringify(inv));
   const j3 = await api(`/ship_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=0&qty=4`, "inv_ship");
   inv = j3.inventory;
+  log("链 出库-4: " + JSON.stringify(inv));
   const j4 = await api(`/stock_level?inv=${encodeURIComponent(JSON.stringify(inv))}&item=0`, "inv_level");
   const j5 = await api("/fill_rate?shipped=6&demanded=10", "inv_fill");
   document.getElementById("s-inv").value = JSON.stringify(inv);
   document.getElementById("s-out").textContent =
     `链: 开仓[10,20] → 入库[15,20] → 出库[11,20] → 水位 ${j4.level} → 履约率 ${j5.rate}`;
 }
-
 // v0.138 — 平台统计（GET /stats）
 async function stats() {
   const j = await api("/stats", "stats");

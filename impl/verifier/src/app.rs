@@ -555,7 +555,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "214 PROVED", "scenario": "16/16"}})
+                          "prove": "218 PROVED", "scenario": "16/16"}})
         }
         "/stats" => {
             // v0.139 — 业务统计（与 Python v0.134 对等，JSON）
@@ -873,7 +873,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "214 PROVED");
+           && r["gates"]["prove"] == "218 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -915,6 +915,19 @@ pub fn run_smoke() -> (usize, usize) {
     let _ = http_get(port, &format!("/submit?task={tid2}"));
     let r = http_get(port, &format!("/accept?task={tid2}&caller=7"));
     check!("HTTP /points_chain release", r["points"] == serde_json::json!([0, 100]));
+
+    // 18. 库存链对账 (v0.199) — open→receive→ship→level→fill（与 Python --inventory-chain-test 对应）
+    let mut inv = http_get(port, "/inventory_new?qty_a=10&qty_b=20")["inventory"].clone();
+    inv = http_get(port, &format!("/receive_stock?inv={}&item=0&qty=5",
+        serde_json::to_string(&inv).unwrap_or_default()))["inventory"].clone();
+    inv = http_get(port, &format!("/ship_stock?inv={}&item=0&qty=4",
+        serde_json::to_string(&inv).unwrap_or_default()))["inventory"].clone();
+    let r = http_get(port, &format!("/stock_level?inv={}&item=0",
+        serde_json::to_string(&inv).unwrap_or_default()));
+    let r2 = http_get(port, "/fill_rate?shipped=6&demanded=10");
+    check!("HTTP /inventory_chain",
+           inv == serde_json::json!([11, 20]) && r["level"] == 11
+           && (r2["rate"].as_f64().unwrap_or(0.0) - 0.6).abs() < 1e-9);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

@@ -2213,6 +2213,21 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ PTS.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_inventory_chain_story do
+    checks = [
+      # §IN 库存链 (v0.200) — 开仓→入库→出库→水位→履约率（与 --inventory-chain-test / INV-IN-6 对应）
+      {"inv_chain_open", inventory_new(10, 20) == {:ok, [10, 20]}},
+      {"inv_chain_receive", receive_stock([10, 20], 0, 5) == {:ok, [15, 20]}},
+      {"inv_chain_ship", ship_stock([15, 20], 0, 4) == {:ok, [11, 20]}},
+      {"inv_chain_level", stock_level([11, 20], 0) == {:ok, 11}},
+      {"inv_chain_fill", fill_rate(6, 10) == {:ok, 0.6}}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ INVC.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2258,6 +2273,11 @@ case System.argv() do
   ["--sk-points" | _] ->
     {passed, total} = SigmaVerify.sk_points_story()
     IO.puts("sigma_core points story (积分链): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-invchain" | _] ->
+    {passed, total} = SigmaVerify.sk_inventory_chain_story()
+    IO.puts("sigma_core inventory chain story (库存链): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->
