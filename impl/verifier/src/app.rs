@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "230 PROVED", "scenario": "16/16"}})
+                          "prove": "234 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "230 PROVED");
+           && r["gates"]["prove"] == "234 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -977,6 +977,21 @@ pub fn run_smoke() -> (usize, usize) {
     let has_task_create = r["events"].as_array().map(|a| a.iter().any(
         |e| e["kind"] == "task_create")).unwrap_or(false);
     check!("HTTP /audit task_create", has_task_create);
+
+    // 22. 贡献分对账 (v0.239) — 每次验收贡献 +10（与 Python --contribution-test 对应）
+    let r = http_get(port, "/post?author=7&bounty=100");
+    let tid5 = r["task_id"].as_u64().unwrap_or(0);
+    let _ = http_get(port, &format!("/claim?task={tid5}&hunter=3"));
+    let _ = http_get(port, &format!("/submit?task={tid5}"));
+    let r = http_get(port, &format!("/accept?task={tid5}&caller=7"));
+    let contrib1 = r["contribution"].as_i64().unwrap_or(0);
+    check!("HTTP /contrib task1", contrib1 >= 10);
+    let r = http_get(port, "/post?author=7&bounty=100");
+    let tid6 = r["task_id"].as_u64().unwrap_or(0);
+    let _ = http_get(port, &format!("/claim?task={tid6}&hunter=3"));
+    let _ = http_get(port, &format!("/submit?task={tid6}"));
+    let r = http_get(port, &format!("/accept?task={tid6}&caller=7"));
+    check!("HTTP /contrib task2", r["contribution"] == contrib1 + 10);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

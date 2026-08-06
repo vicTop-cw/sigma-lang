@@ -2272,6 +2272,19 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ AUD.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_contribution_story do
+    checks = [
+      # §SK 贡献分链 (v0.240) — 每次验收贡献 +10（与 --contribution-test 对应）
+      {"contrib_base", contribution_score([]) == 0},
+      {"contrib_one", contribution_score([[3, 1, 10]]) == 10},
+      {"contrib_two", contribution_score([[3, 1, 10], [3, 1, 10]]) == 20}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ CONTRIB.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2337,6 +2350,11 @@ case System.argv() do
   ["--sk-audit" | _] ->
     {passed, total} = SigmaVerify.sk_audit_story()
     IO.puts("sigma_core audit story (审计链): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-contribution" | _] ->
+    {passed, total} = SigmaVerify.sk_contribution_story()
+    IO.puts("sigma_core contribution story (贡献分): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

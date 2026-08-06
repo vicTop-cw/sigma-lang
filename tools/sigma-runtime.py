@@ -963,6 +963,14 @@ def run_invariant_checks(core):
          "ok": inv7[0] == 15 and inv7[1] == 12 and inv7[1] >= 0, "note": f"inv={inv7}"},
     ])
 
+    # §PF 资产链完整性 (v0.235, INV-PF-7)
+    pf7 = core.buy(core.portfolio_new(100), 0, 30)
+    pf7b = core.sell(pf7, 0, 10)
+    record("INV-PF-7", "invariant", ["buy(30)→sell(10)"], pf7b, [
+        {"law": "资产链完整性 — buy 30 后 sell 10，链后 cash+shares=100（总额守恒）",
+         "ok": pf7b[0] + pf7b[1] == 100, "note": f"pf={pf7b}"},
+    ])
+
     return events
 
 
