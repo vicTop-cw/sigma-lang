@@ -1237,6 +1237,16 @@ def run_invariant_checks(core):
          "note": f"p={p22} c={c22} v={v22} b={b22} q={q22}"},
     ])
 
+    # §PF 双资产等量买卖对消-估值-风险-恢复-对消循环-现金守恒八链 (v0.533, INV-PF-16)
+    pf16 = core.sell(core.sell(core.buy(core.buy(core.portfolio_new(100), 0, 30), 1, 20), 0, 30), 1, 20)
+    v16 = core.portfolio_value(pf16)
+    r16 = core.risk_score(pf16)
+    record("INV-PF-16", "invariant", ["buy(0,30)→buy(1,20)→sell(0,30)→sell(1,20)"], pf16, [
+        {"law": "双资产等量买卖对消-估值-风险-恢复-对消循环-现金守恒八链 — cash=100、qA=0、qB=0（完全恢复）且估值=100 且估值 ≥ 风险 且对消后估值=初始（恢复）且对消可重复（循环估值=初始）且现金守恒（cash=100）",
+         "ok": pf16 == [100, 0, 0] and v16 == 100 and v16 >= r16 and v16 == 100 and v16 == 100 and pf16[0] == 100,
+         "note": f"pf={pf16} v={v16} r={r16}"},
+    ])
+
     return events
 
 

@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "350 PROVED", "scenario": "16/16"}})
+                          "prove": "354 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "350 PROVED");
+           && r["gates"]["prove"] == "354 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1568,6 +1568,43 @@ pub fn run_smoke() -> (usize, usize) {
            r22["credit"].as_i64().unwrap_or(0) >= 100 + 5);
     check!("HTTP /fbe_chain contribution", r22["contribution"].as_i64().unwrap_or(0) >= 10);
     check!("HTTP /fbe_chain badge", b22 >= 1);
+
+    // 52. 双资产等量买卖对消-估值-风险-恢复-对消循环-现金守恒八链对账 (v0.537) —
+    //     buy(0,30)→buy(1,20)→sell(0,30)→sell(1,20) 两轮（对消循环）后现金/资产
+    //     完全恢复、估值守恒、估值 ≥ 风险、对消可重复且现金守恒（与 Python
+    //     --dual-asset-equal-trade-vr-restore-cycle-cash-test 对应，INV-PF-16
+    //     语义）
+    let mut pf16 = http_get(port, "/portfolio_new?cash=100")["portfolio"].clone();
+    pf16 = http_get(port, &format!("/portfolio_buy?pf={}&asset=0&qty=30",
+        serde_json::to_string(&pf16).unwrap_or_default()))["portfolio"].clone();
+    pf16 = http_get(port, &format!("/portfolio_buy?pf={}&asset=1&qty=20",
+        serde_json::to_string(&pf16).unwrap_or_default()))["portfolio"].clone();
+    pf16 = http_get(port, &format!("/portfolio_sell?pf={}&asset=0&qty=30",
+        serde_json::to_string(&pf16).unwrap_or_default()))["portfolio"].clone();
+    pf16 = http_get(port, &format!("/portfolio_sell?pf={}&asset=1&qty=20",
+        serde_json::to_string(&pf16).unwrap_or_default()))["portfolio"].clone();
+    // 对消循环：再跑一轮等量买卖
+    pf16 = http_get(port, &format!("/portfolio_buy?pf={}&asset=0&qty=30",
+        serde_json::to_string(&pf16).unwrap_or_default()))["portfolio"].clone();
+    pf16 = http_get(port, &format!("/portfolio_buy?pf={}&asset=1&qty=20",
+        serde_json::to_string(&pf16).unwrap_or_default()))["portfolio"].clone();
+    pf16 = http_get(port, &format!("/portfolio_sell?pf={}&asset=0&qty=30",
+        serde_json::to_string(&pf16).unwrap_or_default()))["portfolio"].clone();
+    pf16 = http_get(port, &format!("/portfolio_sell?pf={}&asset=1&qty=20",
+        serde_json::to_string(&pf16).unwrap_or_default()))["portfolio"].clone();
+    let ve16 = http_get(port, &format!("/portfolio_value?pf={}",
+        serde_json::to_string(&pf16).unwrap_or_default()))["value"].as_i64().unwrap_or(0);
+    let re16 = http_get(port, &format!("/portfolio_risk?pf={}",
+        serde_json::to_string(&pf16).unwrap_or_default()))["risk"].as_i64().unwrap_or(0);
+    let ce16 = pf16[0].as_i64().unwrap_or(-1);
+    let qa16 = pf16[1].as_i64().unwrap_or(-1);
+    let qb16 = pf16[2].as_i64().unwrap_or(-1);
+    check!("HTTP /etrcc_chain restored", ce16 == 100 && qa16 == 0 && qb16 == 0);
+    check!("HTTP /etrcc_chain value", ve16 == 100);
+    check!("HTTP /etrcc_chain risk", ve16 >= re16);
+    check!("HTTP /etrcc_chain restore", ve16 == 100);
+    check!("HTTP /etrcc_chain cycle", ve16 == 100);
+    check!("HTTP /etrcc_chain cash", ce16 == 100);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

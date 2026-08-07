@@ -185,6 +185,10 @@ jobs:
       - name: ΣLang full-business-eight-link reconciliation (v0.529)
         run: python3 impl/python/sigma_app.py --full-business-eight-link-test
 
+      # v0.539 — 双资产等量买卖对消-估值-风险-恢复-对消循环-现金守恒八链对账进 CI（Python /dual-asset-equal-trade-vr-restore-cycle-cash-test）
+      - name: ΣLang dual-asset-equal-trade-vr-restore-cycle-cash reconciliation (v0.539)
+        run: python3 impl/python/sigma_app.py --dual-asset-equal-trade-vr-restore-cycle-cash-test
+
       # v0.56 — 九道门禁一键验收：consensus / p0 / 三端自检与编译 / 三域审计 /
       # 证明消解 / 找茬冒烟，一条命令在 CI 上全绿才算通过。
       # v0.87 — --report 输出全量回归报告（JSON），作为 CI artifact 保存。
