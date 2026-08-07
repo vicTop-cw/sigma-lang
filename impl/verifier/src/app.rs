@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "326 PROVED", "scenario": "16/16"}})
+                          "prove": "330 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "326 PROVED");
+           && r["gates"]["prove"] == "330 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1392,6 +1392,31 @@ pub fn run_smoke() -> (usize, usize) {
            r20["credit"].as_i64().unwrap_or(0) >= 100 + 5);
     check!("HTTP /fbs_chain contribution", r20["contribution"].as_i64().unwrap_or(0) >= 10);
     check!("HTTP /fbs_chain badge", b20 >= 1);
+
+    // 46. 双资产等量买卖对消-估值-风险-恢复六链对账 (v0.477) — buy(0,30)→
+    //     buy(1,20)→sell(0,30)→sell(1,20) 后现金/资产完全恢复、估值守恒且
+    //     估值 ≥ 风险、对消后估值=初始（与 Python
+    //     --dual-asset-equal-trade-vr-restore-test 对应，INV-PF-14 语义）
+    let mut pfe3 = http_get(port, "/portfolio_new?cash=100")["portfolio"].clone();
+    pfe3 = http_get(port, &format!("/portfolio_buy?pf={}&asset=0&qty=30",
+        serde_json::to_string(&pfe3).unwrap_or_default()))["portfolio"].clone();
+    pfe3 = http_get(port, &format!("/portfolio_buy?pf={}&asset=1&qty=20",
+        serde_json::to_string(&pfe3).unwrap_or_default()))["portfolio"].clone();
+    pfe3 = http_get(port, &format!("/portfolio_sell?pf={}&asset=0&qty=30",
+        serde_json::to_string(&pfe3).unwrap_or_default()))["portfolio"].clone();
+    pfe3 = http_get(port, &format!("/portfolio_sell?pf={}&asset=1&qty=20",
+        serde_json::to_string(&pfe3).unwrap_or_default()))["portfolio"].clone();
+    let ve3 = http_get(port, &format!("/portfolio_value?pf={}",
+        serde_json::to_string(&pfe3).unwrap_or_default()))["value"].as_i64().unwrap_or(0);
+    let re3 = http_get(port, &format!("/portfolio_risk?pf={}",
+        serde_json::to_string(&pfe3).unwrap_or_default()))["risk"].as_i64().unwrap_or(0);
+    let ce3 = pfe3[0].as_i64().unwrap_or(-1);
+    let qa_e3 = pfe3[1].as_i64().unwrap_or(-1);
+    let qb_e3 = pfe3[2].as_i64().unwrap_or(-1);
+    check!("HTTP /etr_chain restored", ce3 == 100 && qa_e3 == 0 && qb_e3 == 0);
+    check!("HTTP /etr_chain value", ve3 == 100);
+    check!("HTTP /etr_chain risk", ve3 >= re3);
+    check!("HTTP /etr_chain restore", ve3 == 100);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

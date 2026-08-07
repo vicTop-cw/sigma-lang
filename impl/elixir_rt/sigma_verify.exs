@@ -2746,6 +2746,34 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ FBS.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_dual_asset_equal_trade_vr_restore_story do
+    # §PF 双资产等量买卖对消-估值-风险-恢复六链 (v0.478) — buy asset0 q1 →
+    # buy asset1 q2 → sell asset0 q1 → sell asset1 q2，买卖等量后现金/资产完全
+    # 恢复（cash=初始、qA=0、qB=0），估值守恒且估值 ≥ 风险且对消后估值=初始
+    # （恢复）（与 --dual-asset-equal-trade-vr-restore-test / INV-PF-14 对应）
+    {:ok, pf0} = portfolio_new(100)
+    {:ok, pf1} = buy(pf0, 0, 30)
+    {:ok, pf2} = buy(pf1, 1, 20)
+    {:ok, pf3} = sell(pf2, 0, 30)
+    {:ok, pf4} = sell(pf3, 1, 20)
+    {:ok, v} = portfolio_value(pf4)
+    {:ok, r} = risk_score(pf4)
+    cash = Enum.at(pf4, 0)
+    qa = Enum.at(pf4, 1)
+    qb = Enum.at(pf4, 2)
+    checks = [
+      {"etr_cash_restored", cash == 100},
+      {"etr_qa_qb_zero", qa == 0 and qb == 0},
+      {"etr_value_conserved", v == 100},
+      {"etr_value_ge_risk", v >= r},
+      {"etr_restore_initial", v == 100}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ ETR.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2921,6 +2949,11 @@ case System.argv() do
   ["--sk-fbs" | _] ->
     {passed, total} = SigmaVerify.sk_full_business_six_link_story()
     IO.puts("sigma_core full-business-six-link story (全业务链六链守恒): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-etr" | _] ->
+    {passed, total} = SigmaVerify.sk_dual_asset_equal_trade_vr_restore_story()
+    IO.puts("sigma_core dual-asset-equal-trade-vr-restore story (双资产等量买卖对消-估值-风险-恢复六链): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   ["--sk-awccb" | _] ->

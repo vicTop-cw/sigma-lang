@@ -373,6 +373,14 @@
     </div>
   </section>
 
+  <section id="etr-panel">
+    <h2>双资产对消-估值-风险-恢复演示（v0.476，六链）</h2>
+    <div class="row">
+      <button onclick="etrChain()">跑六链</button>
+      <span id="etr-out" class="muted"></span>
+    </div>
+  </section>
+
   <section id="pf-panel">
     <h2>金融市场（§PF，v0.148）</h2>
     <div class="row">
@@ -1026,6 +1034,20 @@ async function fbsChain() {
   const jm = await api("/me?user=7", "fbs_me");
   document.getElementById("fbs-out").textContent =
     `六链: 配额 ${jm.quota[1]}（50−1 ≥0）· 积分 ${jw.points[0]}托管/${jw.points[1]}可用（100−40 ≥0）· 契分 ${jr.credit}（100+5×1）· 贡献分 ${jr.contribution}（10×1）· 勋章 ${jb.badge}（<300 档位）`;
+}
+
+// v0.476 — 双资产等量买卖对消-估值-风险-恢复六链演示（与 --dual-asset-equal-trade-vr-restore-test / INV-PF-14 语义对应）
+async function etrChain() {
+  const j0 = await api("/portfolio_new?cash=100", "etr_new");
+  let pf = j0.portfolio;
+  pf = (await api(`/portfolio_buy?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=0&qty=30`, "etr_buy0")).portfolio;
+  pf = (await api(`/portfolio_buy?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=1&qty=20`, "etr_buy1")).portfolio;
+  pf = (await api(`/portfolio_sell?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=0&qty=30`, "etr_sell0")).portfolio;
+  pf = (await api(`/portfolio_sell?pf=${encodeURIComponent(JSON.stringify(pf))}&asset=1&qty=20`, "etr_sell1")).portfolio;
+  const jv = await api(`/portfolio_value?pf=${encodeURIComponent(JSON.stringify(pf))}`, "etr_value");
+  const jr = await api(`/portfolio_risk?pf=${encodeURIComponent(JSON.stringify(pf))}`, "etr_risk");
+  document.getElementById("etr-out").textContent =
+    `六链: 现金 ${pf[0]}（恢复 100）· qA ${pf[1]}（0）· qB ${pf[2]}（0）· 估值 ${jv.value}（总额守恒/恢复初始）· 风险 ${jr.risk}（≤ 估值）`;
 }
 
 // v0.148 — 金融市场（§PF）

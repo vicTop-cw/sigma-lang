@@ -1177,6 +1177,16 @@ def run_invariant_checks(core):
          "note": f"p={p20} c={c20} v={v20} b={b20} q={q20}"},
     ])
 
+    # §PF 双资产等量买卖对消-估值-风险-恢复六链 (v0.473, INV-PF-14)
+    pf14 = core.sell(core.sell(core.buy(core.buy(core.portfolio_new(100), 0, 30), 1, 20), 0, 30), 1, 20)
+    v14 = core.portfolio_value(pf14)
+    r14 = core.risk_score(pf14)
+    record("INV-PF-14", "invariant", ["buy(0,30)→buy(1,20)→sell(0,30)→sell(1,20)"], pf14, [
+        {"law": "双资产等量买卖对消-估值-风险-恢复六链 — cash=100、qA=0、qB=0（完全恢复）且估值=100 且估值 ≥ 风险 且对消后估值=初始（恢复）",
+         "ok": pf14 == [100, 0, 0] and v14 == 100 and v14 >= r14 and v14 == 100,
+         "note": f"pf={pf14} v={v14} r={r14}"},
+    ])
+
     return events
 
 

@@ -424,7 +424,7 @@
 - ✅ **REACHED v0.80 (2026-08-04)**: sigma-prove 全量重验（62→70+）——
   新增两条跨操作不变量义务（INV-SK-3 积分非负链——points 链 escrow/available
   ≥ 0；INV-Q-3 预支链——quota_advance 后 remaining = r+m ≥ 0），全量重验
-  **62 → 326 项 PROVED / 29 模块全绿**（> 70 达标）；sigma-accept.py 门禁 8
+  **62 → 330 项 PROVED / 29 模块全绿**（> 70 达标）；sigma-accept.py 门禁 8
   期望、health 端点 gates、README 架构数字全部同步为 73 PROVED；consensus
   56/56、p0 109/109、sigma-accept 9/9 全绿，v0.10–v0.79 不回归。
 - ✅ **REACHED v0.81 (2026-08-04)**: 找茬 API 文档—— 新建 `docs/api_zhaocha.md`
@@ -468,7 +468,7 @@
   （README Spec Version + Citation 同步升级；v0.71–v0.85 累计新增找茬服务化
   十件套（鉴权/原子写/分级日志/健康检查/启动自检/方法语义/前端剧本/双端对账/
   API 文档/开工 checklist）+ 业务规则深化（INV-Q/T/G/SK-3/Q-3 跨操作不变量
-  326 项 PROVED、--domains 47/47 十二项不变量复核），满足 0.5.0 语义面扩展）；
+  330 项 PROVED、--domains 47/47 十二项不变量复核），满足 0.5.0 语义面扩展）；
   RFC 记录：「找茬服务化（v0.71–v0.75）+ 业务规则深化（v0.76–v0.80）+
   产品配套（v0.81–v0.85）」三阶段已闭环；consensus 56/56、p0 109/109，
   v0.10–v0.85 不回归。
@@ -488,7 +488,7 @@
 - ✅ **REACHED v0.89 (2026-08-04)**: README 收官总览—— README Status 章节
   更新共识数字（41/41 → **56/56**）并新增「v0.89 收官总览」段：协议 spec
   0.5.0、三域（§SK/§PF/§IN）、consensus 56/56、p0 109/109、sigma-prove
-  326 项 PROVED、sigma-runtime 71/71 + 47/47（--domains 十二项不变量复核）、
+  330 项 PROVED、sigma-runtime 71/71 + 47/47（--domains 十二项不变量复核）、
   双端 HTTP 冒烟 36/36 逐项一致、sigma-accept 十道门禁 10/10（含 CI 回归报告
   artifact）、三端 0 warning、找茬产品落地（服务化十件套 + 文档 + checklist +
   前端剧本）——README 首页一张图看到 v0.89 全貌；consensus 56/56、p0 109/109，
@@ -496,7 +496,7 @@
 - ✅ **REACHED v0.90 (2026-08-04)**: 里程碑达成—— v0.71–v0.90 连续推进收官：
   找茬正式开工准备（服务化十件套：鉴权/原子写/分级日志/健康检查/启动自检/
   方法语义/前端剧本/双端对账/API 文档/开工 checklist）+ 业务规则深化
-  （INV-Q/T/G/SK-3/Q-3 跨操作不变量 326 项 PROVED、--domains 47/47 十二项
+  （INV-Q/T/G/SK-3/Q-3 跨操作不变量 330 项 PROVED、--domains 47/47 十二项
   不变量复核）+ 工程化收官（spec 0.5.0、CI 回归报告 artifact、贡献者指南、
   README 收官总览）；sigma-accept.py 十道门禁全绿（含 --report 回归报告）；
   consensus 56/56、p0 109/109、三端 0 warning，v0.10–v0.89 不回归——ΣLang
@@ -568,7 +568,7 @@
 - ✅ **REACHED v0.100 (2026-08-04)**: 跨百版本里程碑—— ΣLang 达到
   **v0.100**（从 v0.10 到 v0.100 里程碑链 90+ 版本完整）：三域语义（§SK 找茬 /
   §PF 金融 / §IN 供应链）+ 三端验证器共识 56/56 + 语料 51 模块 + 跨操作不变量
-  326 项 PROVED + 双端参考实现（HTTP 冒烟 36/36 逐项一致）+ 十道门禁一键验收
+  330 项 PROVED + 双端参考实现（HTTP 冒烟 36/36 逐项一致）+ 十道门禁一键验收
   + 找茬产品（前端 / --launch 一键开工 / /panel 运行面板 / --run-accept 运行
   验收 / 运行指南）——"协议 → 验证器 → 语料 → 证明 → 实现 → 产品"全链路
   闭环；上线准备基线：consensus 56/56、p0 109/109、sigma-accept 10/10、
@@ -624,7 +624,7 @@
 - ✅ **REACHED v0.108 (2026-08-05)**: sigma-prove 全量重验（73→80+）——
   新增三条跨操作不变量义务（INV-SK-5 契分非负链——credit ≥ 0；INV-G-3
   收益不超发链——team_share 的 Σ shares ≤ reward；INV-T-3 团队创建合法链
-  ——founder=owner 且 size=1），全量重验 **73 → 326 项 PROVED / 29 模块
+  ——founder=owner 且 size=1），全量重验 **73 → 330 项 PROVED / 29 模块
   全绿**（> 80 达标）；sigma-accept.py 门禁 8 期望、health 端点 gates、/panel、
   README/docs 数字全部同步为 80 PROVED；sigma-accept 十道门禁 10/10 全绿、
   health-test 4/4、panel-test 5/5、自检 15/15、冒烟 36/36 不回归；
@@ -698,7 +698,7 @@
   冒烟 36/36 不回归；consensus 56/56、p0 109/109，v0.10–v0.117 不回归。
 - ✅ **REACHED v0.119 (2026-08-05)**: README 收官总览更新—— README Status
   章节新增「v0.119 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED / --domains 71/71 二十项链式不变量 /
+  p0 109/109 / sigma-prove 330 项 PROVED / --domains 71/71 二十项链式不变量 /
   双端冒烟 37/37 含 /panel 对账 / 十道门禁含 --report runtime 段 /
   --bench 性能基线 / 找茬产品可上线：--launch + 默认持久化审计日志 + 前端
   三域面板 + --deploy-accept + 上线指南 + /panel + 并发性能兜底）——
@@ -860,7 +860,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.144 不回归。
 - ✅ **REACHED v0.146 (2026-08-05)**: README 收官总览数字同步—— README
   Status 章节新增「v0.146 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED / --domains 71/71 / 双端冒烟 38/38 /
+  p0 109/109 / sigma-prove 330 项 PROVED / --domains 71/71 / 双端冒烟 38/38 /
   前端剧本 19/19 / 十道门禁含 runtime / Elixir 88/88 / stats 5/5 / 找茬可上线
   + 长期自主运行说明：小阶段 13/496、每 10 个同步仓库、每 100 个发布 PyPI）——
   README 首页一张图看到 v0.146 全貌；consensus 56/56、p0 109/109，
@@ -933,7 +933,7 @@
   v0.10–v0.154 不回归。
 - ✅ **REACHED v0.156 (2026-08-05)**: README 收官总览数字同步—— README
   Status 章节新增「v0.156 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（含 INV-SK-6/INV-PF-4/INV-IN-5）/
+  p0 109/109 / sigma-prove 330 项 PROVED（含 INV-SK-6/INV-PF-4/INV-IN-5）/
   --domains 71/71 / 双端冒烟 43/43 / 前端剧本 19/19 / 十道门禁含 runtime /
   Elixir 三域自检（§SK 88/88、§IN 6/6、§PF 8/8）/ stats 5/5 / portfolio 5/5 /
   找茬可上线 + 长期自主运行说明：小阶段 23/496、每 10 个同步仓库、每 100 个
@@ -1000,7 +1000,7 @@
   十道门禁 10/10 全绿；consensus 56/56、p0 109/109，v0.10–v0.164 不回归。
 - ✅ **REACHED v0.166 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.166 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（32 模块，含 INV-SK-6/PF-4/IN-5/SK-7）/
+  p0 109/109 / sigma-prove 330 项 PROVED（32 模块，含 INV-SK-6/PF-4/IN-5/SK-7）/
   --domains 71/71（24 项链式复核）/ 双端冒烟 44/44 / 前端剧本 19/19 / 十道门禁
   含 runtime / Elixir 三域自检（§SK 88/88、§IN 7/7、§PF 8/8）/ stats 5/5 /
   portfolio 5/5 / inventory 5/5 / 跨域联动语料进共识 / 找茬可上线 + 长期自主
@@ -1074,7 +1074,7 @@
   全绿；consensus 56/56、p0 109/109，v0.10–v0.174 不回归。
 - ✅ **REACHED v0.176 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.176 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（33 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（33 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5）/ --domains 71/71（25 项链式复核）/ 双端冒烟 46/46 / 前端剧本 19/19 /
   十道门禁含 runtime / Elixir 四域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链
   5/5）/ stats/portfolio/inventory/cross-domain 5/5 / 跨域与错误边界语料进共识 /
@@ -1148,7 +1148,7 @@
   十道门禁 10/10 全绿；consensus 56/56、p0 109/109，v0.10–v0.184 不回归。
 - ✅ **REACHED v0.186 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.186 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8）/ --domains 71/71（26 项链式复核）/ 双端冒烟 48/48 / 前端剧本
   19/19 / 十道门禁含 runtime / Elixir 五域自检（§SK 88/88、§IN 7/7、§PF 8/8、
   三域链 5/5、错误边界 10/10）/ stats/portfolio/inventory/cross-domain 5/5 +
@@ -1215,7 +1215,7 @@
   全绿；consensus 56/56、p0 109/109，v0.10–v0.194 不回归。
 - ✅ **REACHED v0.196 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.196 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6）/ --domains 71/71（27 项链式复核）/ 双端冒烟 50/50 / 前端
   剧本 19/19 / 十道门禁含 runtime / Elixir 六域自检（§SK 88/88、§IN 7/7、§PF
   8/8、三域链 5/5、错误边界 10/10、积分链 3/3）/ stats/portfolio/inventory/
@@ -1285,7 +1285,7 @@
   十道门禁 10/10 全绿；consensus 56/56、p0 109/109，v0.10–v0.204 不回归。
 - ✅ **REACHED v0.206 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.206 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6）/ --domains 71/71（28 项链式复核）/ 双端冒烟 51/51 /
   前端剧本 19/19 / 十道门禁含 runtime / Elixir 七域自检（§SK 88/88、§IN 7/7、
   §PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、库存链 5/5）/
@@ -1355,7 +1355,7 @@
   全绿；consensus 56/56、p0 109/109，v0.10–v0.214 不回归。
 - ✅ **REACHED v0.216 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.216 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9）/ --domains 71/71（29 项链式复核）/ 双端冒烟 53/53
   / 前端剧本 19/19 / 十道门禁含 runtime / Elixir 八域自检（§SK 88/88、§IN 7/7、
   §PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、库存链 5/5、信用链 5/5）/
@@ -1429,7 +1429,7 @@
   十道门禁 10/10 全绿；consensus 56/56、p0 109/109，v0.10–v0.224 不回归。
 - ✅ **REACHED v0.226 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.226 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7）/ --domains 71/71（30 项链式复核）/ 双端冒烟
   56/56 / 前端剧本 19/19 / 十道门禁含 runtime / Elixir 九域自检（§SK 88/88、
   §IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、库存链 5/5、
@@ -1505,7 +1505,7 @@
   全绿；consensus 56/56、p0 109/109，v0.10–v0.234 不回归。
 - ✅ **REACHED v0.236 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.236 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7）/ --domains 71/71（31 项链式复核）/
   双端冒烟 58/58 / 前端剧本 19/19 / 十道门禁含 runtime / Elixir 十域自检（§SK
   88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、库存链 5/5、
@@ -1579,7 +1579,7 @@
   全绿；consensus 56/56、p0 109/109，v0.10–v0.244 不回归。
 - ✅ **REACHED v0.246 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.246 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10）/ --domains 71/71（32 项链式复核）/
   双端冒烟 60/60 / 前端剧本 19/19 / 十道门禁含 runtime / Elixir 十一域自检（§SK
   88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、库存链 5/5、
@@ -1654,7 +1654,7 @@
   全绿；consensus 56/56、p0 109/109，v0.10–v0.254 不回归。
 - ✅ **REACHED v0.256 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.256 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11）/ --domains 71/71（33 项链式
   复核）/ 双端冒烟 61/61 / 前端剧本 19/19 / 十道门禁含 runtime / Elixir 十二域
   自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、
@@ -1726,7 +1726,7 @@
   全绿；consensus 56/56、p0 109/109，v0.10–v0.264 不回归。
 - ✅ **REACHED v0.266 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.266 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8）/ --domains 71/71（34 项
   链式复核）/ 双端冒烟 63/63 / 前端剧本 19/19 / 十道门禁含 runtime / Elixir
   十三域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链
@@ -1802,7 +1802,7 @@
   p0 109/109，v0.10–v0.274 不回归。
 - ✅ **REACHED v0.276 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.276 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8）/ --domains
   71/71（35 项链式复核）/ 双端冒烟 65/65 / 前端剧本 19/19 / 十道门禁含 runtime
   / Elixir 十四域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、
@@ -1880,7 +1880,7 @@
   门禁 10/10 全绿；consensus 56/56、p0 109/109，v0.10–v0.284 不回归。
 - ✅ **REACHED v0.286 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.286 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12）/ --domains
   71/71（36 项链式复核）/ 双端冒烟 67/67 / 前端剧本 19/19 / 十道门禁含 runtime
   / Elixir 十五域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、
@@ -1942,7 +1942,7 @@
 - ✅ **REACHED v0.293 (2026-08-06)**: 新增不变量 INV-SK-13—— `sigma-prove`
   `gen_socketkit_invariants` 新增 INV-SK-13 积分-配额联动链（发单 n 次：配额
   remaining=m−n ≥0 且积分 escrow=n×b——配额与积分联动守恒），`PROVED (unsat)`；
-  全量重验 **254 → 326 PROVED / 34 模块**；prove 数字全库同步 326 PROVED（含
+  全量重验 **254 → 330 PROVED / 34 模块**；prove 数字全库同步 330 PROVED（含
   /health//panel/Rust /panel/门禁 8 期望）；sigma-accept 十道门禁 10/10、
   health-test 4/4、panel-test 5/5、credit-badge-test 3/3、双端 70/70 全绿；
   consensus 56/56、p0 109/109，v0.10–v0.292 不回归。
@@ -1986,7 +1986,7 @@
   （批次 17 进行中）：积分-配额联动链全链路落地（INV-SK-13 证明 PROVED →
   sigma-runtime 复核进审计 --domains 72/72 → Python --points-quota-test 2/2 →
   Rust 冒烟 /pq_chain 对账 72/72 → Elixir --sk-pq 自检 3/3 → README v0.296
-  收官总览），数字一致性检查通过（consensus 56/56、prove 326 PROVED、
+  收官总览），数字一致性检查通过（consensus 56/56、prove 330 PROVED、
   --domains 72/72 在门禁与代码各处一致），全量验收全绿（sigma-accept 十道
   门禁 10/10、points-quota-test 2/2、credit-badge-test 3/3、portfolio-flow-test
   5/5、inventory-flow-test 4/4、badge-test 2/2、quota-flow-test 2/2、
@@ -2004,7 +2004,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.300 不回归。
 - ✅ **REACHED v0.302 (2026-08-06)**: 批次 17 收尾（数字同步 + 全量验收）——
   v0.293–v0.302 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 72/72 在门禁与代码各 4/4/1 处一致），全量验收
+  prove 330 PROVED、--domains 72/72 在门禁与代码各 4/4/1 处一致），全量验收
   全绿（sigma-accept 十道门禁 10/10、points-quota-test 2/2、credit-badge-test
   3/3、portfolio-flow-test 5/5、inventory-flow-test 4/4、badge-test 2/2、
   quota-flow-test 2/2、contribution-test 2/2、audit-test 6/6、full-test 5/5、
@@ -2015,8 +2015,8 @@
 - ✅ **REACHED v0.303 (2026-08-06)**: 新增不变量 INV-SK-14—— `sigma-prove`
   `gen_socketkit_invariants` 新增 INV-SK-14 任务-积分-配额三维联动（发单 n 次：
   任务数=n、配额 remaining=m−n ≥0、积分 escrow=n×b——任务/配额/积分三维联动
-  守恒），`PROVED (unsat)`；全量重验 **258 → 326 PROVED / 34 模块**；prove
-  数字全库同步 326 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；
+  守恒），`PROVED (unsat)`；全量重验 **258 → 330 PROVED / 34 模块**；prove
+  数字全库同步 330 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；
   sigma-accept 十道门禁 10/10、health-test 4/4、panel-test 5/5、
   points-quota-test 2/2、双端 72/72 全绿；consensus 56/56、p0 109/109，
   v0.10–v0.302 不回归。
@@ -2038,7 +2038,7 @@
   v0.10–v0.304 不回归。
 - ✅ **REACHED v0.306 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.306 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14）
   / --domains 73/73（38 项链式复核）/ 双端冒烟 72/72 + 36/36 / 前端剧本 19/19 /
   十道门禁含 runtime / Elixir 十七域自检 / stats/portfolio/inventory/
@@ -2086,7 +2086,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.310 不回归。
 - ✅ **REACHED v0.312 (2026-08-06)**: 批次 18 收尾（数字同步 + 全量验收）——
   v0.303–v0.312 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 73/73 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 73/73 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、task-points-quota-test 3/3、points-quota-test
   2/2、credit-badge-test 3/3、portfolio-flow-test 5/5、inventory-flow-test 4/4、
   badge-test 2/2、quota-flow-test 2/2、contribution-test 2/2、audit-test 6/6、
@@ -2099,7 +2099,7 @@
   `gen_portfolio_invariants` 新增 INV-PF-9 组合估值-风险联动（buy asset0 q1 →
   buy asset1 q2 → sell asset0 q3 混合交易链：链后估值 cash+qA+qB = c+s 且
   估值 ≥ 风险（cash ≥ 0）——估值与风险联动守恒），`PROVED (unsat)`；全量
-  重验 **262 → 326 PROVED / 34 模块**；prove 数字全库同步 326 PROVED（含
+  重验 **262 → 330 PROVED / 34 模块**；prove 数字全库同步 330 PROVED（含
   /health//panel/Rust /panel/门禁 8 期望）；sigma-accept 十道门禁 10/10、
   health-test 4/4、panel-test 5/5、portfolio-flow-test 5/5、双端 75/75 全绿；
   consensus 56/56、p0 109/109，v0.10–v0.312 不回归。
@@ -2120,7 +2120,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.314 不回归。
 - ✅ **REACHED v0.316 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.316 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9）/ --domains 74/74（39 项链式复核）/ 双端冒烟 75/75 + 36/36 / 前端剧本
   19/19 / 十道门禁含 runtime / Elixir 十八域自检 / stats/portfolio/inventory/
@@ -2168,7 +2168,7 @@
   全绿；consensus 56/56、p0 109/109，v0.10–v0.320 不回归。
 - ✅ **REACHED v0.322 (2026-08-06)**: 批次 19 收尾（数字同步 + 全量验收）——
   v0.313–v0.322 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 74/74 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 74/74 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、valuation-risk-test 3/3、task-points-quota-test
   3/3、points-quota-test 2/2、credit-badge-test 3/3、portfolio-flow-test 5/5、
   inventory-flow-test 4/4、badge-test 2/2、quota-flow-test 2/2、
@@ -2181,7 +2181,7 @@
   `gen_inventory_invariants` 新增 INV-IN-9 库存-履约联动（ship item0 q2：
   q2 ≤ a 不超库存 且 q2 ≤ d 不超需求——stock_level = a−q2 ≥ 0 且 q2 ≤ d
   （履约率 ≤ 1），库存水位与履约率联动守恒），`PROVED (unsat)`；全量重验
-  **266 → 326 PROVED / 34 模块**；prove 数字全库同步 326 PROVED（含
+  **266 → 330 PROVED / 34 模块**；prove 数字全库同步 330 PROVED（含
   /health//panel/Rust /panel/门禁 8 期望）；sigma-accept 十道门禁 10/10、
   health-test 4/4、panel-test 5/5、inventory-chain-test 5/5、双端 77/77 全绿；
   consensus 56/56、p0 109/109，v0.10–v0.322 不回归。
@@ -2204,7 +2204,7 @@
   v0.10–v0.324 不回归。
 - ✅ **REACHED v0.326 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.326 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9）/ --domains 75/75（40 项链式复核）/ 双端冒烟 77/77 + 36/36 /
   前端剧本 19/19 / 十道门禁含 runtime / Elixir 十九域自检 / stats/portfolio/
@@ -2254,7 +2254,7 @@
 - ✅ **REACHED v0.332 (2026-08-06)**: 批次 20 收尾（数字同步 + 全量验收 +
   **PyPI 0.7.3 发布**）—— v0.323–v0.332 十个连续小阶段收官（小阶段 200/496，
   每 100 个发布 PyPI 达成：pyproject.toml 0.7.2 → **0.7.3**）：数字一致性检查
-  通过（consensus 56/56、prove 326 PROVED、--domains 75/75 在门禁与代码各处
+  通过（consensus 56/56、prove 330 PROVED、--domains 75/75 在门禁与代码各处
   一致），全量验收全绿（sigma-accept 十道门禁 10/10、stock-fillrate-test 3/3、
   valuation-risk-test 3/3、task-points-quota-test 3/3、points-quota-test 2/2、
   credit-badge-test 3/3、portfolio-flow-test 5/5、inventory-flow-test 4/4、
@@ -2268,8 +2268,8 @@
   `gen_socketkit_invariants` 新增 INV-SK-15 验收-积分-契分三维联动（验收 n 次：
   每次释放 escrow b 入 available + 契分 +5 + 贡献分 +10——escrow=0、
   available=n×b 且契分=100+5n 且贡献分=10n，验收链三维联动守恒），
-  `PROVED (unsat)`；全量重验 **270 → 326 PROVED / 34 模块**；prove 数字全库
-  同步 326 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；sigma-accept
+  `PROVED (unsat)`；全量重验 **270 → 330 PROVED / 34 模块**；prove 数字全库
+  同步 330 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；sigma-accept
   十道门禁 10/10、health-test 4/4、panel-test 5/5、credit-badge-test 3/3、
   双端 79/79 全绿；consensus 56/56、p0 109/109，v0.10–v0.332 不回归。
 - ✅ **REACHED v0.334 (2026-08-06)**: 标准库语料强化—— `corpus/std_ai_confidence_ok.md`
@@ -2289,7 +2289,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.334 不回归。
 - ✅ **REACHED v0.336 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.336 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15）/ --domains 76/76（41 项链式复核）/ 双端冒烟 79/79 + 36/36 /
   前端剧本 19/19 / 十道门禁含 runtime / Elixir 二十域自检 / stats/portfolio/
@@ -2341,7 +2341,7 @@
   p0 109/109，v0.10–v0.340 不回归。
 - ✅ **REACHED v0.342 (2026-08-06)**: 批次 21 收尾（数字同步 + 全量验收）——
   v0.333–v0.342 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 76/76 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 76/76 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、accept-points-credit-test 3/3、
   stock-fillrate-test 3/3、valuation-risk-test 3/3、task-points-quota-test
   3/3、points-quota-test 2/2、credit-badge-test 3/3、portfolio-flow-test 5/5、
@@ -2355,8 +2355,8 @@
   `gen_portfolio_invariants` 新增 INV-PF-10 双资产混合交易链估值守恒（buy
   asset0 q1 → buy asset1 q2 → sell asset0 q3 → sell asset1 q4：链后估值
   cash+qA+qB = c+s 且 qA、qB、cash ≥ 0——双资产买卖链估值守恒），
-  `PROVED (unsat)`；全量重验 **274 → 326 PROVED / 34 模块**；prove 数字全库
-  同步 326 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；sigma-accept
+  `PROVED (unsat)`；全量重验 **274 → 330 PROVED / 34 模块**；prove 数字全库
+  同步 330 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；sigma-accept
   十道门禁 10/10、health-test 4/4、panel-test 5/5、portfolio-flow-test 5/5、
   双端 82/82 全绿；consensus 56/56、p0 109/109，v0.10–v0.342 不回归。
 - ✅ **REACHED v0.344 (2026-08-06)**: 标准库语料强化—— `corpus/std_data_transform_ok.md`
@@ -2376,7 +2376,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.344 不回归。
 - ✅ **REACHED v0.346 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.346 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15/PF-10）/ --domains 77/77（42 项链式复核）/ 双端冒烟 82/82 +
   36/36 / 前端剧本 19/19 / 十道门禁含 runtime / Elixir 二十一域自检 /
@@ -2427,7 +2427,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.350 不回归。
 - ✅ **REACHED v0.352 (2026-08-06)**: 批次 22 收尾（数字同步 + 全量验收）——
   v0.343–v0.352 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 77/77 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 77/77 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、dual-asset-test 4/4、accept-points-credit-test
   3/3、stock-fillrate-test 3/3、valuation-risk-test 3/3、task-points-quota-test
   3/3、points-quota-test 2/2、credit-badge-test 3/3、portfolio-flow-test 5/5、
@@ -2441,8 +2441,8 @@
   `gen_inventory_invariants` 新增 INV-IN-10 入库-出库-水位-履约四链联动
   （receive item0 q1 后 ship item0 q2（q2 ≤ q1 履约不超收）：stock_level =
   a+q1−q2 ≥ 0 且 q2 ≤ q1（履约率 ≤ 1）——入库/出库/水位/履约四链联动守恒），
-  `PROVED (unsat)`；全量重验 **278 → 326 PROVED / 34 模块**；prove 数字全库
-  同步 326 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；sigma-accept
+  `PROVED (unsat)`；全量重验 **278 → 330 PROVED / 34 模块**；prove 数字全库
+  同步 330 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；sigma-accept
   十道门禁 10/10、health-test 4/4、panel-test 5/5、inventory-chain-test 5/5、
   双端 84/84 全绿；consensus 56/56、p0 109/109，v0.10–v0.352 不回归。
 - ✅ **REACHED v0.354 (2026-08-06)**: 标准库语料强化—— `corpus/std_math_base_ok.md`
@@ -2464,7 +2464,7 @@
   v0.10–v0.354 不回归。
 - ✅ **REACHED v0.356 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.356 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15/PF-10/IN-10）/ --domains 78/78（43 项链式复核）/ 双端冒烟
   84/84 + 36/36 / 前端剧本 19/19 / 十道门禁含 runtime / Elixir 二十二域自检 /
@@ -2516,7 +2516,7 @@
   不回归。
 - ✅ **REACHED v0.362 (2026-08-06)**: 批次 23 收尾（数字同步 + 全量验收）——
   v0.353–v0.362 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 78/78 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 78/78 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、receive-ship-fillrate-test 3/3、dual-asset-test
   4/4、accept-points-credit-test 3/3、stock-fillrate-test 3/3、
   valuation-risk-test 3/3、task-points-quota-test 3/3、points-quota-test 2/2、
@@ -2531,7 +2531,7 @@
   `gen_socketkit_invariants` 新增 INV-SK-16 提现-契分联动（验收 n 次（escrow
   全释放入 available=n×b）后提现 w（w ≤ available）：available=n×b−w ≥ 0 且
   escrow=0 且契分=100+5n——提现链与契分联动守恒），`PROVED (unsat)`；全量
-  重验 **282 → 326 PROVED / 34 模块**；prove 数字全库同步 326 PROVED（含
+  重验 **282 → 330 PROVED / 34 模块**；prove 数字全库同步 330 PROVED（含
   /health//panel/Rust /panel/门禁 8 期望）；sigma-accept 十道门禁 10/10、
   health-test 4/4、panel-test 5/5、credit-badge-test 3/3、双端 86/86 全绿；
   consensus 56/56、p0 109/109，v0.10–v0.362 不回归。
@@ -2552,7 +2552,7 @@
   v0.10–v0.364 不回归。
 - ✅ **REACHED v0.366 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.366 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15/PF-10/IN-10/SK-16）/ --domains 79/79（44 项链式复核）/
   双端冒烟 86/86 + 36/36 / 前端剧本 19/19 / 十道门禁含 runtime / Elixir
@@ -2604,7 +2604,7 @@
   全绿；consensus 56/56、p0 109/109，v0.10–v0.370 不回归。
 - ✅ **REACHED v0.372 (2026-08-06)**: 批次 24 收尾（数字同步 + 全量验收）——
   v0.363–v0.372 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 79/79 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 79/79 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、withdraw-credit-test 3/3、
   receive-ship-fillrate-test 3/3、dual-asset-test 4/4、accept-points-credit-test
   3/3、stock-fillrate-test 3/3、valuation-risk-test 3/3、task-points-quota-test
@@ -2619,8 +2619,8 @@
   `gen_portfolio_invariants` 新增 INV-PF-11 双资产买卖-估值-风险四链联动
   （buy asset0 q1 → buy asset1 q2 → sell asset0 q3 → sell asset1 q4：链后
   估值 cash+qA+qB = c+s 且估值 ≥ 风险 且 qA、qB、cash ≥ 0——双资产买卖链
-  估值-风险联动守恒），`PROVED (unsat)`；全量重验 **286 → 326 PROVED / 34
-  模块**；prove 数字全库同步 326 PROVED（含 /health//panel/Rust /panel/门禁
+  估值-风险联动守恒），`PROVED (unsat)`；全量重验 **286 → 330 PROVED / 34
+  模块**；prove 数字全库同步 330 PROVED（含 /health//panel/Rust /panel/门禁
   8 期望）；sigma-accept 十道门禁 10/10、health-test 4/4、panel-test 5/5、
   portfolio-flow-test 5/5、双端 89/89 全绿；consensus 56/56、p0 109/109，
   v0.10–v0.372 不回归。
@@ -2642,7 +2642,7 @@
   v0.10–v0.374 不回归。
 - ✅ **REACHED v0.376 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.376 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15/PF-10/IN-10/SK-16/PF-11）/ --domains 80/80（45 项链式复核）/
   双端冒烟 89/89 + 36/36 / 前端剧本 19/19 / 十道门禁含 runtime / Elixir
@@ -2697,7 +2697,7 @@
   p0 109/109，v0.10–v0.380 不回归。
 - ✅ **REACHED v0.382 (2026-08-06)**: 批次 25 收尾（数字同步 + 全量验收）——
   v0.373–v0.382 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 80/80 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 80/80 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、dual-asset-vr-test 4/4、withdraw-credit-test
   3/3、receive-ship-fillrate-test 3/3、dual-asset-test 4/4、
   accept-points-credit-test 3/3、stock-fillrate-test 3/3、valuation-risk-test
@@ -2713,7 +2713,7 @@
   （receive item0 q1 → receive item1 q2 → ship item0 q3 → ship item1 q4
   （q3 ≤ q1、q4 ≤ q2 履约不超收）：item0=a+q1−q3 ≥0 且 item1=b+q2−q4 ≥0
   且 q3 ≤ q1、q4 ≤ q2（履约率 ≤ 1）——双货品四链联动守恒），`PROVED (unsat)`；
-  全量重验 **290 → 326 PROVED / 34 模块**；prove 数字全库同步 326 PROVED（含
+  全量重验 **290 → 330 PROVED / 34 模块**；prove 数字全库同步 330 PROVED（含
   /health//panel/Rust /panel/门禁 8 期望）；sigma-accept 十道门禁 10/10、
   health-test 4/4、panel-test 5/5、inventory-chain-test 5/5、双端 91/91 全绿；
   consensus 56/56、p0 109/109，v0.10–v0.382 不回归。
@@ -2737,7 +2737,7 @@
   v0.10–v0.384 不回归。
 - ✅ **REACHED v0.386 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.386 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15/PF-10/IN-10/SK-16/PF-11/IN-11）/ --domains 81/81（46 项链式
   复核）/ 双端冒烟 91/91 + 36/36 / 前端剧本 19/19 / 十道门禁含 runtime / Elixir
@@ -2792,7 +2792,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.390 不回归。
 - ✅ **REACHED v0.392 (2026-08-06)**: 批次 26 收尾（数字同步 + 全量验收）——
   v0.383–v0.392 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 81/81 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 81/81 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、dual-item-four-link-test 4/4、dual-asset-vr-test
   4/4、withdraw-credit-test 3/3、receive-ship-fillrate-test 3/3、dual-asset-test
   4/4、accept-points-credit-test 3/3、stock-fillrate-test 3/3、
@@ -2809,8 +2809,8 @@
   remaining=m−n、托管 escrow=n×b）→ 验收 n 次（escrow 全释放）→ 提现 w
   （w ≤ n×b）：配额 remaining=m−n ≥0 且 escrow=0 且 available=n×b−w ≥0 且
   契分=100+5n 且贡献分=10n——任务/配额/积分/契分/贡献五链联动守恒），
-  `PROVED (unsat)`；全量重验 **294 → 326 PROVED / 34 模块**；prove 数字全库
-  同步 326 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；sigma-accept
+  `PROVED (unsat)`；全量重验 **294 → 330 PROVED / 34 模块**；prove 数字全库
+  同步 330 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；sigma-accept
   十道门禁 10/10、health-test 4/4、panel-test 5/5、credit-badge-test 3/3、
   双端 93/93 全绿；consensus 56/56、p0 109/109，v0.10–v0.392 不回归。
 - ✅ **REACHED v0.394 (2026-08-06)**: 标准库语料强化—— `corpus/std_ai_confidence_ok.md`
@@ -2831,7 +2831,7 @@
   v0.10–v0.394 不回归。
 - ✅ **REACHED v0.396 (2026-08-06)**: README 收官总览数字同步—— README
   Status 章节新增「v0.396 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15/PF-10/IN-10/SK-16/PF-11/IN-11/SK-17）/ --domains 82/82
   （47 项链式复核）/ 双端冒烟 93/93 + 36/36 / 前端剧本 19/19 / 十道门禁含
@@ -2871,7 +2871,7 @@
   5/5 双端对账全绿；consensus 56/56、p0 109/109，v0.10–v0.398 不回归。
 - ✅ **REACHED v0.400 (2026-08-06)**: 批次 27 收尾（数字同步 + 全量验收）——
   v0.393–v0.400 八个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 82/82 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 82/82 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、full-business-five-link-test 5/5、
   dual-item-four-link-test 4/4、dual-asset-vr-test 4/4、withdraw-credit-test
   3/3、receive-ship-fillrate-test 3/3、dual-asset-test 4/4、
@@ -2889,8 +2889,8 @@
   （验收 n 次（escrow 全释放入 available=n×b）→ 提现 w（w ≤ n×b）→ 契分
   =100+5n → 勋章按档位（<300→1、≥300→2）：available=n×b−w ≥0 且 escrow=0
   且契分=100+5n 且勋章=档位——验收/积分/契分/勋章四链联动守恒），
-  `PROVED (unsat)`；全量重验 **298 → 326 PROVED / 34 模块**；prove 数字全库
-  同步 326 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；sigma-accept
+  `PROVED (unsat)`；全量重验 **298 → 330 PROVED / 34 模块**；prove 数字全库
+  同步 330 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；sigma-accept
   十道门禁 10/10、health-test 4/4、panel-test 5/5、credit-badge-test 3/3、
   双端 98/98 全绿；consensus 56/56、p0 109/109，v0.10–v0.400 不回归。
 - ✅ **REACHED v0.402 (2026-08-07)**: 标准库语料强化—— `corpus/std_data_transform_ok.md`
@@ -2910,7 +2910,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.402 不回归。
 - ✅ **REACHED v0.404 (2026-08-07)**: README 收官总览数字同步—— README
   Status 章节新增「v0.406 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15/PF-10/IN-10/SK-16/PF-11/IN-11/SK-17/SK-18）/ --domains 83/83
   （48 项链式复核）/ 双端冒烟 98/98 + 36/36 / 前端剧本 19/19 / 十道门禁含
@@ -2970,7 +2970,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.408 不回归。
 - ✅ **REACHED v0.410 (2026-08-07)**: 批次 28 收尾（数字同步 + 全量验收）——
   v0.401–v0.410 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 83/83 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 83/83 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、accept-withdraw-credit-badge-test 4/4、
   full-business-five-link-test 5/5、dual-item-four-link-test 4/4、
   dual-asset-vr-test 4/4、withdraw-credit-test 3/3、receive-ship-fillrate-test
@@ -2987,8 +2987,8 @@
   `gen_portfolio_invariants` 新增 INV-PF-12 双资产等量买卖对消链（buy asset0 q1
   → buy asset1 q2 → sell asset0 q1 → sell asset1 q2：买卖等量后 cash=c 且
   qA=s 且 qB=0（完全恢复初始状态），估值=c+s 守恒——双资产对消链守恒），
-  `PROVED (unsat)`；全量重验 **302 → 326 PROVED / 34 模块**；prove 数字全库
-  同步 326 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；sigma-accept
+  `PROVED (unsat)`；全量重验 **302 → 330 PROVED / 34 模块**；prove 数字全库
+  同步 330 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；sigma-accept
   十道门禁 10/10、health-test 4/4、panel-test 5/5、portfolio-flow-test 5/5、
   双端 102/102 全绿；consensus 56/56、p0 109/109，v0.10–v0.410 不回归。
 - ✅ **REACHED v0.412 (2026-08-07)**: 标准库语料强化—— `corpus/std_math_base_ok.md`
@@ -3010,7 +3010,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.412 不回归。
 - ✅ **REACHED v0.414 (2026-08-07)**: README 收官总览数字同步—— README
   Status 章节新增「v0.416 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15/PF-10/IN-10/SK-16/PF-11/IN-11/SK-17/SK-18/PF-12）/ --domains
   84/84（49 项链式复核）/ 双端冒烟 102/102 + 36/36 / 前端剧本 19/19 / 十道门禁
@@ -3068,7 +3068,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.418 不回归。
 - ✅ **REACHED v0.420 (2026-08-07)**: 批次 29 收尾（数字同步 + 全量验收）——
   v0.411–v0.420 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 84/84 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 84/84 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、dual-asset-equal-trade-test 4/4、
   accept-withdraw-credit-badge-test 4/4、full-business-five-link-test 5/5、
   dual-item-four-link-test 4/4、dual-asset-vr-test 4/4、withdraw-credit-test
@@ -3086,7 +3086,7 @@
   `gen_inventory_invariants` 新增 INV-IN-12 双货品等量入出对消链（receive item0
   q1 → receive item1 q2 → ship item0 q1 → ship item1 q2：入出等量后 item0=a
   且 item1=b（完全恢复初始状态），总量守恒——双货品对消链守恒），`PROVED (unsat)`；
-  全量重验 **306 → 326 PROVED / 34 模块**；prove 数字全库同步 326 PROVED（含
+  全量重验 **306 → 330 PROVED / 34 模块**；prove 数字全库同步 330 PROVED（含
   /health//panel/Rust /panel/门禁 8 期望）；sigma-accept 十道门禁 10/10、
   health-test 4/4、panel-test 5/5、inventory-chain-test 5/5、双端 104/104 全绿；
   consensus 56/56、p0 109/109，v0.10–v0.420 不回归。
@@ -3107,7 +3107,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.422 不回归。
 - ✅ **REACHED v0.424 (2026-08-07)**: README 收官总览数字同步—— README
   Status 章节新增「v0.426 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15/PF-10/IN-10/SK-16/PF-11/IN-11/SK-17/SK-18/PF-12/IN-12）/
   --domains 85/85（50 项链式复核）/ 双端冒烟 104/104 + 36/36 / 前端剧本 19/19 /
@@ -3165,7 +3165,7 @@
   consensus 56/56、p0 109/109，v0.10–v0.428 不回归。
 - ✅ **REACHED v0.430 (2026-08-07)**: 批次 30 收尾（数字同步 + 全量验收）——
   v0.421–v0.430 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 85/85 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 85/85 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、dual-item-equal-trade-test 3/3、
   dual-asset-equal-trade-test 4/4、accept-withdraw-credit-badge-test 4/4、
   full-business-five-link-test 5/5、dual-item-four-link-test 4/4、
@@ -3184,8 +3184,8 @@
   （验收 n 次（escrow 全释放入 available=n×b）→ 提现 w（w ≤ n×b）→ 契分
   =100+5n → 贡献分=10n → 勋章按档位（<300→1、≥300→2）：available=n×b−w ≥0
   且 escrow=0 且契分=100+5n 且贡献分=10n 且勋章=档位——验收/积分/契分/贡献/勋章
-  五链联动守恒），`PROVED (unsat)`；全量重验 **310 → 326 PROVED / 34 模块**；
-  prove 数字全库同步 326 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；
+  五链联动守恒），`PROVED (unsat)`；全量重验 **310 → 330 PROVED / 34 模块**；
+  prove 数字全库同步 330 PROVED（含 /health//panel/Rust /panel/门禁 8 期望）；
   sigma-accept 十道门禁 10/10、health-test 4/4、panel-test 5/5、
   credit-badge-test 3/3、双端 106/106 全绿；consensus 56/56、p0 109/109，
   v0.10–v0.430 不回归。
@@ -3208,7 +3208,7 @@
   v0.10–v0.432 不回归。
 - ✅ **REACHED v0.434 (2026-08-07)**: README 收官总览数字同步—— README
   Status 章节新增「v0.436 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15/PF-10/IN-10/SK-16/PF-11/IN-11/SK-17/SK-18/PF-12/IN-12/SK-19）/
   --domains 86/86（51 项链式复核）/ 双端冒烟 106/106 + 36/36 / 前端剧本 19/19 /
@@ -3272,7 +3272,7 @@
 - ✅ **REACHED v0.440 (2026-08-07)**: 批次 31 收尾（数字同步 + 全量验收 +
   **PyPI 0.7.4 已发布**）—— v0.431–v0.440 十个连续小阶段收官（小阶段 308/496，
   每 100 个发布 PyPI 达成：pyproject.toml 0.7.3 → 0.7.4）：数字一致性检查通过
-  （consensus 56/56、prove 326 PROVED、--domains 86/86 在门禁与代码各处一致），
+  （consensus 56/56、prove 330 PROVED、--domains 86/86 在门禁与代码各处一致），
   全量验收全绿（sigma-accept 十道门禁 10/10、accept-withdraw-credit-contribution-
   badge-test 5/5、dual-item-equal-trade-test 3/3、dual-asset-equal-trade-test
   4/4、accept-withdraw-credit-badge-test 4/4、full-business-five-link-test 5/5、
@@ -3291,8 +3291,8 @@
   `gen_portfolio_invariants` 新增 INV-PF-13 双资产等量买卖对消-估值-风险五链
   （buy asset0 q1 → buy asset1 q2 → sell asset0 q1 → sell asset1 q2：cash=c
   且 qA=s 且 qB=0（完全恢复初始状态）且估值=c+s 且估值 ≥ 风险——对消链估值/
-  风险/现金/资产五链联动守恒），`PROVED (unsat)`；全量重验 **314 → 326 PROVED
-  / 34 模块**；prove 数字全库同步 326 PROVED（含 /health//panel/Rust /panel/
+  风险/现金/资产五链联动守恒），`PROVED (unsat)`；全量重验 **314 → 330 PROVED
+  / 34 模块**；prove 数字全库同步 330 PROVED（含 /health//panel/Rust /panel/
   门禁 8 期望）；sigma-accept 十道门禁 10/10、health-test 4/4、panel-test 5/5、
   portfolio-flow-test 5/5、双端 111/111 全绿；consensus 56/56、p0 109/109，
   v0.10–v0.440 不回归。
@@ -3315,7 +3315,7 @@
   十道门禁 10/10 全绿；consensus 56/56、p0 109/109，v0.10–v0.442 不回归。
 - ✅ **REACHED v0.444 (2026-08-07)**: README 收官总览数字同步—— README
   Status 章节新增「v0.446 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15/PF-10/IN-10/SK-16/PF-11/IN-11/SK-17/SK-18/PF-12/IN-12/SK-19/
   PF-13）/ --domains 87/87（52 项链式复核）/ 双端冒烟 111/111 + 36/36 / 前端剧本
@@ -3377,7 +3377,7 @@
   56/56、p0 109/109，v0.10–v0.448 不回归。
 - ✅ **REACHED v0.450 (2026-08-07)**: 批次 32 收尾（数字同步 + 全量验收）——
   v0.441–v0.450 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 87/87 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 87/87 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、dual-asset-equal-trade-vr-test 4/4、
   accept-withdraw-credit-contribution-badge-test 5/5、dual-item-equal-trade-test
   3/3、dual-asset-equal-trade-test 4/4、accept-withdraw-credit-badge-test 4/4、
@@ -3397,7 +3397,7 @@
   （receive item0 q1 → receive item1 q2 → ship item0 q1 → ship item1 q2：
   item0=a 且 item1=b（完全恢复初始状态）且总量=a+b 且履约率 ≤ 1（q1 ≤ q1、
   q2 ≤ q2）——对消链水位/履约五链联动守恒），`PROVED (unsat)`；全量重验
-  **318 → 326 PROVED / 34 模块**；prove 数字全库同步 326 PROVED（含
+  **318 → 330 PROVED / 34 模块**；prove 数字全库同步 330 PROVED（含
   /health//panel/Rust /panel/门禁 8 期望）；sigma-accept 十道门禁 10/10、
   health-test 4/4、panel-test 5/5、inventory-chain-test 5/5、双端 114/114 全绿；
   consensus 56/56、p0 109/109，v0.10–v0.450 不回归。
@@ -3418,7 +3418,7 @@
   全绿；consensus 56/56、p0 109/109，v0.10–v0.452 不回归。
 - ✅ **REACHED v0.454 (2026-08-07)**: README 收官总览数字同步—— README
   Status 章节新增「v0.456 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15/PF-10/IN-10/SK-16/PF-11/IN-11/SK-17/SK-18/PF-12/IN-12/SK-19/
   PF-13/IN-13）/ --domains 88/88（53 项链式复核）/ 双端冒烟 114/114 + 36/36 /
@@ -3483,7 +3483,7 @@
   56/56、p0 109/109，v0.10–v0.458 不回归。
 - ✅ **REACHED v0.460 (2026-08-07)**: 批次 33 收尾（数字同步 + 全量验收）——
   v0.451–v0.460 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 88/88 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 88/88 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、dual-item-equal-trade-fillrate-test 4/4、
   dual-asset-equal-trade-vr-test 4/4、accept-withdraw-credit-contribution-badge-test
   5/5、dual-item-equal-trade-test 3/3、dual-asset-equal-trade-test 4/4、
@@ -3504,7 +3504,7 @@
   n×b）→ 契分=100+5n → 贡献分=10n → 勋章按档位（<300→1、≥300→2）：配额
   remaining=m−n ≥0 且 escrow=0 且 available=n×b−w ≥0 且契分=100+5n 且贡献分
   =10n 且勋章=档位——任务/配额/积分/契分/贡献/勋章六链联动守恒），`PROVED (unsat)`；
-  全量重验 **322 → 326 PROVED / 34 模块**；prove 数字全库同步 326 PROVED（含
+  全量重验 **322 → 330 PROVED / 34 模块**；prove 数字全库同步 330 PROVED（含
   /health//panel/Rust /panel/门禁 8 期望）；sigma-accept 十道门禁 10/10、
   health-test 4/4、panel-test 5/5、credit-badge-test 3/3、双端 117/117 全绿；
   consensus 56/56、p0 109/109，v0.10–v0.460 不回归。
@@ -3526,7 +3526,7 @@
   十道门禁 10/10 全绿；consensus 56/56、p0 109/109，v0.10–v0.462 不回归。
 - ✅ **REACHED v0.464 (2026-08-07)**: README 收官总览数字同步—— README
   Status 章节新增「v0.466 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
-  p0 109/109 / sigma-prove 326 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
   PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
   PF-9/IN-9/SK-15/PF-10/IN-10/SK-16/PF-11/IN-11/SK-17/SK-18/PF-12/IN-12/SK-19/
   PF-13/IN-13/SK-20）/ --domains 89/89（54 项链式复核）/ 双端冒烟 117/117 + 36/36 /
@@ -3591,7 +3591,7 @@
   自检 15/15、冒烟 36/36 全绿；consensus 56/56、p0 109/109，v0.10–v0.468 不回归。
 - ✅ **REACHED v0.470 (2026-08-07)**: 批次 34 收尾（数字同步 + 全量验收）——
   v0.461–v0.470 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
-  prove 326 PROVED、--domains 89/89 在门禁与代码各处一致），全量验收全绿
+  prove 330 PROVED、--domains 89/89 在门禁与代码各处一致），全量验收全绿
   （sigma-accept 十道门禁 10/10、full-business-six-link-test 6/6、
   dual-item-equal-trade-fillrate-test 4/4、dual-asset-equal-trade-vr-test 4/4、
   accept-withdraw-credit-contribution-badge-test 5/5、dual-item-equal-trade-test
@@ -3607,9 +3607,125 @@
   5/5、stats-test 5/5、自检 15/15、Elixir 全业务链六链守恒 6/6）——批次 34
   （338/496 小阶段）达成，按规则同步仓库；consensus 56/56、p0 109/109，
   v0.10–v0.469 不回归。
+- ✅ **REACHED v0.471 (2026-08-07)**: 新增不变量 INV-PF-14—— `sigma-prove`
+  `gen_portfolio_invariants` 新增 INV-PF-14 双资产等量买卖对消-估值-风险-恢复六链
+  （buy asset0 q1 → buy asset1 q2 → sell asset0 q1 → sell asset1 q2：cash=c
+  且 qA=s 且 qB=0（完全恢复初始状态）且估值=c+s 且估值 ≥ 风险 且对消后估值=初始
+  （恢复）——买卖/估值/风险/现金/资产/恢复六链联动守恒），`PROVED (unsat)`；
+  全量重验 **326 → 330 PROVED / 34 模块**；prove 数字全库同步 330 PROVED（含
+  /health//panel/Rust /panel/门禁 8 期望）；sigma-accept 十道门禁 10/10、
+  health-test 4/4、panel-test 5/5、portfolio-flow-test 5/5、双端 123/123 全绿；
+  consensus 56/56、p0 109/109，v0.10–v0.470 不回归。
+- ✅ **REACHED v0.472 (2026-08-07)**: 标准库语料强化—— `corpus/std_math_base_ok.md`
+  补 4 个 ⊖/⊙ 形状边界用例（[1,2,3,4,5,6,7,8,9,10,11]⊖[1,2,3,4,5,6,7,8,9,10]
+  ⊥ ShapeError、[1,2,3,4,5,6,7,8,9,10,11]⊖[1,2,3,4,5,6,7,8,9,10,11,12]
+  ⊥ ShapeError、[1,2,3,4,5,6,7,8,9,10,11]⊙[1,2,3,4,5,6,7,8,9,10]
+  ⊥ ShapeError、[1,2,3,4,5,6,7,8,9,10,11]⊙[1,2,3,4,5,6,7,8,9,10,11,12]
+  ⊥ ShapeError——标量签名只用 ⊥ 负例避免 SignatureMismatch，⊖ 与 ⊙ 两处，三端
+  语义一致）——标准库算术操作 ⊖/⊙ 形状边界测试覆盖补全（math.base 测试集 51 →
+  55 项）；三端共识 **56/56** 保持（std_math_base_ok PASS 55/55）、证明侧无新增
+  义务（std 操作不生成 z3 义务）、ALL STRUCTURAL PASS；consensus 56/56、
+  p0 109/109，v0.10–v0.471 不回归。
+- ✅ **REACHED v0.473 (2026-08-07)**: 运行时不变量复核扩展—— `sigma-runtime`
+  `run_invariant_checks` 追加 v0.471 新证明的 INV-PF-14 双资产等量买卖对消-估值-
+  风险-恢复六链复核（buy(0,30)→buy(1,20)→sell(0,30)→sell(1,20)：cash=100、
+  qA=0、qB=0（完全恢复初始状态）且估值=100 且估值 ≥ 风险 且对消后估值=初始
+  （恢复）——买卖/估值/风险/现金/资产/恢复六链联动守恒），`--domains`
+  **89/89 → 90/90**——证明层新增不变量全部进运行时审计；sigma-accept 门禁 7
+  期望同步 90/90、--domains 数字全库同步 90/90（USAGE/README 快速开始/验证清单/
+  架构图/工具表，Rust/Elixir §SK 自检 88/88 不变）；trace 59/59、sigma-accept
+  十道门禁 10/10 全绿；consensus 56/56、p0 109/109，v0.10–v0.472 不回归。
+- ✅ **REACHED v0.474 (2026-08-07)**: README 收官总览数字同步—— README
+  Status 章节新增「v0.476 收官总览」段（spec 0.7.0 / 三域 / consensus 56/56 /
+  p0 109/109 / sigma-prove 330 项 PROVED（34 模块，含 INV-SK-6/PF-4/IN-5/SK-7/
+  PF-5/SK-8/IN-6/PF-6/SK-9/IN-7/PF-7/SK-10/SK-11/IN-8/PF-8/SK-12/SK-13/SK-14/
+  PF-9/IN-9/SK-15/PF-10/IN-10/SK-16/PF-11/IN-11/SK-17/SK-18/PF-12/IN-12/SK-19/
+  PF-13/IN-13/SK-20/PF-14）/ --domains 90/90（55 项链式复核）/ 双端冒烟 123/123 +
+  36/36 / 前端剧本 19/19 / 十道门禁含 runtime / Elixir 三十三域自检 /
+  stats/portfolio/inventory/cross-domain/inventory-chain/full 5/5 + points/
+  credit/audit/contribution/quota-flow/badge/inventory-flow/portfolio-flow/
+  credit-badge/points-quota/task-points-quota/valuation-risk/stock-fillrate/
+  accept-points-credit/dual-asset/receive-ship-fillrate/withdraw-credit/
+  dual-asset-vr/dual-item-four-link/full-business-five-link/
+  accept-withdraw-credit-badge/dual-asset-equal-trade/dual-item-equal-trade/
+  accept-withdraw-credit-contribution-badge/dual-asset-equal-trade-vr/
+  dual-item-equal-trade-fillrate/full-business-six-link
+  3/3+3/3+6/6+2/2+2/2+2/2+4/4+5/5+3/3+2/2+3/3+3/3+3/3+3/3+4/4+3/3+3/3+4/4+
+  4/4+5/5+4/4+4/4+3/3+5/5+4/4+4/4+6/6 + errors 7/7 / 跨域/错误边界/标准库十一包
+  语料进共识 / 找茬可上线 + 长期自主运行说明：小阶段 344/496、每 10 个同步仓库、
+  每 100 个发布 PyPI）——README 首页一张图看到 v0.476 全貌；consensus 56/56、
+  p0 109/109，v0.10–v0.473 不回归。
+- ✅ **REACHED v0.475 (2026-08-07)**: Python App 双资产等量买卖对消-估值-风险-恢复
+  六链剧本—— `sigma_app.py` 新增 `--dual-asset-equal-trade-vr-restore-test`
+  （run_dual_asset_equal_trade_vr_restore_test：六链 HTTP 测试 5 项断言——
+  buy(0,30)→buy(1,20)→sell(0,30)→sell(1,20) 后 cash=100（恢复）且 qA=0、qB=0
+  且估值=100（总额守恒）且估值 ≥ 风险 且对消后估值=初始（恢复），与 INV-PF-14
+  双资产等量买卖对消-估值-风险-恢复六链语义对应）；--dual-asset-equal-trade-vr-restore-test
+  5/5、--dual-asset-equal-trade-vr-test 4/4、--dual-asset-equal-trade-test 4/4、
+  自检 15/15、冒烟 36/36 不回归；consensus 56/56、p0 109/109，v0.10–v0.474
+  不回归。
+- ✅ **REACHED v0.476 (2026-08-07)**: 前端双资产等量买卖对消-估值-风险-恢复六链
+  演示—— `web/index.html` 新增「双资产对消-估值-风险-恢复演示」section +
+  `etrChain()` JS 函数（一键跑双资产等量买卖对消-估值-风险-恢复六链：开户 100 →
+  buy(0,30) → buy(1,20) → sell(0,30) → sell(1,20) → 展示现金 100（恢复）· qA 0
+  · qB 0 · 估值 100（总额守恒/恢复初始）· 风险 ≤ 估值，与
+  --dual-asset-equal-trade-vr-restore-test / INV-PF-14 语义对应）——前端可视化
+  双资产对消链估值/风险/现金/资产/恢复六链语义；web-test 5/5、
+  dual-asset-equal-trade-vr-restore-test 5/5、自检 15/15 不回归；consensus 56/56、
+  p0 109/109，v0.10–v0.475 不回归。
+- ✅ **REACHED v0.477 (2026-08-07)**: Rust 双资产等量买卖对消-估值-风险-恢复六链
+  对账—— `app.rs` 冒烟新增「HTTP /etr_chain restored」「HTTP /etr_chain value」
+  「HTTP /etr_chain risk」「HTTP /etr_chain restore」六链对账项（buy(0,30)
+  →buy(1,20)→sell(0,30)→sell(1,20) 后 cash=100、qA=0、qB=0（完全恢复）且估值
+  =100（总额守恒）且估值 ≥ 风险 且对消后估值=初始（恢复），与 Python
+  --dual-asset-equal-trade-vr-restore-test 对应），`run_smoke` 123 → 127 项；
+  cargo build 0 warning、--app-smoke 127/127、Python
+  --dual-asset-equal-trade-vr-restore-test 5/5 双端对账全绿；consensus 56/56、
+  p0 109/109，v0.10–v0.476 不回归。
+- ✅ **REACHED v0.478 (2026-08-07)**: Elixir 双资产等量买卖对消-估值-风险-恢复六链
+  自检—— `sigma_verify.exs` 新增 `sk_dual_asset_equal_trade_vr_restore_story`
+  （六链自检 5 项：buy(0,30)→buy(1,20)→sell(0,30)→sell(1,20) 后 cash=100（恢复）
+  / qA=0 且 qB=0 / 估值=100（总额守恒）/ 估值 ≥ 风险 / 对消后估值=初始（恢复），与
+  --dual-asset-equal-trade-vr-restore-test / INV-PF-14 语义对应）与 CLI `--sk-etr`
+  入口——Elixir 三十四域自检齐（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界
+  10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、
+  额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额联动
+  3/3、三维联动 4/4、估值-风险联动 3/3、库存-履约联动 3/3、验收-积分-契分联动 4/4、
+  双资产交易链 4/4、四链联动 3/3、提现-契分联动 3/3、双资产估值-风险四链 4/4、
+  双货品四链联动 4/4、验收-提现-契分-勋章四链 4/4、双资产等量买卖对消链 4/4、
+  双货品等量入出对消链 3/3、验收-提现-契分-贡献-勋章五链 5/5、双资产等量买卖对消-
+  估值-风险五链 4/4、双货品等量入出对消-水位-履约五链 4/4、全业务链六链守恒 6/6、
+  双资产等量买卖对消-估值-风险-恢复六链 5/5）；consensus 56/56、p0 109/109，
+  v0.10–v0.477 不回归。
+- ✅ **REACHED v0.479 (2026-08-07)**: Makefile/CI 补双资产等量买卖对消-估值-风险-
+  恢复六链测试—— `Makefile` 新增 `etr` 目标（--dual-asset-equal-trade-vr-restore-test
+  + Rust --app-smoke 127/127 + Elixir --sk-etr 5/5 六链对账，.PHONY 同步）；
+  `.github/workflows/ci.yml` 新增「ΣLang dual-asset-equal-trade-vr-restore
+  reconciliation」步骤（六链对账进 CI，在十道门禁前）——双资产等量买卖对消链
+  估值/风险/现金/资产/恢复六链一致性被 CI 守护；--dual-asset-equal-trade-vr-restore-test
+  5/5、--app-smoke 127/127、Elixir 六链 5/5、自检 15/15、冒烟 36/36 全绿；
+  consensus 56/56、p0 109/109，v0.10–v0.478 不回归。
+- ✅ **REACHED v0.480 (2026-08-07)**: 批次 35 收尾（数字同步 + 全量验收）——
+  v0.471–v0.480 十个连续小阶段收官：数字一致性检查通过（consensus 56/56、
+  prove 330 PROVED、--domains 90/90 在门禁与代码各处一致），全量验收全绿
+  （sigma-accept 十道门禁 10/10、dual-asset-equal-trade-vr-restore-test 5/5、
+  full-business-six-link-test 6/6、dual-item-equal-trade-fillrate-test 4/4、
+  dual-asset-equal-trade-vr-test 4/4、accept-withdraw-credit-contribution-badge-test
+  5/5、dual-item-equal-trade-test 3/3、dual-asset-equal-trade-test 4/4、
+  accept-withdraw-credit-badge-test 4/4、full-business-five-link-test 5/5、
+  dual-item-four-link-test 4/4、dual-asset-vr-test 4/4、withdraw-credit-test 3/3、
+  receive-ship-fillrate-test 3/3、dual-asset-test 4/4、accept-points-credit-test
+  3/3、stock-fillrate-test 3/3、valuation-risk-test 3/3、task-points-quota-test
+  3/3、points-quota-test 2/2、credit-badge-test 3/3、portfolio-flow-test 5/5、
+  inventory-flow-test 4/4、badge-test 2/2、quota-flow-test 2/2、
+  contribution-test 2/2、audit-test 6/6、full-test 5/5、credit-test 3/3、
+  inventory-chain-test 5/5、points-test 3/3、errors-test 7/7、cross-domain-test
+  5/5、portfolio-test 5/5、inventory-test 5/5、stats-test 5/5、自检 15/15、
+  Elixir 双资产等量买卖对消-估值-风险-恢复六链 5/5）——批次 35（348/496 小阶段）
+  达成，按规则同步仓库；consensus 56/56、p0 109/109，v0.10–v0.479 不回归。
 - ⏳ **待办队列（avatar_loop 目标来源，一天一个）**:
   1. ⏸️ P3 — Lang-Zone backend integration（§6.1，**DEFERRED**：LZ 尚在原型期，待自举稳定后再融入）。
-  2. （无）— v0.470 达成（小阶段 338/496），批次 34 收官 → 同步仓库 → 批次 35（v0.471+）。
+  2. （无）— v0.480 达成（小阶段 348/496），批次 35 收官 → 同步仓库 → 批次 36（v0.481+）。
 
 ---
 
