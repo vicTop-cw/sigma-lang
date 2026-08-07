@@ -1225,6 +1225,18 @@ def run_invariant_checks(core):
          "ok": inv15 == [10, 20] and v15in == 30, "note": f"inv={inv15} total={v15in}"},
     ])
 
+    # §SK 全业务链八链守恒 (v0.523, INV-SK-22)
+    p22 = core.points_withdraw(core.points_release(core.points_hold(core.points_new(), 100), 100), 40)
+    c22 = core.credit_score([[0, 1]])
+    v22 = core.contribution_score([[3, 1, 10]])
+    b22 = core.badge_level(c22)
+    q22 = core.quota_use(core.quota_new(50), 1)
+    record("INV-SK-22", "invariant", ["quota_use(1)→hold(100)→release(100)→withdraw(40)×credit/contribution/badge"], p22, [
+        {"law": "全业务链八链守恒 — 任务数=1 且兑现=40 且配额 remaining=49 ≥0 且 escrow=0 且 available=60 ≥0 且契分=105 且贡献分=10 且勋章=1（<300 档位）",
+         "ok": p22 == [0, 60] and c22 == 105 and v22 == 10 and b22 == 1 and q22[1] == 49,
+         "note": f"p={p22} c={c22} v={v22} b={b22} q={q22}"},
+    ])
+
     return events
 
 
