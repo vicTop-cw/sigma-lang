@@ -381,6 +381,14 @@
     </div>
   </section>
 
+  <section id="eifr-panel">
+    <h2>双货品对消-水位-履约-恢复演示（v0.486，六链）</h2>
+    <div class="row">
+      <button onclick="eifrChain()">跑六链</button>
+      <span id="eifr-out" class="muted"></span>
+    </div>
+  </section>
+
   <section id="pf-panel">
     <h2>金融市场（§PF，v0.148）</h2>
     <div class="row">
@@ -1048,6 +1056,19 @@ async function etrChain() {
   const jr = await api(`/portfolio_risk?pf=${encodeURIComponent(JSON.stringify(pf))}`, "etr_risk");
   document.getElementById("etr-out").textContent =
     `六链: 现金 ${pf[0]}（恢复 100）· qA ${pf[1]}（0）· qB ${pf[2]}（0）· 估值 ${jv.value}（总额守恒/恢复初始）· 风险 ${jr.risk}（≤ 估值）`;
+}
+
+// v0.486 — 双货品等量入出对消-水位-履约-恢复六链演示（与 --dual-item-equal-trade-fillrate-restore-test / INV-IN-14 语义对应）
+async function eifrChain() {
+  await api("/inventory_new?qty_a=10&qty_b=20", "eifr_new");
+  let inv = (await api("/receive_stock?inv=[10,20]&item=0&qty=5", "eifr_receive0")).inventory;
+  inv = (await api(`/receive_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=1&qty=6`, "eifr_receive1")).inventory;
+  inv = (await api(`/ship_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=0&qty=5`, "eifr_ship0")).inventory;
+  inv = (await api(`/ship_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=1&qty=6`, "eifr_ship1")).inventory;
+  const jf0 = await api("/fill_rate?shipped=5&demanded=5", "eifr_fr0");
+  const jf1 = await api("/fill_rate?shipped=6&demanded=6", "eifr_fr1");
+  document.getElementById("eifr-out").textContent =
+    `六链: item0 ${inv[0]}（恢复 10）· item1 ${inv[1]}（恢复 20）· 总量 ${inv[0] + inv[1]}（守恒/恢复初始 30）· 履约率 ${jf0.rate}/${jf1.rate}（≤ 1）`;
 }
 
 // v0.148 — 金融市场（§PF）

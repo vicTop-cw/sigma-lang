@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "330 PROVED", "scenario": "16/16"}})
+                          "prove": "334 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "330 PROVED");
+           && r["gates"]["prove"] == "334 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1417,6 +1417,27 @@ pub fn run_smoke() -> (usize, usize) {
     check!("HTTP /etr_chain value", ve3 == 100);
     check!("HTTP /etr_chain risk", ve3 >= re3);
     check!("HTTP /etr_chain restore", ve3 == 100);
+
+    // 47. 双货品等量入出对消-水位-履约-恢复六链对账 (v0.487) — receive(0,5)→
+    //     receive(1,6)→ship(0,5)→ship(1,6) 后库存完全恢复、总量守恒、履约率
+    //     ≤ 1 且对消后总量=初始（与 Python
+    //     --dual-item-equal-trade-fillrate-restore-test 对应，INV-IN-14 语义）
+    let _ = http_get(port, "/inventory_new?qty_a=10&qty_b=20");
+    let inv14 = http_get(port, "/receive_stock?inv=[10,20]&item=0&qty=5")["inventory"].clone();
+    let inv14b = http_get(port, &format!("/receive_stock?inv={}&item=1&qty=6",
+        serde_json::to_string(&inv14).unwrap_or_default()))["inventory"].clone();
+    let inv14c = http_get(port, &format!("/ship_stock?inv={}&item=0&qty=5",
+        serde_json::to_string(&inv14b).unwrap_or_default()))["inventory"].clone();
+    let inv14d = http_get(port, &format!("/ship_stock?inv={}&item=1&qty=6",
+        serde_json::to_string(&inv14c).unwrap_or_default()))["inventory"].clone();
+    let fr0_14 = http_get(port, "/fill_rate?shipped=5&demanded=5")["rate"].as_f64().unwrap_or(-1.0);
+    let fr1_14 = http_get(port, "/fill_rate?shipped=6&demanded=6")["rate"].as_f64().unwrap_or(-1.0);
+    let it0_14 = inv14d[0].as_i64().unwrap_or(-1);
+    let it1_14 = inv14d[1].as_i64().unwrap_or(-1);
+    check!("HTTP /eifr_chain restored", it0_14 == 10 && it1_14 == 20);
+    check!("HTTP /eifr_chain total", it0_14 + it1_14 == 30);
+    check!("HTTP /eifr_chain fillrate", (0.0..=1.0).contains(&fr0_14) && (0.0..=1.0).contains(&fr1_14));
+    check!("HTTP /eifr_chain restore", it0_14 + it1_14 == 30);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");
