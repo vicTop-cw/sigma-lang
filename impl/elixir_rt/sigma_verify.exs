@@ -2802,6 +2802,41 @@ defmodule SigmaVerify do
     {length(checks) - length(failed), length(checks)}
   end
 
+  def sk_dual_asset_equal_trade_vr_restore_cycle_story do
+    # §PF 双资产等量买卖对消-估值-风险-恢复-对消循环七链 (v0.508) — buy asset0 q1
+    # → buy asset1 q2 → sell asset0 q1 → sell asset1 q2 两轮（对消循环），买卖等量
+    # 后现金/资产完全恢复（cash=初始、qA=0、qB=0），估值守恒、估值 ≥ 风险、对消后
+    # 估值=初始（恢复）且对消可重复（循环估值=初始）（与
+    # --dual-asset-equal-trade-vr-restore-cycle-test / INV-PF-15 对应）
+    {:ok, pf0} = portfolio_new(100)
+    {:ok, pf1} = buy(pf0, 0, 30)
+    {:ok, pf2} = buy(pf1, 1, 20)
+    {:ok, pf3} = sell(pf2, 0, 30)
+    {:ok, pf4} = sell(pf3, 1, 20)
+    # 对消循环：再跑一轮等量买卖
+    {:ok, pf5} = buy(pf4, 0, 30)
+    {:ok, pf6} = buy(pf5, 1, 20)
+    {:ok, pf7} = sell(pf6, 0, 30)
+    {:ok, pf8} = sell(pf7, 1, 20)
+    {:ok, v} = portfolio_value(pf8)
+    {:ok, r} = risk_score(pf8)
+    cash = Enum.at(pf8, 0)
+    qa = Enum.at(pf8, 1)
+    qb = Enum.at(pf8, 2)
+    checks = [
+      {"etrc_cash_restored", cash == 100},
+      {"etrc_qa_qb_zero", qa == 0 and qb == 0},
+      {"etrc_value_conserved", v == 100},
+      {"etrc_value_ge_risk", v >= r},
+      {"etrc_restore_initial", v == 100},
+      {"etrc_cycle_repeat", v == 100}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ ETRC.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
+
   def sk_dual_item_equal_trade_fillrate_restore_story do
     # §IN 双货品等量入出对消-水位-履约-恢复六链 (v0.488) — receive item0 q1 →
     # receive item1 q2 → ship item0 q1 → ship item1 q2，入出等量后库存完全恢复
@@ -3013,6 +3048,11 @@ case System.argv() do
   ["--sk-etr" | _] ->
     {passed, total} = SigmaVerify.sk_dual_asset_equal_trade_vr_restore_story()
     IO.puts("sigma_core dual-asset-equal-trade-vr-restore story (双资产等量买卖对消-估值-风险-恢复六链): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-etrc" | _] ->
+    {passed, total} = SigmaVerify.sk_dual_asset_equal_trade_vr_restore_cycle_story()
+    IO.puts("sigma_core dual-asset-equal-trade-vr-restore-cycle story (双资产等量买卖对消-估值-风险-恢复-对消循环七链): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   ["--sk-eifr" | _] ->
