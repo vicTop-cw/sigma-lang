@@ -1129,6 +1129,14 @@ def run_invariant_checks(core):
          "ok": pf12 == [100, 0, 0] and v12 == 100, "note": f"pf={pf12} v={v12}"},
     ])
 
+    # §IN 双货品等量入出对消链 (v0.423, INV-IN-12)
+    inv12 = core.ship_stock(core.ship_stock(core.receive_stock(core.receive_stock([10, 20], 0, 5), 1, 6), 0, 5), 1, 6)
+    v12in = inv12[0] + inv12[1]
+    record("INV-IN-12", "invariant", ["receive(0,5)→receive(1,6)→ship(0,5)→ship(1,6)"], inv12, [
+        {"law": "双货品等量入出对消链 — 入出等量后 item0=10、item1=20（完全恢复初始状态），总量=30 守恒",
+         "ok": inv12 == [10, 20] and v12in == 30, "note": f"inv={inv12} total={v12in}"},
+    ])
+
     return events
 
 

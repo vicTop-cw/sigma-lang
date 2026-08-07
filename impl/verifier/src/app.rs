@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "306 PROVED", "scenario": "16/16"}})
+                          "prove": "310 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "306 PROVED");
+           && r["gates"]["prove"] == "310 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1281,6 +1281,22 @@ pub fn run_smoke() -> (usize, usize) {
     let qb_e = pfe[2].as_i64().unwrap_or(-1);
     check!("HTTP /et_chain restored", ce == 100 && qa_e == 0 && qb_e == 0);
     check!("HTTP /et_chain value", ve == 100);
+
+    // 41. 双货品等量入出对消链对账 (v0.427) — receive(0,5)→receive(1,6)→
+    //     ship(0,5)→ship(1,6) 后库存完全恢复、总量守恒（与 Python
+    //     --dual-item-equal-trade-test 对应，INV-IN-12 语义）
+    let _ = http_get(port, "/inventory_new?qty_a=10&qty_b=20");
+    let inv12 = http_get(port, "/receive_stock?inv=[10,20]&item=0&qty=5")["inventory"].clone();
+    let inv12b = http_get(port, &format!("/receive_stock?inv={}&item=1&qty=6",
+        serde_json::to_string(&inv12).unwrap_or_default()))["inventory"].clone();
+    let inv12c = http_get(port, &format!("/ship_stock?inv={}&item=0&qty=5",
+        serde_json::to_string(&inv12b).unwrap_or_default()))["inventory"].clone();
+    let inv12d = http_get(port, &format!("/ship_stock?inv={}&item=1&qty=6",
+        serde_json::to_string(&inv12c).unwrap_or_default()))["inventory"].clone();
+    let it0_12 = inv12d[0].as_i64().unwrap_or(-1);
+    let it1_12 = inv12d[1].as_i64().unwrap_or(-1);
+    check!("HTTP /eit_chain restored", it0_12 == 10 && it1_12 == 20);
+    check!("HTTP /eit_chain total", it0_12 + it1_12 == 30);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

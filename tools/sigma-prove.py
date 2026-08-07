@@ -707,6 +707,15 @@ def gen_inventory_invariants(ops):
              "(assert (= (index inv2 0) (- (index inv 0) q3))) (assert (= (index inv2 1) (- (index inv 1) q4)))\n"
              "; INV-IN-11 (v0.383): 双货品入库-出库-水位-履约四链联动 — item0=a+q1−q3 ≥0 且 item1=b+q2−q4 ≥0 且 q3 ≤ q1、q4 ≤ q2（履约率 ≤ 1）\n"
              "(assert (not (and (>= (index inv2 0) 0) (>= (index inv2 1) 0) (<= q3 q1) (<= q4 q2))))\n(check-sat)\n")
+    inv12 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+             "(declare-const a Int) (declare-const b Int)\n"
+             "(declare-const q1 Int) (declare-const q2 Int)\n"
+             "(declare-const inv2 Int)\n"
+             "(assert (>= a 0)) (assert (>= b 0)) (assert (>= q1 0)) (assert (>= q2 0))\n"
+             "; receive item0 q1 → receive item1 q2 → ship item0 q1 → ship item1 q2: 双货品等量入出对消链\n"
+             "(assert (= (index inv2 0) a)) (assert (= (index inv2 1) b))\n"
+             "; INV-IN-12 (v0.421): 双货品等量入出对消链 — 入出等量后 item0=a 且 item1=b（完全恢复初始状态）\n"
+             "(assert (not (and (= (index inv2 0) a) (= (index inv2 1) b))))\n(check-sat)\n")
     return [("INV-IN-1 total-conserved", inv1),
             ("INV-IN-2 no-negative-chain", inv2),
             ("INV-IN-3 receive-additive-chain", inv3),
@@ -717,7 +726,8 @@ def gen_inventory_invariants(ops):
             ("INV-IN-8 mixed-ship-link", inv8),
             ("INV-IN-9 stock-fillrate-link", inv9),
             ("INV-IN-10 receive-ship-fillrate-chain", inv10),
-            ("INV-IN-11 dual-item-four-link", inv11)]
+            ("INV-IN-11 dual-item-four-link", inv11),
+            ("INV-IN-12 dual-item-equal-trade-offset", inv12)]
 
 
 def gen_portfolio_invariants(ops):

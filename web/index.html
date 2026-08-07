@@ -333,6 +333,14 @@
     </div>
   </section>
 
+  <section id="eit-panel">
+    <h2>双货品等量入出对消链演示（v0.426，供应链）</h2>
+    <div class="row">
+      <button onclick="eitChain()">跑对消链</button>
+      <span id="eit-out" class="muted"></span>
+    </div>
+  </section>
+
   <section id="pf-panel">
     <h2>金融市场（§PF，v0.148）</h2>
     <div class="row">
@@ -917,6 +925,17 @@ async function etChain() {
   const jv = await api(`/portfolio_value?pf=${encodeURIComponent(JSON.stringify(pf))}`, "et_value");
   document.getElementById("et-out").textContent =
     `对消后: 现金 ${pf[0]}（恢复 100）· qA ${pf[1]}（0）· qB ${pf[2]}（0）· 估值 ${jv.value}（总额守恒）`;
+}
+
+// v0.426 — 双货品等量入出对消链演示（与 --dual-item-equal-trade-test / INV-IN-12 语义对应）
+async function eitChain() {
+  await api("/inventory_new?qty_a=10&qty_b=20", "eit_new");
+  let inv = (await api("/receive_stock?inv=[10,20]&item=0&qty=5", "eit_receive0")).inventory;
+  inv = (await api(`/receive_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=1&qty=6`, "eit_receive1")).inventory;
+  inv = (await api(`/ship_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=0&qty=5`, "eit_ship0")).inventory;
+  inv = (await api(`/ship_stock?inv=${encodeURIComponent(JSON.stringify(inv))}&item=1&qty=6`, "eit_ship1")).inventory;
+  document.getElementById("eit-out").textContent =
+    `对消后: item0 ${inv[0]}（恢复 10）· item1 ${inv[1]}（恢复 20）· 总量 ${inv[0] + inv[1]}（守恒 30）`;
 }
 
 // v0.148 — 金融市场（§PF）
