@@ -149,6 +149,10 @@ jobs:
       - name: ΣLang accept-withdraw-credit-contribution-badge reconciliation (v0.439)
         run: python3 impl/python/sigma_app.py --accept-withdraw-credit-contribution-badge-test
 
+      # v0.449 — 双资产等量买卖对消-估值-风险五链对账进 CI（Python /dual-asset-equal-trade-vr-test）
+      - name: ΣLang dual-asset-equal-trade-vr reconciliation (v0.449)
+        run: python3 impl/python/sigma_app.py --dual-asset-equal-trade-vr-test
+
       # v0.56 — 九道门禁一键验收：consensus / p0 / 三端自检与编译 / 三域审计 /
       # 证明消解 / 找茬冒烟，一条命令在 CI 上全绿才算通过。
       # v0.87 — --report 输出全量回归报告（JSON），作为 CI artifact 保存。

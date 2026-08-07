@@ -873,6 +873,18 @@ def gen_portfolio_invariants(ops):
              "(assert (= (index p2 0) c)) (assert (= (index p2 1) s)) (assert (= (index p2 2) 0))\n"
              "; INV-PF-12 (v0.411): 双资产等量买卖对消链 — 买卖等量后 cash=c 且 qA=s 且 qB=0（完全恢复）\n"
              "(assert (not (and (= (index p2 0) c) (= (index p2 1) s) (= (index p2 2) 0))))\n(check-sat)\n")
+    inv13 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+             "(declare-const c Int) (declare-const s Int)\n"
+             "(declare-const q1 Int) (declare-const q2 Int)\n"
+             "(declare-const p2 Int)\n"
+             "(assert (>= c 0)) (assert (>= s 0)) (assert (>= q1 0)) (assert (>= q2 0))\n"
+             "(assert (<= (+ q1 q2) c))\n"
+             "; buy asset0 q1 → buy asset1 q2 → sell asset0 q1 → sell asset1 q2: 双资产等量买卖对消-估值-风险五链\n"
+             "(assert (= (index p2 0) c)) (assert (= (index p2 1) s)) (assert (= (index p2 2) 0))\n"
+             "; INV-PF-13 (v0.441): 双资产等量买卖对消-估值-风险五链 — cash=c 且 qA=s 且 qB=0 且估值=c+s 且估值 ≥ 风险\n"
+             "(assert (not (and (= (index p2 0) c) (= (index p2 1) s) (= (index p2 2) 0)\n"
+             "                 (= (+ (index p2 0) (index p2 1) (index p2 2)) (+ c s))\n"
+             "                 (>= (+ (index p2 0) (index p2 1) (index p2 2)) (+ (index p2 1) (index p2 2))))))\n(check-sat)\n")
     return [("INV-PF-1 cash-conserved", inv1),
             ("INV-PF-2 shares-conserved", inv2),
             ("INV-PF-3 nonnegative-chain", inv3),
@@ -884,7 +896,8 @@ def gen_portfolio_invariants(ops):
             ("INV-PF-9 valuation-risk-link", inv9),
             ("INV-PF-10 dual-asset-valuation-chain", inv10),
             ("INV-PF-11 dual-asset-valuation-risk-chain", inv11),
-            ("INV-PF-12 dual-asset-equal-trade-offset", inv12)]
+            ("INV-PF-12 dual-asset-equal-trade-offset", inv12),
+            ("INV-PF-13 dual-asset-equal-trade-vr-five-link", inv13)]
 
 
 def gen_socketkit_invariants(ops):
