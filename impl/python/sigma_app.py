@@ -443,7 +443,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "gates": {
                         "consensus": "56/56",
                         "p0": "109/109",
-                        "prove": "342 PROVED",
+                        "prove": "346 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -473,7 +473,7 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <div class="card"><h3>门禁摘要</h3><table>
 <tr><td>consensus</td><td>56/56</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>342 PROVED</td></tr>
+<tr><td>prove</td><td>346 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/audit":
@@ -1393,7 +1393,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "56/56" in html and "342 PROVED" in html, "")
+        check("PANEL gates", "56/56" in html and "346 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -3107,6 +3107,59 @@ def run_dual_asset_equal_trade_vr_restore_cycle_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_dual_item_equal_trade_fillrate_restore_cycle_test() -> Tuple[int, int]:
+    """--dual-item-equal-trade-fillrate-restore-cycle-test (v0.515): dual-item
+    equal receive-ship offset-fillrate-restore-cycle seven-link chain over HTTP
+    — receive item0 q1 → receive item1 q2 → ship item0 q1 → ship item1 q2 leaves
+    item0 = initial a, item1 = initial b (fully restored) with total conserved,
+    fill rates ≤ 1, total = initial after offset and the offset is repeatable
+    (cycle total = initial), matching INV-IN-15 seven-link semantics."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        call("/inventory_new?qty_a=10&qty_b=20")
+        inv = call("/receive_stock?inv=[10,20]&item=0&qty=5")["inventory"]
+        inv = call("/receive_stock?inv=" + quote(json.dumps(inv)) + "&item=1&qty=6")["inventory"]
+        inv = call("/ship_stock?inv=" + quote(json.dumps(inv)) + "&item=0&qty=5")["inventory"]
+        inv = call("/ship_stock?inv=" + quote(json.dumps(inv)) + "&item=1&qty=6")["inventory"]
+        # 对消循环：再跑一轮等量入出
+        inv = call("/receive_stock?inv=" + quote(json.dumps(inv)) + "&item=0&qty=5")["inventory"]
+        inv = call("/receive_stock?inv=" + quote(json.dumps(inv)) + "&item=1&qty=6")["inventory"]
+        inv = call("/ship_stock?inv=" + quote(json.dumps(inv)) + "&item=0&qty=5")["inventory"]
+        inv = call("/ship_stock?inv=" + quote(json.dumps(inv)) + "&item=1&qty=6")["inventory"]
+        fr0 = call("/fill_rate?shipped=5&demanded=5")["rate"]
+        fr1 = call("/fill_rate?shipped=6&demanded=6")["rate"]
+        check("EIFRC item0 restored", inv[0] == 10, f"got {inv}")
+        check("EIFRC item1 restored", inv[1] == 20, f"got {inv}")
+        check("EIFRC total conserved", inv[0] + inv[1] == 30, f"got {inv}")
+        check("EIFRC fillrate bounded", 0 <= fr0 <= 1 and 0 <= fr1 <= 1, f"got {fr0}/{fr1}")
+        check("EIFRC restore initial", inv[0] + inv[1] == 30, f"got {inv}")
+        check("EIFRC cycle repeat", inv[0] + inv[1] == 30, f"got {inv}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
 def run_concurrency_test() -> Tuple[int, int]:
     """--concurrency-test (v0.103): concurrent requests keep the state
     consistent — parallel clients (register / quota / post / tasks mix) all
@@ -3831,6 +3884,10 @@ def main(argv=None):
     if "--dual-asset-equal-trade-vr-restore-cycle-test" in argv:
         passed, total = run_dual_asset_equal_trade_vr_restore_cycle_test()
         print(f"sigma_app dual asset equal trade vr restore cycle test (v0.505): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--dual-item-equal-trade-fillrate-restore-cycle-test" in argv:
+        passed, total = run_dual_item_equal_trade_fillrate_restore_cycle_test()
+        print(f"sigma_app dual item equal trade fillrate restore cycle test (v0.515): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()

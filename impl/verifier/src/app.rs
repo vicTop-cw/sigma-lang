@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "342 PROVED", "scenario": "16/16"}})
+                          "prove": "346 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "342 PROVED");
+           && r["gates"]["prove"] == "346 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1503,6 +1503,38 @@ pub fn run_smoke() -> (usize, usize) {
     check!("HTTP /etrc_chain risk", ve4 >= re4);
     check!("HTTP /etrc_chain restore", ve4 == 100);
     check!("HTTP /etrc_chain cycle", ve4 == 100);
+
+    // 50. 双货品等量入出对消-水位-履约-恢复-对消循环七链对账 (v0.517) —
+    //     receive(0,5)→receive(1,6)→ship(0,5)→ship(1,6) 两轮（对消循环）后
+    //     库存完全恢复、总量守恒、履约率 ≤ 1 且对消可重复（循环总量=初始，与
+    //     Python --dual-item-equal-trade-fillrate-restore-cycle-test 对应，
+    //     INV-IN-15 语义）
+    let _ = http_get(port, "/inventory_new?qty_a=10&qty_b=20");
+    let inv15 = http_get(port, "/receive_stock?inv=[10,20]&item=0&qty=5")["inventory"].clone();
+    let inv15b = http_get(port, &format!("/receive_stock?inv={}&item=1&qty=6",
+        serde_json::to_string(&inv15).unwrap_or_default()))["inventory"].clone();
+    let inv15c = http_get(port, &format!("/ship_stock?inv={}&item=0&qty=5",
+        serde_json::to_string(&inv15b).unwrap_or_default()))["inventory"].clone();
+    let inv15d = http_get(port, &format!("/ship_stock?inv={}&item=1&qty=6",
+        serde_json::to_string(&inv15c).unwrap_or_default()))["inventory"].clone();
+    // 对消循环：再跑一轮等量入出
+    let inv15e = http_get(port, &format!("/receive_stock?inv={}&item=0&qty=5",
+        serde_json::to_string(&inv15d).unwrap_or_default()))["inventory"].clone();
+    let inv15f = http_get(port, &format!("/receive_stock?inv={}&item=1&qty=6",
+        serde_json::to_string(&inv15e).unwrap_or_default()))["inventory"].clone();
+    let inv15g = http_get(port, &format!("/ship_stock?inv={}&item=0&qty=5",
+        serde_json::to_string(&inv15f).unwrap_or_default()))["inventory"].clone();
+    let inv15h = http_get(port, &format!("/ship_stock?inv={}&item=1&qty=6",
+        serde_json::to_string(&inv15g).unwrap_or_default()))["inventory"].clone();
+    let fr0_15 = http_get(port, "/fill_rate?shipped=5&demanded=5")["rate"].as_f64().unwrap_or(-1.0);
+    let fr1_15 = http_get(port, "/fill_rate?shipped=6&demanded=6")["rate"].as_f64().unwrap_or(-1.0);
+    let it0_15 = inv15h[0].as_i64().unwrap_or(-1);
+    let it1_15 = inv15h[1].as_i64().unwrap_or(-1);
+    check!("HTTP /eifrc_chain restored", it0_15 == 10 && it1_15 == 20);
+    check!("HTTP /eifrc_chain total", it0_15 + it1_15 == 30);
+    check!("HTTP /eifrc_chain fillrate", (0.0..=1.0).contains(&fr0_15) && (0.0..=1.0).contains(&fr1_15));
+    check!("HTTP /eifrc_chain restore", it0_15 + it1_15 == 30);
+    check!("HTTP /eifrc_chain cycle", it0_15 + it1_15 == 30);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

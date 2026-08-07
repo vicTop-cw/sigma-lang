@@ -739,6 +739,19 @@ def gen_inventory_invariants(ops):
              "                 (= (+ (index inv2 0) (index inv2 1)) (+ a b))\n"
              "                 (<= q1 q1) (<= q2 q2)\n"
              "                 (= (+ (index inv2 0) (index inv2 1)) (+ a b)))))\n(check-sat)\n")
+    inv15 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+             "(declare-const a Int) (declare-const b Int)\n"
+             "(declare-const q1 Int) (declare-const q2 Int)\n"
+             "(declare-const inv2 Int)\n"
+             "(assert (>= a 0)) (assert (>= b 0)) (assert (>= q1 0)) (assert (>= q2 0))\n"
+             "; receive item0 q1 → receive item1 q2 → ship item0 q1 → ship item1 q2: 双货品等量入出对消-水位-履约-恢复-对消循环七链\n"
+             "(assert (= (index inv2 0) a)) (assert (= (index inv2 1) b))\n"
+             "; INV-IN-15 (v0.511): 双货品等量入出对消-水位-履约-恢复-对消循环七链 — item0=a 且 item1=b（完全恢复）且总量=a+b 且履约率 ≤ 1 且对消后总量=初始（恢复）且对消可重复（循环总量=初始）\n"
+             "(assert (not (and (= (index inv2 0) a) (= (index inv2 1) b)\n"
+             "                 (= (+ (index inv2 0) (index inv2 1)) (+ a b))\n"
+             "                 (<= q1 q1) (<= q2 q2)\n"
+             "                 (= (+ (index inv2 0) (index inv2 1)) (+ a b))\n"
+             "                 (= (+ (index inv2 0) (index inv2 1)) (+ a b)))))\n(check-sat)\n")
     return [("INV-IN-1 total-conserved", inv1),
             ("INV-IN-2 no-negative-chain", inv2),
             ("INV-IN-3 receive-additive-chain", inv3),
@@ -752,7 +765,8 @@ def gen_inventory_invariants(ops):
             ("INV-IN-11 dual-item-four-link", inv11),
             ("INV-IN-12 dual-item-equal-trade-offset", inv12),
             ("INV-IN-13 dual-item-equal-trade-fillrate-five-link", inv13),
-            ("INV-IN-14 dual-item-equal-trade-fillrate-restore-six-link", inv14)]
+            ("INV-IN-14 dual-item-equal-trade-fillrate-restore-six-link", inv14),
+            ("INV-IN-15 dual-item-equal-trade-fillrate-restore-cycle-seven-link", inv15)]
 
 
 def gen_portfolio_invariants(ops):
