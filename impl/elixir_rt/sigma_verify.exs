@@ -2694,6 +2694,32 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ ETV.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_dual_item_equal_trade_fillrate_story do
+    # §IN 双货品等量入出对消-水位-履约五链 (v0.458) — receive item0 q1 →
+    # receive item1 q2 → ship item0 q1 → ship item1 q2，入出等量后库存完全恢复
+    # （item0=初始 a、item1=初始 b），总量守恒且履约率 ≤ 1（与
+    # --dual-item-equal-trade-fillrate-test / INV-IN-13 对应）
+    {:ok, inv0} = inventory_new(10, 20)
+    {:ok, inv1} = receive_stock(inv0, 0, 5)
+    {:ok, inv2} = receive_stock(inv1, 1, 6)
+    {:ok, inv3} = ship_stock(inv2, 0, 5)
+    {:ok, inv4} = ship_stock(inv3, 1, 6)
+    it0 = Enum.at(inv4, 0)
+    it1 = Enum.at(inv4, 1)
+    {:ok, fr0} = fill_rate(5, 5)
+    {:ok, fr1} = fill_rate(6, 6)
+    checks = [
+      {"eif_item0_restored", it0 == 10},
+      {"eif_item1_restored", it1 == 20},
+      {"eif_total_conserved", it0 + it1 == 30},
+      {"eif_fillrate_bounded", fr0 <= 1.0 and fr0 >= 0.0 and fr1 <= 1.0 and fr1 >= 0.0}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ EIF.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2859,6 +2885,11 @@ case System.argv() do
   ["--sk-eit" | _] ->
     {passed, total} = SigmaVerify.sk_dual_item_equal_trade_story()
     IO.puts("sigma_core dual-item-equal-trade story (双货品等量入出对消链): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-eif" | _] ->
+    {passed, total} = SigmaVerify.sk_dual_item_equal_trade_fillrate_story()
+    IO.puts("sigma_core dual-item-equal-trade-fillrate story (双货品等量入出对消-水位-履约五链): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   ["--sk-awccb" | _] ->

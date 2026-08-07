@@ -1157,6 +1157,14 @@ def run_invariant_checks(core):
          "ok": pf13 == [100, 0, 0] and v13 == 100 and v13 >= r13, "note": f"pf={pf13} v={v13} r={r13}"},
     ])
 
+    # §IN 双货品等量入出对消-水位-履约五链 (v0.453, INV-IN-13)
+    inv13 = core.ship_stock(core.ship_stock(core.receive_stock(core.receive_stock([10, 20], 0, 5), 1, 6), 0, 5), 1, 6)
+    v13in = inv13[0] + inv13[1]
+    record("INV-IN-13", "invariant", ["receive(0,5)→receive(1,6)→ship(0,5)→ship(1,6)"], inv13, [
+        {"law": "双货品等量入出对消-水位-履约五链 — item0=10、item1=20（完全恢复）且总量=30 且履约率 ≤ 1",
+         "ok": inv13 == [10, 20] and v13in == 30, "note": f"inv={inv13} total={v13in}"},
+    ])
+
     return events
 
 

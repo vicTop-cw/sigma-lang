@@ -153,6 +153,10 @@ jobs:
       - name: ΣLang dual-asset-equal-trade-vr reconciliation (v0.449)
         run: python3 impl/python/sigma_app.py --dual-asset-equal-trade-vr-test
 
+      # v0.459 — 双货品等量入出对消-水位-履约五链对账进 CI（Python /dual-item-equal-trade-fillrate-test）
+      - name: ΣLang dual-item-equal-trade-fillrate reconciliation (v0.459)
+        run: python3 impl/python/sigma_app.py --dual-item-equal-trade-fillrate-test
+
       # v0.56 — 九道门禁一键验收：consensus / p0 / 三端自检与编译 / 三域审计 /
       # 证明消解 / 找茬冒烟，一条命令在 CI 上全绿才算通过。
       # v0.87 — --report 输出全量回归报告（JSON），作为 CI artifact 保存。
