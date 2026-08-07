@@ -1121,6 +1121,14 @@ def run_invariant_checks(core):
          "ok": p18 == [0, 60] and c18 == 105 and b18 == 1, "note": f"p={p18} c={c18} b={b18}"},
     ])
 
+    # §PF 双资产等量买卖对消链 (v0.413, INV-PF-12)
+    pf12 = core.sell(core.sell(core.buy(core.buy(core.portfolio_new(100), 0, 30), 1, 20), 0, 30), 1, 20)
+    v12 = core.portfolio_value(pf12)
+    record("INV-PF-12", "invariant", ["buy(0,30)→buy(1,20)→sell(0,30)→sell(1,20)"], pf12, [
+        {"law": "双资产等量买卖对消链 — 买卖等量后 cash=100、qA=0、qB=0（完全恢复初始状态）",
+         "ok": pf12 == [100, 0, 0] and v12 == 100, "note": f"pf={pf12} v={v12}"},
+    ])
+
     return events
 
 

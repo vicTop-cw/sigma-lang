@@ -14,7 +14,7 @@
 
 PYTHON ?= python3
 
-.PHONY: accept check story prove rust elixir app stats portfolio inventory cross-domain errors points invchain credit full audit contribution quota badge invflow pfflow cb pq tpq vr sf apc da rsf wc dvr di awc ready deploy all
+.PHONY: accept check story prove rust elixir app stats portfolio inventory cross-domain errors points invchain credit full audit contribution quota badge invflow pfflow cb pq tpq vr sf apc da rsf wc dvr di awc et ready deploy all
 
 accept: ## 九道门禁一键验收（CI 与本地同一条命令）
 	$(PYTHON) tools/sigma-accept.py
@@ -176,6 +176,11 @@ awc: ## 验收-提现-契分-勋章四链对账（Python /accept-withdraw-credit
 	$(PYTHON) impl/python/sigma_app.py --accept-withdraw-credit-badge-test
 	cd impl/verifier && cargo run -q -- --app-smoke
 	cd impl/elixir_rt && elixir sigma_verify.exs --sk-awc
+
+et: ## 双资产等量买卖对消链对账（Python /dual-asset-equal-trade-test + Rust 104/104 + Elixir 双资产等量买卖对消链 4/4，v0.419）
+	$(PYTHON) impl/python/sigma_app.py --dual-asset-equal-trade-test
+	cd impl/verifier && cargo run -q -- --app-smoke
+	cd impl/elixir_rt && elixir sigma_verify.exs --sk-et
 
 ready: ## 生产就绪检查（--launch-ready 一次性确认环境，v0.121）
 	$(PYTHON) impl/python/sigma_app.py --launch-ready
