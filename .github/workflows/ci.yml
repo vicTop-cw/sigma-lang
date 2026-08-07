@@ -169,6 +169,10 @@ jobs:
       - name: ΣLang dual-item-equal-trade-fillrate-restore reconciliation (v0.489)
         run: python3 impl/python/sigma_app.py --dual-item-equal-trade-fillrate-restore-test
 
+      # v0.499 — 全业务链七链守恒对账进 CI（Python /full-business-seven-link-test）
+      - name: ΣLang full-business-seven-link reconciliation (v0.499)
+        run: python3 impl/python/sigma_app.py --full-business-seven-link-test
+
       # v0.56 — 九道门禁一键验收：consensus / p0 / 三端自检与编译 / 三域审计 /
       # 证明消解 / 找茬冒烟，一条命令在 CI 上全绿才算通过。
       # v0.87 — --report 输出全量回归报告（JSON），作为 CI artifact 保存。
