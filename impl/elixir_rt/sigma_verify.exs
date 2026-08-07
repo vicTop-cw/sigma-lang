@@ -2720,6 +2720,32 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ EIF.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_full_business_six_link_story do
+    # §SK 全业务链六链守恒 (v0.468) — 发单 n 次（配额 remaining=m−n、托管
+    # escrow=n×b）→ 验收 n 次（escrow 全释放）→ 提现 w（w ≤ n×b）→ 契分=100+5n
+    # → 贡献分=10n → 勋章按档位（与 --full-business-six-link-test / INV-SK-20
+    # 对应）
+    {:ok, q0} = quota_new(50)
+    {:ok, q1} = quota_use(q0, 1)
+    {:ok, p1} = points_release(points_hold(points_new(), 100), 100)
+    {:ok, p0} = points_withdraw(p1, 40)
+    c = credit_score([[0, 1]])
+    v = contribution_score([[3, 1, 10]])
+    b = badge_level(c)
+    checks = [
+      {"fbs_quota_remaining", Enum.at(q1, 1) == 49 and Enum.at(q1, 1) >= 0},
+      {"fbs_escrow_zero", Enum.at(p0, 0) == 0},
+      {"fbs_available_nonneg", Enum.at(p0, 1) == 60 and Enum.at(p0, 1) >= 0},
+      {"fbs_credit", c == 105},
+      {"fbs_contribution", v == 10},
+      {"fbs_badge", b == 1}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ FBS.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2890,6 +2916,11 @@ case System.argv() do
   ["--sk-eif" | _] ->
     {passed, total} = SigmaVerify.sk_dual_item_equal_trade_fillrate_story()
     IO.puts("sigma_core dual-item-equal-trade-fillrate story (双货品等量入出对消-水位-履约五链): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-fbs" | _] ->
+    {passed, total} = SigmaVerify.sk_full_business_six_link_story()
+    IO.puts("sigma_core full-business-six-link story (全业务链六链守恒): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   ["--sk-awccb" | _] ->

@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "322 PROVED", "scenario": "16/16"}})
+                          "prove": "326 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "322 PROVED");
+           && r["gates"]["prove"] == "326 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1365,6 +1365,33 @@ pub fn run_smoke() -> (usize, usize) {
     check!("HTTP /eif_chain restored", it0_13 == 10 && it1_13 == 20);
     check!("HTTP /eif_chain total", it0_13 + it1_13 == 30);
     check!("HTTP /eif_chain fillrate", (0.0..=1.0).contains(&fr0_13) && (0.0..=1.0).contains(&fr1_13));
+
+    // 45. 全业务链六链守恒对账 (v0.467) — 发单→验收→提现后：配额 remaining
+    //     ≥ 0、escrow=0、available ≥ 0、契分/贡献/勋章联动（与 Python
+    //     --full-business-six-link-test 对应，INV-SK-20 语义）
+    let escrow_before8 = http_get(port, "/stats")["platform_points"][0].as_i64().unwrap_or(0);
+    let avail_before8 = http_get(port, "/stats")["platform_points"][1].as_i64().unwrap_or(0);
+    let _ = http_get(port, "/post?author=7&bounty=100");
+    let tid20 = http_get(port, "/tasks")["tasks"].as_array()
+        .and_then(|a| a.last())
+        .map(|t| t["task_id"].as_u64().unwrap_or(0)).unwrap_or(0);
+    let _ = http_get(port, &format!("/claim?task={tid20}&hunter=3"));
+    let _ = http_get(port, &format!("/submit?task={tid20}"));
+    let r20 = http_get(port, &format!("/accept?task={tid20}&caller=7"));
+    let w20 = http_get(port, "/withdraw?user=3&amount=40");
+    let p20 = w20["points"].clone();
+    let q20 = http_get(port, "/me?user=7")["quota"][1].as_i64().unwrap_or(-1);
+    let b20 = http_get(port, "/badge?user=3")["badge"].as_i64().unwrap_or(0);
+    check!("HTTP /fbs_chain quota", q20 >= 0 && q20 <= 50);
+    check!("HTTP /fbs_chain escrow",
+           p20[0].as_i64().unwrap_or(-1) == escrow_before8);
+    check!("HTTP /fbs_chain available",
+           p20[1].as_i64().unwrap_or(-1) == avail_before8 + 60
+           && p20[1].as_i64().unwrap_or(-1) >= 0);
+    check!("HTTP /fbs_chain credit",
+           r20["credit"].as_i64().unwrap_or(0) >= 100 + 5);
+    check!("HTTP /fbs_chain contribution", r20["contribution"].as_i64().unwrap_or(0) >= 10);
+    check!("HTTP /fbs_chain badge", b20 >= 1);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");

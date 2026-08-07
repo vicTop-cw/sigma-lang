@@ -1105,6 +1105,19 @@ def gen_socketkit_invariants(ops):
              "; INV-SK-19 (v0.431): 验收-提现-契分-贡献-勋章五链守恒 — available=n×b−w ≥0 且 escrow=0 且契分=100+5n 且贡献分=10n 且勋章按档位\n"
              "(assert (not (and (>= (index p2 1) 0) (= (index p2 0) 0) (= c2 (+ 100 (* 5 n)))\n"
              "                 (= v2 (* 10 n)) (= b2 (ite (< c2 300) 1 2)))))\n(check-sat)\n")
+    inv20 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+             "(declare-const m Int) (declare-const n Int) (declare-const b Int) (declare-const w Int)\n"
+             "(declare-const q2 Int) (declare-const p2 Int) (declare-const c2 Int) (declare-const v2 Int) (declare-const b2 Int)\n"
+             "(assert (>= m 0)) (assert (>= n 0)) (assert (>= b 0)) (assert (>= w 0)) (assert (<= n m)) (assert (<= w (* n b)))\n"
+             "; 发单 n 次（配额 remaining=m−n、托管 escrow=n×b）→ 验收 n 次（escrow 全释放）→ 提现 w → 契分/贡献分/勋章联动\n"
+             "(assert (= (index q2 0) m)) (assert (= (index q2 1) (- m n)))\n"
+             "(assert (= (index p2 0) 0)) (assert (= (index p2 1) (- (* n b) w)))\n"
+             "(assert (= c2 (+ 100 (* 5 n))))\n"
+             "(assert (= v2 (* 10 n)))\n"
+             "(assert (= b2 (ite (< c2 300) 1 2)))\n"
+             "; INV-SK-20 (v0.461): 全业务链六链守恒 — 配额 remaining=m−n ≥0 且 escrow=0 且 available=n×b−w ≥0 且契分=100+5n 且贡献分=10n 且勋章按档位\n"
+             "(assert (not (and (>= (index q2 1) 0) (= (index p2 0) 0) (>= (index p2 1) 0)\n"
+             "                 (= c2 (+ 100 (* 5 n))) (= v2 (* 10 n)) (= b2 (ite (< c2 300) 1 2)))))\n(check-sat)\n")
     return [("INV-SK-1 bounty-conserved", inv1),
             ("INV-SK-2 no-over-withdraw", inv2),
             ("INV-SK-3 nonnegative-chain", inv3),
@@ -1123,7 +1136,8 @@ def gen_socketkit_invariants(ops):
             ("INV-SK-16 withdraw-credit-link", inv16),
             ("INV-SK-17 full-business-five-link", inv17),
             ("INV-SK-18 accept-withdraw-credit-badge-link", inv18),
-            ("INV-SK-19 accept-withdraw-credit-contribution-badge-link", inv19)]
+            ("INV-SK-19 accept-withdraw-credit-contribution-badge-link", inv19),
+            ("INV-SK-20 full-business-six-link", inv20)]
 
 
 def gen_quota_invariants(ops):
