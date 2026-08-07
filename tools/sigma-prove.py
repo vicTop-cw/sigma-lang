@@ -1036,6 +1036,17 @@ def gen_socketkit_invariants(ops):
              "; INV-SK-17 (v0.393): 全业务链五链守恒 — 配额 remaining=m−n ≥0 且 escrow=0 且 available=n×b−w ≥0 且契分=100+5n 且贡献分=10n\n"
              "(assert (not (and (>= (index q2 1) 0) (= (index p2 0) 0) (>= (index p2 1) 0)\n"
              "                 (= c2 (+ 100 (* 5 n))) (= v2 (* 10 n)))))\n(check-sat)\n")
+    inv18 = ("(set-logic NIA)\n(declare-fun index (Int Int) Int)\n"
+             "(declare-const n Int) (declare-const b Int) (declare-const w Int)\n"
+             "(declare-const p2 Int) (declare-const c2 Int) (declare-const b2 Int)\n"
+             "(assert (>= n 0)) (assert (>= b 0)) (assert (>= w 0)) (assert (<= w (* n b)))\n"
+             "; 验收 n 次（escrow 全释放入 available=n×b）→ 提现 w（w ≤ n×b）→ 契分=100+5n → 勋章按档位\n"
+             "(assert (= (index p2 0) 0)) (assert (= (index p2 1) (- (* n b) w)))\n"
+             "(assert (= c2 (+ 100 (* 5 n))))\n"
+             "(assert (= b2 (ite (< c2 300) 1 2)))\n"
+             "; INV-SK-18 (v0.401): 验收-提现-契分-勋章四链联动 — available=n×b−w ≥0 且 escrow=0 且契分=100+5n 且勋章按档位\n"
+             "(assert (not (and (>= (index p2 1) 0) (= (index p2 0) 0) (= c2 (+ 100 (* 5 n)))\n"
+             "                 (= b2 (ite (< c2 300) 1 2)))))\n(check-sat)\n")
     return [("INV-SK-1 bounty-conserved", inv1),
             ("INV-SK-2 no-over-withdraw", inv2),
             ("INV-SK-3 nonnegative-chain", inv3),
@@ -1052,7 +1063,8 @@ def gen_socketkit_invariants(ops):
             ("INV-SK-14 task-points-quota-link", inv14),
             ("INV-SK-15 accept-points-credit-link", inv15),
             ("INV-SK-16 withdraw-credit-link", inv16),
-            ("INV-SK-17 full-business-five-link", inv17)]
+            ("INV-SK-17 full-business-five-link", inv17),
+            ("INV-SK-18 accept-withdraw-credit-badge-link", inv18)]
 
 
 def gen_quota_invariants(ops):

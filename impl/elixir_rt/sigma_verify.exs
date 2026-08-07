@@ -2576,6 +2576,27 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ DI.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_accept_withdraw_credit_badge_story do
+    # §SK 验收-提现-契分-勋章四链联动 (v0.408) — 验收 n 次（escrow 全释放入
+    # available=n×b）后提现 w（w ≤ available），available=n×b−w ≥ 0 且
+    # escrow=0 且契分=100+5n 且勋章按档位（与 --accept-withdraw-credit-badge-test
+    # / INV-SK-18 对应）
+    {:ok, p1} = points_release(points_hold(points_new(), 100), 100)
+    {:ok, p0} = points_withdraw(p1, 40)
+    c = credit_score([[0, 1]])
+    b = badge_level(c)
+    checks = [
+      {"awc_available_nonneg", Enum.at(p0, 1) == 60 and Enum.at(p0, 1) >= 0},
+      {"awc_escrow_zero", Enum.at(p0, 0) == 0},
+      {"awc_credit", c == 105},
+      {"awc_badge", b == 1}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ AWC.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2721,6 +2742,11 @@ case System.argv() do
   ["--sk-di" | _] ->
     {passed, total} = SigmaVerify.sk_dual_item_four_link_story()
     IO.puts("sigma_core dual-item-four-link story (双货品四链联动): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-awc" | _] ->
+    {passed, total} = SigmaVerify.sk_accept_withdraw_credit_badge_story()
+    IO.puts("sigma_core accept-withdraw-credit-badge story (验收-提现-契分-勋章四链联动): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->
