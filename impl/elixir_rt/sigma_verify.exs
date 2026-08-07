@@ -2644,6 +2644,29 @@ defmodule SigmaVerify do
     Enum.each(failed, fn {name, _} -> IO.puts("  ❌ EIT.#{name}") end)
     {length(checks) - length(failed), length(checks)}
   end
+
+  def sk_awccb_story do
+    # §SK 验收-提现-契分-贡献-勋章五链守恒 (v0.438) — 验收 n 次（escrow 全释放
+    # 入 available=n×b）后提现 w（w ≤ available），available=n×b−w ≥ 0 且
+    # escrow=0 且契分=100+5n 且贡献分=10n 且勋章按档位（与
+    # --accept-withdraw-credit-contribution-badge-test / INV-SK-19 对应）
+    {:ok, p1} = points_release(points_hold(points_new(), 100), 100)
+    {:ok, p0} = points_withdraw(p1, 40)
+    c = credit_score([[0, 1]])
+    v = contribution_score([[3, 1, 10]])
+    b = badge_level(c)
+    checks = [
+      {"awccb_available_nonneg", Enum.at(p0, 1) == 60 and Enum.at(p0, 1) >= 0},
+      {"awccb_escrow_zero", Enum.at(p0, 0) == 0},
+      {"awccb_credit", c == 105},
+      {"awccb_contribution", v == 10},
+      {"awccb_badge", b == 1}
+    ]
+
+    failed = Enum.filter(checks, fn {_name, ok} -> not ok end)
+    Enum.each(failed, fn {name, _} -> IO.puts("  ❌ AWC2.#{name}") end)
+    {length(checks) - length(failed), length(checks)}
+  end
 end
 
 # ============================================================
@@ -2804,6 +2827,11 @@ case System.argv() do
   ["--sk-eit" | _] ->
     {passed, total} = SigmaVerify.sk_dual_item_equal_trade_story()
     IO.puts("sigma_core dual-item-equal-trade story (双货品等量入出对消链): #{passed}/#{total} passed")
+    System.halt(if passed == total, do: 0, else: 1)
+
+  ["--sk-awccb" | _] ->
+    {passed, total} = SigmaVerify.sk_awccb_story()
+    IO.puts("sigma_core accept-withdraw-credit-contribution-badge story (验收-提现-契分-贡献-勋章五链守恒): #{passed}/#{total} passed")
     System.halt(if passed == total, do: 0, else: 1)
 
   [path | _] ->

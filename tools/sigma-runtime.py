@@ -1137,6 +1137,17 @@ def run_invariant_checks(core):
          "ok": inv12 == [10, 20] and v12in == 30, "note": f"inv={inv12} total={v12in}"},
     ])
 
+    # §SK 验收-提现-契分-贡献-勋章五链守恒 (v0.433, INV-SK-19)
+    p19 = core.points_withdraw(core.points_release(core.points_hold(core.points_new(), 100), 100), 40)
+    c19 = core.credit_score([[0, 1]])
+    v19 = core.contribution_score([[3, 1, 10]])
+    b19 = core.badge_level(c19)
+    record("INV-SK-19", "invariant", ["hold(100)→release(100)→withdraw(40)×credit/contribution/badge"], p19, [
+        {"law": "验收-提现-契分-贡献-勋章五链守恒 — available=60 ≥0 且 escrow=0 且契分=105 且贡献分=10 且勋章=1（<300 档位）",
+         "ok": p19 == [0, 60] and c19 == 105 and v19 == 10 and b19 == 1,
+         "note": f"p={p19} c={c19} v={v19} b={b19}"},
+    ])
+
     return events
 
 

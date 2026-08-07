@@ -565,7 +565,7 @@ fn route(app: &mut MVPApp, path: &str, query: &str) -> (u16, String) {
                 "by_state": [by_state[0], by_state[1], by_state[2], by_state[3]],
                 "total_bounty": total_bounty,
                 "gates": {"consensus": "56/56", "p0": "109/109",
-                          "prove": "310 PROVED", "scenario": "16/16"}})
+                          "prove": "314 PROVED", "scenario": "16/16"}})
         }
         "/audit" => {
             // v0.229 — 审计轨迹（与 Python v0.227 对等：events 含 kind/input/output）
@@ -890,7 +890,7 @@ pub fn run_smoke() -> (usize, usize) {
     let r = http_get(port, "/panel");
     check!("HTTP /panel",
            r["users"] == 1 && r["tasks"] == 1
-           && r["gates"]["prove"] == "310 PROVED");
+           && r["gates"]["prove"] == "314 PROVED");
 
     // 12. 业务统计 (v0.139) — 与 Python /stats 对账
     let r = http_get(port, "/stats");
@@ -1297,6 +1297,31 @@ pub fn run_smoke() -> (usize, usize) {
     let it1_12 = inv12d[1].as_i64().unwrap_or(-1);
     check!("HTTP /eit_chain restored", it0_12 == 10 && it1_12 == 20);
     check!("HTTP /eit_chain total", it0_12 + it1_12 == 30);
+
+    // 42. 验收-提现-契分-贡献-勋章五链守恒对账 (v0.437) — 验收后提现 w：
+    //     available 增加 n×b−w ≥0、escrow 净不变、契分/贡献/勋章联动（与
+    //     Python --accept-withdraw-credit-contribution-badge-test 对应，INV-SK-19
+    //     语义）
+    let escrow_before7 = http_get(port, "/stats")["platform_points"][0].as_i64().unwrap_or(0);
+    let avail_before7 = http_get(port, "/stats")["platform_points"][1].as_i64().unwrap_or(0);
+    let _ = http_get(port, "/post?author=7&bounty=100");
+    let tid19 = http_get(port, "/tasks")["tasks"].as_array()
+        .and_then(|a| a.last())
+        .map(|t| t["task_id"].as_u64().unwrap_or(0)).unwrap_or(0);
+    let _ = http_get(port, &format!("/claim?task={tid19}&hunter=3"));
+    let _ = http_get(port, &format!("/submit?task={tid19}"));
+    let r19 = http_get(port, &format!("/accept?task={tid19}&caller=7"));
+    let w19 = http_get(port, "/withdraw?user=3&amount=40");
+    let p19 = w19["points"].clone();
+    let b19 = http_get(port, "/badge?user=3")["badge"].as_i64().unwrap_or(0);
+    check!("HTTP /awccb_chain available",
+           p19[1].as_i64().unwrap_or(-1) == avail_before7 + 60
+           && p19[1].as_i64().unwrap_or(-1) >= 0);
+    check!("HTTP /awccb_chain escrow", p19[0].as_i64().unwrap_or(-1) == escrow_before7);
+    check!("HTTP /awccb_chain credit",
+           r19["credit"].as_i64().unwrap_or(0) >= 100 + 5);
+    check!("HTTP /awccb_chain contribution", r19["contribution"].as_i64().unwrap_or(0) >= 10);
+    check!("HTTP /awccb_chain badge", b19 >= 1);
 
     // 10. 错误码语义化 (v0.54)  §SK/§IN 错误 → 语义化 4xx
     let (st, _) = http_get_status(port, "/ship_stock?inv=[15,20]&item=0&qty=99");
