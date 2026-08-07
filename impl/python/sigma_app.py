@@ -443,7 +443,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "gates": {
                         "consensus": "56/56",
                         "p0": "109/109",
-                        "prove": "294 PROVED",
+                        "prove": "298 PROVED",
                         "scenario": "16/16",
                     },
                 })
@@ -473,7 +473,7 @@ td,th{{padding:8px;border-bottom:1px solid #eceff1;text-align:left}}
 <div class="card"><h3>门禁摘要</h3><table>
 <tr><td>consensus</td><td>56/56</td></tr>
 <tr><td>p0</td><td>109/109</td></tr>
-<tr><td>prove</td><td>294 PROVED</td></tr>
+<tr><td>prove</td><td>298 PROVED</td></tr>
 <tr><td>scenario</td><td>16/16</td></tr></table></div>
 </body></html>""")
             if path == "/audit":
@@ -1393,7 +1393,7 @@ def run_panel_test() -> Tuple[int, int]:
         check("PANEL live users", "用户数" in html and ">1<" in html, "")
         check("PANEL live tasks", "任务数" in html and ">1<" in html, "")
         check("PANEL live bounty", "赏金总额" in html and ">100<" in html, "")
-        check("PANEL gates", "56/56" in html and "294 PROVED" in html, "")
+        check("PANEL gates", "56/56" in html and "298 PROVED" in html, "")
     finally:
         server.shutdown()
         thread.join()
@@ -2534,6 +2534,54 @@ def run_dual_item_four_link_test() -> Tuple[int, int]:
     return passed, total
 
 
+def run_full_business_five_link_test() -> Tuple[int, int]:
+    """--full-business-five-link-test (v0.397): full business five-link
+    conservation over HTTP — post n tasks (quota remaining=m−n, escrow=n×b) →
+    accept n tasks (escrow fully released) → withdraw w (w ≤ n×b) leaves quota
+    remaining=m−n ≥ 0, escrow=0, available=n×b−w ≥ 0, credit=100+5n and
+    contribution=10n, matching INV-SK-17 five-link semantics."""
+    passed = total = 0
+
+    def check(name: str, cond: bool, detail: str = ""):
+        nonlocal passed, total
+        total += 1
+        if cond:
+            passed += 1
+        else:
+            print(f"  ❌ {name}: {detail}")
+
+    _Handler.app = MVPApp()
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{port}"
+
+    def call(p: str) -> dict:
+        with urllib.request.urlopen(base + p, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        call(f"/register?user=7&name={quote('找茬主')}")
+        call(f"/register?user=3&name={quote('找茬人')}")
+        call("/quota?user=7&monthly=50")
+        call("/post?author=7&bounty=100")
+        call("/claim?task=0&hunter=3")
+        call("/submit?task=0")
+        r = call("/accept?task=0&caller=7")
+        w = call("/withdraw?user=3&amount=40")
+        me = call("/me?user=7")
+        check("FB quota remaining", me["quota"][1] == 49 and me["quota"][1] >= 0, f"got {me}")
+        check("FB escrow zero", w["points"][0] == 0, f"got {w}")
+        check("FB available nonneg", w["points"][1] == 60 and w["points"][1] >= 0, f"got {w}")
+        check("FB credit", r["credit"] == 105, f"got {r}")
+        check("FB contribution", r["contribution"] == 10, f"got {r}")
+    finally:
+        server.shutdown()
+        thread.join()
+    return passed, total
+
+
 def run_concurrency_test() -> Tuple[int, int]:
     """--concurrency-test (v0.103): concurrent requests keep the state
     consistent — parallel clients (register / quota / post / tasks mix) all
@@ -3210,6 +3258,10 @@ def main(argv=None):
     if "--dual-item-four-link-test" in argv:
         passed, total = run_dual_item_four_link_test()
         print(f"sigma_app dual item four link test (v0.387): {passed}/{total} passed")
+        return 0 if passed == total else 1
+    if "--full-business-five-link-test" in argv:
+        passed, total = run_full_business_five_link_test()
+        print(f"sigma_app full business five link test (v0.397): {passed}/{total} passed")
         return 0 if passed == total else 1
     if "--concurrency-test" in argv:
         passed, total = run_concurrency_test()

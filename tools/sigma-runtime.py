@@ -1101,6 +1101,17 @@ def run_invariant_checks(core):
          "note": f"inv={inv11}"},
     ])
 
+    # §SK 全业务链五链守恒 (v0.395, INV-SK-17)
+    p17 = core.points_withdraw(core.points_release(core.points_hold(core.points_new(), 100), 100), 40)
+    c17 = core.credit_score([[0, 1]])
+    v17 = core.contribution_score([[3, 1, 10]])
+    q17 = core.quota_use(core.quota_new(50), 1)
+    record("INV-SK-17", "invariant", ["quota_use(1)→hold(100)→release(100)→withdraw(40)"], p17, [
+        {"law": "全业务链五链守恒 — 发单 1 次后配额 remaining=49 ≥0 且 escrow=0 且 available=60 ≥0 且契分=105 且贡献分=10",
+         "ok": p17 == [0, 60] and c17 == 105 and v17 == 10 and q17[1] == 49,
+         "note": f"p={p17} c={c17} v={v17} q={q17}"},
+    ])
+
     return events
 
 
