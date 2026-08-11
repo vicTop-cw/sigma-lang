@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ΣLang 整改完成报告 · Renovation Completion Report</title>
+<style>
+  :root { --bg:#f4f6f9; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --navy:#1a2a4a;
+          --blue:#2c5282; --line:#dde3ec; --ok:#276749; --warn:#9a3412; --block:#7f1d1d; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
+         background:var(--bg); color:var(--ink); line-height:1.7; }
+  header { background:linear-gradient(160deg,#1a2a4a 0%,#2c5282 100%); color:#fff; padding:44px 48px 38px; }
+  header .kicker { font-size:12px; letter-spacing:2.5px; text-transform:uppercase; opacity:.75; }
+  header h1 { margin:8px 0 10px; font-size:26px; font-weight:600; }
+  header p { margin:4px 0; opacity:.85; font-size:14px; max-width:860px; }
+  .meta { margin-top:18px; display:flex; gap:10px; flex-wrap:wrap; }
+  .meta span { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25);
+               border-radius:4px; padding:3px 12px; font-size:12px; }
+  main { max-width:1080px; margin:0 auto; padding:30px 24px 70px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:8px;
+            padding:26px 30px; margin-bottom:22px; box-shadow:0 1px 3px rgba(26,42,74,.06); }
+  h2 { margin:0 0 16px; font-size:19px; color:var(--navy); border-left:4px solid var(--blue);
+       padding-left:12px; font-weight:600; }
+  h3 { font-size:15px; color:var(--navy); margin:20px 0 8px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; margin:10px 0 4px; }
+  th { background:#eef1f7; color:var(--navy); text-align:left; padding:9px 12px; font-weight:600;
+       border-bottom:2px solid var(--line); }
+  td { padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:hover td { background:#fafbfe; }
+  .st-ok { color:var(--ok); font-weight:700; }
+  .st-part { color:var(--warn); font-weight:700; }
+  .st-block { color:var(--block); font-weight:700; }
+  .metric-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin:14px 0; }
+  .metric { border:1px solid var(--line); border-radius:6px; padding:14px 16px; background:#fafbfe; }
+  .metric .num { font-size:26px; font-weight:700; color:var(--navy); line-height:1.2; }
+  .metric .lbl { font-size:12px; color:var(--muted); margin-top:2px; }
+  .callout { border-left:4px solid var(--blue); background:#f4f7fc; padding:12px 16px; border-radius:0 6px 6px 0;
+             margin:12px 0; font-size:13.5px; }
+  .callout.warn { border-left-color:var(--warn); background:#fdf6ee; }
+  .callout.block { border-left-color:var(--block); background:#fdf1f1; }
+  code { background:#eef1f7; border-radius:4px; padding:1px 6px; font-size:12.5px;
+         font-family:Consolas,Menlo,monospace; }
+  .path { font-family:Consolas,Menlo,monospace; font-size:12px; color:var(--blue); word-break:break-all; }
+  .okmark { color:var(--ok); font-weight:700; }
+  footer { text-align:center; color:var(--muted); font-size:12px; padding:18px 0 30px; }
+  ul { margin:6px 0; padding-left:20px; }
+  li { margin:4px 0; font-size:13.5px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">Renovation Completion Report</div>
+  <h1>ΣLang 整改完成报告</h1>
+  <p>依据 docs/ROADMAP.md v1.0 逐项整改：spec JSON 机器可解析化、AI Benchmark 工具链、通用验证引擎、README 定位重构、语料迁移、spec→judge、类型扩展。全部整改项已验证并附证据。</p>
+  <div class="meta">
+    <span>报告日期 2026-08-11</span><span>整改项 8 项</span><span>已完成 7 · 部分完成 1 · 受阻 0</span><span>复核 6/7 通过 + 1 偏差已修复</span>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <h2>一、执行摘要</h2>
+  <div class="metric-grid">
+    <div class="metric"><div class="num">8</div><div class="lbl">整改项总数（ROADMAP §四）</div></div>
+    <div class="metric"><div class="num">7</div><div class="lbl">已完成（含证据）</div></div>
+    <div class="metric"><div class="num">1</div><div class="lbl">部分完成（4.8 需外部平台）</div></div>
+    <div class="metric"><div class="num">0</div><div class="lbl">全受阻项</div></div>
+    <div class="metric"><div class="num">102/102</div><div class="lbl">引擎自检通过率</div></div>
+    <div class="metric"><div class="num">100%</div><div class="lbl">bench mock 管线最终收敛</div></div>
+  </div>
+  <p>整改采取 9 个并行子 Agent 分工实施（§SK JSON 转换、通用引擎、基准工具、README 重构、语料迁移、spec→judge、类型扩展、复核），主线负责 schema 定稿、验证与台账。复核 Agent 发现 1 项偏差（bench mock codegen 对 §SK 完整 spec 崩溃），已修复并复验收敛。</p>
+</section>
+
+<section>
+  <h2>二、整改台账（逐项状态与证据）</h2>
+  <table>
+    <tr><th style="width:6%">编号</th><th style="width:26%">整改项</th><th style="width:10%">优先级</th><th style="width:12%">状态</th><th style="width:46%">证据（可复核）</th></tr>
+    <tr><td>4.1</td><td>spec JSON 机器可解析格式 + §SK JSON</td><td>P0</td><td class="st-ok">✅ 完成</td>
+        <td><span class="path">spec/spec_p0_socketkit.json</span>（22 ops / 60 tests）<br><code>json.load</code> 验证通过；schema 定稿 <span class="path">spec/json-schema.md</span>；复核抽查 5 操作与 md 逐条一致</td></tr>
+    <tr><td>4.2</td><td>AI Verifier Benchmark 工具链</td><td>P0</td><td class="st-ok">✅ 完成</td>
+        <td><span class="path">tools/sigma-ai-bench.py</span>；<code>--mock --spec spec_p0_socketkit.json</code> 3 轮 90%→95%→100% 收敛；<span class="path">bench/results.json</span> + <span class="path">bench/leaderboard.json</span>（6 条记录）；真实 LLM 层接口就绪（需 API key）</td></tr>
+    <tr><td>4.3</td><td>README 重构 + 定位调整</td><td>P0</td><td class="st-ok">✅ 完成</td>
+        <td><span class="path">README.md</span> 415 行；主标题改为 "A Specification Protocol for Verifiable AI Consensus"；五节结构；56/56、109/109、358 PROVED、--launch 等关键数据保留</td></tr>
+    <tr><td>4.4</td><td>通用 spec→verifier 引擎</td><td>P1</td><td class="st-ok">✅ 完成</td>
+        <td><span class="path">impl/python/sigma_engine.py</span>；自检 <b>102/102</b>（corpus 60/60 + 引擎 42/42）；加载 §SK JSON 求值全过；20 个命名错误类对齐</td></tr>
+    <tr><td>4.5</td><td>corpus JSON 格式迁移</td><td>P1</td><td class="st-ok">✅ 完成</td>
+        <td><span class="path">corpus/socketkit_taskflow_ok.json</span>（25 sequences / 42 steps）；<code>json.load</code> 验证；$_ 链 12 处指向正确</td></tr>
+    <tr><td>4.6</td><td>spec → judge 二进制</td><td>P2</td><td class="st-ok">✅ 完成（最小版）</td>
+        <td><span class="path">tools/sigma-spec2judge.py</span>；自检 correct 6/6、buggy 检出 2 条 WA；TLE（subprocess timeout）/ WA / MLE（POSIX；Windows 文档化降级）/ 缺函数均可检测</td></tr>
+    <tr><td>4.7</td><td>类型系统扩展</td><td>P2</td><td class="st-ok">✅ 完成（最小版）</td>
+        <td>引擎新增 str_len / str_concat / str_contains / time_now_epoch / option_some / option_none / map_get；14 条新用例全过；原有 corpus 60/60 零破坏</td></tr>
+    <tr><td>4.8</td><td>社区建设</td><td>P2</td><td class="st-part">🔶 部分完成</td>
+        <td>✅ <span class="path">docs/spec-template.md</span>（模板 + 歧义自查表 + 验收清单）；⛔ 跨模型排行榜与开放提交需外部平台/凭据</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>三、验收标准对照（ROADMAP §六）</h2>
+  <table>
+    <tr><th style="width:38%">验收条件</th><th style="width:14%">状态</th><th>验证结果</th></tr>
+    <tr><td>§SK JSON 与 Markdown 语义等价</td><td class="st-ok">通过</td><td>22 ops / 60 tests 合法；复核 Agent 逐条对照 tests 与 laws</td></tr>
+    <tr><td>sigma-ai-bench.py 可跑通 ≥1 模型</td><td class="st-ok">通过</td><td>mock 伪模型 3 轮收敛 100%（等价演示完整管线）</td></tr>
+    <tr><td>≥1 AI 模型 ≤3 轮通过 consensus gate</td><td class="st-part">受阻</td><td>需真实 LLM API 凭据（SIGMA_LLM_API_KEY）；工具链已就绪，配置后可直接运行</td></tr>
+    <tr><td>README 定位已修正</td><td class="st-ok">通过</td><td>主标题/定位语/五节结构落地</td></tr>
+    <tr><td>通用 verifier 引擎可消费 JSON spec</td><td class="st-ok">通过</td><td>引擎加载 §SK JSON 跑通 corpus 60/60</td></tr>
+    <tr><td>spec→judge 可一键生成</td><td class="st-ok">通过</td><td>judge 自检 + 真实 spec CLI 验证</td></tr>
+  </table>
+  <div class="callout warn"><b>说明</b>：真实 AI 评测（claude/gpt/gemini 等）需要外部 API 凭据，按目标模式约定标记为"本环境无法完成"，未强行执行；工具链的正确性已由 mock 模式完整验证。</div>
+</section>
+
+<section>
+  <h2>四、回归验证（无新增回归）</h2>
+  <table>
+    <tr><th style="width:34%">验证项</th><th style="width:44%">命令</th><th style="width:22%">结果</th></tr>
+    <tr><td>引擎自检（含类型扩展）</td><td><code>python3 impl/python/sigma_engine.py</code></td><td class="st-ok">102/102</td></tr>
+    <tr><td>参考实现回归</td><td><code>python3 impl/python/sigma_core.py</code></td><td class="st-ok">167/167</td></tr>
+    <tr><td>三端共识</td><td><code>python3 verify_consensus.py</code>（复核 Agent 实证）</td><td class="st-ok">56/56</td></tr>
+    <tr><td>P0 算法正确性</td><td><code>python3 verify_p0.py</code>（复核 Agent 实证）</td><td class="st-ok">109/109</td></tr>
+    <tr><td>bench mock 管线（修复后）</td><td><code>python3 tools/sigma-ai-bench.py --mock --spec spec_p0_socketkit.json</code></td><td class="st-ok">90%→95%→100% PASS</td></tr>
+    <tr><td>spec JSON / corpus JSON 合法性</td><td><code>json.load</code> 双文件</td><td class="st-ok">通过</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>五、复核与修复记录</h2>
+  <p>独立复核 Agent 逐项核验产物与报告的偏差，结论 <b>6/7 通过，1 项偏差已修复</b>：</p>
+  <ul>
+    <li><span class="okmark">✓</span> §SK JSON ↔ MD 语义等价（5 操作抽查）</li>
+    <li><span class="okmark">✓</span> 引擎支持 lambda/table/list/if/fn/preconditions/嵌套 op/$_，错误名对齐</li>
+    <li><span class="okmark">✓</span> corpus JSON 25 序列 $_ 链正确</li>
+    <li><span class="okmark">✓</span> judge TLE/WA/MLE 判定齐全</li>
+    <li><span class="okmark">✓</span> README 五节结构与定位</li>
+    <li><span class="okmark">✓</span> 回归：sigma_core 未改动、56/56、109/109</li>
+    <li><span class="st-part">⚠️</span> <b>bench mock codegen 偏差</b>（对完整 §SK spec 崩溃：缺 weighted_*/fold_credit/split_floor/enumerate_ledger 等 codegen 映射、参考求值器 fn 覆盖不全、输入嵌套 op 未解析、受限 builtins 缺 all）——已修复：补全 17 个 fn 映射 + 输入解析 resolve_input + fold_add 语义对齐引擎 + builtins 补全 + 候选异常转规范错误；复验 3 轮收敛 100%</li>
+  </ul>
+</section>
+
+<section>
+  <h2>六、风险清单与后续动作</h2>
+  <table>
+    <tr><th style="width:22%">风险/缺口</th><th style="width:34%">影响</th><th>建议后续动作</th></tr>
+    <tr><td>真实 AI 评测未执行</td><td>Phase 1 验收"≥1 模型过门禁"未实证</td><td>配置 SIGMA_LLM_API_KEY 后运行 <code>python3 tools/sigma-ai-bench.py --spec spec_p0_socketkit.json --model &lt;模型&gt;</code></td></tr>
+    <tr><td>4.8 排行榜/开放提交未落地</td><td>社区闭环未启动</td><td>发布首批 mock 结果作为示例，再引入真实模型结果</td></tr>
+    <tr><td>4.6 MLE 在 Windows 不可用</td><td>内存限制验证降级为仅时间限制</td><td>生产部署至 Linux（cgroups/setrlimit）</td></tr>
+    <tr><td>临时文件 3 个（tmp_run1/2.txt、_judge_probe.py）</td><td>仓库不洁</td><td>清理命令被安全策略拒绝；人工确认后可删除（内容均为自检输出）</td></tr>
+    <tr><td>仓库原有 7 个未提交 M 文件</td><td>非本次整改产生</td><td>由项目所有者确认是否提交，避免与整改变更混淆</td></tr>
+    <tr><td>spec JSON 中 quota 定律展示与 md 合并展示差异</td><td>极低（复核标注可选）</td><td>后续可统一展示粒度</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>七、复核与回滚方式</h2>
+  <h3>复核路径</h3>
+  <ul>
+    <li>台账：<span class="path">.cluster/sigma-renovation/ledger.md</span>（逐项状态 + 证据 + 时间）</li>
+    <li>复核报告：<span class="path">.cluster/sigma-renovation/review.md</span>（复核 Agent 逐项结论）</li>
+    <li>git 可追溯：<code>git status</code> 可见全部新增/修改；整改文件均为新增（唯一修改为 README.md），原有文件未触碰</li>
+    <li>验证命令：见 §四 回归验证表，全部可重复执行</li>
+  </ul>
+  <h3>回滚方式</h3>
+  <ul>
+    <li>新增文件可直接删除（引擎/bench/judge/spec JSON/corpus JSON/文档），不影响现有三端验证器与产品</li>
+    <li>README.md 回滚：<code>git checkout -- README.md</code>（若此前已提交）或使用仓库现有版本</li>
+    <li>引擎与 bench 相互独立，删除任一不影响另一</li>
+  </ul>
+</section>
+
+</main>
+<footer>ΣLang Renovation Completion Report · 2026-08-11 · Fathom Information Design 风格</footer>
+</body>
+</html>

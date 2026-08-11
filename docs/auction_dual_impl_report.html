@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>§AU 拍卖协议 · 双子代理独立实现对比报告</title>
+<style>
+  :root { --bg:#f5f7fa; --card:#fff; --ink:#263238; --muted:#78909c; --accent:#1a237e;
+          --a:#c62828; --b:#1565c0; --ok:#2e7d32; --warn:#e65100; --line:#e0e0e0; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Microsoft YaHei",-apple-system,sans-serif; background:var(--bg); color:var(--ink); line-height:1.65; }
+  header { background:linear-gradient(135deg,#1a237e,#283593); color:#fff; padding:36px 40px; }
+  header h1 { margin:0 0 8px; font-size:24px; letter-spacing:.5px; }
+  header p { margin:4px 0; opacity:.85; font-size:14px; }
+  .badges { margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; }
+  .badge { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3); border-radius:20px;
+           padding:4px 14px; font-size:12px; }
+  main { max-width:1080px; margin:0 auto; padding:28px 20px 60px; }
+  section { background:var(--card); border-radius:12px; padding:24px 28px; margin-bottom:22px;
+            box-shadow:0 1px 4px rgba(0,0,0,.08); }
+  h2 { margin:0 0 14px; font-size:18px; color:var(--accent); border-left:4px solid var(--accent); padding-left:10px; }
+  h3 { font-size:15px; margin:18px 0 8px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; margin:10px 0; }
+  th,td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { background:#eef0f7; color:var(--accent); font-weight:600; }
+  .tag-a { display:inline-block; background:#fdecea; color:var(--a); border-radius:4px; padding:1px 8px; font-size:12px; font-weight:600; }
+  .tag-b { display:inline-block; background:#e8f0fd; color:var(--b); border-radius:4px; padding:1px 8px; font-size:12px; font-weight:600; }
+  .tag-both { display:inline-block; background:#e8f5e9; color:var(--ok); border-radius:4px; padding:1px 8px; font-size:12px; font-weight:600; }
+  .warn { color:var(--warn); font-weight:600; }
+  .ok { color:var(--ok); font-weight:600; }
+  .muted { color:var(--muted); font-size:12.5px; }
+  code { background:#f0f2f7; border-radius:4px; padding:1px 6px; font-size:12.5px; font-family:Consolas,monospace; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; margin:12px 0; }
+  .card { border:1px solid var(--line); border-radius:10px; padding:14px 16px; background:#fafbfe; }
+  .card h4 { margin:0 0 8px; font-size:14px; }
+  .card p { margin:6px 0; font-size:13px; }
+  .step { display:flex; gap:12px; margin:10px 0; }
+  .marker { flex:0 0 28px; height:28px; border-radius:50%; background:var(--accent); color:#fff;
+            display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
+  .step-body { flex:1; }
+  .step-title { font-weight:600; font-size:13.5px; }
+  .step-text { font-size:13px; color:#455a64; }
+  .verdict { border-radius:10px; padding:16px 18px; font-size:14px; }
+  .verdict-a { background:#fdecea; border:1px solid #f5c6c0; }
+  .verdict-b { background:#e8f0fd; border:1px solid #c5d8f5; }
+  footer { text-align:center; color:var(--muted); font-size:12px; padding:20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>§AU 拍卖协议 · 双子代理独立实现对比报告</h1>
+  <p>ΣLang 风格协议设计实验 — 同一份规范，两个独立子代理（A / B）分别实现，对比异同</p>
+  <div class="badges">
+    <span class="badge">协议：密封二价拍卖（Vickrey）</span>
+    <span class="badge">指纹段：0xA000–0xA0FF</span>
+    <span class="badge">4 个操作 · 5 个故意模糊点</span>
+    <span class="badge">实现语言：Python（单文件）</span>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <h2>一、协议设计：为什么选 Vickrey 拍卖</h2>
+  <p>密封二价拍卖（Vickrey）是经济学经典机制：<b>出价最高者赢得拍卖，但支付第二高的价格</b>。
+  这个机制"反直觉"——赢家付的不是自己的出价——因此实现时容易出错，是检验"同一份规范能否产生一致实现"的理想对象。</p>
+  <div class="cards">
+    <div class="card"><h4>🎯 4 个操作</h4>
+      <p><code>auction_create</code> 创建拍卖 · <code>bid</code> 密封出价 · <code>auction_close</code> 结算（Vickrey 定价）· <code>auction_cancel</code> 取消</p></div>
+    <div class="card"><h4>🧩 8 个标准场景</h4>
+      <p>多人竞价、单出价付保留价、无人达保留价、平局、恰好等于保留价、已关闭幂等……</p></div>
+    <div class="card"><h4>⚠️ 5 个故意模糊点</h4>
+      <p>出价列表顺序、平局裁决、同人多价、错误风格、reserve=0 边界——spec 有意留白，观察合理分歧</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>二、双子代理实现概览</h2>
+  <table>
+    <tr><th style="width:16%">维度</th><th style="width:42%"><span class="tag-a">实现 A</span> sigma_auction_a.py</th><th style="width:42%"><span class="tag-b">实现 B</span> sigma_auction_b.py</th></tr>
+    <tr><td>数据结构</td><td>7 元列表 <code>[item,seller,reserve,phase,bids,winner,price]</code>，纯函数式</td><td>同左；另有 <code>_fresh()</code> 结构拷贝辅助函数</td></tr>
+    <tr><td>出价列表顺序</td><td class="warn">新出价<b>前插</b>（最新在前）</td><td class="ok">按 <b>bidder_id 升序</b>维护，重出价原位替换</td></tr>
+    <tr><td>平局裁决（真实出价流程）</td><td class="warn">后出价者胜（列表靠前者）</td><td class="ok">bidder_id 最小者胜</td></tr>
+    <tr><td>对已关闭拍卖 close</td><td>幂等 identity</td><td>幂等 identity</td></tr>
+    <tr><td>对已取消拍卖 close</td><td class="warn">抛 <code>ClosedErr</code></td><td>幂等 identity</td></tr>
+    <tr><td>错误处理</td><td colspan="2">统一异常体系：<code>ReserveErr / BidAmountErr / ClosedErr</code>（均继承 <code>AuctionError</code>）</td></tr>
+    <tr><td>同人多价</td><td colspan="2">"最后一次出价生效"，但实现机制不同：A 关闭时去重保留首个（最新在前），B 插入时原位替换</td></tr>
+    <tr><td>自检规模</td><td>25 项（标准场景 + 7 项边界）</td><td><b>30 项</b>（标准场景 + 7 项边界 + <b>300 轮随机属性测试</b>）</td></tr>
+    <tr><td>代码风格</td><td>紧凑，lambda 驱动测试，部分类型注解</td><td>工程化：阶段常量、辅助函数、显式 check/check_err</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>三、关键行为分歧（重点）</h2>
+
+  <h3>分歧 1：出价列表的顺序语义 <span class="tag-a">A：最新在前</span> vs <span class="tag-b">B：bidder_id 升序</span></h3>
+  <p>spec 的 AU.4 组合场景隐含要求 <code>[[3,100],[5,60],[7,80]]</code>（bidder_id 升序，3&lt;5&lt;7）。
+  但出价顺序是 7 → 3 → 5，无论"最新在前"还是"插入顺序"都无法得到该结果。</p>
+  <div class="verdict verdict-a"><b>实现 A 的自检矛盾</b>：A 选择"最新在前"，但写 AU.4 断言时照抄了 spec 的字面期望
+  （bidder_id 升序）。其 composite 场景实际产生 <code>[[5,60],[3,100],[7,80]]</code>，与自检期望不符 →
+  <b>推演结论：A 自检 24/25，AU.4 一项失败</b>。这是"实现了自己的理解，却用 spec 字面结果测试自己"的典型矛盾。</div>
+  <div class="verdict verdict-b" style="margin-top:10px"><b>实现 B 读懂了 spec 样例</b>：B 从 AU.2.2 测试 2 与 AU.4 的期望输出反推，
+  得出"规范要求 bidder_id 升序"的结论并写进设计决策 → <b>推演结论：B 自检 30/30 全绿</b>。</div>
+
+  <h3>分歧 2：平局裁决 — 真实语义分歧</h3>
+  <table>
+    <tr><th>场景（1 出价 100，2 出价 100，reserve=50）</th><th><span class="tag-a">实现 A</span></th><th><span class="tag-b">实现 B</span></th></tr>
+    <tr><td>出价顺序 1 → 2</td><td class="warn">winner = 2（后出价，列表靠前）</td><td>winner = 1（最小 bidder_id）</td></tr>
+    <tr><td>spec S6 直接构造列表 [[1,100],[2,100],[3,80]]</td><td>winner = 1</td><td>winner = 1</td></tr>
+  </table>
+  <p>spec 的 S6 测试直接构造列表，两种实现都给出 winner=1，<b>标准测试无法暴露此分歧</b>；
+  但经过真实 <code>bid()</code> 流程后，两个实现的裁决不同。这正是 AU.3 故意留白的结果。</p>
+
+  <h3>分歧 3：对已取消拍卖执行 close</h3>
+  <table>
+    <tr><th>操作</th><th><span class="tag-a">实现 A</span></th><th><span class="tag-b">实现 B</span></th><th>spec 依据</th></tr>
+    <tr><td>close(已关闭)</td><td>幂等返回原值</td><td>幂等返回原值</td><td>AU.2.3 定律明确要求</td></tr>
+    <tr><td>close(已取消)</td><td class="warn">抛 ClosedErr</td><td>幂等返回原值</td><td>未明确规定（模糊点）</td></tr>
+    <tr><td>cancel(已取消)</td><td>幂等返回原值</td><td>幂等返回原值</td><td>两者自洽</td></tr>
+  </table>
+  <p>spec 测试 8 自己都写了"<code>⊥ ClosedErr (or identity)</code>"——两种都算对，属于规范留白被两种方式填充。</p>
+
+  <h3>差异 4：测试强度</h3>
+  <p>B 额外实现了 <b>300 轮固定种子随机属性测试</b>（验证 Vickrey 定价、phase 转移、幂等性、price ≤ 赢家出价四条定律），
+  A 只有确定性用例。经推演，B 的属性测试与其实现逻辑完全自洽。</p>
+</section>
+
+<section>
+  <h2>四、相同点（共识部分）</h2>
+  <table>
+    <tr><th>共识项</th><th>说明</th></tr>
+    <tr><td>Vickrey 定价规则</td><td>两者完全一致：赢家付第二高价；唯一有效出价时付保留价；无人达保留价 → 无赢家</td></tr>
+    <tr><td>8 个标准场景</td><td>两者对全部 spec 标准测试给出相同结论（含 S6 平局、S7 恰好等于保留价）</td></tr>
+    <tr><td>错误代数（⊥）</td><td>都用异常表达协议错误，错误类型命名完全一致（ReserveErr/BidAmountErr/ClosedErr）</td></tr>
+    <tr><td>纯函数式</td><td>操作返回新列表，不修改输入拍卖</td></tr>
+    <tr><td>保留价边界</td><td>reserve=0 时出价 0 视为有效；负数保留价/出价一律报错</td></tr>
+    <tr><td>指纹意识</td><td>两文件都在 docstring 中标注 0xA001–0xA004 指纹与 AU 章节号</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>五、结论</h2>
+  <div class="cards">
+    <div class="card"><h4>✅ 协议设计有效</h4><p>核心机制（Vickrey 定价、状态机、保留价）在两个独立实现中完全一致——规范的主干语义足够清晰。</p></div>
+    <div class="card"><h4>⚠️ 留白必然产生分歧</h4><p>3 处真实分歧全部落在 spec 故意模糊的区域。其中"出价列表顺序"最值得注意：<b>spec 的测试样例其实已隐含答案（bidder_id 升序），但 A 没读出这一层，B 读出了</b>——证明测试样例本身就是语义的一部分。</p></div>
+    <div class="card"><h4>🔬 验证方式</h4><p>本会话 exec 被环境级安全拦截（工作区路径为符号链接），子代理亦同。以上结论基于对两份源码的逐行人工推演；用户可在本地运行验证（命令见下）。</p></div>
+  </div>
+  <p class="muted">本地复验命令：</p>
+  <p><code>python3 E:\IDEProjects\AI\sigma-lang\impl\python\sigma_auction_a.py</code>　预期 A 输出 24/25（AU.4 一项失败）</p>
+  <p><code>python3 E:\IDEProjects\AI\sigma-lang\impl\python\sigma_auction_b.py</code>　预期 B 输出 30/30</p>
+</section>
+
+</main>
+<footer>ΣLang §AU · 双子代理一致性实验 · 2026-08-11</footer>
+</body>
+</html>

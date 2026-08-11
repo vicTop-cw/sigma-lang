@@ -9,47 +9,58 @@ AIGC:
     ReservedCode2: mDw4RkGQhmoXriChPW1y8uAeGLTUKR7LTtVVK6shiaXc2rZ3XsgXQEMKxkPer/PCdZcb5aucga996aYUlulURYZoOAQ7LrPIfXvtjpmHWTDG2xZ8OCOyXkCpRkO/TBYnsMyzEBGfCubT1uNVhrlJdRjXn3g8+eQxQmjHyG3hNkpBppdOWszZymfJUV0=
 ---
 
-# ΣLang — AI-Native Semantic Protocol
+# ΣLang — A Specification Protocol for Verifiable AI Consensus
 
 [![PyPI version](https://img.shields.io/pypi/v/sigma-lang?color=blue&label=PyPI%20version)](https://pypi.org/project/sigma-lang/)
 [![PyPI downloads](https://img.shields.io/pypi/dm/sigma-lang?label=PyPI%20downloads)](https://pypi.org/project/sigma-lang/)
 [![spec](https://img.shields.io/badge/spec-0.7.0-1a237e)](spec/)
 
-> **Sigma Language** — A deterministic semantic protocol for AI systems.
-> One symbol, one meaning, one result — across all models.
-
-> **Sigma Language（ΣLang）** — 面向 AI 系统的确定性语义协议。
-> 一个符号，一种含义，一个结果 — 跨所有模型一致。
+> **ΣLang** — A Specification Protocol for Verifiable AI Consensus.
+> Through verifiable specifications + consensus gates, different AI systems produce
+> identical behavior on the same business rules.
+>
+> **ΣLang（中文）** — 面向可验证 AI 共识的规约协议。
+> 通过可验证的规约 + 共识门禁，让不同 AI 系统对同一份业务规则产出完全一致的行为。
+>
+> **当前阶段**：Phase 0 人工参考实现已对齐（consensus 56/56、z3 358 PROVED），
+> Phase 1 AI 自主实现验证中。
 
 ---
 
-## What is ΣLang? / 什么是 ΣLang？
+## 1. 项目定位 / What is ΣLang?
 
-ΣLang is **not a programming language** in the traditional sense.
-It is a **contract between intelligences**.
+**一句话**：ΣLang 是一套"AI 都能看懂、且大家都认账"的业务规则说明书——把"找茬平台
+怎么发单、接单、验收、算钱"这类事，写成任何人都能读、任何 AI 都能执行、而且三个
+独立验证器结论完全一致的文档。
 
-ΣLang 不是传统意义上的编程语言，而是**智能体之间的合约**。
+ΣLang 不是传统意义上的编程语言，而是**智能体之间的合约**：
 
 - ✅ Deterministic semantics / 确定性语义
 - ✅ Symbol-anchored meaning / 符号锚定的含义
-- ✅ Markdown as source code / Markdown 即源码
+- ✅ Markdown as source code / Markdown 即源码（Phase 1 起另有 JSON 机器可解析格式）
 - ✅ Ownership-aware dataflow / 所有权感知的数据流
 - ✅ Zero syntactic ambiguity / 零语法歧义
 - ✅ Verifier-enforced consistency / 验证器强制一致性
 
----
+**打个比方**：想象三个裁判（Python / Rust / Elixir 各一个），同时读同一份规则书，
+然后对同一个业务动作下判罚。ΣLang 的要求是：**三个裁判必须给出一模一样的判罚**，
+差一个字都不行——这就是"共识门禁"（Law XIII，56/56 全绿）。
 
-## 大白话导读：这仓库到底在干嘛？（2026-08-05 更新）
+**为什么需要它**：现在 AI 各说各话——同一个"验收"动作，不同 AI 可能理解成不同意思。
+ΣLang 给业务规则一个**唯一、可验证、可证明**的语义，AI 之间协作时说的"验收"就是
+同一个"验收"。
 
-**一句话**：ΣLang 是一套"AI 都能看懂、且大家都认账"的业务规则说明书——
-把"找茬平台怎么发单、接单、验收、算钱"这类事，写成任何人都能读、任何 AI
-都能执行、而且三个独立验证器结论完全一致的文档。
+**定位说明（2026-08-11 调整）**：项目定位从 "AI-Native Semantic Protocol"（暗示
+协议与 AI 之间已有运行时通路）调整为 **"A Specification Protocol for Verifiable AI
+Consensus"**（描述目标与路径）：
 
-**打个比方**：想象三个裁判（Python / Rust / Elixir 各一个），同时读同一份
-规则书，然后对同一个业务动作下判罚。ΣLang 的要求是：**三个裁判必须给出
-一模一样的判罚**，差一个字都不行——这就是"共识门禁"。
+| 之前 | 之后 |
+|------|------|
+| "AI 原生语义协议"（暗示已实现） | "面向可验证 AI 共识的规约协议"（描述目标） |
+| 找茬产品是旗舰应用 | 找茬是规约的最小可行 demo |
+| 三端一致是最终成果 | 三端一致是 ground truth 标尺——用来测量 AI 的语义理解能力 |
 
-**这仓库里有 5 样东西**：
+**仓库里有什么**（5 样东西）：
 
 | 东西 | 是啥 | 大白话 |
 |------|------|--------|
@@ -59,21 +70,38 @@ It is a **contract between intelligences**.
 | `tools/` | 证明工具 | 用数学（z3）证明规则永远不会出错 |
 | `web/` + App | 找茬产品 | 一个真的能跑起来的例子：找茬平台 |
 
-**为什么需要它**：现在 AI 各说各话——同一个"验收"动作，不同 AI 可能理解成
-不同意思。ΣLang 给业务规则一个**唯一、可验证、可证明**的语义，AI 之间协作
-时说的"验收"就是同一个"验收"。
+**现在做到哪了**：三块业务语义（找茬 / 金融 / 供应链）已全链路打通——三端共识
+**56/56**、算法正确性 **109/109**、数学证明 **358 项 PROVED**、一键验收 **10/10
+门禁**、找茬产品一条命令启动（`python3 impl/python/sigma_app.py --launch`）、PyPI
+发布（`pip install sigma-lang`）。
 
-**现在做到哪了**：三块业务语义（找茬 / 金融 / 供应链）已全链路打通——
-三端共识 56/56、数学证明 354 项 PROVED、找茬产品一条命令就能启动上线
-（`python3 impl/python/sigma_app.py --launch`）。
+**接下来做什么（Phase 1）**：Phase 0（人工参考实现对齐）已完成——它证明了 spec 对
+**人类**没有歧义。下一步是**让 AI 读 spec 并自主产出通过 consensus gate 的实现**：
+用 AI Verifier Benchmark 评测不同模型"从规约中提取精确语义"的能力（见第 3 节），
+直至任何 AI 模型可消费 spec 并自证一致（Phase 3）。
 
 ---
 
-## 怎么用它 / How to use it（2026-08-05）
+## 2. 快速体验 / Quick Start
 
-**用法 1：把找茬产品跑起来（2 分钟，不写代码）**
+### 2.1 三行代码看语义（pip 安装）
 
-> 依赖：Python 3.8+（三端验证可选装 Rust/Elixir，使用产品只需 Python）。
+> `pip install sigma-lang`（已在 PyPI 发布：pypi.org/project/sigma-lang）——装完即可
+> `import sigma_core`，零第三方依赖的纯函数库。
+
+```python
+import sigma_core as core
+task = core.task_create(7, 100)    # 发单 → [7, 100, 0, 0]
+task = core.accept_task(task, 3)   # 接单 → [7, 100, 1, 3]
+task = core.task_accept(task, 7)   # 验收 → [7, 100, 3, 3]
+```
+
+你拿到的行为与三端验证器共识一致——就是协议保证的行为。也可走 HTTP：
+`curl "http://127.0.0.1:8080/post?author=7&bounty=100"`。
+
+### 2.2 一条命令启动找茬 Demo（不写代码）
+
+> 依赖：Python 3.8+（三端验证可选装 Rust/Elixir，运行 demo 只需 Python）。
 
 ```sh
 git clone https://github.com/vicTop-cw/sigma-lang.git
@@ -82,58 +110,12 @@ make deploy        # 就绪检查通过后自动启动前后端（Windows 无 ma
 python3 impl/python/sigma_app.py --launch-ready
 python3 impl/python/sigma_app.py --launch
 ```
-浏览器打开 http://127.0.0.1:8000 —— 注册用户、发单、接单、验收、提现、勋章，
-全流程可用；API 在 http://127.0.0.1:8080（端点见 `docs/api_zhaocha.md`），
-运行面板 http://127.0.0.1:8080/panel。
 
-**用法 2：把 ΣLang 当"业务规则协议"（给 AI 定语义、验证规则）**
+浏览器打开 http://127.0.0.1:8000 —— 注册用户、发单、接单、验收、提现、勋章，全流程
+可用；API 在 http://127.0.0.1:8080（端点见 `docs/api_zhaocha.md`），运行面板
+http://127.0.0.1:8080/panel。
 
-不用这个仓库的产品，只借它的协议能力：
-1. 读规范：`spec/spec_p0_socketkit.md`（找茬）/ `spec_p0_inventory.md`（供应链）
-   —— 看业务规则怎么写；
-2. 抄格式写自己的规则：把业务操作（如"验收"）写成 `corpus/*.md` 那样的
-   函数 + 定律 + 测试；
-3. 三端验证：`python3 verify_consensus.py`（Python/Rust/Elixir 三个验证器
-   结论必须一致）；
-4. 数学证明：`python3 tools/sigma-prove.py`（z3 证明你的规则不会自相矛盾）；
-5. 一键验收：`python3 tools/sigma-accept.py`（十道门禁全绿才算合格）。
-
-**用法 3：把语义嵌入自己的项目（当库用，不碰协议）**
-
-> 安装：`pip install sigma-lang`（**已在 PyPI 发布**：pypi.org/project/sigma-lang）
-> ——装完即可 `import sigma_core`，零第三方依赖的纯函数库。
-
-```python
-import sigma_core as core
-task = core.task_create(7, 100)    # 发单 → [7, 100, 0, 0]
-task = core.accept_task(task, 3)   # 接单 → [7, 100, 1, 3]
-task = core.task_accept(task, 7)   # 验收 → [7, 100, 3, 3]
-```
-或走 HTTP：`curl "http://127.0.0.1:8080/post?author=7&bounty=100"`。
-你拿到的行为与三端验证器共识一致——就是协议保证的行为。
-
-**用法 4：让别的 AI 智能体用（给 AI 的 prompt 模板）**
-
-把下面这段发给任何 AI（Claude / GPT / 其他 Agent）：
-
-> 你是 ΣLang 协议的开发者。先读 `README.md` 的"大白话导读"和"怎么用它"，
-> 再读 `spec/spec_p0_socketkit.md` 掌握业务规则写法。你的任务：
-> 1. 用 `impl/python/sigma_core.py` 的纯函数实现业务逻辑（禁止自己重新定义规则）；
-> 2. 用 `python3 verify_consensus.py` 确认语义与三个验证器一致；
-> 3. 改完必须 `python3 tools/sigma-accept.py` 十道门禁全绿。
-> 规则以 spec/ 为准，语料在 corpus/，任何不一致先查 spec 再改实现。
-
-**一句话总结**：想用产品 → 用法 1；想用协议 → 用法 2；想用语义 → 用法 3；
-想教 AI 用 → 用法 4。详细分角色上手见 `docs/USAGE.md`。
-
----
-
-## Quick Start / 新人 30 分钟上手（v0.47）
-
-ΣLang 用一句话介绍：**给 AI 立的"度量衡"协议——同一份规则文档，
-Python / Rust / Elixir 三个独立验证器必须给出完全一样的结论。**
-
-### 三域概览（协议已承载三个独立领域）
+### 2.3 三域概览（协议已承载三个独立领域）
 
 | 域 | 规范 | 语义 | 语料 |
 |----|------|------|------|
@@ -141,24 +123,24 @@ Python / Rust / Elixir 三个独立验证器必须给出完全一样的结论。
 | §PF 金融（投资组合） | `spec/spec_p0_portfolio.md` | portfolio_new / buy / sell / portfolio_value / risk_score | `corpus/portfolio_ok.md` |
 | §IN 供应链（库存） | `spec/spec_p0_inventory.md` | inventory_new / receive_stock / ship_stock / stock_level / fill_rate | `corpus/inventory_ok.md` |
 
-### 快速开始命令
+### 2.4 快速开始命令
 
 ```sh
-python3 verify_consensus.py                  # 三端共识门禁（47/47 全绿）
+python3 verify_consensus.py                  # 三端共识门禁（56/56 全绿）
 python3 verify_p0.py                         # 算法正确性（109/109）
-python3 tools/sigma-runtime.py --domains     # 三域审计故事线一次跑通（96/96）
-python3 tools/sigma-prove.py corpus/socketkit_ok.md corpus/portfolio_ok.md corpus/inventory_ok.md  # z3 义务消解（354 项 PROVED）
-python3 impl/python/sigma_app.py --smoke     # 找茬 MVP 参考后端 HTTP 冒烟（25/25）
+python3 tools/sigma-runtime.py --domains     # 三域审计故事线（96/96）
+python3 tools/sigma-prove.py corpus/socketkit_ok.md corpus/portfolio_ok.md corpus/inventory_ok.md  # z3 义务消解（358 项 PROVED）
+python3 impl/python/sigma_app.py --smoke     # 找茬 MVP 参考后端 HTTP 冒烟
 ```
 
-### 验证清单（任何改动后必须全绿）
+### 2.5 验证清单（任何改动后必须全绿）
 
 ```sh
 # 1. 三端共识（Law XIII 门禁）
-python3 verify_consensus.py                    # 47/47
+python3 verify_consensus.py                    # 56/56
 # 2. 三端 §SK 自检
-cd impl/verifier && cargo run -q -- --sk-self-check      # 88/88
-cd impl/elixir_rt && elixir sigma_verify.exs --sk-self-check  # 88/88
+cd impl/verifier && cargo run -q -- --***      # 88/88
+cd impl/elixir_rt && elixir sigma_verify.exs --***  # 88/88
 python3 impl/python/sigma_core.py              # 167/167
 # 3. 三端编译
 cd impl/verifier && cargo build                # 0 error / 0 warning
@@ -167,62 +149,116 @@ python3 tools/sigma-prove.py corpus/socketkit_ok.md corpus/portfolio_ok.md corpu
 python3 tools/sigma-runtime.py --domains       # 96/96
 ```
 
-> 三端一致（Law XIII）是 ΣLang 的核心承诺：**一个符号、一种含义、一个结果——
-> 谁来算都一样。**
+> 三端一致（Law XIII）是 ΣLang 的核心承诺：**一个符号、一种含义、一个结果——谁来算
+> 都一样。**
 
 ---
 
-## Architecture / 架构与数据流（v0.59）
+## 3. AI Benchmark / 用 ΣLang 评测 AI 的语义理解能力
 
-ΣLang 的语义如何从规范一路走到共识门禁？全景如下：
+> 本节是 ΣLang 的新核心定位：三端一致不是终点，而是 ground truth 标尺——用它来
+> 测量 AI 的语义理解能力。
 
-```text
-  spec/ 规范（英文为准 + spec/zh 中文参考）
-   │  定义操作：指纹 / 签名 / 定律 / 测试（真实函数调用）
-   ▼
-  corpus/ 语料（51 个模块：ok 期望 PASS，break 期望 FAIL）
-   │  三端验证器独立解析 + 求值（eval_expr 真实调用 §SK/§PF/§IN）
-   ├──▶ Python verify_consensus.py ─┐
-   ├──▶ Rust  impl/verifier        ├──▶ Law XIII 共识门禁（56/56 全绿）
-   └──▶ Elixir impl/elixir_rt      ─┘
-   │
-   ├──▶ tools/sigma-prove.py     z3 义务消解（354 项 PROVED）
-   ├──▶ tools/sigma-runtime.py   审计运行时（trace 59/59 + --domains 96/96）
-   ├──▶ impl/python/sigma_app.py 找茬参考后端（自检 15/15 + 冒烟 36/36 + 持久化/审计）
-   └──▶ tools/sigma-accept.py    一键验收（9 道门禁）→ GitHub Actions CI
+### 3.1 为什么需要它
+
+Phase 0 已经证明：同一份 spec，三个**人类**程序员（不同语言、不同思维方式）读完后
+结论完全一致（56/56）。下一个问题是：**AI 能不能做到？**
+
+不同 AI 读同一份业务规则，目前各说各话——GPT 一种解读、Claude 另一种、Gemini 又一种。
+这不是加 benchmark 数据集能解决的，需要的是"精确语义"的测量标尺。ΣLang 的独特定位：
+
+> **不是又一个 benchmark 数据集——是衡量 AI 语义理解精确度的工具。**
+> 对模型厂商的吸引力：你的模型能读懂形式化规约吗？来这里测。
+
+### 3.2 评测流程（Phase 1）
+
+1. 给模型同一份 spec（机器可解析的 spec JSON，见 §5.2）；
+2. 模型生成 Python 实现（`impl/python/sigma_core_ai.py`）；
+3. 自动跑 `verify_consensus.py`，对比 AI 实现 vs 人工参考（ground truth，56/56）；
+4. 失败 → 反馈失败操作清单 + 正确期望（diff）→ 模型自我修正 → 重跑，最多 3 轮；
+5. 记录每轮结果，产出跨模型一致性矩阵与排行榜。
+
+给任何 AI（Claude / GPT / 其他 Agent）的标准 prompt 模板：
+
+> 你是 ΣLang 协议的开发者。先读 `README.md` 的"快速体验"和"协议编写指南"，
+> 再读 `spec/spec_p0_socketkit.md` 掌握业务规则写法。你的任务：
+> 1. 用 `impl/python/sigma_core.py` 的纯函数实现业务逻辑（禁止自己重新定义规则）；
+> 2. 用 `python3 verify_consensus.py` 确认语义与三个验证器一致；
+> 3. 改完必须 `python3 tools/sigma-accept.py` 十道门禁全绿。
+> 规则以 spec/ 为准，语料在 corpus/，任何不一致先查 spec 再改实现。
+
+### 3.3 工具：sigma-ai-bench.py（Phase 1 新增，建设中）
+
+```sh
+python3 tools/sigma-ai-bench.py --model claude-4 --spec spec_p0_socketkit.json --rounds 3
 ```
 
-**工具链职责**
+| 参数 | 说明 |
+|------|------|
+| `--model` | 目标模型名（Claude / GPT / Gemini / DeepSeek / 国产模型等，统一 LLM 调用层适配） |
+| `--spec` | 机器可解析的 spec JSON（§5.2 格式） |
+| `--rounds` | 允许的自我修正轮数上限（默认 3） |
+| `--mock` | **不调用真实 LLM API**：用确定性脚本模拟"生成 → 修正"链路，跑通整条流水线（工具链自检 / CI 用，不消耗 API 额度） |
 
-| 工具 | 职责 | 结果 |
-|------|------|------|
-| `verify_consensus.py` | 三端验证器对 51 个语料模块独立判定（Python/Rust/Elixir/Expected） | 56/56 一致 |
-| `verify_p0.py` | 算法正确性（含 §SK 语义检查） | 109/109 |
-| `tools/sigma-prove.py` | 把语料定律编码为 z3 义务并消解 | 354 项 PROVED |
-| `tools/sigma-runtime.py` | 审计运行时：逐事件复核定律（trace / --story / --growth / --inventory / --domains） | 59/59 + 96/96 |
-| `impl/python/sigma_app.py` | 找茬 MVP 参考后端：业务全委托 §SK，App 只管状态 | 自检 15/15 + 冒烟 36/36 |
-| `tools/sigma-accept.py` | 九道门禁一键验收（本地与 CI 同一条命令） | 9/9 |
-| `.github/workflows/ci.yml` | push/PR 自动验收，全绿才算过 | CI 门禁 |
+输出示例（形如，数字为示意）：
 
-**一条语义的旅程**（以 §SK `task_create` 为例）：
+```
+→ 第 1 轮: 生成实现 → 43/56 passed → 反馈 diff
+→ 第 2 轮: 修正实现 → 52/56 passed → 反馈 diff
+→ 第 3 轮: 修正实现 → 56/56 PASSED ✅
+```
 
-1. `spec/spec_p0_socketkit.md` 定义指纹 `0xF001`、签名、定律与测试；
-2. `corpus/socketkit_taskflow_ok.md` 把它写成**真实函数调用**测试；
-3. Python / Rust / Elixir 三个独立验证器各自求值，结果必须逐项一致（Law XIII）；
-4. `tools/sigma-prove.py` 把定律编码为 z3 义务，证明不可违反（P-01 结构 + 义务 PROVED）；
-5. `tools/sigma-runtime.py` 在业务故事线里审计它的行为（input/output/定律复核）；
-6. `impl/python/sigma_app.py` 的 `post_task` 直接委托它，并记录审计事件；
-7. 任何改动后 `tools/sigma-accept.py` 九道门禁全绿，CI 放行。
+工具链架构：Prompt 模板（spec JSON + 少量示例 + 输出格式约束）→ LLM 调用层（统一
+接口适配不同模型 API）→ 验证层（复用 `verify_consensus.py`）→ 反馈层（失败操作清单
++ 正确期望，作为修正轮次上下文）。
 
-> 整条链路的含义：**业务规则先以 ΣLang 语义存在并被证明，然后才是任何语言
-> 的实现**——实现只是语义的投影。
+### 3.4 产出物：bench/results.json
+
+每次评测写入 `bench/` 目录下的 JSON 结果文件，每轮记录：
+
+- 模型名、spec 版本、尝试次数；
+- 该轮 consensus 通过率（x/56）；
+- **失败操作清单**——哪个模型对哪些操作出错，比总分更有诊断价值；
+- 是否在 ≤ 3 轮内通过 consensus gate（Phase 1 验收标准：≥ 50/56）。
+
+跨模型汇总后即得到**一致性矩阵**：行是模型、列是操作，格子里是"通过 / 出错"。
+哪些操作被普遍误解、哪个模型全过——一目了然，最终输出排行榜：哪个模型在"从规约中
+提取精确语义"这项能力上最强。
+
+### 3.5 路线图
+
+```
+Phase 0 ──────→ Phase 1 ──────→ Phase 2 ──────→ Phase 3
+[已完成]        [进行中]         [中期]           [远期]
+人工参考对齐    AI 替代 1 个     AI 替代 2 个     协议原生
+56/56 consensus  verifier         verifier         无需人工翻译
+```
+
+- **Phase 0 ✅（已完成）**：三个独立人工实现（Python / Rust / Elixir）对同一份 spec
+  逐项一致——spec 对人类无歧义，是后续所有 AI 实验的基准线；
+- **Phase 1 🚀（下一步）**：AI 读 spec → 生成实现 → 过 consensus gate（本节的
+  sigma-ai-bench.py）；配套整改：spec JSON 机器可解析格式（§5.2）、通用 spec→verifier
+  引擎、corpus JSON 化；
+- **Phase 2（中期）**：不同模型各自独立读 spec、各自独立生成实现，跨模型互相对齐且
+  与人工参考对齐——"AI 之间通过协议达成共识"；
+- **Phase 3（远期）**：spec JSON 成为 canonical，任何 AI 系统直接解析 spec 产生执行
+  行为，无需人工翻译。
+
+> 完整的整改路线图见 `docs/ROADMAP.md`。
 
 ---
 
-## Product Guide / 用 ΣLang 做找茬（v0.69）
+## 4. 找茬 Demo / 规约 → 产品的最小可行闭环
 
-**找茬功能 ↔ §SK 语义对照**——每个业务动作都对应一个被三端共识、z3 可证明的
-ΣLang 操作：
+### 4.1 定位
+
+找茬产品是**规约 → 产品的最小可行闭环的参考 demo**：证明"业务规则先以 ΣLang 语义
+存在并被证明，然后才是任何语言的实现"。它是 demo，不是旗舰——ΣLang 的主角是规约与
+共识门禁（第 3 节），找茬是第一个吃螃蟹的落地例子。
+
+### 4.2 功能 ↔ §SK 语义对照
+
+每个业务动作都对应一个被三端共识、z3 可证明的 ΣLang 操作：
 
 | 找茬功能 | §SK 语义（spec_p0_socketkit.md） |
 |---------|----------------------------------|
@@ -239,47 +275,7 @@ python3 tools/sigma-runtime.py --domains       # 96/96
 | 受茬团 / 找茬团 | `team_create` / `team_join` / `team_share` |
 | 积分来源可追溯 | `points_ledger` |
 
-**落地三步走**：
-
-1. **起后端**：`python3 impl/python/sigma_app.py --serve --port 8080
-   --state state.json --audit-log audit.json`（或 Rust `cargo run -- --app-serve`；
-   双端业务流剧本 `--scenario` / `--app-scenario` 16/16 逐项一致）。
-2. **过验收**：`python3 tools/sigma-accept.py` 九道门禁全绿 + 找茬专项
-   （`--smoke` 36/36 / `--persist-test` 10/10 / `--audit-test` 5/5）——任何
-   部署改动放行前必跑。
-3. **扩展业务**：新规则**先写进 spec（§SK）→ 三端实现 → 语料进共识门禁 →
-   z3 证明 → App 委托**，再进产品——业务逻辑永远先以 ΣLang 语义存在并被证明，
-   任何语言的实现都只是它的投影。
-
-> 详细部署与运维见 `docs/deploy_zhaocha.md`（v0.68）。
-
----
-
-## Launch Checklist / 找茬开工检查清单（v0.85）
-
-上线前逐项勾选——每项都有可重复执行的命令与期望结果（覆盖 v0.71–v0.84
-服务化能力）：
-
-| # | 检查项 | 命令 | 期望 |
-|---|--------|------|------|
-| 1 | 启动自检（v0.75） | `python3 impl/python/sigma_app.py --serve --skip-startup-check` 去掉跳过标志 | 先过 §SK.6 门禁再监听，失败拒绝启动 |
-| 2 | 鉴权（v0.71） | `python3 impl/python/sigma_app.py --serve --auth-token SECRET` | 未带 ?token= 返回 401 |
-| 3 | 状态持久化（v0.51/72） | `--state state.json` | 重启不丢；原子写崩溃不损坏 |
-| 4 | 审计日志（v0.55） | `--audit-log audit.json` | 每个业务动作的 ΣLang 事件，可对账 |
-| 5 | 访问日志（v0.73） | `--log-file app.log` | 2xx=INFO / 4xx=WARNING 分级 |
-| 6 | 健康检查（v0.74） | `GET /health` | status ok + 门禁摘要（56/56、73 PROVED） |
-| 7 | HTTP 方法（v0.82） | 前端用 POST 变更、GET 查询 | 变更/查询端点双方法可用 |
-| 8 | 业务流剧本 | `--scenario`（16/16）+ `--frontend-scenario`（11/11） | CLI 与前端视角全绿 |
-| 9 | 双端对账（v0.84） | Python `--smoke` 与 Rust `--app-smoke` | 双端 36/36 逐项一致 |
-| 10 | 一键门禁 | `python3 tools/sigma-accept.py` | 10/10 全绿 |
-
-> 任何一项未过 = 开工放行前必须修复；门禁数字以当前 milestone 为准。
-
----
-
-## Run Guide / 找茬运行指南（v0.98）
-
-**一条命令开工（v0.94）**：
+### 4.3 启动与运行
 
 ```sh
 python3 impl/python/sigma_app.py --launch
@@ -290,1852 +286,188 @@ python3 impl/python/sigma_app.py --launch
 |------|------|------|
 | 前端页面 | `http://127.0.0.1:8000` | 注册/开户/发单/接单/提交/验收/提现/勋章（web/index.html，后端地址可在 localStorage `sigma_base` 配） |
 | API | `http://127.0.0.1:8080` | 全部业务端点（见 `docs/api_zhaocha.md`） |
-| 运行面板 | `http://127.0.0.1:8080/panel` | 业务摘要 + 门禁摘要（v0.95） |
-| 健康检查 | `http://127.0.0.1:8080/health` | 服务状态 + 配置摘要（v0.74） |
+| 运行面板 | `http://127.0.0.1:8080/panel` | 业务摘要 + 门禁摘要 |
+| 健康检查 | `http://127.0.0.1:8080/health` | 服务状态 + 配置摘要 |
 
-**开工后完整使用流程（§SK.6）**：
+**完整使用流程（§SK.6）**：注册两个用户（作者 7 / 找茬人 3）→ 作者开户额度（50）→
+发单（作者 7，赏金 100）→ 接单（找茬人 3）→ 提交 → 验收（作者 7 确认）→ 提现
+（找茬人 100）→ 勋章（契分 105）。
 
-1. 「我的会话」注册两个用户（作者 7 / 找茬人 3），作者开户额度（50）；
-2. 「发布需求」发单（作者 7，赏金 100）；
-3. 「任务列表」看到新单（待接单）→ 「任务操作」接单（找茬人 3）；
-4. 提交 → 验收（作者 7 确认）→ 任务变已完成；
-5. 提现（找茬人 100）→ 勋章（契分 105）。
+### 4.4 验收与上线
 
-**运行验收（v0.96）**：`python3 impl/python/sigma_app.py --run-accept` —— 8 项
-端到端（启动自检 / 双服务在线 / 全链路业务流 / /panel 实时数据 / 状态可持久化 /
-审计可对账）。**协议门禁**：`python3 tools/sigma-accept.py --report acceptance.json`
-十道门禁一键验收（v0.48/56/84/87）。
-
----
-
-## Deploy Guide / 找茬上线指南（v0.117）
-
-**上线启动（v0.94/101/102）**：
+- **运行验收**：`python3 impl/python/sigma_app.py --run-accept` —— 8 项端到端
+  （启动自检 / 双服务在线 / 全链路业务流 / /panel 实时数据 / 状态可持久化 / 审计可对账）；
+- **协议门禁**：`python3 tools/sigma-accept.py --report acceptance.json` —— 十道门禁
+  一键验收（本地与 CI 同一条命令）；
+- **上线启动**：
 
 ```sh
 python3 impl/python/sigma_app.py --launch \
   --port 8080 --web-port 8000 \
   --auth-token SECRET \
   --state data/state.json --audit-log data/audit.json --log-file data/app.log
-# 未显式指定 --state/--audit-log/--log-file 时自动落到 data/ 默认路径（v0.102）
+# 未显式指定 --state/--audit-log/--log-file 时自动落到 data/ 默认路径
 ```
 
-**生产配置（v0.101 透传）**：
+- **上线验收**：`python3 impl/python/sigma_app.py --deploy-accept`（9 项端到端）→
+  `python3 tools/sigma-accept.py --report acceptance.json`（十道门禁 + 运行验收
+  runtime 段）；
+- **运维要点**：数据在 `data/`（定期备份 state.json）；审计可对账（每个业务动作的
+  ΣLang 事件）；`GET /health` 监控服务状态；`GET /panel` 看运行状态与门禁摘要；
+  并发安全有 `--concurrency-test` 兜底；
+- 详细部署与运维见 `docs/deploy_zhaocha.md`。
 
-| 参数 | 说明 |
-|------|------|
-| `--port` / `--web-port` | 后端 API / 前端端口 |
-| `--auth-token SECRET` | 启用鉴权（未带 ?token= 返回 401，v0.71） |
-| `--state FILE` | 状态持久化（原子写，崩溃不损坏，v0.72/101） |
-| `--audit-log FILE` | ΣLang 审计日志（可对账，v0.55） |
-| `--log-file FILE` | 访问日志分级（2xx=INFO / 4xx=WARNING，v0.73） |
+### 4.5 上线检查清单（开工前逐项勾选）
 
-**上线验收**：`python3 impl/python/sigma_app.py --deploy-accept`（9 项端到端，
-v0.104）→ `python3 tools/sigma-accept.py --report acceptance.json`（十道门禁 +
-运行验收 runtime 段，v0.116）。
+| # | 检查项 | 命令 | 期望 |
+|---|--------|------|------|
+| 1 | 启动自检 | `python3 impl/python/sigma_app.py --serve`（去掉 --skip-startup-check） | 先过 §SK.6 门禁再监听，失败拒绝启动 |
+| 2 | 鉴权 | `--serve --auth-token SECRET` | 未带 ?token= 返回 401 |
+| 3 | 状态持久化 | `--state state.json` | 重启不丢；原子写崩溃不损坏 |
+| 4 | 审计日志 | `--audit-log audit.json` | 每个业务动作的 ΣLang 事件，可对账 |
+| 5 | 访问日志 | `--log-file app.log` | 2xx=INFO / 4xx=WARNING 分级 |
+| 6 | 健康检查 | `GET /health` | status ok + 门禁摘要 |
+| 7 | HTTP 方法 | 前端用 POST 变更、GET 查询 | 变更/查询端点双方法可用 |
+| 8 | 业务流剧本 | `--scenario` + `--frontend-scenario` | CLI 与前端视角全绿 |
+| 9 | 双端对账 | Python `--smoke` 与 Rust `--app-smoke` | 双端逐项一致 |
+| 10 | 一键门禁 | `python3 tools/sigma-accept.py` | 10/10 全绿 |
 
-**运维要点**：数据在 `data/`（定期备份 state.json）；审计可对账（每个业务动作
-的 ΣLang 事件）；`GET /health` 监控服务状态（v0.74）；`GET /panel` 看运行状态
-与门禁摘要（v0.95）；并发安全有 `--concurrency-test` 兜底（v0.103）。
+> 任何一项未过 = 开工放行前必须修复；门禁数字以当前 milestone 为准。
 
 ---
 
-## Status / 项目状态
-
-| Module / 模块 | Tests / 测试 | Status / 状态 |
-|---------------|-------------|---------------|
-| §T Time & Causal Order / 时间与因果序 | 17/17 | ✅ |
-| §E Error Algebra / 错误代数 | 16/16 | ✅ |
-| §C Confidence & Probabilistic Logic / 置信度与概率逻辑 | 37/37 | ✅ |
-| §I I/O Boundary & Effects / I/O 边界与效应 | 25/25 | ✅ |
-| §SK SocketKit Protocol / SocketKit 协议 | 14/14 | ✅ |
-| **Total / 总计** | **109/109** | **✅** |
-
-Verifier Consensus / 验证器共识: **56/56** corpus modules agree across Python / Rust / Elixir verifiers.
-56/56 语料库模块在 Python / Rust / Elixir 三个验证器上达成一致。
-
-**v0.89 收官总览 (2026-08-04)**: 协议 **spec 0.5.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（29 模块）、sigma-runtime **71/71 + 47/47**（--domains 含
-12 项跨操作不变量复核）、双端 HTTP 冒烟 **36/36 逐项一致**、sigma-accept
-**十道门禁 10/10**（含 CI 回归报告 artifact）、三端 0 warning；找茬产品落地
-（服务化十件套 + API 文档 + 部署文档 + 开工 checklist + 前端联调剧本）——
-从 v0.10 到 v0.89 里程碑链完整。
-
-**v0.119 收官总览 (2026-08-05)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（29 模块）、sigma-runtime **71/71 + 71/71**（--domains 含
-20 项链式不变量复核）、双端 HTTP 冒烟 **37/37 逐项一致**（含 /panel 对账）、
-sigma-accept **十道门禁 10/10**（含 --report 运行验收 runtime 段）、
---bench 性能基线（/health 99 req/s、/tasks 270 req/s）、三端 0 warning；
-找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 +
-上线验收 --deploy-accept + 上线指南 + 运行面板 /panel + 并发/性能兜底）——
-从 v0.10 到 v0.119 里程碑链完整。
-
-**v0.146 收官总览 (2026-08-05)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（30 模块，含 INV-SK-6 额度-托管联动 / INV-PF-4 交易链可加性）、
-sigma-runtime **71/71 + 71/71**（--domains 含 22 项链式不变量复核）、双端 HTTP
-冒烟 **38/38 逐项一致**（含 /panel 与 /stats 对账）、前端联调剧本 **19/19**、
-sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir 自检 **88/88**、
-stats-test **5/5**、三端 0 warning；找茬产品可上线（--launch 一键开工 + 默认
-持久化/审计/日志 + 前端三域面板 + 平台统计 /stats + 上线/运行/部署指南 +
-性能基线）——从 v0.10 到 v0.146 里程碑链完整（长期自主运行小阶段 13/496 推进
-中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.156 收官总览 (2026-08-05)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（31 模块，含 INV-SK-6 额度-托管联动 / INV-PF-4 交易链可加性 /
-INV-IN-5 混合货品可加链）、sigma-runtime **71/71 + 71/71**（--domains 含 23 项
-链式不变量复核）、双端 HTTP 冒烟 **43/43 逐项一致**（含 /panel、/stats 与
-/portfolio_* 对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**
-（含 --report runtime 段）、Elixir 三域自检（§SK 88/88、§IN 6/6、§PF 8/8）、
-stats-test **5/5**、portfolio-test **5/5**、三端 0 warning；找茬产品可上线
-（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 + 平台统计 /stats +
-金融市场 /portfolio_* + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.156
-里程碑链完整（长期自主运行小阶段 23/496 推进中，每 10 个同步仓库、每 100 个
-发布 PyPI）。
-
-**v0.166 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（32 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动）、sigma-runtime **71/71 +
-71/71**（--domains 含 24 项链式不变量复核）、双端 HTTP 冒烟 **44/44 逐项一致**
-（含 /panel、/stats、/portfolio_* 与供应链链对账）、前端联调剧本 **19/19**、
-sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir 三域自检
-（§SK 88/88、§IN 7/7、§PF 8/8）、stats-test **5/5**、portfolio-test **5/5**、
-inventory-test **5/5**、三端 0 warning；跨域联动语料（§SK→§PF→§IN 三域链
-sigma_cross_domain_ok）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认
-持久化/审计/日志 + 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* +
-供应链联动演示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.166 里程碑
-链完整（长期自主运行小阶段 33/496 推进中，每 10 个同步仓库、每 100 个发布
-PyPI）。
-
-**v0.176 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（33 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒）、
-sigma-runtime **71/71 + 71/71**（--domains 含 25 项链式不变量复核）、双端 HTTP
-冒烟 **46/46 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链与跨域链对账）、
-前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime
-段）、Elixir 四域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5）、stats-test
-**5/5**、portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test
-**5/5**、三端 0 warning；跨域联动语料与三域错误边界语料（§SK→§PF→§IN 链 +
-错误路径强化）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/
-审计/日志 + 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/
-三域联动演示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.176 里程碑链
-完整（长期自主运行小阶段 43/496 推进中，每 10 个同步仓库、每 100 个发布
-PyPI）。
-
-**v0.186 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动）、sigma-runtime **71/71 + 71/71**（--domains 含 26 项
-链式不变量复核）、双端 HTTP 冒烟 **48/48 逐项一致**（含 /panel、/stats、
-/portfolio_*、供应链链、跨域链与错误边界对账）、前端联调剧本 **19/19**、
-sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir 五域自检
-（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10）、stats-test
-**5/5**、portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test
-**5/5**、errors-test **7/7**、三端 0 warning；跨域联动语料、三域错误边界语料
-与标准库边界强化（§SK→§PF→§IN 链 + 错误路径 + std 边界用例 24 项）进共识
-56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域
-面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域联动演示 + 语义化
-错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.186 里程碑链完整
-（长期自主运行小阶段 53/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.196 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动）、sigma-runtime **71/71 +
-71/71**（--domains 含 27 项链式不变量复核）、双端 HTTP 冒烟 **50/50 逐项一致**
-（含 /panel、/stats、/portfolio_*、供应链链、跨域链、错误边界与积分链对账）、
-前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime
-段）、Elixir 六域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界
-10/10、积分链 3/3）、stats-test **5/5**、portfolio-test **5/5**、inventory-test
-**5/5**、cross-domain-test **5/5**、points-test **3/3**、errors-test **7/7**、
-三端 0 warning；跨域联动语料、三域错误边界语料与标准库双包边界强化
-（§SK→§PF→§IN 链 + 错误路径 + std math_base 24 项 + data_transform 18 项）
-进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端
-三域面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链联动
-演示 + 语义化错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.196
-里程碑链完整（长期自主运行小阶段 63/496 推进中，每 10 个同步仓库、每 100 个
-发布 PyPI）。
-
-**v0.206 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性）、
-sigma-runtime **71/71 + 71/71**（--domains 含 28 项链式不变量复核）、双端 HTTP
-冒烟 **51/51 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、跨域链、
-错误边界、积分链与库存链对账）、前端联调剧本 **19/19**、sigma-accept **十道
-门禁 10/10**（含 --report runtime 段）、Elixir 七域自检（§SK 88/88、§IN 7/7、
-§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、库存链 5/5）、stats-test
-**5/5**、portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test
-**5/5**、inventory-chain-test **5/5**、points-test **3/3**、errors-test
-**7/7**、三端 0 warning；跨域联动语料、三域错误边界语料与标准库三包边界强化
-（§SK→§PF→§IN 链 + 错误路径 + std math_base 24 项 + data_transform 18 项 +
-ai_confidence 8 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认
-持久化/审计/日志 + 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* +
-供应链/三域/积分链/库存链联动演示 + 语义化错误提示 + 上线/运行/部署指南 +
-性能基线）——从 v0.10 到 v0.206 里程碑链完整（长期自主运行小阶段 73/496
-推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.216 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动）、sigma-runtime **71/71 + 71/71**（--domains 含 29 项
-链式不变量复核）、双端 HTTP 冒烟 **53/53 逐项一致**（含 /panel、/stats、
-/portfolio_*、供应链链、跨域链、错误边界、积分链、库存链与信用链对账）、前端
-联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime 段）、
-Elixir 八域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、
-积分链 3/3、库存链 5/5、信用链 5/5）、stats-test **5/5**、portfolio-test
-**5/5**、inventory-test **5/5**、cross-domain-test **5/5**、
-inventory-chain-test **5/5**、points-test **3/3**、credit-test **3/3**、
-errors-test **7/7**、三端 0 warning；跨域联动语料、三域错误边界语料与标准库
-四包边界强化（§SK→§PF→§IN 链 + 错误路径 + std math_base 24 项 +
-data_transform 18 项 + ai_confidence 12 项）进共识 56/56；找茬产品可上线
-（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 + 平台统计 /stats +
-金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链联动演示 + 语义化错误
-提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.216 里程碑链完整
-（长期自主运行小阶段 83/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.226 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动）、sigma-runtime **71/71 +
-71/71**（--domains 含 30 项链式不变量复核）、双端 HTTP 冒烟 **56/56 逐项一致**
-（含 /panel、/stats、/portfolio_*、供应链链、跨域链、错误边界、积分链、库存链、
-信用链与全流程对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**
-（含 --report runtime 段）、Elixir 九域自检（§SK 88/88、§IN 7/7、§PF 8/8、
-三域链 5/5、错误边界 10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6）、
-stats-test **5/5**、portfolio-test **5/5**、inventory-test **5/5**、
-cross-domain-test **5/5**、inventory-chain-test **5/5**、full-test **5/5**、
-points-test **3/3**、credit-test **3/3**、errors-test **7/7**、三端 0 warning；
-跨域联动语料、三域错误边界语料与标准库五包边界强化（§SK→§PF→§IN 链 + 错误
-路径 + std math_base 24 项 + data_transform 24 项 + ai_confidence 12 项）进
-共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端
-三域面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/库存链/
-信用链/全流程联动演示 + 语义化错误提示 + 上线/运行/部署指南 + 性能基线）——
-从 v0.10 到 v0.226 里程碑链完整（长期自主运行小阶段 93/496 推进中，每 10 个
-同步仓库、每 100 个发布 PyPI）。
-
-**v0.236 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性）、
-sigma-runtime **71/71 + 71/71**（--domains 含 31 项链式不变量复核）、双端 HTTP
-冒烟 **58/58 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、跨域链、
-错误边界、积分链、库存链、信用链、全流程与审计对账）、前端联调剧本 **19/19**、
-sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir 十域自检
-（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、
-库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3）、stats-test **5/5**、
-portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test **5/5**、
-inventory-chain-test **5/5**、full-test **5/5**、points-test **3/3**、
-credit-test **3/3**、audit-test **6/6**、errors-test **7/7**、三端 0 warning；
-跨域联动语料、三域错误边界语料与标准库六包边界强化（§SK→§PF→§IN 链 + 错误
-路径 + std math_base 27 项 + data_transform 24 项 + ai_confidence 12 项）进
-共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端
-三域面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/库存链/
-信用链/全流程联动演示 + 审计轨迹视图 + 语义化错误提示 + 上线/运行/部署指南 +
-性能基线）——从 v0.10 到 v0.236 里程碑链完整（长期自主运行小阶段 103/496
-推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.246 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动）、sigma-runtime **71/71 + 71/71**（--domains 含 32 项
-链式不变量复核）、双端 HTTP 冒烟 **60/60 逐项一致**（含 /panel、/stats、
-/portfolio_*、供应链链、跨域链、错误边界、积分链、库存链、信用链、全流程、
-审计与贡献分对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**
-（含 --report runtime 段）、Elixir 十一域自检（§SK 88/88、§IN 7/7、§PF 8/8、
-三域链 5/5、错误边界 10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、
-审计链 3/3、贡献分 3/3）、stats-test **5/5**、portfolio-test **5/5**、
-inventory-test **5/5**、cross-domain-test **5/5**、inventory-chain-test
-**5/5**、full-test **5/5**、points-test **3/3**、credit-test **3/3**、
-audit-test **6/6**、contribution-test **2/2**、errors-test **7/7**、三端
-0 warning；跨域联动语料、三域错误边界语料与标准库七包边界强化（§SK→§PF→§IN
-链 + 错误路径 + std math_base 27 项 + data_transform 33 项 + ai_confidence
-12 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志
-+ 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/
-库存链/信用链/全流程联动演示 + 审计轨迹视图 + 贡献分演示 + 语义化错误提示 +
-上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.246 里程碑链完整（长期自主
-运行小阶段 113/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.256 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动）、sigma-runtime **71/71 +
-71/71**（--domains 含 33 项链式不变量复核）、双端 HTTP 冒烟 **61/61 逐项一致**
-（含 /panel、/stats、/portfolio_*、供应链链、跨域链、错误边界、积分链、库存链、
-信用链、全流程、审计、贡献分与额度链对账）、前端联调剧本 **19/19**、
-sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir 十二域自检
-（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、
-库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、额度链 4/4）、
-stats-test **5/5**、portfolio-test **5/5**、inventory-test **5/5**、
-cross-domain-test **5/5**、inventory-chain-test **5/5**、full-test **5/5**、
-points-test **3/3**、credit-test **3/3**、audit-test **6/6**、
-contribution-test **2/2**、quota-flow-test **2/2**、errors-test **7/7**、
-三端 0 warning；跨域联动语料、三域错误边界语料与标准库八包边界强化（§SK→§PF→
-§IN 链 + 错误路径 + std math_base 27 项 + data_transform 33 项 + ai_confidence
-16 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志
-+ 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/
-库存链/信用链/全流程联动演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 +
-语义化错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.256 里程碑链
-完整（长期自主运行小阶段 123/496 推进中，每 10 个同步仓库、每 100 个发布
-PyPI）。
-
-**v0.266 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动）、
-sigma-runtime **71/71 + 71/71**（--domains 含 34 项链式不变量复核）、双端 HTTP
-冒烟 **63/63 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、跨域链、
-错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链与勋章链对账）、
-前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime
-段）、Elixir 十三域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界
-10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、
-额度链 4/4、勋章链 4/4）、stats-test **5/5**、portfolio-test **5/5**、
-inventory-test **5/5**、cross-domain-test **5/5**、inventory-chain-test
-**5/5**、full-test **5/5**、points-test **3/3**、credit-test **3/3**、
-audit-test **6/6**、contribution-test **2/2**、quota-flow-test **2/2**、
-badge-test **2/2**、errors-test **7/7**、三端 0 warning；跨域联动语料、三域
-错误边界语料与标准库九包边界强化（§SK→§PF→§IN 链 + 错误路径 + std math_base
-29 项 + data_transform 33 项 + ai_confidence 16 项）进共识 56/56；找茬产品可
-上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 + 平台统计
-/stats + 金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/全流程联动
-演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 + 语义化错误提示 +
-上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.266 里程碑链完整（长期自主
-运行小阶段 133/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.276 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性）、sigma-runtime **71/71 + 71/71**（--domains 含 35 项
-链式不变量复核）、双端 HTTP 冒烟 **65/65 逐项一致**（含 /panel、/stats、
-/portfolio_*、供应链链、跨域链、错误边界、积分链、库存链、信用链、全流程、
-审计、贡献分、额度链、勋章链与库存流转对账）、前端联调剧本 **19/19**、
-sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir 十四域自检
-（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、
-库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、额度链 4/4、
-勋章链 4/4、库存流转 4/4）、stats-test **5/5**、portfolio-test **5/5**、
-inventory-test **5/5**、cross-domain-test **5/5**、inventory-chain-test
-**5/5**、full-test **5/5**、points-test **3/3**、credit-test **3/3**、
-audit-test **6/6**、contribution-test **2/2**、quota-flow-test **2/2**、
-badge-test **2/2**、inventory-flow-test **4/4**、errors-test **7/7**、三端
-0 warning；跨域联动语料、三域错误边界语料与标准库十包边界强化（§SK→§PF→§IN
-链 + 错误路径 + std math_base 29 项 + data_transform 42 项 + ai_confidence
-16 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志
-+ 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/
-库存链/信用链/全流程联动演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 +
-勋章链演示 + 库存流转演示 + 语义化错误提示 + 上线/运行/部署指南 + 性能基线）
-——从 v0.10 到 v0.276 里程碑链完整（长期自主运行小阶段 143/496 推进中，每 10
-个同步仓库、每 100 个发布 PyPI）。
-
-**v0.286 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动）、sigma-runtime
-**71/71 + 71/71**（--domains 含 36 项链式不变量复核）、双端 HTTP 冒烟 **67/67
-逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、跨域链、错误边界、积分链、
-库存链、信用链、全流程、审计、贡献分、额度链、勋章链、库存流转与组合流转对账）、
-前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime
-段）、Elixir 十五域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界
-10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、
-额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5）、stats-test **5/5**、
-portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test **5/5**、
-inventory-chain-test **5/5**、full-test **5/5**、points-test **3/3**、
-credit-test **3/3**、audit-test **6/6**、contribution-test **2/2**、
-quota-flow-test **2/2**、badge-test **2/2**、inventory-flow-test **4/4**、
-portfolio-flow-test **5/5**、errors-test **7/7**、三端 0 warning；跨域联动语料、
-三域错误边界语料与标准库十一包边界强化（§SK→§PF→§IN 链 + 错误路径 + std
-math_base 29 项 + data_transform 42 项 + ai_confidence 20 项）进共识 56/56；
-找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 +
-平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/
-全流程联动演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 +
-库存流转演示 + portfolio 流转演示 + 语义化错误提示 + 上线/运行/部署指南 +
-性能基线）——从 v0.10 到 v0.286 里程碑链完整（长期自主运行小阶段 153/496
-推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.296 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链）、sigma-runtime **59/59 + 72/72**（--domains 含 37 项链式
-不变量复核）、双端 HTTP 冒烟 **70/70 + 36/36 逐项一致**（含 /panel、/stats、
-/portfolio_*、供应链链、跨域链、错误边界、积分链、库存链、信用链、全流程、
-审计、贡献分、额度链、勋章链、库存流转、组合流转与三链联动对账）、前端联调
-剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime 段）、
-Elixir 十六域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、
-积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、
-额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3）、
-stats-test **5/5**、portfolio-test **5/5**、inventory-test **5/5**、
-cross-domain-test **5/5**、inventory-chain-test **5/5**、full-test **5/5**、
-points-test **3/3**、credit-test **3/3**、audit-test **6/6**、
-contribution-test **2/2**、quota-flow-test **2/2**、badge-test **2/2**、
-inventory-flow-test **4/4**、portfolio-flow-test **5/5**、credit-badge-test
-**3/3**、web-test **5/5**、errors-test **7/7**、三端 0 warning；跨域联动语料、
-三域错误边界语料与标准库十一包边界强化（§SK→§PF→§IN 链 + 错误路径 + std
-math_base 31 项 + data_transform 42 项 + ai_confidence 20 项）进共识 56/56；
-找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 +
-平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/
-全流程/三链联动演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 +
-库存流转演示 + portfolio 流转演示 + 语义化错误提示 + 上线/运行/部署指南 +
-性能基线）——从 v0.10 到 v0.296 里程碑链完整（长期自主运行小阶段 164/496
-推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.306 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链）、sigma-runtime
-**59/59 + 73/73**（--domains 含 38 项链式不变量复核）、双端 HTTP 冒烟
-**72/72 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、跨域链、
-错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链、勋章链、
-库存流转、组合流转、三链联动与积分-配额联动对账）、前端联调剧本 **19/19**、
-sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir 十七域自检
-（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、
-库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、额度链 4/4、
-勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额联动 3/3）、
-stats-test **5/5**、portfolio-test **5/5**、inventory-test **5/5**、
-cross-domain-test **5/5**、inventory-chain-test **5/5**、full-test **5/5**、
-points-test **3/3**、credit-test **3/3**、audit-test **6/6**、
-contribution-test **2/2**、quota-flow-test **2/2**、badge-test **2/2**、
-inventory-flow-test **4/4**、portfolio-flow-test **5/5**、credit-badge-test
-**3/3**、points-quota-test **2/2**、web-test **5/5**、errors-test **7/7**、
-三端 0 warning；跨域联动语料、三域错误边界语料与标准库十一包边界强化
-（§SK→§PF→§IN 链 + 错误路径 + std math_base 31 项 + data_transform 42 项 +
-ai_confidence 24 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认
-持久化/审计/日志 + 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* +
-供应链/三域/积分链/库存链/信用链/全流程/三链联动/积分-配额联动演示 + 审计轨迹
-视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio 流转
-演示 + 语义化错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.306
-里程碑链完整（长期自主运行小阶段 174/496 推进中，每 10 个同步仓库、每 100 个
-发布 PyPI）。
-
-**v0.316 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链）、sigma-runtime **59/59 + 74/74**（--domains 含 39 项链式不变量复核）、
-双端 HTTP 冒烟 **75/75 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、
-供应链链、跨域链、错误边界、积分链、库存链、信用链、全流程、审计、贡献分、
-额度链、勋章链、库存流转、组合流转、三链联动、积分-配额联动与三维联动对账）、
-前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime
-段）、Elixir 十八域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界
-10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、
-额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额
-联动 3/3、三维联动 4/4）、stats-test **5/5**、portfolio-test **5/5**、
-inventory-test **5/5**、cross-domain-test **5/5**、inventory-chain-test
-**5/5**、full-test **5/5**、points-test **3/3**、credit-test **3/3**、
-audit-test **6/6**、contribution-test **2/2**、quota-flow-test **2/2**、
-badge-test **2/2**、inventory-flow-test **4/4**、portfolio-flow-test **5/5**、
-credit-badge-test **3/3**、points-quota-test **2/2**、task-points-quota-test
-**3/3**、web-test **5/5**、errors-test **7/7**、三端 0 warning；跨域联动语料、
-三域错误边界语料与标准库十一包边界强化（§SK→§PF→§IN 链 + 错误路径 + std
-math_base 31 项 + data_transform 48 项 + ai_confidence 24 项）进共识 56/56；
-找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 +
-平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/
-全流程/三链联动/积分-配额联动/三维联动演示 + 审计轨迹视图 + 贡献分演示 +
-额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio 流转演示 + 语义化错误提示
-+ 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.316 里程碑链完整（长期自主
-运行小阶段 184/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.326 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链）、sigma-runtime **59/59 + 75/75**（--domains
-含 40 项链式不变量复核）、双端 HTTP 冒烟 **77/77 + 36/36 逐项一致**（含 /panel、
-/stats、/portfolio_*、供应链链、跨域链、错误边界、积分链、库存链、信用链、
-全流程、审计、贡献分、额度链、勋章链、库存流转、组合流转、三链联动、积分-配额
-联动、三维联动与估值-风险联动对账）、前端联调剧本 **19/19**、sigma-accept
-**十道门禁 10/10**（含 --report runtime 段）、Elixir 十九域自检（§SK 88/88、
-§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、库存链 5/5、信用链
-5/5、全流程 6/6、审计链 3/3、贡献分 3/3、额度链 4/4、勋章链 4/4、库存流转 4/4、
-组合流转 5/5、三链联动 3/3、积分-配额联动 3/3、三维联动 4/4、估值-风险联动
-3/3）、stats-test **5/5**、portfolio-test **5/5**、inventory-test **5/5**、
-cross-domain-test **5/5**、inventory-chain-test **5/5**、full-test **5/5**、
-points-test **3/3**、credit-test **3/3**、audit-test **6/6**、
-contribution-test **2/2**、quota-flow-test **2/2**、badge-test **2/2**、
-inventory-flow-test **4/4**、portfolio-flow-test **5/5**、credit-badge-test
-**3/3**、points-quota-test **2/2**、task-points-quota-test **3/3**、
-valuation-risk-test **3/3**、web-test **5/5**、errors-test **7/7**、三端
-0 warning；跨域联动语料、三域错误边界语料与标准库十一包边界强化（§SK→§PF→§IN
-链 + 错误路径 + std math_base 35 项 + data_transform 48 项 + ai_confidence
-24 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志
-+ 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/
-库存链/信用链/全流程/三链联动/积分-配额联动/三维联动/估值-风险联动演示 + 审计
-轨迹视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio
-流转演示 + 语义化错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到
-v0.326 里程碑链完整（长期自主运行小阶段 194/496 推进中，每 10 个同步仓库、
-每 100 个发布 PyPI）。
-
-**v0.336 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链）、
-sigma-runtime **59/59 + 76/76**（--domains 含 41 项链式不变量复核）、双端 HTTP
-冒烟 **79/79 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、
-跨域链、错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链、勋章链、
-库存流转、组合流转、三链联动、积分-配额联动、三维联动、估值-风险联动与库存-履约
-联动对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含
---report runtime 段）、Elixir 二十域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链
-5/5、错误边界 10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链
-3/3、贡献分 3/3、额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动
-3/3、积分-配额联动 3/3、三维联动 4/4、估值-风险联动 3/3、库存-履约联动 3/3）、
-stats-test **5/5**、portfolio-test **5/5**、inventory-test **5/5**、
-cross-domain-test **5/5**、inventory-chain-test **5/5**、full-test **5/5**、
-points-test **3/3**、credit-test **3/3**、audit-test **6/6**、
-contribution-test **2/2**、quota-flow-test **2/2**、badge-test **2/2**、
-inventory-flow-test **4/4**、portfolio-flow-test **5/5**、credit-badge-test
-**3/3**、points-quota-test **2/2**、task-points-quota-test **3/3**、
-valuation-risk-test **3/3**、stock-fillrate-test **3/3**、web-test **5/5**、
-errors-test **7/7**、三端 0 warning；跨域联动语料、三域错误边界语料与标准库
-十一包边界强化（§SK→§PF→§IN 链 + 错误路径 + std math_base 35 项 +
-data_transform 48 项 + ai_confidence 28 项）进共识 56/56；找茬产品可上线
-（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 + 平台统计 /stats +
-金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/全流程/三链联动/
-积分-配额联动/三维联动/估值-风险联动/库存-履约联动演示 + 审计轨迹视图 + 贡献分
-演示 + 额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio 流转演示 + 语义化
-错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.336 里程碑链完整
-（长期自主运行小阶段 204/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.346 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链）、sigma-runtime **59/59 + 77/77**
-（--domains 含 42 项链式不变量复核）、双端 HTTP 冒烟 **82/82 + 36/36 逐项一致**
-（含 /panel、/stats、/portfolio_*、供应链链、跨域链、错误边界、积分链、库存链、
-信用链、全流程、审计、贡献分、额度链、勋章链、库存流转、组合流转、三链联动、
-积分-配额联动、三维联动、估值-风险联动、库存-履约联动与验收-积分-契分联动对账）、
-前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime
-段）、Elixir 二十一域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界
-10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、
-额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额
-联动 3/3、三维联动 4/4、估值-风险联动 3/3、库存-履约联动 3/3、验收-积分-契分
-联动 4/4）、stats-test **5/5**、portfolio-test **5/5**、inventory-test **5/5**、
-cross-domain-test **5/5**、inventory-chain-test **5/5**、full-test **5/5**、
-points-test **3/3**、credit-test **3/3**、audit-test **6/6**、
-contribution-test **2/2**、quota-flow-test **2/2**、badge-test **2/2**、
-inventory-flow-test **4/4**、portfolio-flow-test **5/5**、credit-badge-test
-**3/3**、points-quota-test **2/2**、task-points-quota-test **3/3**、
-valuation-risk-test **3/3**、stock-fillrate-test **3/3**、
-accept-points-credit-test **3/3**、web-test **5/5**、errors-test **7/7**、三端
-0 warning；跨域联动语料、三域错误边界语料与标准库十一包边界强化（§SK→§PF→§IN
-链 + 错误路径 + std math_base 35 项 + data_transform 54 项 + ai_confidence
-28 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志
-+ 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/
-库存链/信用链/全流程/三链联动/积分-配额联动/三维联动/估值-风险联动/库存-履约
-联动/验收-积分-契分联动演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 + 勋章链
-演示 + 库存流转演示 + portfolio 流转演示 + 语义化错误提示 + 上线/运行/部署指南
-+ 性能基线）——从 v0.10 到 v0.346 里程碑链完整（长期自主运行小阶段 214/496
-推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.356 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链）、
-sigma-runtime **59/59 + 78/78**（--domains 含 43 项链式不变量复核）、双端 HTTP
-冒烟 **84/84 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、
-跨域链、错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链、勋章链、
-库存流转、组合流转、三链联动、积分-配额联动、三维联动、估值-风险联动、库存-履约
-联动、验收-积分-契分联动与双资产交易链对账）、前端联调剧本 **19/19**、
-sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir 二十二域自检
-（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、库存链
-5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、额度链 4/4、勋章链 4/4、
-库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额联动 3/3、三维联动 4/4、
-估值-风险联动 3/3、库存-履约联动 3/3、验收-积分-契分联动 4/4、双资产交易链
-4/4）、stats-test **5/5**、portfolio-test **5/5**、inventory-test **5/5**、
-cross-domain-test **5/5**、inventory-chain-test **5/5**、full-test **5/5**、
-points-test **3/3**、credit-test **3/3**、audit-test **6/6**、
-contribution-test **2/2**、quota-flow-test **2/2**、badge-test **2/2**、
-inventory-flow-test **4/4**、portfolio-flow-test **5/5**、credit-badge-test
-**3/3**、points-quota-test **2/2**、task-points-quota-test **3/3**、
-valuation-risk-test **3/3**、stock-fillrate-test **3/3**、
-accept-points-credit-test **3/3**、dual-asset-test **4/4**、web-test **5/5**、
-errors-test **7/7**、三端 0 warning；跨域联动语料、三域错误边界语料与标准库
-十一包边界强化（§SK→§PF→§IN 链 + 错误路径 + std math_base 39 项 +
-data_transform 54 项 + ai_confidence 28 项）进共识 56/56；找茬产品可上线
-（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 + 平台统计 /stats +
-金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/全流程/三链联动/
-积分-配额联动/三维联动/估值-风险联动/库存-履约联动/验收-积分-契分联动/双资产
-交易链演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 + 库存流转
-演示 + portfolio 流转演示 + 语义化错误提示 + 上线/运行/部署指南 + 性能基线）
-——从 v0.10 到 v0.356 里程碑链完整（长期自主运行小阶段 224/496 推进中，每 10
-个同步仓库、每 100 个发布 PyPI）。
-
-**v0.366 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链）、sigma-runtime **59/59 + 79/79**（--domains 含
-44 项链式不变量复核）、双端 HTTP 冒烟 **86/86 + 36/36 逐项一致**（含 /panel、
-/stats、/portfolio_*、供应链链、跨域链、错误边界、积分链、库存链、信用链、
-全流程、审计、贡献分、额度链、勋章链、库存流转、组合流转、三链联动、积分-配额
-联动、三维联动、估值-风险联动、库存-履约联动、验收-积分-契分联动、双资产交易链
-与四链联动对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含
---report runtime 段）、Elixir 二十三域自检（§SK 88/88、§IN 7/7、§PF 8/8、
-三域链 5/5、错误边界 10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、
-审计链 3/3、贡献分 3/3、额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、
-三链联动 3/3、积分-配额联动 3/3、三维联动 4/4、估值-风险联动 3/3、库存-履约
-联动 3/3、验收-积分-契分联动 4/4、双资产交易链 4/4、四链联动 3/3）、
-stats-test **5/5**、portfolio-test **5/5**、inventory-test **5/5**、
-cross-domain-test **5/5**、inventory-chain-test **5/5**、full-test **5/5**、
-points-test **3/3**、credit-test **3/3**、audit-test **6/6**、
-contribution-test **2/2**、quota-flow-test **2/2**、badge-test **2/2**、
-inventory-flow-test **4/4**、portfolio-flow-test **5/5**、credit-badge-test
-**3/3**、points-quota-test **2/2**、task-points-quota-test **3/3**、
-valuation-risk-test **3/3**、stock-fillrate-test **3/3**、
-accept-points-credit-test **3/3**、dual-asset-test **4/4**、
-receive-ship-fillrate-test **3/3**、web-test **5/5**、errors-test **7/7**、三端
-0 warning；跨域联动语料、三域错误边界语料与标准库十一包边界强化（§SK→§PF→§IN
-链 + 错误路径 + std math_base 39 项 + data_transform 54 项 + ai_confidence
-32 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志
-+ 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/
-库存链/信用链/全流程/三链联动/积分-配额联动/三维联动/估值-风险联动/库存-履约
-联动/验收-积分-契分联动/双资产交易链/四链联动演示 + 审计轨迹视图 + 贡献分演示 +
-额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio 流转演示 + 语义化错误提示 +
-上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.366 里程碑链完整（长期自主
-运行小阶段 234/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.376 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链）、
-sigma-runtime **59/59 + 80/80**（--domains 含 45 项链式不变量复核）、双端 HTTP
-冒烟 **89/89 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、
-跨域链、错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链、勋章链、
-库存流转、组合流转、三链联动、积分-配额联动、三维联动、估值-风险联动、库存-履约
-联动、验收-积分-契分联动、双资产交易链、四链联动与提现-契分联动对账）、前端联调
-剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime 段）、
-Elixir 二十四域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、
-积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、
-额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额
-联动 3/3、三维联动 4/4、估值-风险联动 3/3、库存-履约联动 3/3、验收-积分-契分
-联动 4/4、双资产交易链 4/4、四链联动 3/3、提现-契分联动 3/3）、stats-test
-**5/5**、portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test
-**5/5**、inventory-chain-test **5/5**、full-test **5/5**、points-test **3/3**、
-credit-test **3/3**、audit-test **6/6**、contribution-test **2/2**、
-quota-flow-test **2/2**、badge-test **2/2**、inventory-flow-test **4/4**、
-portfolio-flow-test **5/5**、credit-badge-test **3/3**、points-quota-test
-**2/2**、task-points-quota-test **3/3**、valuation-risk-test **3/3**、
-stock-fillrate-test **3/3**、accept-points-credit-test **3/3**、dual-asset-test
-**4/4**、receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-web-test **5/5**、errors-test **7/7**、三端 0 warning；跨域联动语料、三域错误
-边界语料与标准库十一包边界强化（§SK→§PF→§IN 链 + 错误路径 + std math_base
-39 项 + data_transform 60 项 + ai_confidence 32 项）进共识 56/56；找茬产品可
-上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 + 平台统计 /stats
-+ 金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/全流程/三链联动/
-积分-配额联动/三维联动/估值-风险联动/库存-履约联动/验收-积分-契分联动/双资产
-交易链/四链联动/提现-契分联动演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 +
-勋章链演示 + 库存流转演示 + portfolio 流转演示 + 语义化错误提示 + 上线/运行/部署
-指南 + 性能基线）——从 v0.10 到 v0.376 里程碑链完整（长期自主运行小阶段 244/496
-推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.386 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链）、sigma-runtime **59/59 +
-81/81**（--domains 含 46 项链式不变量复核）、双端 HTTP 冒烟 **91/91 + 36/36
-逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、跨域链、错误边界、积分链、
-库存链、信用链、全流程、审计、贡献分、额度链、勋章链、库存流转、组合流转、三链
-联动、积分-配额联动、三维联动、估值-风险联动、库存-履约联动、验收-积分-契分联动、
-双资产交易链、四链联动、提现-契分联动与双资产估值-风险四链对账）、前端联调剧本
-**19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir
-二十五域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链
-3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、额度链 4/4、
-勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额联动 3/3、
-三维联动 4/4、估值-风险联动 3/3、库存-履约联动 3/3、验收-积分-契分联动 4/4、
-双资产交易链 4/4、四链联动 3/3、提现-契分联动 3/3、双资产估值-风险四链 4/4）、
-stats-test **5/5**、portfolio-test **5/5**、inventory-test **5/5**、
-cross-domain-test **5/5**、inventory-chain-test **5/5**、full-test **5/5**、
-points-test **3/3**、credit-test **3/3**、audit-test **6/6**、
-contribution-test **2/2**、quota-flow-test **2/2**、badge-test **2/2**、
-inventory-flow-test **4/4**、portfolio-flow-test **5/5**、credit-badge-test
-**3/3**、points-quota-test **2/2**、task-points-quota-test **3/3**、
-valuation-risk-test **3/3**、stock-fillrate-test **3/3**、
-accept-points-credit-test **3/3**、dual-asset-test **4/4**、
-receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、web-test **5/5**、errors-test **7/7**、三端
-0 warning；跨域联动语料、三域错误边界语料与标准库十一包边界强化（§SK→§PF→§IN
-链 + 错误路径 + std math_base 43 项 + data_transform 60 项 + ai_confidence
-32 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志
-+ 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/
-库存链/信用链/全流程/三链联动/积分-配额联动/三维联动/估值-风险联动/库存-履约
-联动/验收-积分-契分联动/双资产交易链/四链联动/提现-契分联动/双资产估值-风险四链
-演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 + 库存流转演示 +
-portfolio 流转演示 + 语义化错误提示 + 上线/运行/部署指南 + 性能基线）——从
-v0.10 到 v0.386 里程碑链完整（长期自主运行小阶段 254/496 推进中，每 10 个同步
-仓库、每 100 个发布 PyPI）。
-
-**v0.396 收官总览 (2026-08-06)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链）、
-sigma-runtime **59/59 + 82/82**（--domains 含 47 项链式不变量复核）、双端 HTTP
-冒烟 **93/93 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、
-跨域链、错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链、勋章链、
-库存流转、组合流转、三链联动、积分-配额联动、三维联动、估值-风险联动、库存-履约
-联动、验收-积分-契分联动、双资产交易链、四链联动、提现-契分联动、双资产估值-风险
-四链与双货品四链对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**
-（含 --report runtime 段）、Elixir 二十六域自检（§SK 88/88、§IN 7/7、§PF 8/8、
-三域链 5/5、错误边界 10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、
-审计链 3/3、贡献分 3/3、额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、
-三链联动 3/3、积分-配额联动 3/3、三维联动 4/4、估值-风险联动 3/3、库存-履约
-联动 3/3、验收-积分-契分联动 4/4、双资产交易链 4/4、四链联动 3/3、提现-契分联动
-3/3、双资产估值-风险四链 4/4、双货品四链联动 4/4）、stats-test **5/5**、
-portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test **5/5**、
-inventory-chain-test **5/5**、full-test **5/5**、points-test **3/3**、
-credit-test **3/3**、audit-test **6/6**、contribution-test **2/2**、
-quota-flow-test **2/2**、badge-test **2/2**、inventory-flow-test **4/4**、
-portfolio-flow-test **5/5**、credit-badge-test **3/3**、points-quota-test
-**2/2**、task-points-quota-test **3/3**、valuation-risk-test **3/3**、
-stock-fillrate-test **3/3**、accept-points-credit-test **3/3**、dual-asset-test
-**4/4**、receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、dual-item-four-link-test **4/4**、web-test **5/5**、
-errors-test **7/7**、三端 0 warning；跨域联动语料、三域错误边界语料与标准库
-十一包边界强化（§SK→§PF→§IN 链 + 错误路径 + std math_base 43 项 +
-data_transform 60 项 + ai_confidence 36 项）进共识 56/56；找茬产品可上线
-（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 + 平台统计 /stats +
-金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/全流程/三链联动/
-积分-配额联动/三维联动/估值-风险联动/库存-履约联动/验收-积分-契分联动/双资产
-交易链/四链联动/提现-契分联动/双资产估值-风险四链/双货品四链演示 + 审计轨迹视图
-+ 贡献分演示 + 额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio 流转演示 +
-语义化错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.396 里程碑链
-完整（长期自主运行小阶段 264/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.406 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链）、sigma-runtime **59/59 + 83/83**
-（--domains 含 48 项链式不变量复核）、双端 HTTP 冒烟 **98/98 + 36/36 逐项一致**
-（含 /panel、/stats、/portfolio_*、供应链链、跨域链、错误边界、积分链、库存链、
-信用链、全流程、审计、贡献分、额度链、勋章链、库存流转、组合流转、三链联动、
-积分-配额联动、三维联动、估值-风险联动、库存-履约联动、验收-积分-契分联动、
-双资产交易链、四链联动、提现-契分联动、双资产估值-风险四链、双货品四链与全业务链
-五链对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report
-runtime 段）、Elixir 二十六域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、
-错误边界 10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、
-贡献分 3/3、额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、
-积分-配额联动 3/3、三维联动 4/4、估值-风险联动 3/3、库存-履约联动 3/3、
-验收-积分-契分联动 4/4、双资产交易链 4/4、四链联动 3/3、提现-契分联动 3/3、
-双资产估值-风险四链 4/4、双货品四链联动 4/4）、stats-test **5/5**、
-portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test **5/5**、
-inventory-chain-test **5/5**、full-test **5/5**、points-test **3/3**、
-credit-test **3/3**、audit-test **6/6**、contribution-test **2/2**、
-quota-flow-test **2/2**、badge-test **2/2**、inventory-flow-test **4/4**、
-portfolio-flow-test **5/5**、credit-badge-test **3/3**、points-quota-test
-**2/2**、task-points-quota-test **3/3**、valuation-risk-test **3/3**、
-stock-fillrate-test **3/3**、accept-points-credit-test **3/3**、dual-asset-test
-**4/4**、receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、dual-item-four-link-test **4/4**、
-full-business-five-link-test **5/5**、web-test **5/5**、errors-test **7/7**、
-三端 0 warning；跨域联动语料、三域错误边界语料与标准库十一包边界强化
-（§SK→§PF→§IN 链 + 错误路径 + std math_base 43 项 + data_transform 66 项 +
-ai_confidence 36 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认
-持久化/审计/日志 + 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* +
-供应链/三域/积分链/库存链/信用链/全流程/三链联动/积分-配额联动/三维联动/
-估值-风险联动/库存-履约联动/验收-积分-契分联动/双资产交易链/四链联动/提现-契分
-联动/双资产估值-风险四链/双货品四链/全业务链五链演示 + 审计轨迹视图 + 贡献分演示
-+ 额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio 流转演示 + 语义化错误提示
-+ 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.406 里程碑链完整（长期自主
-运行小阶段 274/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.416 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链 / INV-PF-12 双资产等量买卖对消链）、
-sigma-runtime **59/59 + 84/84**（--domains 含 49 项链式不变量复核）、双端 HTTP
-冒烟 **102/102 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、
-跨域链、错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链、勋章链、
-库存流转、组合流转、三链联动、积分-配额联动、三维联动、估值-风险联动、库存-履约
-联动、验收-积分-契分联动、双资产交易链、四链联动、提现-契分联动、双资产估值-风险
-四链、双货品四链、全业务链五链与验收-提现-契分-勋章四链对账）、前端联调剧本
-**19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir
-二十七域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链
-3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、额度链 4/4、
-勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额联动 3/3、
-三维联动 4/4、估值-风险联动 3/3、库存-履约联动 3/3、验收-积分-契分联动 4/4、
-双资产交易链 4/4、四链联动 3/3、提现-契分联动 3/3、双资产估值-风险四链 4/4、
-双货品四链联动 4/4、验收-提现-契分-勋章四链 4/4）、stats-test **5/5**、
-portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test **5/5**、
-inventory-chain-test **5/5**、full-test **5/5**、points-test **3/3**、
-credit-test **3/3**、audit-test **6/6**、contribution-test **2/2**、
-quota-flow-test **2/2**、badge-test **2/2**、inventory-flow-test **4/4**、
-portfolio-flow-test **5/5**、credit-badge-test **3/3**、points-quota-test
-**2/2**、task-points-quota-test **3/3**、valuation-risk-test **3/3**、
-stock-fillrate-test **3/3**、accept-points-credit-test **3/3**、dual-asset-test
-**4/4**、receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、dual-item-four-link-test **4/4**、
-full-business-five-link-test **5/5**、accept-withdraw-credit-badge-test **4/4**、
-web-test **5/5**、errors-test **7/7**、三端 0 warning；跨域联动语料、三域错误
-边界语料与标准库十一包边界强化（§SK→§PF→§IN 链 + 错误路径 + std math_base
-47 项 + data_transform 66 项 + ai_confidence 36 项）进共识 56/56；找茬产品可
-上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 + 平台统计 /stats
-+ 金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/全流程/三链联动/
-积分-配额联动/三维联动/估值-风险联动/库存-履约联动/验收-积分-契分联动/双资产
-交易链/四链联动/提现-契分联动/双资产估值-风险四链/双货品四链/全业务链五链/
-验收-提现-契分-勋章四链演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 + 勋章链
-演示 + 库存流转演示 + portfolio 流转演示 + 语义化错误提示 + 上线/运行/部署指南
-+ 性能基线）——从 v0.10 到 v0.416 里程碑链完整（长期自主运行小阶段 284/496
-推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.426 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链 / INV-PF-12 双资产等量买卖对消链 /
-INV-IN-12 双货品等量入出对消链）、sigma-runtime **59/59 + 85/85**（--domains
-含 50 项链式不变量复核）、双端 HTTP 冒烟 **104/104 + 36/36 逐项一致**（含
-/panel、/stats、/portfolio_*、供应链链、跨域链、错误边界、积分链、库存链、信用链、
-全流程、审计、贡献分、额度链、勋章链、库存流转、组合流转、三链联动、积分-配额
-联动、三维联动、估值-风险联动、库存-履约联动、验收-积分-契分联动、双资产交易链、
-四链联动、提现-契分联动、双资产估值-风险四链、双货品四链、全业务链五链、
-验收-提现-契分-勋章四链与双资产等量买卖对消链对账）、前端联调剧本 **19/19**、
-sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir 二十八域自检
-（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、库存链
-5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、额度链 4/4、勋章链 4/4、
-库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额联动 3/3、三维联动 4/4、
-估值-风险联动 3/3、库存-履约联动 3/3、验收-积分-契分联动 4/4、双资产交易链 4/4、
-四链联动 3/3、提现-契分联动 3/3、双资产估值-风险四链 4/4、双货品四链联动 4/4、
-验收-提现-契分-勋章四链 4/4、双资产等量买卖对消链 4/4）、stats-test **5/5**、
-portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test **5/5**、
-inventory-chain-test **5/5**、full-test **5/5**、points-test **3/3**、
-credit-test **3/3**、audit-test **6/6**、contribution-test **2/2**、
-quota-flow-test **2/2**、badge-test **2/2**、inventory-flow-test **4/4**、
-portfolio-flow-test **5/5**、credit-badge-test **3/3**、points-quota-test
-**2/2**、task-points-quota-test **3/3**、valuation-risk-test **3/3**、
-stock-fillrate-test **3/3**、accept-points-credit-test **3/3**、dual-asset-test
-**4/4**、receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、dual-item-four-link-test **4/4**、
-full-business-five-link-test **5/5**、accept-withdraw-credit-badge-test **4/4**、
-dual-asset-equal-trade-test **4/4**、web-test **5/5**、errors-test **7/7**、三端
-0 warning；跨域联动语料、三域错误边界语料与标准库十一包边界强化（§SK→§PF→§IN
-链 + 错误路径 + std math_base 47 项 + data_transform 66 项 + ai_confidence
-40 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志
-+ 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/
-库存链/信用链/全流程/三链联动/积分-配额联动/三维联动/估值-风险联动/库存-履约
-联动/验收-积分-契分联动/双资产交易链/四链联动/提现-契分联动/双资产估值-风险四链/
-双货品四链/全业务链五链/验收-提现-契分-勋章四链/双资产等量买卖对消链演示 + 审计
-轨迹视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio 流转
-演示 + 语义化错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.426
-里程碑链完整（长期自主运行小阶段 294/496 推进中，每 10 个同步仓库、每 100 个
-发布 PyPI）。
-
-**v0.436 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链 / INV-PF-12 双资产等量买卖对消链 /
-INV-IN-12 双货品等量入出对消链 / INV-SK-19 验收-提现-契分-贡献-勋章五链守恒链）、
-sigma-runtime **59/59 + 86/86**（--domains 含 51 项链式不变量复核）、双端 HTTP
-冒烟 **106/106 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、
-跨域链、错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链、勋章链、
-库存流转、组合流转、三链联动、积分-配额联动、三维联动、估值-风险联动、库存-履约
-联动、验收-积分-契分联动、双资产交易链、四链联动、提现-契分联动、双资产估值-风险
-四链、双货品四链、全业务链五链、验收-提现-契分-勋章四链、双资产等量买卖对消链与
-双货品等量入出对消链对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁
-10/10**（含 --report runtime 段）、Elixir 二十九域自检（§SK 88/88、§IN 7/7、
-§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、库存链 5/5、信用链 5/5、
-全流程 6/6、审计链 3/3、贡献分 3/3、额度链 4/4、勋章链 4/4、库存流转 4/4、
-组合流转 5/5、三链联动 3/3、积分-配额联动 3/3、三维联动 4/4、估值-风险联动 3/3、
-库存-履约联动 3/3、验收-积分-契分联动 4/4、双资产交易链 4/4、四链联动 3/3、
-提现-契分联动 3/3、双资产估值-风险四链 4/4、双货品四链联动 4/4、验收-提现-契分-
-勋章四链 4/4、双资产等量买卖对消链 4/4、双货品等量入出对消链 3/3）、stats-test
-**5/5**、portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test
-**5/5**、inventory-chain-test **5/5**、full-test **5/5**、points-test **3/3**、
-credit-test **3/3**、audit-test **6/6**、contribution-test **2/2**、
-quota-flow-test **2/2**、badge-test **2/2**、inventory-flow-test **4/4**、
-portfolio-flow-test **5/5**、credit-badge-test **3/3**、points-quota-test
-**2/2**、task-points-quota-test **3/3**、valuation-risk-test **3/3**、
-stock-fillrate-test **3/3**、accept-points-credit-test **3/3**、dual-asset-test
-**4/4**、receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、dual-item-four-link-test **4/4**、
-full-business-five-link-test **5/5**、accept-withdraw-credit-badge-test **4/4**、
-dual-asset-equal-trade-test **4/4**、dual-item-equal-trade-test **3/3**、
-web-test **5/5**、errors-test **7/7**、三端 0 warning；跨域联动语料、三域错误
-边界语料与标准库十一包边界强化（§SK→§PF→§IN 链 + 错误路径 + std math_base
-47 项 + data_transform 72 项 + ai_confidence 40 项）进共识 56/56；找茬产品可
-上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 + 平台统计 /stats
-+ 金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/全流程/三链联动/
-积分-配额联动/三维联动/估值-风险联动/库存-履约联动/验收-积分-契分联动/双资产
-交易链/四链联动/提现-契分联动/双资产估值-风险四链/双货品四链/全业务链五链/
-验收-提现-契分-勋章四链/双资产等量买卖对消链/双货品等量入出对消链演示 + 审计轨迹
-视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio 流转演示
-+ 语义化错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.436 里程碑链
-完整（长期自主运行小阶段 304/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.446 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链 / INV-PF-12 双资产等量买卖对消链 /
-INV-IN-12 双货品等量入出对消链 / INV-SK-19 验收-提现-契分-贡献-勋章五链守恒链 /
-INV-PF-13 双资产等量买卖对消-估值-风险五链）、sigma-runtime **59/59 + 87/87**
-（--domains 含 52 项链式不变量复核）、双端 HTTP 冒烟 **111/111 + 36/36 逐项一致**
-（含 /panel、/stats、/portfolio_*、供应链链、跨域链、错误边界、积分链、库存链、
-信用链、全流程、审计、贡献分、额度链、勋章链、库存流转、组合流转、三链联动、
-积分-配额联动、三维联动、估值-风险联动、库存-履约联动、验收-积分-契分联动、
-双资产交易链、四链联动、提现-契分联动、双资产估值-风险四链、双货品四链、全业务链
-五链、验收-提现-契分-勋章四链、双资产等量买卖对消链、双货品等量入出对消链与五链
-守恒对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report
-runtime 段）、Elixir 三十域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、
-错误边界 10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、
-贡献分 3/3、额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、
-积分-配额联动 3/3、三维联动 4/4、估值-风险联动 3/3、库存-履约联动 3/3、
-验收-积分-契分联动 4/4、双资产交易链 4/4、四链联动 3/3、提现-契分联动 3/3、
-双资产估值-风险四链 4/4、双货品四链联动 4/4、验收-提现-契分-勋章四链 4/4、
-双资产等量买卖对消链 4/4、双货品等量入出对消链 3/3、验收-提现-契分-贡献-勋章
-五链 5/5）、stats-test **5/5**、portfolio-test **5/5**、inventory-test **5/5**、
-cross-domain-test **5/5**、inventory-chain-test **5/5**、full-test **5/5**、
-points-test **3/3**、credit-test **3/3**、audit-test **6/6**、
-contribution-test **2/2**、quota-flow-test **2/2**、badge-test **2/2**、
-inventory-flow-test **4/4**、portfolio-flow-test **5/5**、credit-badge-test
-**3/3**、points-quota-test **2/2**、task-points-quota-test **3/3**、
-valuation-risk-test **3/3**、stock-fillrate-test **3/3**、
-accept-points-credit-test **3/3**、dual-asset-test **4/4**、
-receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、dual-item-four-link-test **4/4**、
-full-business-five-link-test **5/5**、accept-withdraw-credit-badge-test **4/4**、
-dual-asset-equal-trade-test **4/4**、dual-item-equal-trade-test **3/3**、
-accept-withdraw-credit-contribution-badge-test **5/5**、web-test **5/5**、
-errors-test **7/7**、三端 0 warning；跨域联动语料、三域错误边界语料与标准库
-十一包边界强化（§SK→§PF→§IN 链 + 错误路径 + std math_base 51 项 +
-data_transform 72 项 + ai_confidence 40 项）进共识 56/56；找茬产品可上线
-（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 + 平台统计 /stats +
-金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/全流程/三链联动/
-积分-配额联动/三维联动/估值-风险联动/库存-履约联动/验收-积分-契分联动/双资产
-交易链/四链联动/提现-契分联动/双资产估值-风险四链/双货品四链/全业务链五链/
-验收-提现-契分-勋章四链/双资产等量买卖对消链/双货品等量入出对消链/五链守恒演示
-+ 审计轨迹视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio
-流转演示 + 语义化错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.446
-里程碑链完整（长期自主运行小阶段 314/496 推进中，每 10 个同步仓库、每 100 个
-发布 PyPI）。
-
-**v0.456 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链 / INV-PF-12 双资产等量买卖对消链 /
-INV-IN-12 双货品等量入出对消链 / INV-SK-19 验收-提现-契分-贡献-勋章五链守恒链 /
-INV-PF-13 双资产等量买卖对消-估值-风险五链 / INV-IN-13 双货品等量入出对消-水位-
-履约五链）、sigma-runtime **59/59 + 88/88**（--domains 含 53 项链式不变量复核）、
-双端 HTTP 冒烟 **114/114 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、
-供应链链、跨域链、错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链、
-勋章链、库存流转、组合流转、三链联动、积分-配额联动、三维联动、估值-风险联动、
-库存-履约联动、验收-积分-契分联动、双资产交易链、四链联动、提现-契分联动、
-双资产估值-风险四链、双货品四链、全业务链五链、验收-提现-契分-勋章四链、双资产
-等量买卖对消链、双货品等量入出对消链、五链守恒与双资产等量买卖对消-估值-风险五链
-对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report
-runtime 段）、Elixir 三十一域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、
-错误边界 10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、
-贡献分 3/3、额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、
-积分-配额联动 3/3、三维联动 4/4、估值-风险联动 3/3、库存-履约联动 3/3、
-验收-积分-契分联动 4/4、双资产交易链 4/4、四链联动 3/3、提现-契分联动 3/3、
-双资产估值-风险四链 4/4、双货品四链联动 4/4、验收-提现-契分-勋章四链 4/4、
-双资产等量买卖对消链 4/4、双货品等量入出对消链 3/3、验收-提现-契分-贡献-勋章
-五链 5/5、双资产等量买卖对消-估值-风险五链 4/4）、stats-test **5/5**、
-portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test **5/5**、
-inventory-chain-test **5/5**、full-test **5/5**、points-test **3/3**、
-credit-test **3/3**、audit-test **6/6**、contribution-test **2/2**、
-quota-flow-test **2/2**、badge-test **2/2**、inventory-flow-test **4/4**、
-portfolio-flow-test **5/5**、credit-badge-test **3/3**、points-quota-test
-**2/2**、task-points-quota-test **3/3**、valuation-risk-test **3/3**、
-stock-fillrate-test **3/3**、accept-points-credit-test **3/3**、dual-asset-test
-**4/4**、receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、dual-item-four-link-test **4/4**、
-full-business-five-link-test **5/5**、accept-withdraw-credit-badge-test **4/4**、
-dual-asset-equal-trade-test **4/4**、dual-item-equal-trade-test **3/3**、
-accept-withdraw-credit-contribution-badge-test **5/5**、
-dual-asset-equal-trade-vr-test **4/4**、web-test **5/5**、errors-test **7/7**、
-三端 0 warning；跨域联动语料、三域错误边界语料与标准库十一包边界强化
-（§SK→§PF→§IN 链 + 错误路径 + std math_base 51 项 + data_transform 72 项 +
-ai_confidence 44 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认
-持久化/审计/日志 + 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* +
-供应链/三域/积分链/库存链/信用链/全流程/三链联动/积分-配额联动/三维联动/
-估值-风险联动/库存-履约联动/验收-积分-契分联动/双资产交易链/四链联动/提现-契分
-联动/双资产估值-风险四链/双货品四链/全业务链五链/验收-提现-契分-勋章四链/双资产
-等量买卖对消链/双货品等量入出对消链/五链守恒/双资产等量买卖对消-估值-风险五链
-演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 + 库存流转演示 +
-portfolio 流转演示 + 语义化错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10
-到 v0.456 里程碑链完整（长期自主运行小阶段 324/496 推进中，每 10 个同步仓库、
-每 100 个发布 PyPI）。
-
-**v0.466 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链 / INV-PF-12 双资产等量买卖对消链 /
-INV-IN-12 双货品等量入出对消链 / INV-SK-19 验收-提现-契分-贡献-勋章五链守恒链 /
-INV-PF-13 双资产等量买卖对消-估值-风险五链 / INV-IN-13 双货品等量入出对消-水位-
-履约五链 / INV-SK-20 全业务链六链守恒链）、sigma-runtime **59/59 + 89/89**
-（--domains 含 54 项链式不变量复核）、双端 HTTP 冒烟 **117/117 + 36/36 逐项一致**
-（含 /panel、/stats、/portfolio_*、供应链链、跨域链、错误边界、积分链、库存链、
-信用链、全流程、审计、贡献分、额度链、勋章链、库存流转、组合流转、三链联动、
-积分-配额联动、三维联动、估值-风险联动、库存-履约联动、验收-积分-契分联动、
-双资产交易链、四链联动、提现-契分联动、双资产估值-风险四链、双货品四链、全业务链
-五链、验收-提现-契分-勋章四链、双资产等量买卖对消链、双货品等量入出对消链、五链
-守恒、双资产等量买卖对消-估值-风险五链与双货品等量入出对消-水位-履约五链对账）、
-前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime
-段）、Elixir 三十二域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界
-10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、
-额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额联动
-3/3、三维联动 4/4、估值-风险联动 3/3、库存-履约联动 3/3、验收-积分-契分联动 4/4、
-双资产交易链 4/4、四链联动 3/3、提现-契分联动 3/3、双资产估值-风险四链 4/4、
-双货品四链联动 4/4、验收-提现-契分-勋章四链 4/4、双资产等量买卖对消链 4/4、
-双货品等量入出对消链 3/3、验收-提现-契分-贡献-勋章五链 5/5、双资产等量买卖对消-
-估值-风险五链 4/4、双货品等量入出对消-水位-履约五链 4/4）、stats-test **5/5**、
-portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test **5/5**、
-inventory-chain-test **5/5**、full-test **5/5**、points-test **3/3**、
-credit-test **3/3**、audit-test **6/6**、contribution-test **2/2**、
-quota-flow-test **2/2**、badge-test **2/2**、inventory-flow-test **4/4**、
-portfolio-flow-test **5/5**、credit-badge-test **3/3**、points-quota-test
-**2/2**、task-points-quota-test **3/3**、valuation-risk-test **3/3**、
-stock-fillrate-test **3/3**、accept-points-credit-test **3/3**、dual-asset-test
-**4/4**、receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、dual-item-four-link-test **4/4**、
-full-business-five-link-test **5/5**、accept-withdraw-credit-badge-test **4/4**、
-dual-asset-equal-trade-test **4/4**、dual-item-equal-trade-test **3/3**、
-accept-withdraw-credit-contribution-badge-test **5/5**、
-dual-asset-equal-trade-vr-test **4/4**、dual-item-equal-trade-fillrate-test
-**4/4**、web-test **5/5**、errors-test **7/7**、三端 0 warning；跨域联动语料、
-三域错误边界语料与标准库十一包边界强化（§SK→§PF→§IN 链 + 错误路径 + std
-math_base 51 项 + data_transform 78 项 + ai_confidence 44 项）进共识 56/56；
-找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 + 平台
-统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/全流程/
-三链联动/积分-配额联动/三维联动/估值-风险联动/库存-履约联动/验收-积分-契分联动/
-双资产交易链/四链联动/提现-契分联动/双资产估值-风险四链/双货品四链/全业务链五链/
-验收-提现-契分-勋章四链/双资产等量买卖对消链/双货品等量入出对消链/五链守恒/
-双资产等量买卖对消-估值-风险五链/双货品等量入出对消-水位-履约五链演示 + 审计轨迹
-视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio 流转演示
-+ 语义化错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.466 里程碑链
-完整（长期自主运行小阶段 334/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.476 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链 / INV-PF-12 双资产等量买卖对消链 /
-INV-IN-12 双货品等量入出对消链 / INV-SK-19 验收-提现-契分-贡献-勋章五链守恒链 /
-INV-PF-13 双资产等量买卖对消-估值-风险五链 / INV-IN-13 双货品等量入出对消-水位-
-履约五链 / INV-SK-20 全业务链六链守恒链 / INV-PF-14 双资产等量买卖对消-估值-风险-
-恢复六链）、sigma-runtime **59/59 + 90/90**（--domains 含 55 项链式不变量复核）、
-双端 HTTP 冒烟 **123/123 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、
-供应链链、跨域链、错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链、
-勋章链、库存流转、组合流转、三链联动、积分-配额联动、三维联动、估值-风险联动、
-库存-履约联动、验收-积分-契分联动、双资产交易链、四链联动、提现-契分联动、
-双资产估值-风险四链、双货品四链、全业务链五链、验收-提现-契分-勋章四链、双资产
-等量买卖对消链、双货品等量入出对消链、五链守恒、双资产等量买卖对消-估值-风险五链、
-双货品等量入出对消-水位-履约五链与全业务链六链守恒对账）、前端联调剧本 **19/19**、
-sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir 三十三域自检
-（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、库存链
-5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、额度链 4/4、勋章链 4/4、
-库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额联动 3/3、三维联动 4/4、
-估值-风险联动 3/3、库存-履约联动 3/3、验收-积分-契分联动 4/4、双资产交易链 4/4、
-四链联动 3/3、提现-契分联动 3/3、双资产估值-风险四链 4/4、双货品四链联动 4/4、
-验收-提现-契分-勋章四链 4/4、双资产等量买卖对消链 4/4、双货品等量入出对消链 3/3、
-验收-提现-契分-贡献-勋章五链 5/5、双资产等量买卖对消-估值-风险五链 4/4、
-双货品等量入出对消-水位-履约五链 4/4、全业务链六链守恒 6/6）、stats-test **5/5**、
-portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test **5/5**、
-inventory-chain-test **5/5**、full-test **5/5**、points-test **3/3**、
-credit-test **3/3**、audit-test **6/6**、contribution-test **2/2**、
-quota-flow-test **2/2**、badge-test **2/2**、inventory-flow-test **4/4**、
-portfolio-flow-test **5/5**、credit-badge-test **3/3**、points-quota-test
-**2/2**、task-points-quota-test **3/3**、valuation-risk-test **3/3**、
-stock-fillrate-test **3/3**、accept-points-credit-test **3/3**、dual-asset-test
-**4/4**、receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、dual-item-four-link-test **4/4**、
-full-business-five-link-test **5/5**、accept-withdraw-credit-badge-test **4/4**、
-dual-asset-equal-trade-test **4/4**、dual-item-equal-trade-test **3/3**、
-accept-withdraw-credit-contribution-badge-test **5/5**、
-dual-asset-equal-trade-vr-test **4/4**、dual-item-equal-trade-fillrate-test
-**4/4**、full-business-six-link-test **6/6**、web-test **5/5**、errors-test
-**7/7**、三端 0 warning；跨域联动语料、三域错误边界语料与标准库十一包边界强化
-（§SK→§PF→§IN 链 + 错误路径 + std math_base 55 项 + data_transform 78 项 +
-ai_confidence 44 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认
-持久化/审计/日志 + 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* +
-供应链/三域/积分链/库存链/信用链/全流程/三链联动/积分-配额联动/三维联动/
-估值-风险联动/库存-履约联动/验收-积分-契分联动/双资产交易链/四链联动/提现-契分
-联动/双资产估值-风险四链/双货品四链/全业务链五链/验收-提现-契分-勋章四链/双资产
-等量买卖对消链/双货品等量入出对消链/五链守恒/双资产等量买卖对消-估值-风险五链/
-双货品等量入出对消-水位-履约五链/全业务链六链守恒演示 + 审计轨迹视图 + 贡献分演示
-+ 额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio 流转演示 + 语义化错误提示
-+ 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.476 里程碑链完整（长期自主
-运行小阶段 344/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.486 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链 / INV-PF-12 双资产等量买卖对消链 /
-INV-IN-12 双货品等量入出对消链 / INV-SK-19 验收-提现-契分-贡献-勋章五链守恒链 /
-INV-PF-13 双资产等量买卖对消-估值-风险五链 / INV-IN-13 双货品等量入出对消-水位-
-履约五链 / INV-SK-20 全业务链六链守恒链 / INV-PF-14 双资产等量买卖对消-估值-风险-
-恢复六链 / INV-IN-14 双货品等量入出对消-水位-履约-恢复六链）、sigma-runtime
-**59/59 + 91/91**（--domains 含 56 项链式不变量复核）、双端 HTTP 冒烟 **127/127
-+ 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、跨域链、错误边界、
-积分链、库存链、信用链、全流程、审计、贡献分、额度链、勋章链、库存流转、组合流转、
-三链联动、积分-配额联动、三维联动、估值-风险联动、库存-履约联动、验收-积分-契分
-联动、双资产交易链、四链联动、提现-契分联动、双资产估值-风险四链、双货品四链、
-全业务链五链、验收-提现-契分-勋章四链、双资产等量买卖对消链、双货品等量入出对消链、
-五链守恒、双资产等量买卖对消-估值-风险五链、双货品等量入出对消-水位-履约五链、
-全业务链六链守恒与双资产等量买卖对消-估值-风险-恢复六链对账）、前端联调剧本
-**19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir
-三十四域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链
-3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、额度链 4/4、
-勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额联动 3/3、三维联动
-4/4、估值-风险联动 3/3、库存-履约联动 3/3、验收-积分-契分联动 4/4、双资产交易链
-4/4、四链联动 3/3、提现-契分联动 3/3、双资产估值-风险四链 4/4、双货品四链联动 4/4、
-验收-提现-契分-勋章四链 4/4、双资产等量买卖对消链 4/4、双货品等量入出对消链 3/3、
-验收-提现-契分-贡献-勋章五链 5/5、双资产等量买卖对消-估值-风险五链 4/4、
-双货品等量入出对消-水位-履约五链 4/4、全业务链六链守恒 6/6、双资产等量买卖对消-
-估值-风险-恢复六链 5/5）、stats-test **5/5**、portfolio-test **5/5**、
-inventory-test **5/5**、cross-domain-test **5/5**、inventory-chain-test **5/5**、
-full-test **5/5**、points-test **3/3**、credit-test **3/3**、audit-test **6/6**、
-contribution-test **2/2**、quota-flow-test **2/2**、badge-test **2/2**、
-inventory-flow-test **4/4**、portfolio-flow-test **5/5**、credit-badge-test
-**3/3**、points-quota-test **2/2**、task-points-quota-test **3/3**、
-valuation-risk-test **3/3**、stock-fillrate-test **3/3**、
-accept-points-credit-test **3/3**、dual-asset-test **4/4**、
-receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、dual-item-four-link-test **4/4**、
-full-business-five-link-test **5/5**、accept-withdraw-credit-badge-test **4/4**、
-dual-asset-equal-trade-test **4/4**、dual-item-equal-trade-test **3/3**、
-accept-withdraw-credit-contribution-badge-test **5/5**、
-dual-asset-equal-trade-vr-test **4/4**、dual-item-equal-trade-fillrate-test
-**4/4**、full-business-six-link-test **6/6**、
-dual-asset-equal-trade-vr-restore-test **5/5**、web-test **5/5**、errors-test
-**7/7**、三端 0 warning；跨域联动语料、三域错误边界语料与标准库十一包边界强化
-（§SK→§PF→§IN 链 + 错误路径 + std math_base 55 项 + data_transform 78 项 +
-ai_confidence 48 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认
-持久化/审计/日志 + 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* +
-供应链/三域/积分链/库存链/信用链/全流程/三链联动/积分-配额联动/三维联动/
-估值-风险联动/库存-履约联动/验收-积分-契分联动/双资产交易链/四链联动/提现-契分
-联动/双资产估值-风险四链/双货品四链/全业务链五链/验收-提现-契分-勋章四链/双资产
-等量买卖对消链/双货品等量入出对消链/五链守恒/双资产等量买卖对消-估值-风险五链/
-双货品等量入出对消-水位-履约五链/全业务链六链守恒/双资产等量买卖对消-估值-风险-
-恢复六链演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 + 库存流转演示
-+ portfolio 流转演示 + 语义化错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10
-到 v0.486 里程碑链完整（长期自主运行小阶段 354/496 推进中，每 10 个同步仓库、
-每 100 个发布 PyPI）。
-
-**v0.496 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链 / INV-PF-12 双资产等量买卖对消链 /
-INV-IN-12 双货品等量入出对消链 / INV-SK-19 验收-提现-契分-贡献-勋章五链守恒链 /
-INV-PF-13 双资产等量买卖对消-估值-风险五链 / INV-IN-13 双货品等量入出对消-水位-
-履约五链 / INV-SK-20 全业务链六链守恒链 / INV-PF-14 双资产等量买卖对消-估值-风险-
-恢复六链 / INV-IN-14 双货品等量入出对消-水位-履约-恢复六链 / INV-SK-21 全业务链
-七链守恒链）、sigma-runtime **59/59 + 92/92**（--domains 含 57 项链式不变量复核）、
-双端 HTTP 冒烟 **131/131 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、
-供应链链、跨域链、错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链、
-勋章链、库存流转、组合流转、三链联动、积分-配额联动、三维联动、估值-风险联动、
-库存-履约联动、验收-积分-契分联动、双资产交易链、四链联动、提现-契分联动、
-双资产估值-风险四链、双货品四链、全业务链五链、验收-提现-契分-勋章四链、双资产
-等量买卖对消链、双货品等量入出对消链、五链守恒、双资产等量买卖对消-估值-风险五链、
-双货品等量入出对消-水位-履约五链、全业务链六链守恒、双资产等量买卖对消-估值-风险-
-恢复六链与双货品等量入出对消-水位-履约-恢复六链对账）、前端联调剧本 **19/19**、
-sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir 三十五域自检
-（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链 3/3、库存链
-5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、额度链 4/4、勋章链 4/4、
-库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额联动 3/3、三维联动 4/4、
-估值-风险联动 3/3、库存-履约联动 3/3、验收-积分-契分联动 4/4、双资产交易链 4/4、
-四链联动 3/3、提现-契分联动 3/3、双资产估值-风险四链 4/4、双货品四链联动 4/4、
-验收-提现-契分-勋章四链 4/4、双资产等量买卖对消链 4/4、双货品等量入出对消链 3/3、
-验收-提现-契分-贡献-勋章五链 5/5、双资产等量买卖对消-估值-风险五链 4/4、
-双货品等量入出对消-水位-履约五链 4/4、全业务链六链守恒 6/6、双资产等量买卖对消-
-估值-风险-恢复六链 5/5、双货品等量入出对消-水位-履约-恢复六链 5/5）、stats-test
-**5/5**、portfolio-test **5/5**、inventory-test **5/5**、cross-domain-test
-**5/5**、inventory-chain-test **5/5**、full-test **5/5**、points-test **3/3**、
-credit-test **3/3**、audit-test **6/6**、contribution-test **2/2**、
-quota-flow-test **2/2**、badge-test **2/2**、inventory-flow-test **4/4**、
-portfolio-flow-test **5/5**、credit-badge-test **3/3**、points-quota-test
-**2/2**、task-points-quota-test **3/3**、valuation-risk-test **3/3**、
-stock-fillrate-test **3/3**、accept-points-credit-test **3/3**、dual-asset-test
-**4/4**、receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、dual-item-four-link-test **4/4**、
-full-business-five-link-test **5/5**、accept-withdraw-credit-badge-test **4/4**、
-dual-asset-equal-trade-test **4/4**、dual-item-equal-trade-test **3/3**、
-accept-withdraw-credit-contribution-badge-test **5/5**、
-dual-asset-equal-trade-vr-test **4/4**、dual-item-equal-trade-fillrate-test
-**4/4**、full-business-six-link-test **6/6**、
-dual-asset-equal-trade-vr-restore-test **5/5**、
-dual-item-equal-trade-fillrate-restore-test **5/5**、web-test **5/5**、
-errors-test **7/7**、三端 0 warning；跨域联动语料、三域错误边界语料与标准库十一包
-边界强化（§SK→§PF→§IN 链 + 错误路径 + std math_base 55 项 + data_transform 84 项
-+ ai_confidence 48 项）进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认
-持久化/审计/日志 + 前端三域面板 + 平台统计 /stats + 金融市场 /portfolio_* +
-供应链/三域/积分链/库存链/信用链/全流程/三链联动/积分-配额联动/三维联动/
-估值-风险联动/库存-履约联动/验收-积分-契分联动/双资产交易链/四链联动/提现-契分
-联动/双资产估值-风险四链/双货品四链/全业务链五链/验收-提现-契分-勋章四链/双资产
-等量买卖对消链/双货品等量入出对消链/五链守恒/双资产等量买卖对消-估值-风险五链/
-双货品等量入出对消-水位-履约五链/全业务链六链守恒/双资产等量买卖对消-估值-风险-
-恢复六链/双货品等量入出对消-水位-履约-恢复六链演示 + 审计轨迹视图 + 贡献分演示 +
-额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio 流转演示 + 语义化错误提示 +
-上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.496 里程碑链完整（长期自主运行
-小阶段 364/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.506 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链 / INV-PF-12 双资产等量买卖对消链 /
-INV-IN-12 双货品等量入出对消链 / INV-SK-19 验收-提现-契分-贡献-勋章五链守恒链 /
-INV-PF-13 双资产等量买卖对消-估值-风险五链 / INV-IN-13 双货品等量入出对消-水位-
-履约五链 / INV-SK-20 全业务链六链守恒链 / INV-PF-14 双资产等量买卖对消-估值-风险-
-恢复六链 / INV-IN-14 双货品等量入出对消-水位-履约-恢复六链 / INV-SK-21 全业务链
-七链守恒链 / INV-PF-15 双资产等量买卖对消-估值-风险-恢复-对消循环七链）、
-sigma-runtime **59/59 + 93/93**（--domains 含 58 项链式不变量复核）、双端 HTTP
-冒烟 **138/138 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、
-跨域链、错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链、勋章链、
-库存流转、组合流转、三链联动、积分-配额联动、三维联动、估值-风险联动、库存-履约
-联动、验收-积分-契分联动、双资产交易链、四链联动、提现-契分联动、双资产估值-风险
-四链、双货品四链、全业务链五链、验收-提现-契分-勋章四链、双资产等量买卖对消链、
-双货品等量入出对消链、五链守恒、双资产等量买卖对消-估值-风险五链、双货品等量入出
-对消-水位-履约五链、全业务链六链守恒、双资产等量买卖对消-估值-风险-恢复六链、
-双货品等量入出对消-水位-履约-恢复六链与全业务链七链守恒对账）、前端联调剧本
-**19/19**、sigma-accept **十道门禁 10/10**（含 --report runtime 段）、Elixir
-三十六域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、错误边界 10/10、积分链
-3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、贡献分 3/3、额度链 4/4、
-勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、积分-配额联动 3/3、三维联动
-4/4、估值-风险联动 3/3、库存-履约联动 3/3、验收-积分-契分联动 4/4、双资产交易链
-4/4、四链联动 3/3、提现-契分联动 3/3、双资产估值-风险四链 4/4、双货品四链联动 4/4、
-验收-提现-契分-勋章四链 4/4、双资产等量买卖对消链 4/4、双货品等量入出对消链 3/3、
-验收-提现-契分-贡献-勋章五链 5/5、双资产等量买卖对消-估值-风险五链 4/4、
-双货品等量入出对消-水位-履约五链 4/4、全业务链六链守恒 6/6、双资产等量买卖对消-
-估值-风险-恢复六链 5/5、双货品等量入出对消-水位-履约-恢复六链 5/5、全业务链七链
-守恒 7/7）、stats-test **5/5**、portfolio-test **5/5**、inventory-test **5/5**、
-cross-domain-test **5/5**、inventory-chain-test **5/5**、full-test **5/5**、
-points-test **3/3**、credit-test **3/3**、audit-test **6/6**、contribution-test
-**2/2**、quota-flow-test **2/2**、badge-test **2/2**、inventory-flow-test **4/4**、
-portfolio-flow-test **5/5**、credit-badge-test **3/3**、points-quota-test **2/2**、
-task-points-quota-test **3/3**、valuation-risk-test **3/3**、stock-fillrate-test
-**3/3**、accept-points-credit-test **3/3**、dual-asset-test **4/4**、
-receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、dual-asset-vr-test
-**4/4**、dual-item-four-link-test **4/4**、full-business-five-link-test **5/5**、
-accept-withdraw-credit-badge-test **4/4**、dual-asset-equal-trade-test **4/4**、
-dual-item-equal-trade-test **3/3**、accept-withdraw-credit-contribution-badge-test
-**5/5**、dual-asset-equal-trade-vr-test **4/4**、dual-item-equal-trade-fillrate-test
-**4/4**、full-business-six-link-test **6/6**、dual-asset-equal-trade-vr-restore-test
-**5/5**、dual-item-equal-trade-fillrate-restore-test **5/5**、
-full-business-seven-link-test **7/7**、web-test **5/5**、errors-test **7/7**、三端
-0 warning；跨域联动语料、三域错误边界语料与标准库十一包边界强化（§SK→§PF→§IN
-链 + 错误路径 + std math_base 59 项 + data_transform 84 项 + ai_confidence 48 项）
-进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域
-面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/
-全流程/三链联动/积分-配额联动/三维联动/估值-风险联动/库存-履约联动/验收-积分-契分
-联动/双资产交易链/四链联动/提现-契分联动/双资产估值-风险四链/双货品四链/全业务链
-五链/验收-提现-契分-勋章四链/双资产等量买卖对消链/双货品等量入出对消链/五链守恒/
-双资产等量买卖对消-估值-风险五链/双货品等量入出对消-水位-履约五链/全业务链六链
-守恒/双资产等量买卖对消-估值-风险-恢复六链/双货品等量入出对消-水位-履约-恢复六链/
-全业务链七链守恒演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 + 库存
-流转演示 + portfolio 流转演示 + 语义化错误提示 + 上线/运行/部署指南 + 性能基线）
-——从 v0.10 到 v0.506 里程碑链完整（长期自主运行小阶段 374/496 推进中，每 10 个
-同步仓库、每 100 个发布 PyPI）。
-
-**v0.516 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链 / INV-PF-12 双资产等量买卖对消链 /
-INV-IN-12 双货品等量入出对消链 / INV-SK-19 验收-提现-契分-贡献-勋章五链守恒链 /
-INV-PF-13 双资产等量买卖对消-估值-风险五链 / INV-IN-13 双货品等量入出对消-水位-
-履约五链 / INV-SK-20 全业务链六链守恒链 / INV-PF-14 双资产等量买卖对消-估值-风险-
-恢复六链 / INV-IN-14 双货品等量入出对消-水位-履约-恢复六链 / INV-SK-21 全业务链
-七链守恒链 / INV-PF-15 双资产等量买卖对消-估值-风险-恢复-对消循环七链 /
-INV-IN-15 双货品等量入出对消-水位-履约-恢复-对消循环七链）、sigma-runtime
-**59/59 + 94/94**（--domains 含 59 项链式不变量复核）、双端 HTTP 冒烟 **143/143
-+ 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、跨域链、错误边界、
-积分链、库存链、信用链、全流程、审计、贡献分、额度链、勋章链、库存流转、组合流转、
-三链联动、积分-配额联动、三维联动、估值-风险联动、库存-履约联动、验收-积分-契分
-联动、双资产交易链、四链联动、提现-契分联动、双资产估值-风险四链、双货品四链、
-全业务链五链、验收-提现-契分-勋章四链、双资产等量买卖对消链、双货品等量入出对消链、
-五链守恒、双资产等量买卖对消-估值-风险五链、双货品等量入出对消-水位-履约五链、
-全业务链六链守恒、双资产等量买卖对消-估值-风险-恢复六链、双货品等量入出对消-水位-
-履约-恢复六链、全业务链七链守恒与双资产等量买卖对消-估值-风险-恢复-对消循环七链
-对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report
-runtime 段）、Elixir 三十七域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、
-错误边界 10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、
-贡献分 3/3、额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、
-积分-配额联动 3/3、三维联动 4/4、估值-风险联动 3/3、库存-履约联动 3/3、
-验收-积分-契分联动 4/4、双资产交易链 4/4、四链联动 3/3、提现-契分联动 3/3、
-双资产估值-风险四链 4/4、双货品四链联动 4/4、验收-提现-契分-勋章四链 4/4、
-双资产等量买卖对消链 4/4、双货品等量入出对消链 3/3、验收-提现-契分-贡献-勋章五链
-5/5、双资产等量买卖对消-估值-风险五链 4/4、双货品等量入出对消-水位-履约五链 4/4、
-全业务链六链守恒 6/6、双资产等量买卖对消-估值-风险-恢复六链 5/5、双货品等量入出
-对消-水位-履约-恢复六链 5/5、全业务链七链守恒 7/7、双资产等量买卖对消-估值-风险-
-恢复-对消循环七链 6/6）、stats-test **5/5**、portfolio-test **5/5**、
-inventory-test **5/5**、cross-domain-test **5/5**、inventory-chain-test **5/5**、
-full-test **5/5**、points-test **3/3**、credit-test **3/3**、audit-test **6/6**、
-contribution-test **2/2**、quota-flow-test **2/2**、badge-test **2/2**、
-inventory-flow-test **4/4**、portfolio-flow-test **5/5**、credit-badge-test
-**3/3**、points-quota-test **2/2**、task-points-quota-test **3/3**、
-valuation-risk-test **3/3**、stock-fillrate-test **3/3**、
-accept-points-credit-test **3/3**、dual-asset-test **4/4**、
-receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、dual-item-four-link-test **4/4**、
-full-business-five-link-test **5/5**、accept-withdraw-credit-badge-test **4/4**、
-dual-asset-equal-trade-test **4/4**、dual-item-equal-trade-test **3/3**、
-accept-withdraw-credit-contribution-badge-test **5/5**、
-dual-asset-equal-trade-vr-test **4/4**、dual-item-equal-trade-fillrate-test
-**4/4**、full-business-six-link-test **6/6**、dual-asset-equal-trade-vr-restore-test
-**5/5**、dual-item-equal-trade-fillrate-restore-test **5/5**、
-full-business-seven-link-test **7/7**、dual-asset-equal-trade-vr-restore-cycle-test
-**6/6**、web-test **5/5**、errors-test **7/7**、三端 0 warning；跨域联动语料、
-三域错误边界语料与标准库十一包边界强化（§SK→§PF→§IN 链 + 错误路径 + std math_base
-59 项 + data_transform 84 项 + ai_confidence 52 项）进共识 56/56；找茬产品可上线
-（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 + 平台统计 /stats +
-金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/全流程/三链联动/
-积分-配额联动/三维联动/估值-风险联动/库存-履约联动/验收-积分-契分联动/双资产
-交易链/四链联动/提现-契分联动/双资产估值-风险四链/双货品四链/全业务链五链/
-验收-提现-契分-勋章四链/双资产等量买卖对消链/双货品等量入出对消链/五链守恒/
-双资产等量买卖对消-估值-风险五链/双货品等量入出对消-水位-履约五链/全业务链六链
-守恒/双资产等量买卖对消-估值-风险-恢复六链/双货品等量入出对消-水位-履约-恢复六链/
-全业务链七链守恒/双资产等量买卖对消-估值-风险-恢复-对消循环七链演示 + 审计轨迹
-视图 + 贡献分演示 + 额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio 流转演示
-+ 语义化错误提示 + 上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.516 里程碑链
-完整（长期自主运行小阶段 384/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.526 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链 / INV-PF-12 双资产等量买卖对消链 /
-INV-IN-12 双货品等量入出对消链 / INV-SK-19 验收-提现-契分-贡献-勋章五链守恒链 /
-INV-PF-13 双资产等量买卖对消-估值-风险五链 / INV-IN-13 双货品等量入出对消-水位-
-履约五链 / INV-SK-20 全业务链六链守恒链 / INV-PF-14 双资产等量买卖对消-估值-风险-
-恢复六链 / INV-IN-14 双货品等量入出对消-水位-履约-恢复六链 / INV-SK-21 全业务链
-七链守恒链 / INV-PF-15 双资产等量买卖对消-估值-风险-恢复-对消循环七链 /
-INV-IN-15 双货品等量入出对消-水位-履约-恢复-对消循环七链 / INV-SK-22 全业务链
-八链守恒链）、sigma-runtime **59/59 + 95/95**（--domains 含 60 项链式不变量复核）、
-双端 HTTP 冒烟 **148/148 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、
-供应链链、跨域链、错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链、
-勋章链、库存流转、组合流转、三链联动、积分-配额联动、三维联动、估值-风险联动、
-库存-履约联动、验收-积分-契分联动、双资产交易链、四链联动、提现-契分联动、
-双资产估值-风险四链、双货品四链、全业务链五链、验收-提现-契分-勋章四链、双资产
-等量买卖对消链、双货品等量入出对消链、五链守恒、双资产等量买卖对消-估值-风险五链、
-双货品等量入出对消-水位-履约五链、全业务链六链守恒、双资产等量买卖对消-估值-风险-
-恢复六链、双货品等量入出对消-水位-履约-恢复六链、全业务链七链守恒、双资产等量买卖
-对消-估值-风险-恢复-对消循环七链与双货品等量入出对消-水位-履约-恢复-对消循环七链
-对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含 --report
-runtime 段）、Elixir 三十八域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链 5/5、
-错误边界 10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、
-贡献分 3/3、额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、
-积分-配额联动 3/3、三维联动 4/4、估值-风险联动 3/3、库存-履约联动 3/3、
-验收-积分-契分联动 4/4、双资产交易链 4/4、四链联动 3/3、提现-契分联动 3/3、
-双资产估值-风险四链 4/4、双货品四链联动 4/4、验收-提现-契分-勋章四链 4/4、
-双资产等量买卖对消链 4/4、双货品等量入出对消链 3/3、验收-提现-契分-贡献-勋章五链
-5/5、双资产等量买卖对消-估值-风险五链 4/4、双货品等量入出对消-水位-履约五链 4/4、
-全业务链六链守恒 6/6、双资产等量买卖对消-估值-风险-恢复六链 5/5、双货品等量入出
-对消-水位-履约-恢复六链 5/5、全业务链七链守恒 7/7、双资产等量买卖对消-估值-风险-
-恢复-对消循环七链 6/6、双货品等量入出对消-水位-履约-恢复-对消循环七链 6/6）、
-stats-test **5/5**、portfolio-test **5/5**、inventory-test **5/5**、
-cross-domain-test **5/5**、inventory-chain-test **5/5**、full-test **5/5**、
-points-test **3/3**、credit-test **3/3**、audit-test **6/6**、contribution-test
-**2/2**、quota-flow-test **2/2**、badge-test **2/2**、inventory-flow-test **4/4**、
-portfolio-flow-test **5/5**、credit-badge-test **3/3**、points-quota-test **2/2**、
-task-points-quota-test **3/3**、valuation-risk-test **3/3**、stock-fillrate-test
-**3/3**、accept-points-credit-test **3/3**、dual-asset-test **4/4**、
-receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、dual-asset-vr-test
-**4/4**、dual-item-four-link-test **4/4**、full-business-five-link-test **5/5**、
-accept-withdraw-credit-badge-test **4/4**、dual-asset-equal-trade-test **4/4**、
-dual-item-equal-trade-test **3/3**、accept-withdraw-credit-contribution-badge-test
-**5/5**、dual-asset-equal-trade-vr-test **4/4**、dual-item-equal-trade-fillrate-test
-**4/4**、full-business-six-link-test **6/6**、dual-asset-equal-trade-vr-restore-test
-**5/5**、dual-item-equal-trade-fillrate-restore-test **5/5**、
-full-business-seven-link-test **7/7**、dual-asset-equal-trade-vr-restore-cycle-test
-**6/6**、dual-item-equal-trade-fillrate-restore-cycle-test **6/6**、web-test
-**5/5**、errors-test **7/7**、三端 0 warning；跨域联动语料、三域错误边界语料与
-标准库十一包边界强化（§SK→§PF→§IN 链 + 错误路径 + std math_base 59 项 +
-data_transform 90 项 + ai_confidence 52 项）进共识 56/56；找茬产品可上线
-（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域面板 + 平台统计 /stats +
-金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/全流程/三链联动/
-积分-配额联动/三维联动/估值-风险联动/库存-履约联动/验收-积分-契分联动/双资产
-交易链/四链联动/提现-契分联动/双资产估值-风险四链/双货品四链/全业务链五链/
-验收-提现-契分-勋章四链/双资产等量买卖对消链/双货品等量入出对消链/五链守恒/
-双资产等量买卖对消-估值-风险五链/双货品等量入出对消-水位-履约五链/全业务链六链
-守恒/双资产等量买卖对消-估值-风险-恢复六链/双货品等量入出对消-水位-履约-恢复六链/
-全业务链七链守恒/双资产等量买卖对消-估值-风险-恢复-对消循环七链/双货品等量入出
-对消-水位-履约-恢复-对消循环七链演示 + 审计轨迹视图 + 贡献分演示 + 额度流转演示 +
-勋章链演示 + 库存流转演示 + portfolio 流转演示 + 语义化错误提示 + 上线/运行/部署
-指南 + 性能基线）——从 v0.10 到 v0.526 里程碑链完整（长期自主运行小阶段 394/496
-推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.536 收官总览 (2026-08-07)**: 协议 **spec 0.7.0**，三域（§SK 找茬业务 /
-§PF 金融 / §IN 供应链）——consensus **56/56**、p0 **109/109**、sigma-prove
-**354 项 PROVED**（34 模块，含 INV-SK-6 额度-托管 / INV-PF-4 交易链可加 /
-INV-IN-5 混合货品可加 / INV-SK-7 任务-契分联动 / INV-PF-5 买入-卖出链守恒 /
-INV-SK-8 赏金-积分联动 / INV-IN-6 入库-出库联动 / INV-PF-6 交易链完整性 /
-INV-SK-9 额度-契分联动 / INV-IN-7 混合货品联动 / INV-PF-7 资产链完整性 /
-INV-SK-10 契分-贡献联动 / INV-SK-11 契分-勋章联动 / INV-IN-8 混合出库联动 /
-INV-PF-8 混合资产链完整性 / INV-SK-12 契分-贡献-勋章三链联动 / INV-SK-13
-积分-配额联动链 / INV-SK-14 任务-积分-配额三维联动链 / INV-PF-9 组合估值-风险
-联动链 / INV-IN-9 库存-履约联动链 / INV-SK-15 验收-积分-契分三维联动链 /
-INV-PF-10 双资产混合交易链估值守恒链 / INV-IN-10 入库-出库-水位-履约四链联动链 /
-INV-SK-16 提现-契分联动链 / INV-PF-11 双资产买卖-估值-风险四链联动链 /
-INV-IN-11 双货品入库-出库-水位-履约四链联动链 / INV-SK-17 全业务链五链守恒链 /
-INV-SK-18 验收-提现-契分-勋章四链联动链 / INV-PF-12 双资产等量买卖对消链 /
-INV-IN-12 双货品等量入出对消链 / INV-SK-19 验收-提现-契分-贡献-勋章五链守恒链 /
-INV-PF-13 双资产等量买卖对消-估值-风险五链 / INV-IN-13 双货品等量入出对消-水位-
-履约五链 / INV-SK-20 全业务链六链守恒链 / INV-PF-14 双资产等量买卖对消-估值-风险-
-恢复六链 / INV-IN-14 双货品等量入出对消-水位-履约-恢复六链 / INV-SK-21 全业务链
-七链守恒链 / INV-PF-15 双资产等量买卖对消-估值-风险-恢复-对消循环七链 /
-INV-IN-15 双货品等量入出对消-水位-履约-恢复-对消循环七链 / INV-SK-22 全业务链
-八链守恒链 / INV-PF-16 双资产等量买卖对消-估值-风险-恢复-对消循环-现金守恒八链）、
-sigma-runtime **59/59 + 96/96**（--domains 含 61 项链式不变量复核）、双端 HTTP
-冒烟 **156/156 + 36/36 逐项一致**（含 /panel、/stats、/portfolio_*、供应链链、
-跨域链、错误边界、积分链、库存链、信用链、全流程、审计、贡献分、额度链、勋章链、
-库存流转、组合流转、三链联动、积分-配额联动、三维联动、估值-风险联动、库存-履约
-联动、验收-积分-契分联动、双资产交易链、四链联动、提现-契分联动、双资产估值-风险
-四链、双货品四链、全业务链五链、验收-提现-契分-勋章四链、双资产等量买卖对消链、
-双货品等量入出对消链、五链守恒、双资产等量买卖对消-估值-风险五链、双货品等量入出
-对消-水位-履约五链、全业务链六链守恒、双资产等量买卖对消-估值-风险-恢复六链、
-双货品等量入出对消-水位-履约-恢复六链、全业务链七链守恒、双资产等量买卖对消-估值-
-风险-恢复-对消循环七链、双货品等量入出对消-水位-履约-恢复-对消循环七链与全业务链
-八链守恒对账）、前端联调剧本 **19/19**、sigma-accept **十道门禁 10/10**（含
---report runtime 段）、Elixir 三十九域自检（§SK 88/88、§IN 7/7、§PF 8/8、三域链
-5/5、错误边界 10/10、积分链 3/3、库存链 5/5、信用链 5/5、全流程 6/6、审计链 3/3、
-贡献分 3/3、额度链 4/4、勋章链 4/4、库存流转 4/4、组合流转 5/5、三链联动 3/3、
-积分-配额联动 3/3、三维联动 4/4、估值-风险联动 3/3、库存-履约联动 3/3、
-验收-积分-契分联动 4/4、双资产交易链 4/4、四链联动 3/3、提现-契分联动 3/3、
-双资产估值-风险四链 4/4、双货品四链联动 4/4、验收-提现-契分-勋章四链 4/4、
-双资产等量买卖对消链 4/4、双货品等量入出对消链 3/3、验收-提现-契分-贡献-勋章五链
-5/5、双资产等量买卖对消-估值-风险五链 4/4、双货品等量入出对消-水位-履约五链 4/4、
-全业务链六链守恒 6/6、双资产等量买卖对消-估值-风险-恢复六链 5/5、双货品等量入出
-对消-水位-履约-恢复六链 5/5、全业务链七链守恒 7/7、双资产等量买卖对消-估值-风险-
-恢复-对消循环七链 6/6、双货品等量入出对消-水位-履约-恢复-对消循环七链 6/6、
-全业务链八链守恒 8/8）、stats-test **5/5**、portfolio-test **5/5**、
-inventory-test **5/5**、cross-domain-test **5/5**、inventory-chain-test **5/5**、
-full-test **5/5**、points-test **3/3**、credit-test **3/3**、audit-test **6/6**、
-contribution-test **2/2**、quota-flow-test **2/2**、badge-test **2/2**、
-inventory-flow-test **4/4**、portfolio-flow-test **5/5**、credit-badge-test
-**3/3**、points-quota-test **2/2**、task-points-quota-test **3/3**、
-valuation-risk-test **3/3**、stock-fillrate-test **3/3**、
-accept-points-credit-test **3/3**、dual-asset-test **4/4**、
-receive-ship-fillrate-test **3/3**、withdraw-credit-test **3/3**、
-dual-asset-vr-test **4/4**、dual-item-four-link-test **4/4**、
-full-business-five-link-test **5/5**、accept-withdraw-credit-badge-test **4/4**、
-dual-asset-equal-trade-test **4/4**、dual-item-equal-trade-test **3/3**、
-accept-withdraw-credit-contribution-badge-test **5/5**、
-dual-asset-equal-trade-vr-test **4/4**、dual-item-equal-trade-fillrate-test
-**4/4**、full-business-six-link-test **6/6**、dual-asset-equal-trade-vr-restore-test
-**5/5**、dual-item-equal-trade-fillrate-restore-test **5/5**、
-full-business-seven-link-test **7/7**、dual-asset-equal-trade-vr-restore-cycle-test
-**6/6**、dual-item-equal-trade-fillrate-restore-cycle-test **6/6**、
-full-business-eight-link-test **8/8**、web-test **5/5**、errors-test **7/7**、三端
-0 warning；跨域联动语料、三域错误边界语料与标准库十一包边界强化（§SK→§PF→§IN
-链 + 错误路径 + std math_base 63 项 + data_transform 90 项 + ai_confidence 52 项）
-进共识 56/56；找茬产品可上线（--launch 一键开工 + 默认持久化/审计/日志 + 前端三域
-面板 + 平台统计 /stats + 金融市场 /portfolio_* + 供应链/三域/积分链/库存链/信用链/
-全流程/三链联动/积分-配额联动/三维联动/估值-风险联动/库存-履约联动/验收-积分-契分
-联动/双资产交易链/四链联动/提现-契分联动/双资产估值-风险四链/双货品四链/全业务链
-五链/验收-提现-契分-勋章四链/双资产等量买卖对消链/双货品等量入出对消链/五链守恒/
-双资产等量买卖对消-估值-风险五链/双货品等量入出对消-水位-履约五链/全业务链六链
-守恒/双资产等量买卖对消-估值-风险-恢复六链/双货品等量入出对消-水位-履约-恢复六链/
-全业务链七链守恒/双资产等量买卖对消-估值-风险-恢复-对消循环七链/双货品等量入出
-对消-水位-履约-恢复-对消循环七链/全业务链八链守恒演示 + 审计轨迹视图 + 贡献分演示
-+ 额度流转演示 + 勋章链演示 + 库存流转演示 + portfolio 流转演示 + 语义化错误提示 +
-上线/运行/部署指南 + 性能基线）——从 v0.10 到 v0.536 里程碑链完整（长期自主运行
-小阶段 404/496 推进中，每 10 个同步仓库、每 100 个发布 PyPI）。
-
-**v0.10 可用 (2026-08-02)**: 数学符号（⊕ ⊗ ⊖ ⊘ ⊙ ≡ ≥ ≤ ∈）、基本操作（`index()`/`I₂`、元素级/矩阵运算）、常量包（§C `0xK0xx`/`0xQ0xx` 按指纹解析，Opaque 类不可遮蔽）已在三个验证器求值器全部实现并有语料覆盖；`sigma-prove` 义务消解 `PROVED (unsat)`，`sigma-moonbit` 生成 `.mbtp`；共识门禁 35/35 全绿。
-
-**v0.11 可用 (2026-08-02)**: 包管理器 `tools/sigma-cli.py`（install/verify/list/search/fingerprint，`~/.sigma/registry.json` 注册表，Iron Law VII 无环依赖解析）+ 标准库 3 包（`std/math.base.md` / `std/data.transform.md` / `std/ai.confidence.md`，各配 `corpus/std_*_ok.md` 验证器测试集）；共识门禁 38/38 全绿、p0 95/95、三端 0 warning，v0.10 不回归。见 `MASTER_PLAN.md` Phase 3–4 与 `AUTOPILOT.md` §6。
-
-**AI Bootstrapping Test (P2, 2026-08-02)**: `tools/sigma-bootstrap.py` — 一键闭环验证 spec→impl→verify→pass：4 个 P0 spec 均携带 `## Implementation Checklist (for AI)`、`impl/python/sigma_core.py` 自检 71/71、`verify_p0.py` 95/95。证明「新鲜 AI 只凭规范+验证器即可从零实现并通过验证」。见 `MASTER_PLAN.md` Phase 5。
-
-**v0.12 Novel Spec Test (2026-08-02)**: `corpus/novel_gene_ok.md`（DNA 对齐语义）三端验证器一致（consensus 39/39），跑通 AI 读 spec → 写实现 → 验证 → 发布的完整闭环。见 `MASTER_PLAN.md` Phase 5.2。
-
-**v0.13 SocketKit Protocol (2026-08-02)**: `spec/spec_p0_socketkit.md`（§SK：task_create / review_merge / contribution_score 的 ΣLang 语义）+ `corpus/socketkit_ok.md` 三端一致（consensus 40/40），走通 RFC → spec → 验证器 → 测试 晋升路径。见 `MASTER_PLAN.md` §6.2。
-
-**v0.14 SocketKit Runtime (2026-08-03)**: §SK 参考实现进入 `impl/python/sigma_core.py`（自检 75/75）· 审计运行时 `tools/sigma-runtime.py`（业务 trace → ΣLang obligation 日志，10/10 满足）· `sigma-prove` 对 §SK 六条定律义务消解全部 `PROVED (unsat)` · 负例 `corpus/socketkit_break.md`（E-02，三端一致 FAIL）· §SK 行为测试进 `verify_p0.py`（109/109）；共识门禁 41/41 全绿、三端 0 warning，v0.10–v0.13 不回归。
-
-**v0.15 三端 §SK 执行层 (2026-08-03)**: §SK 参考实现从 Python 单侧同步到 Rust（`impl/verifier/src/sk.rs` + `--sk-self-check`，16/16）与 Elixir（`sigma_verify.exs` §SK + `--sk-self-check`，16/16）——同一组 §SK 用例三端判定一致（Law XIII 业务语义层），`cargo build` 0 error/0 warning；consensus 41/41、p0 109/109 不回退，v0.10–v0.14 不回归。
-
-**v0.16 SocketKit 语料执行化 (2026-08-03)**: 三端求值器（`verify_consensus.py` / `evaluator.rs` / `sigma_verify.exs`）的 eval_expr 直接支持 §SK 三操作真实调用（`task_create(a,b)` / `review_merge([...])` / `contribution_score([...])`，含 ⊥ BountyErr / TypeError / ShapeError 错误路径）；`corpus/socketkit_ok.md` 的 Tests 从规范表达式（⊕ ∈ ⊘）升级为真实调用——**Law XIII 共识门禁从此直接验证业务语义本身**，9/9 三端一致（consensus 41/41）、0 warning，v0.10–v0.15 不回归。
-
-**v0.17 §SK 对齐真实业务 (2026-08-03)**: 依据找茬需求文档（`D:\Desktop\来找茬_需求文档.md` v1.0）校准 §SK——Task 扩展为 4 元组 `[author, bounty, status, hunter]` + 4 态状态机（待接单→进行中→待验收→已完成）；新增 `accept_task`（接单）/ `task_submit`（提交成果）/ `task_accept`（受茬人单人验收）/ `credit_score`（契分制：基础 100、完成 +5/单、违约 ×0.7）；`review_merge` 修正为增长期核验师场景。三端执行层同步（sigma_core 91/91、三端 §SK 自检 32/32、socketkit_ok 24/24 三端一致），sigma-prove 18 项 §SK 义务全部 PROVED (unsat)，sigma-runtime 完整 MVP 业务 trace 23/23；consensus 41/41、p0 109/109、三端 0 warning，v0.10–v0.16 不回归。
-
-**v0.18 状态机不变量证明 (2026-08-03)**: `task_accept` 增加作者授权参数（只有受茬人本人 caller ≡ author 可验收，否则 ⊥ AuthError），spec 新增 §SK.3.8 不变量章节——**INV-1 状态单调**（状态只前进不后退）、**INV-2 终态不可变**（completed 不可再被任何状态操作改变）、**INV-3 守恒**（bounty 与 hunter 流转中不变）、**INV-4 作者授权**。三端执行层与 eval_expr 同步授权校验（sigma_core 92/92、三端 §SK 自检 33/33、socketkit_ok 25/25 三端一致），sigma-prove 新增 6 项不变量义务全部 `PROVED (unsat)`（§SK 共 23 项），sigma-runtime 审计 trace 增加不变量逐条复核（31/31）；consensus 41/41、p0 109/109、三端 0 warning，v0.10–v0.17 不回归。
-
-**v0.19 第二个自举新域（金融 portfolio@1.0）(2026-08-03)**: 验证 ΣLang 协议泛化性——第二个全新领域（金融投资组合）走通 spec→三端→语料→证明 全流程：`spec/spec_p0_portfolio.md`（§PF：portfolio_new / buy / sell / portfolio_value / risk_score，单位价格 1 使总资产守恒可证）+ `corpus/portfolio_ok.md`（19/19 三端一致 PASS）与 `corpus/portfolio_break.md`（E-02 三端一致 FAIL）；三端 eval_expr 支持新域真实调用（sigma_core 111/111、0 warning）；sigma-prove 新增 10 项 §PF 义务全部 `PROVED (unsat)`（§SK+§PF 共 33 项）；sigma-runtime 审计 trace 增加 §PF 段（45/45）；consensus 43/43、p0 109/109，v0.10–v0.18 不回归。
-
-**v0.20 找茬五大制度补齐 (2026-08-03)**: 依据找茬需求文档（`D:\Desktop\来找茬_需求文档.md` §四）把剩余三制度纳入 §SK——**SK.3.9 额度制**（`quota_new/quota_use/quota_reset`：月额/扣减/月底清零）、**SK.3.10 积分制**（`points_hold/points_release/points_withdraw`：托管冻结/释放/提现，⊥ InsufficientEscrow / InsufficientPoints）、**SK.3.11 勋章制**（`badge_level`：铜银金钻四级）。三端执行层与 eval_expr 同步（sigma_core 130/130、三端 §SK 自检 56/56、socketkit_ok 50/50 三端一致、0 warning），sigma-prove 新增 8 项三制度义务全部 `PROVED (unsat)`（共 41 项），sigma-runtime 审计 trace 增加三制度段（71/71）；consensus 43/43、p0 109/109，v0.10–v0.19 不回归。
-
-**v0.21 找茬 MVP 全链路审计剧本 (2026-08-03)**: spec 新增 **§SK.6 MVP 业务剧本**——12 步端到端验收场景（开户额度→发布需求→扣减额度→赏金托管→接单→提交成果→验收确认→释放赏金→找茬人提现→契分奖励→贡献累计→勋章升级）；`sigma-runtime --story`（run_mvp_story）一次跑通完整业务故事线并逐事件复核不变量（INV-1 状态单调 / INV-3 守恒 / INV-4 作者授权 / 额度扣减 / 积分托管守恒），**18/18 义务满足**——作为 App 开工的「验收剧本」；consensus 43/43、p0 109/109、三端 0 warning，v0.10–v0.20 不回归。
-
-**v0.22 找茬 MVP 参考实现 (2026-08-03)**: `impl/python/sigma_app.py`（MVPApp）——找茬 MVP 真正"开工"的第一步：业务方法**全部委托** sigma_core §SK 语义（App 层只管状态、零业务规则重写），stdlib-only HTTP JSON API（`--serve` 暴露 `/post /claim /submit /accept /withdraw /badge`）；自检跑通 §SK.6 十二步剧本（**15/15**），步骤与 `sigma-runtime --story`（18/18）一一对应——被审计的验收剧本可直接实现为可运行后端；consensus 43/43、p0 109/109、三端 0 warning，v0.10–v0.21 不回归。
-
-**v0.23 MVP 端到端 HTTP 冒烟测试 (2026-08-03)**: `sigma_app.py` 增加 `/quota` 端点（开户额度，补全 HTTP 全链路）与 `--smoke` 模式（run_http_smoke：起服务→HTTP 七步全链路 `/quota → /post → /claim → /submit → /accept → /withdraw → /badge` → 逐响应断言 → 关服务，**13/13 通过**）——参考实现"作为 HTTP 服务的可用性"被可重复执行的冒烟测试固化；自检 15/15 不回归；consensus 43/43、p0 109/109、三端 0 warning，v0.10–v0.22 不回归。
-
-**v0.24 三端 §SK.6 story 一致性 (2026-08-03)**: §SK.6 MVP 业务剧本从 Python 单侧扩到三端——Rust `sk.rs story()` + `--sk-story`（**15/15**）、Elixir `sk_story()` + `--sk-story`（**15/15**），与 Python `sigma_app.py`（**15/15**）逐项一致：三把独立的尺子审计**同一条业务故事线**（开户→发单→扣额度→托管→接单→交成果→验收→释放→提现→加契分→加贡献→升勋章），Law XIII 在"产品层"收官；consensus 43/43、p0 109/109、三端 0 warning，v0.10–v0.23 不回归。
-
-**v0.25 Rust 参考实现 (2026-08-03)**: `impl/verifier/src/app.rs`（MVPApp 的 Rust 版，贴近生产部署）——业务方法**全部委托** sk.rs §SK 语义（App 层零业务规则重写），CLI 新增 `--app-self-check`（**15/15**）；与 Python `sigma_app.py`（15/15）、Rust `--sk-story`（15/15）、Elixir `--sk-story`（15/15）**四端逐项一致**——同一业务故事线在 Python 参考后端与 Rust 生产级实现上算出同一个答案；`cargo build` 0 error/0 warning；consensus 43/43、p0 109/109，v0.10–v0.24 不回归。
-
-**v0.26 Rust HTTP 服务 + 冒烟对账 (2026-08-03)**: `app.rs` 增加 stdlib-only HTTP JSON API（手写 TcpListener + serde_json，`--app-serve`，端点 `/quota /post /claim /submit /accept /withdraw /badge` 与 Python `sigma_app.py --serve` 一致，业务全部委托 App 层 → §SK）+ `--app-smoke`（run_smoke：HTTP 七步全链路，**13/13**）——与 Python `sigma_app.py --smoke`（**13/13**）**双端逐项一致**，HTTP 层也同尺；`cargo build` 0 error/0 warning；consensus 43/43、p0 109/109，v0.10–v0.25 不回归。
-
-### Two verification modes / 两种验证模式
-
-ΣLang ships **two distinct verification tools** with different purposes:
-
-| Tool / 工具 | Mode / 模式 | What it checks / 检查内容 |
-|------------|------------|--------------------------|
-| `verify_p0.py` | **Algorithm correctness** / 算法正确性 | 109 tests over §T/§E/§C/§I/§SK module *algorithms* (Lamport clocks, Result monad, confidence ops, I/O effects, SocketKit app behavior) — proves the P0 semantics are implementable. Does NOT parse `.md` specs. |
-| `verify_consensus.py` | **Spec conformance** / 规范一致性 | Parses `.md` specs, applies Laws I–XVII + E-03/06/07/10 + §S/P-01 checks, and requires **41/41 corpus modules** to agree across Python / Rust / Elixir (Law XIII gate). |
-
-> These are complementary, not redundant: `verify_p0.py` proves the **semantics** are sound;
-> `verify_consensus.py` proves the **specs** conform and that independent implementations agree
-> on the same verdict (one symbol, one meaning, one result — across all models).
-> 两者互补而非冗余：前者证明语义可靠，后者证明规范合规且跨实现判定一致。
-
----
-
-## Repository Structure / 目录结构
-
-```
-sigma-lang/
-├── README.md                       # Project entry (this file) / 项目入口（本文件）
-├── LICENSE                         # MIT
-├── MASTER_PLAN.md                  # Development roadmap / 开发路线图
-├── verify_p0.py                    # Algorithmic verification (109 tests) / 算法验证
-├── verify_consensus.py             # Three-verifier consensus check / 三验证器共识检查
-│
-├── spec/                           # English specifications (normative) / 英文规范（规范性）
-│   ├── spec_p0_foundations.md      # ⭐ Main P0 specification (整合版核心入口)
-│   ├── spec_p0_time.md             # §T Full time & causality spec
-│   ├── spec_p0_error.md            # §E Full error algebra spec
-│   ├── spec_p0_confidence.md       # §C Full confidence & probability spec
-│   ├── spec_p0_io.md               # §I Full I/O & effects spec
-│   ├── spec_top_rules.md           # ⭐ Top-level rules: §S shadowing + §C constants + §G conflict
-│   ├── spec_top_extensions.md      # Top-level rules: Law XIII–XVII + E-10 extensions
-│   ├── spec_top_proofs.md          # Proof-carrying spec structure (P-01 enforced)
-│   └── zh/                         # Chinese translations / 中文翻译
-│       ├── spec_p0_foundations_zh.md
-│       ├── spec_top_rules_zh.md
-│       ├── spec_top_extensions_zh.md
-│       └── spec_top_proofs_zh.md
-│
-├── archive/                        # Deprecated / superseded specs / 废弃/已替代的规范
-│   ├── spec.md                     # v0.1 Initial Draft (superseded by spec_p0_foundations.md)
-│   └── spec_p0_shadowing.md        # §S v0.2 (merged into spec_top_rules.md §S)
-│
-├── corpus/                         # Shared test corpus (38 modules) / 共享测试语料库
-├── examples/                       # Usage examples / 使用示例
-├── impl/                           # Verifier implementations / 验证器实现
-│   ├── verifier/                   # Rust reference Verifier
-│   ├── elixir_rt/                  # Elixir/BEAM verifier + runtime
-│   └── python/                     # sigma_core.py — minimal reference core
-├── tools/                          # Tooling (sigma-prove, etc.) / 工具
-└── .github/workflows/              # CI: consensus gate
+## 5. 协议编写指南 / 写你自己的规约
+
+### 5.1 五步法（不用这个仓库的产品，只借它的协议能力）
+
+1. **读规范**：`spec/spec_p0_socketkit.md`（找茬）/ `spec_p0_inventory.md`（供应链）
+   ——看业务规则怎么写；模板见 `docs/spec-template.md`；
+2. **抄格式写自己的规则**：把业务操作（如"验收"）写成 函数 + 定律 + 测试；
+3. **三端验证**：`python3 verify_consensus.py`（Python/Rust/Elixir 三个验证器结论
+   必须一致）；
+4. **数学证明**：`python3 tools/sigma-prove.py`（z3 证明你的规则不会自相矛盾）；
+5. **一键验收**：`python3 tools/sigma-accept.py`（十道门禁全绿才算合格）。
+
+扩展阅读：`docs/TUTORIAL.md`（30 分钟上手）、`docs/USAGE.md`（分角色上手）、
+`docs/CONTRIBUTING.md`（贡献者指南）。
+
+### 5.2 spec JSON：机器可解析格式（Phase 1 落地中）
+
+Markdown 是人读格式，AI 解析不稳定。Phase 1 为每份 `spec_p0_*.md` 提供等价的
+`spec_p0_*.json`，让 AI 直接从结构化 JSON 提取语义，consensus gate 也直接消费
+JSON spec——"翻译出错"这个 bug 源头被消除。顶层结构：
+
+```json
+{
+  "spec": "§SK",
+  "version": "0.7.0",
+  "fingerprint_prefix": "0xF000",
+  "types": [
+    {"name": "Author", "kind": "alias", "target": "nat"},
+    {"name": "Task", "kind": "list", "element": "nat"},
+    {"name": "Status", "kind": "enum", "values": [
+      {"name": "open", "value": 0},
+      {"name": "in_progress", "value": 1},
+      {"name": "pending_review", "value": 2},
+      {"name": "completed", "value": 3}
+    ]}
+  ],
+  "operations": [
+    {
+      "name": "task_create",
+      "fingerprint": "0xF001",
+      "signature": {"params": ["nat", "nat"], "returns": "Task"},
+      "definition": {"kind": "lambda", "params": ["a", "b"], "body": ["a", "b", 0, 0]},
+      "preconditions": [{"expr": "b >= 0", "error": "BountyErr"}],
+      "laws": [
+        {"forall": ["a", "b"], "predicate": "index(task_create(a, b), 2) == 0",
+         "description": "freshly created task is open"}
+      ],
+      "tests": [
+        {"input": [7, 100], "output": [7, 100, 0, 0]},
+        {"input": [1, -5], "output": null, "error": "BountyErr"}
+      ]
+    }
+  ]
+}
 ```
 
----
+- 类型声明（`types`）：`alias` / `list` / `enum` / `option` / `map`，基础类型
+  `nat` / `int` / `str` / `bool` / `List<T>` / `Option<T>` / `unit`；
+- 操作声明（`operations`）：`fingerprint`（指纹）/ `signature`（签名）/
+  `definition`（lambda / table 状态机 / expression 三种定义体）/ `preconditions`
+  （前置条件 + 错误码）/ `laws`（定律，forall 谓词）/ `tests`（输入输出对）；
+- **完整字段定义与校验规则见 `spec/json-schema.md`（v1.0）**——写 JSON spec 前必读。
 
-## Quick Navigation / 快速导航
+### 5.3 架构与数据流
 
-### Getting Started / 入门
-
-| Document / 文档 | Description / 说明 |
-|----------------|-------------------|
-| [spec_p0_foundations.md](spec/spec_p0_foundations.md) | **Main P0 specification** — start here. Covers all 17 Iron Laws, core types, package system, §T/§E/§C/§I modules, and Verifier architecture. / **P0 核心规范** — 从这里开始。涵盖全部 17 条铁律、核心类型、包系统、四大模块和验证器架构。 |
-
-### Core Modules / 核心模块
-
-| Document / 文档 | Module / 模块 | Tests / 测试 |
-|----------------|---------------|-------------|
-| [spec_p0_time.md](spec/spec_p0_time.md) | §T Time & Causal Order / 时间与因果序 | 17/17 |
-| [spec_p0_error.md](spec/spec_p0_error.md) | §E Error Algebra / 错误代数 | 16/16 |
-| [spec_p0_confidence.md](spec/spec_p0_confidence.md) | §C Confidence & Probabilistic Logic / 置信度与概率逻辑 | 37/37 |
-| [spec_p0_io.md](spec/spec_p0_io.md) | §I I/O Boundary & Effects / I/O 边界与效应 | 25/25 |
-
-### Top-Level Governance / 顶层治理
-
-| Document / 文档 | Content / 内容 |
-|----------------|---------------|
-| [spec_top_rules.md](spec/spec_top_rules.md) | §S Shadowing & Binding Discipline, §C Real-World Constants, §G Conflict Adjudication, Rule Index / §S 遮蔽与绑定纪律、§C 现实常量、§G 冲突裁决、规则索引 |
-| [spec_top_extensions.md](spec/spec_top_extensions.md) | Laws XIII–XVII (Verifier Consensus, Negative Tests, Export Completeness, Compatibility Proof, Probabilistic Guarantee) + Law VIII-ext E-10 (Eval Determinism) + E-08 S-01 Level 1 (package signature) + E-08 Strategy Bundle candidate / Law XIII–XVII 扩展 + E-10 评估确定性 + E-08 S-01 Level 1 包签名 + E-08 策略包候选 |
-| [spec_pki_feasibility.md](spec/spec_pki_feasibility.md) | E-08 S-01 PKI Feasibility Study (Trust & Provenance: signatures, author identity, anti-poisoning) / 信任与溯源 PKI 可行性研究 |
-| [spec_top_proofs.md](spec/spec_top_proofs.md) | Proof-Carrying Spec Structure (P-01 enforced) / 证明携带规范结构（P-01 已强制执行） |
-
-### Chinese Translations / 中文翻译
-
-| Document / 文档 | Original / 原文 |
-|----------------|-----------------|
-| [spec_p0_foundations_zh.md](spec/zh/spec_p0_foundations_zh.md) | spec_p0_foundations.md |
-| [spec_top_rules_zh.md](spec/zh/spec_top_rules_zh.md) | spec_top_rules.md |
-| [spec_top_extensions_zh.md](spec/zh/spec_top_extensions_zh.md) | spec_top_extensions.md |
-| [spec_top_proofs_zh.md](spec/zh/spec_top_proofs_zh.md) | spec_top_proofs.md |
-
-> **Note**: `spec/` contains the authoritative English originals. `spec/zh/` contains Chinese translations for reference. In case of discrepancy, the English version prevails.
-> **注意**: `spec/` 目录为权威英文原版。`spec/zh/` 为中文参考翻译。如有出入，以英文原版为准。
-
----
-
-## Quick Start / 快速开始
-
-### Run the verifier / 运行验证器
-
-```bash
-python3 verify_p0.py
+```text
+  spec/ 规范（英文为准 + spec/zh 中文参考）
+   │  定义操作：指纹 / 签名 / 定律 / 测试（真实函数调用）
+   ▼
+  corpus/ 语料（56 个模块：ok 期望 PASS，break 期望 FAIL）
+   │  三端验证器独立解析 + 求值（eval_expr 真实调用 §SK/§PF/§IN）
+   ├──▶ Python verify_consensus.py ─┐
+   ├──▶ Rust  impl/verifier        ├──▶ Law XIII 共识门禁（56/56 全绿）
+   └──▶ Elixir impl/elixir_rt      ─┘
+   │
+   ├──▶ tools/sigma-prove.py     z3 义务消解（358 项 PROVED）
+   ├──▶ tools/sigma-runtime.py   审计运行时（trace + --domains 96/96）
+   ├──▶ impl/python/sigma_app.py 找茬参考后端（自检 + 冒烟 + 持久化/审计）
+   └──▶ tools/sigma-accept.py    一键验收（十道门禁）→ GitHub Actions CI
 ```
 
-Expected output / 预期输出:
+**两种验证模式**（互补而非冗余）：
+
+| 工具 | 模式 | 检查内容 |
+|------|------|---------|
+| `verify_p0.py` | 算法正确性 | 109 tests over §T/§E/§C/§I/§SK 模块算法（Lamport 时钟、Result monad、置信度运算、I/O 效应、SocketKit 行为）——证明 P0 语义可实现。不解析 .md spec。 |
+| `verify_consensus.py` | 规范一致性 | 解析 .md spec，应用 Laws I–XVII + E-03/06/07/10 + §S/P-01 检查，要求 56/56 语料模块在 Python / Rust / Elixir 上判定一致（Law XIII 门禁）。 |
+
+**工具链职责**：
+
+| 工具 | 职责 | 结果 |
+|------|------|------|
+| `verify_consensus.py` | 三端验证器对语料模块独立判定（Python/Rust/Elixir/Expected） | 56/56 一致 |
+| `verify_p0.py` | 算法正确性（含 §SK 语义检查） | 109/109 |
+| `tools/sigma-prove.py` | 把语料定律编码为 z3 义务并消解 | 358 项 PROVED |
+| `tools/sigma-runtime.py` | 审计运行时：逐事件复核定律（trace / --story / --growth / --inventory / --domains） | --domains 96/96 |
+| `impl/python/sigma_app.py` | 找茬 MVP 参考后端：业务全委托 §SK，App 只管状态 | 自检 + 冒烟 + 持久化/审计 |
+| `tools/sigma-accept.py` | 十道门禁一键验收（本地与 CI 同一条命令） | 10/10 |
+| `.github/workflows/ci.yml` | push/PR 自动验收，全绿才算过 | CI 门禁 |
+
+**一条语义的旅程**（以 §SK `task_create` 为例）：
+
+1. `spec/spec_p0_socketkit.md` 定义指纹 `0xF001`、签名、定律与测试；
+2. `corpus/socketkit_taskflow_ok.md` 把它写成**真实函数调用**测试；
+3. Python / Rust / Elixir 三个独立验证器各自求值，结果必须逐项一致（Law XIII）；
+4. `tools/sigma-prove.py` 把定律编码为 z3 义务，证明不可违反（P-01 结构 + 义务 PROVED）；
+5. `tools/sigma-runtime.py` 在业务故事线里审计它的行为（input/output/定律复核）；
+6. `impl/python/sigma_app.py` 的 `post_task` 直接委托它，并记录审计事件；
+7. 任何改动后 `tools/sigma-accept.py` 十道门禁全绿，CI 放行。
+
+> 整条链路的含义：**业务规则先以 ΣLang 语义存在并被证明，然后才是任何语言的实现**
+> ——实现只是语义的投影。
+
+### 5.4 设计理念
+
+**三层架构**：
+
 ```
-⏰ MODULE T: 17/17 passed
-⚠️  MODULE E: 16/16 passed
-🎲 MODULE C: 37/37 passed
-🔌 MODULE I: 25/25 passed
-📋 MODULE SK: 14/14 passed
-
-  🎯 TOTAL: 109/109 tests passed
-  🏆 ALL P0 FOUNDATIONS VERIFIED — ΣLang is sound!
-```
-
-### Read the spec / 阅读规范
-
-Start with `spec/spec_p0_foundations.md` — it ties all four P0 modules together.
-
-从 `spec/spec_p0_foundations.md` 开始 — 它聚合了全部四个 P0 模块。
-
----
-
-## Design Philosophy / 设计理念
-
-### Three-Layer Architecture / 三层架构
-
-```
-L0 — Core (core@1.0)        ← immutable, always loaded / 不可变，始终加载
+L0 — Core (core@1.0)        ← 不可变，始终加载
      ℕ ℤ ℚ ℝ ℂ 𝔹 Sym Prop λ ∀ ∃
      + Iron Laws + Verifier interface
 
-L1 — Standard Library          ← community maintained, versioned / 社区维护，版本化
+L1 — Standard Library          ← 社区维护，版本化
      math.calculus / math.linear / finance.base
      signal.fourier / stat.prob / opt.gradient
 
-L2 — User Packages            ← anyone can publish / 任何人可发布
+L2 — User Packages            ← 任何人可发布
      emoji.finance / tcm.wuzang / physics.qft
      must pass Verifier Iron Laws / 必须通过验证器铁律
 ```
 
-### The 17 Iron Laws / 十七条铁律
+**十七条铁律**：
 
 ```
 Law I    — Fingerprint Uniqueness / 指纹唯一性
@@ -2157,72 +489,144 @@ Law XVI  — Compatibility Proof / 兼容性证明
 Law XVII — Probabilistic Guarantee / 概率保证
 ```
 
-Laws I–XII are defined in `spec/spec_p0_foundations.md` §0. Laws XIII–XVII plus the Law VIII
-extension E-10 (Evaluation Determinism) are promoted extensions defined in
-`spec/spec_top_extensions.md`, enforced by all three verifiers (Python / Rust / Elixir).
+Laws I–XII 定义于 `spec/spec_p0_foundations.md` §0；Laws XIII–XVII 及 Law VIII 扩展
+E-10（评估确定性）定义于 `spec/spec_top_extensions.md`，由全部三个验证器强制执行。
 
-Law I–XII 定义于 `spec/spec_p0_foundations.md` §0。Law XIII–XVII 及 Law VIII 扩展 E-10（评估确定性）为已推广的扩展，定义于 `spec/spec_top_extensions.md`，由全部三个验证器强制执行。
+### 5.5 为什么需要 ΣLang
+
+**问题**：把同一份 Markdown 文档交给不同的 AI——GPT-4 一种解读、Claude 另一种、
+Gemini 第三种。**同样的输入，不同的输出。这对生产级 AI 系统来说是不可接受的。**
+
+**方案**：ΣLang 用**数学锚定的符号**替换歧义的自然语言：
+
+| 传统 | ΣLang |
+|------|-------|
+| "把数字加起来" | `a ⊕ b` with associativity law / 带结合律 |
+| "如果分数 >= 90" | `grade(s) ≝ if s<60 then 𝗀𝖣 else…` + 边界测试 |
+| "大概是真的" | `⊢_0.73 P` with calibration law / 带校准律 |
+| "发送消息" | `send(addr, msg)` with causal ordering / 带因果序 |
+
+### 5.6 目录结构
+
+```
+sigma-lang/
+├── README.md                       # Project entry (this file) / 项目入口（本文件）
+├── LICENSE                         # MIT
+├── verify_p0.py                    # Algorithmic verification (109 tests) / 算法验证
+├── verify_consensus.py             # Three-verifier consensus check / 三验证器共识检查
+│
+├── spec/                           # English specifications (normative) / 英文规范（规范性）
+│   ├── spec_p0_foundations.md      # ⭐ Main P0 specification (整合版核心入口)
+│   ├── spec_p0_time.md             # §T Full time & causality spec
+│   ├── spec_p0_error.md            # §E Full error algebra spec
+│   ├── spec_p0_confidence.md       # §C Full confidence & probability spec
+│   ├── spec_p0_io.md               # §I Full I/O & effects spec
+│   ├── spec_p0_socketkit.md        # §SK 找茬业务
+│   ├── spec_p0_portfolio.md        # §PF 金融（投资组合）
+│   ├── spec_p0_inventory.md        # §IN 供应链（库存）
+│   ├── spec_top_rules.md           # ⭐ Top-level rules: §S shadowing + §C constants + §G conflict
+│   ├── spec_top_extensions.md      # Top-level rules: Law XIII–XVII + E-10 extensions
+│   ├── spec_top_proofs.md          # Proof-carrying spec structure (P-01 enforced)
+│   ├── json-schema.md              # Spec JSON Schema v1.0（机器可解析格式规范）
+│   └── zh/                         # Chinese translations / 中文翻译
+│
+├── archive/                        # Deprecated / superseded specs / 废弃/已替代的规范
+├── corpus/                         # Shared test corpus (56 modules) / 共享测试语料库
+├── examples/                       # Usage examples / 使用示例
+├── impl/                           # Verifier implementations / 验证器实现
+│   ├── verifier/                   # Rust reference Verifier
+│   ├── elixir_rt/                  # Elixir/BEAM verifier + runtime
+│   └── python/                     # sigma_core.py — minimal reference core
+├── tools/                          # Tooling (sigma-prove, sigma-ai-bench…) / 工具
+└── .github/workflows/              # CI: consensus gate
+```
+
+### 5.7 文档导航
+
+- **入门**：[spec_p0_foundations.md](spec/spec_p0_foundations.md) —— P0 核心规范，
+  涵盖 17 条铁律、核心类型、包系统、§T/§E/§C/§I 模块和验证器架构；
+- **核心模块**：[spec_p0_time.md](spec/spec_p0_time.md)（§T 17/17）·
+  [spec_p0_error.md](spec/spec_p0_error.md)（§E 16/16）·
+  [spec_p0_confidence.md](spec/spec_p0_confidence.md)（§C 37/37）·
+  [spec_p0_io.md](spec/spec_p0_io.md)（§I 25/25）；
+- **业务域**：[spec_p0_socketkit.md](spec/spec_p0_socketkit.md)（§SK 找茬）·
+  [spec_p0_portfolio.md](spec/spec_p0_portfolio.md)（§PF 金融）·
+  [spec_p0_inventory.md](spec/spec_p0_inventory.md)（§IN 供应链）；
+- **顶层治理**：[spec_top_rules.md](spec/spec_top_rules.md)（§S 遮蔽与绑定纪律、§C
+  现实常量、§G 冲突裁决、规则索引）· [spec_top_extensions.md](spec/spec_top_extensions.md)
+  （Laws XIII–XVII + E-10 评估确定性）· [spec_pki_feasibility.md](spec/spec_pki_feasibility.md)
+  （信任与溯源 PKI 可行性研究）· [spec_top_proofs.md](spec/spec_top_proofs.md)
+  （P-01 证明携带结构）；
+- **中文翻译**：`spec/zh/`（spec_p0_foundations_zh.md 等）。
+
+> **注意**：`spec/` 目录为权威英文原版；`spec/zh/` 为中文参考翻译，如有出入以英文
+> 原版为准。
+
+### 5.8 废弃与归档
+
+| 文件 | 原因 |
+|------|------|
+| `archive/spec.md` | v0.1 初稿 — 已被 `spec/spec_p0_foundations.md` (v0.3.0) 取代。使用旧章节目录结构，缺少 §T/§E/§C/§I 模块化架构、Law XIII–XVII 和三验证器共识。 |
+| `archive/spec_p0_shadowing.md` | §S Shadowing v0.2 — 明确标记为 SUPERSEDED，内容已合并到 `spec/spec_top_rules.md` §S（2026-08-01）。 |
 
 ---
 
-## Why ΣLang? / 为什么需要 ΣLang？
+## 6. 项目状态 / Status
 
-### The Problem / 问题
+### 6.1 状态总览
 
-Today, when you give the same Markdown document to different AIs:
-- GPT-4 interprets it one way
-- Claude interprets it another way
-- Gemini interprets it a third way
+| Module / 模块 | Tests / 测试 | Status / 状态 |
+|---------------|-------------|---------------|
+| §T Time & Causal Order / 时间与因果序 | 17/17 | ✅ |
+| §E Error Algebra / 错误代数 | 16/16 | ✅ |
+| §C Confidence & Probabilistic Logic / 置信度与概率逻辑 | 37/37 | ✅ |
+| §I I/O Boundary & Effects / I/O 边界与效应 | 25/25 | ✅ |
+| §SK SocketKit Protocol / SocketKit 协议 | 14/14 | ✅ |
+| **Total / 总计** | **109/109** | **✅** |
 
-**Same input, different outputs. This is unacceptable for production AI systems.**
+- **Verifier Consensus / 验证器共识**：**56/56** 语料模块在 Python / Rust / Elixir
+  三个验证器上达成一致；
+- **z3 义务消解**：**358 项 PROVED**；**一键验收**：**10/10 门禁**；**运行时不变量
+  复核**：`--domains` **96/96**；三端 0 warning。
 
-如今，把同一份 Markdown 文档交给不同的 AI：
-- GPT-4 按一种方式解读
-- Claude 按另一种方式解读
-- Gemini 按第三种方式解读
+### 6.2 里程碑历史
 
-**同样的输入，不同的输出。这对生产级 AI 系统来说是不可接受的。**
+> README 不再逐条堆叠版本记录（避免变成 changelog），完整逐条记录见仓库提交历史。
+> 以下为关键节点：
 
-### The Solution / 解决方案
+| 里程碑 | 日期 | 要点 |
+|--------|------|------|
+| v0.10–v0.13 | 2026-08-02 | 协议雏形：数学符号/基本操作/常量包可用，SocketKit 协议定义，共识门禁 40/40 |
+| v0.14–v0.24 | 2026-08-03 | 三端 §SK 执行层 + 找茬 MVP 参考实现，业务故事线三端逐项一致 |
+| v0.27–v0.46 | 2026-08-03 | 找茬五大制度（额度/积分/勋章/核验师/督导）+ §PF 金融 / §IN 供应链两域自举（协议泛化性验证） |
+| v0.47–v0.70 | 2026-08-04 | 三域概览/验证清单、找茬产品化（鉴权/持久化/审计/健康检查/分级日志）、产品落地指南 |
+| v0.71–v0.100 | 2026-08-04 | 服务化十件套、一键开工 `--launch`、运行/上线指南，跨百版本里程碑 |
+| v0.101–v0.130 | 2026-08-05 | 部署加固、性能基线、**PyPI 发布**（pip install sigma-lang 全球可用） |
+| v0.131–v0.256 | 2026-08-05→06 | 发布链自动化（打 tag 即发布）、跨域联动/错误边界/标准库强化、前端三域面板、审计轨迹视图 |
+| v0.257–v0.540 | 2026-08-06→07 | 链式不变量持续补强（INV-* 至 16 组）、批次推进至 41（小阶段 408/496）、PyPI 0.7.5 |
 
-ΣLang replaces ambiguous natural language with **mathematically anchored symbols**:
+- **当前**：spec **0.7.0** · PyPI **0.7.5** · 里程碑 **v0.540**（批次 41 · 小阶段
+  408/496，长期自主运行推进中）；
+- **推进规则**：每 10 个小阶段同步仓库，每 100 个发布 PyPI；
+- **下一步（Phase 1）**：AI Verifier Benchmark（第 3 节）——让 AI 消费 spec 并自证
+  一致。
 
-ΣLang 用**数学锚定的符号**替换歧义的自然语言：
+### 6.3 版本信息
 
-| Traditional / 传统 | ΣLang |
-|--------------------|--------|
-| "add the numbers" / "把数字加起来" | `a ⊕ b` with associativity law / 带结合律 |
-| "if score >= 90" / "如果分数 >= 90" | `grade(s) ≝ if s<60 then 𝗀𝖣 else…` + boundary tests / 边界测试 |
-| "probably true" / "大概是真的" | `⊢_0.73 P` with calibration law / 带校准律 |
-| "send message" / "发送消息" | `send(addr, msg)` with causal ordering / 带因果序 |
-
----
-
-## Deprecated & Archived / 废弃与归档
-
-The following files have been moved to `archive/` as they are superseded by newer specifications:
-
-以下文件已被移至 `archive/` 目录，因为它们已被更新的规范所取代：
-
-| File / 文件 | Reason / 原因 |
-|------------|---------------|
-| `archive/spec.md` | v0.1 Initial Draft — superseded by `spec/spec_p0_foundations.md` (v0.3.0). The v0.1 spec uses an older chapter-based structure (chapters 1–17) and lacks the §T/§E/§C/§I modular architecture, promoted Laws XIII–XVII, and three-verifier consensus enforcement. / v0.1 初稿 — 已被 `spec/spec_p0_foundations.md` (v0.3.0) 取代。v0.1 使用旧的章节目录结构（第 1–17 章），缺少 §T/§E/§C/§I 模块化架构、Law XIII–XVII 推广和三验证器共识。 |
-| `archive/spec_p0_shadowing.md` | §S Shadowing v0.2 — explicitly marked SUPERSEDED. Content merged into `spec/spec_top_rules.md` §S on 2026-08-01. / §S 遮蔽 v0.2 — 明确标记为 SUPERSEDED。内容已于 2026-08-01 合并到 `spec/spec_top_rules.md` §S。 |
-
----
-
-## Version / 版本
-
-- **Milestone / 里程碑**: **v0.540 批次 41 收尾 (2026-08-07)** — 小阶段 408/496 · 数字同步 + 全量验收全绿 · **PyPI 0.7.5 发布 (2026-08-07)** — v0.532 = 400/496 · **v0.539 Makefile/CI 补双资产对消-估值-风险-恢复-循环-现金守恒八链测试 (2026-08-07)** — make etrcc + CI 对账 · **v0.538 Elixir 双资产等量买卖对消-估值-风险-恢复-对消循环-现金守恒八链自检 (2026-08-07)** — 四十域自检齐 · **v0.537 Rust 双资产等量买卖对消-估值-风险-恢复-对消循环-现金守恒八链对账 (2026-08-07)** — 冒烟 162/162 · **v0.536 前端双资产等量买卖对消-估值-风险-恢复-对消循环-现金守恒八链演示 (2026-08-07)** — web 八链 · **v0.535 Python App 双资产等量买卖对消-估值-风险-恢复-对消循环-现金守恒八链剧本 (2026-08-07)** — --dual-asset-equal-trade-vr-restore-cycle-cash-test 7/7 · **v0.534 README 收官总览数字同步 (2026-08-07)** — Status v0.536 全貌（INV-PF-16 · --domains 96/96） · **v0.533 运行时不变量复核扩展 (2026-08-07)** — INV-PF-16 复核进审计，--domains 96/96 · **v0.532 标准库语料强化 + PyPI 0.7.5 (2026-08-07)** — math.base 十四元素形状 63 项 · **v0.531 新增不变量 INV-PF-16 (2026-08-07)** — 双资产等量买卖对消-估值-风险-恢复-对消循环-现金守恒八链 PROVED · 全量 354 PROVED · **v0.530 批次 40 收尾 (2026-08-07)** — 小阶段 398/496 · 数字同步 + 全量验收全绿 · **v0.529 Makefile/CI 补全业务链八链守恒测试 (2026-08-07)** — make fbe + CI 对账 · **v0.528 Elixir 全业务链八链守恒自检 (2026-08-07)** — 三十九域自检齐 · **v0.527 Rust 全业务链八链守恒对账 (2026-08-07)** — 冒烟 156/156 · **v0.526 前端全业务链八链守恒演示 (2026-08-07)** — web 八链 · **v0.525 Python App 全业务链八链守恒剧本 (2026-08-07)** — --full-business-eight-link-test 8/8 · **v0.524 README 收官总览数字同步 (2026-08-07)** — Status v0.526 全貌（INV-SK-22 · --domains 95/95） · **v0.523 运行时不变量复核扩展 (2026-08-07)** — INV-SK-22 复核进审计，--domains 95/95 · **v0.522 标准库语料强化 (2026-08-07)** — data.transform 十四元素形状 90 项 · **v0.521 新增不变量 INV-SK-22 (2026-08-07)** — 全业务链八链守恒 PROVED · 全量 354 PROVED · **v0.520 批次 39 收尾 (2026-08-07)** — 小阶段 388/496 · 数字同步 + 全量验收全绿 · **v0.519 Makefile/CI 补双货品对消-水位-履约-恢复-循环七链测试 (2026-08-07)** — make eifrc + CI 对账 · **v0.518 Elixir 双货品等量入出对消-水位-履约-恢复-对消循环七链自检 (2026-08-07)** — 三十八域自检齐 · **v0.517 Rust 双货品等量入出对消-水位-履约-恢复-对消循环七链对账 (2026-08-07)** — 冒烟 148/148 · **v0.516 前端双货品等量入出对消-水位-履约-恢复-对消循环七链演示 (2026-08-07)** — web 七链 · **v0.515 Python App 双货品等量入出对消-水位-履约-恢复-对消循环七链剧本 (2026-08-07)** — --dual-item-equal-trade-fillrate-restore-cycle-test 6/6 · **v0.514 README 收官总览数字同步 (2026-08-07)** — Status v0.516 全貌（INV-IN-15 · --domains 94/94） · **v0.513 运行时不变量复核扩展 (2026-08-07)** — INV-IN-15 复核进审计，--domains 94/94 · **v0.512 标准库语料强化 (2026-08-07)** — ai.confidence 十四元素形状 52 项 · **v0.511 新增不变量 INV-IN-15 (2026-08-07)** — 双货品等量入出对消-水位-履约-恢复-对消循环七链 PROVED · 全量 354 PROVED · **v0.510 批次 38 收尾 (2026-08-07)** — 小阶段 378/496 · 数字同步 + 全量验收全绿 · **v0.509 Makefile/CI 补双资产对消-估值-风险-恢复-循环七链测试 (2026-08-07)** — make etrc + CI 对账 · **v0.508 Elixir 双资产等量买卖对消-估值-风险-恢复-对消循环七链自检 (2026-08-07)** — 三十七域自检齐 · **v0.507 Rust 双资产等量买卖对消-估值-风险-恢复-对消循环七链对账 (2026-08-07)** — 冒烟 143/143 · **v0.506 前端双资产等量买卖对消-估值-风险-恢复-对消循环七链演示 (2026-08-07)** — web 七链 · **v0.505 Python App 双资产等量买卖对消-估值-风险-恢复-对消循环七链剧本 (2026-08-07)** — --dual-asset-equal-trade-vr-restore-cycle-test 6/6 · **v0.504 README 收官总览数字同步 (2026-08-07)** — Status v0.506 全貌（INV-PF-15 · --domains 93/93） · **v0.503 运行时不变量复核扩展 (2026-08-07)** — INV-PF-15 复核进审计，--domains 93/93 · **v0.502 标准库语料强化 (2026-08-07)** — math.base 十四元素形状 59 项 · **v0.501 新增不变量 INV-PF-15 (2026-08-07)** — 双资产等量买卖对消-估值-风险-恢复-对消循环七链 PROVED · 全量 354 PROVED · **v0.500 批次 37 收尾 (2026-08-07)** — 小阶段 368/496 · 数字同步 + 全量验收全绿 · **v0.499 Makefile/CI 补全业务链七链守恒测试 (2026-08-07)** — make fbs2 + CI 对账 · **v0.498 Elixir 全业务链七链守恒自检 (2026-08-07)** — 三十六域自检齐 · **v0.497 Rust 全业务链七链守恒对账 (2026-08-07)** — 冒烟 138/138 · **v0.496 前端全业务链七链守恒演示 (2026-08-07)** — web 七链守恒 · **v0.495 Python App 全业务链七链守恒剧本 (2026-08-07)** — --full-business-seven-link-test 7/7 · **v0.494 README 收官总览数字同步 (2026-08-07)** — Status v0.496 全貌（INV-SK-21 · --domains 92/92） · **v0.493 运行时不变量复核扩展 (2026-08-07)** — INV-SK-21 复核进审计，--domains 92/92 · **v0.492 标准库语料强化 (2026-08-07)** — data.transform 十三元素形状 84 项 · **v0.491 新增不变量 INV-SK-21 (2026-08-07)** — 全业务链七链守恒 PROVED · 全量 354 PROVED · **v0.490 批次 36 收尾 (2026-08-07)** — 小阶段 358/496 · 数字同步 + 全量验收全绿 · **v0.489 Makefile/CI 补双货品对消-水位-履约-恢复六链测试 (2026-08-07)** — make eifr + CI 对账 · **v0.488 Elixir 双货品等量入出对消-水位-履约-恢复六链自检 (2026-08-07)** — 三十五域自检齐 · **v0.487 Rust 双货品等量入出对消-水位-履约-恢复六链对账 (2026-08-07)** — 冒烟 131/131 · **v0.486 前端双货品等量入出对消-水位-履约-恢复六链演示 (2026-08-07)** — web 六链 · **v0.485 Python App 双货品等量入出对消-水位-履约-恢复六链剧本 (2026-08-07)** — --dual-item-equal-trade-fillrate-restore-test 5/5 · **v0.484 README 收官总览数字同步 (2026-08-07)** — Status v0.486 全貌（INV-IN-14 · --domains 91/91） · **v0.483 运行时不变量复核扩展 (2026-08-07)** — INV-IN-14 复核进审计，--domains 91/91 · **v0.482 标准库语料强化 (2026-08-07)** — ai.confidence 十三元素形状 48 项 · **v0.481 新增不变量 INV-IN-14 (2026-08-07)** — 双货品等量入出对消-水位-履约-恢复六链 PROVED · 全量 354 PROVED · **v0.480 批次 35 收尾 (2026-08-07)** — 小阶段 348/496 · 数字同步 + 全量验收全绿 · **v0.479 Makefile/CI 补双资产对消-估值-风险-恢复六链测试 (2026-08-07)** — make etr + CI 对账 · **v0.478 Elixir 双资产等量买卖对消-估值-风险-恢复六链自检 (2026-08-07)** — 三十四域自检齐 · **v0.477 Rust 双资产等量买卖对消-估值-风险-恢复六链对账 (2026-08-07)** — 冒烟 127/127 · **v0.476 前端双资产等量买卖对消-估值-风险-恢复六链演示 (2026-08-07)** — web 六链 · **v0.475 Python App 双资产等量买卖对消-估值-风险-恢复六链剧本 (2026-08-07)** — --dual-asset-equal-trade-vr-restore-test 5/5 · **v0.474 README 收官总览数字同步 (2026-08-07)** — Status v0.476 全貌（INV-PF-14 · --domains 90/90） · **v0.473 运行时不变量复核扩展 (2026-08-07)** — INV-PF-14 复核进审计，--domains 90/90 · **v0.472 标准库语料强化 (2026-08-07)** — math.base 十三元素形状 55 项 · **v0.471 新增不变量 INV-PF-14 (2026-08-07)** — 双资产等量买卖对消-估值-风险-恢复六链 PROVED · 全量 354 PROVED · **v0.470 批次 34 收尾 (2026-08-07)** — 小阶段 338/496 · 数字同步 + 全量验收全绿 · **v0.469 Makefile/CI 补全业务链六链守恒测试 (2026-08-07)** — make fbs + CI 对账 · **v0.468 Elixir 全业务链六链守恒自检 (2026-08-07)** — 三十三域自检齐 · **v0.467 Rust 全业务链六链守恒对账 (2026-08-07)** — 冒烟 123/123 · **v0.466 前端全业务链六链守恒演示 (2026-08-07)** — web 六链守恒 · **v0.465 Python App 全业务链六链守恒剧本 (2026-08-07)** — --full-business-six-link-test 6/6 · **v0.464 README 收官总览数字同步 (2026-08-07)** — Status v0.466 全貌（INV-SK-20 · --domains 89/89） · **v0.463 运行时不变量复核扩展 (2026-08-07)** — INV-SK-20 复核进审计，--domains 89/89 · **v0.462 标准库语料强化 (2026-08-07)** — data.transform 十二元素形状 78 项 · **v0.461 新增不变量 INV-SK-20 (2026-08-07)** — 全业务链六链守恒 PROVED · 全量 354 PROVED · **v0.460 批次 33 收尾 (2026-08-07)** — 小阶段 328/496 · 数字同步 + 全量验收全绿 · **v0.459 Makefile/CI 补双货品对消-水位-履约五链测试 (2026-08-07)** — make eif + CI 对账 · **v0.458 Elixir 双货品等量入出对消-水位-履约五链自检 (2026-08-07)** — 三十二域自检齐 · **v0.457 Rust 双货品等量入出对消-水位-履约五链对账 (2026-08-07)** — 冒烟 117/117 · **v0.456 前端双货品等量入出对消-水位-履约五链演示 (2026-08-07)** — web 五链 · **v0.455 Python App 双货品等量入出对消-水位-履约五链剧本 (2026-08-07)** — --dual-item-equal-trade-fillrate-test 4/4 · **v0.454 README 收官总览数字同步 (2026-08-07)** — Status v0.456 全貌（INV-IN-13 · --domains 88/88） · **v0.453 运行时不变量复核扩展 (2026-08-07)** — INV-IN-13 复核进审计，--domains 88/88 · **v0.452 标准库语料强化 (2026-08-07)** — ai.confidence 十二元素形状 44 项 · **v0.451 新增不变量 INV-IN-13 (2026-08-07)** — 双货品等量入出对消-水位-履约五链 PROVED · 全量 354 PROVED · **v0.450 批次 32 收尾 (2026-08-07)** — 小阶段 318/496 · 数字同步 + 全量验收全绿 · **v0.449 Makefile/CI 补双资产对消-估值-风险五链测试 (2026-08-07)** — make etv + CI 对账 · **v0.448 Elixir 双资产等量买卖对消-估值-风险五链自检 (2026-08-07)** — 三十一域自检齐 · **v0.447 Rust 双资产等量买卖对消-估值-风险五链对账 (2026-08-07)** — 冒烟 114/114 · **v0.446 前端双资产等量买卖对消-估值-风险五链演示 (2026-08-07)** — web 五链 · **v0.445 Python App 双资产等量买卖对消-估值-风险五链剧本 (2026-08-07)** — --dual-asset-equal-trade-vr-test 4/4 · **v0.444 README 收官总览数字同步 (2026-08-07)** — Status v0.446 全貌（INV-PF-13 · --domains 87/87） · **v0.443 运行时不变量复核扩展 (2026-08-07)** — INV-PF-13 复核进审计，--domains 87/87 · **v0.442 标准库语料强化 (2026-08-07)** — math.base 十二元素形状 51 项 · **v0.441 新增不变量 INV-PF-13 (2026-08-07)** — 双资产等量买卖对消-估值-风险五链 PROVED · 全量 354 PROVED · **v0.440 批次 31 收尾 (2026-08-07)** — 小阶段 308/496 · 数字同步 + 全量验收全绿 + PyPI 0.7.4 发布 · **v0.439 Makefile/CI 补五链守恒测试 (2026-08-07)** — make awccb + CI 对账 · **v0.438 Elixir 验收-提现-契分-贡献-勋章五链守恒自检 (2026-08-07)** — 三十域自检齐 · **v0.437 Rust 验收-提现-契分-贡献-勋章五链守恒对账 (2026-08-07)** — 冒烟 111/111 · **v0.436 前端验收-提现-契分-贡献-勋章五链守恒演示 (2026-08-07)** — web 五链守恒 · **v0.435 Python App 验收-提现-契分-贡献-勋章五链守恒剧本 (2026-08-07)** — --accept-withdraw-credit-contribution-badge-test 5/5 · **v0.434 README 收官总览数字同步 (2026-08-07)** — Status v0.436 全貌（INV-SK-19 · --domains 86/86） · **v0.433 运行时不变量复核扩展 (2026-08-07)** — INV-SK-19 复核进审计，--domains 86/86 · **v0.432 标准库语料强化 (2026-08-07)** — data.transform 十一元素形状 72 项 + PyPI 0.7.4 · **v0.431 新增不变量 INV-SK-19 (2026-08-07)** — 验收-提现-契分-贡献-勋章五链守恒 PROVED · 全量 354 PROVED · **v0.430 批次 30 收尾 (2026-08-07)** — 小阶段 298/496 · 数字同步 + 全量验收全绿 · **v0.429 Makefile/CI 补双货品等量入出对消链测试 (2026-08-07)** — make eit + CI 对账 · **v0.428 Elixir 双货品等量入出对消链自检 (2026-08-07)** — 二十九域自检齐 · **v0.427 Rust 双货品等量入出对消链对账 (2026-08-07)** — 冒烟 106/106 · **v0.426 前端双货品等量入出对消链演示 (2026-08-07)** — web 对消链 · **v0.425 Python App 双货品等量入出对消链剧本 (2026-08-07)** — --dual-item-equal-trade-test 3/3 · **v0.424 README 收官总览数字同步 (2026-08-07)** — Status v0.426 全貌（INV-IN-12 · --domains 85/85） · **v0.423 运行时不变量复核扩展 (2026-08-07)** — INV-IN-12 复核进审计，--domains 85/85 · **v0.422 标准库语料强化 (2026-08-07)** — ai.confidence 十一元素形状 40 项 · **v0.421 新增不变量 INV-IN-12 (2026-08-07)** — 双货品等量入出对消链 PROVED · 全量 354 PROVED · **v0.420 批次 29 收尾 (2026-08-07)** — 小阶段 288/496 · 数字同步 + 全量验收全绿 · **v0.419 Makefile/CI 补双资产等量买卖对消链测试 (2026-08-07)** — make et + CI 对账 · **v0.418 Elixir 双资产等量买卖对消链自检 (2026-08-07)** — 二十八域自检齐 · **v0.417 Rust 双资产等量买卖对消链对账 (2026-08-07)** — 冒烟 104/104 · **v0.416 前端双资产等量买卖对消链演示 (2026-08-07)** — web 对消链 · **v0.415 Python App 双资产等量买卖对消链剧本 (2026-08-07)** — --dual-asset-equal-trade-test 4/4 · **v0.414 README 收官总览数字同步 (2026-08-07)** — Status v0.416 全貌（INV-PF-12 · --domains 84/84） · **v0.413 运行时不变量复核扩展 (2026-08-07)** — INV-PF-12 复核进审计，--domains 84/84 · **v0.412 标准库语料强化 (2026-08-07)** — math.base 十一元素形状 47 项 · **v0.411 新增不变量 INV-PF-12 (2026-08-07)** — 双资产等量买卖对消链 PROVED · 全量 354 PROVED · **v0.410 批次 28 收尾 (2026-08-07)** — 小阶段 278/496 · 数字同步 + 全量验收全绿 · **v0.409 Makefile/CI 补验收-提现-契分-勋章四链测试 (2026-08-07)** — make awc + CI 对账 · **v0.408 Elixir 验收-提现-契分-勋章四链自检 (2026-08-07)** — 二十七域自检齐 · **v0.407 Rust 验收-提现-契分-勋章四链对账 (2026-08-07)** — 冒烟 102/102 · **v0.406 前端验收-提现-契分-勋章四链演示 (2026-08-07)** — web 四链联动 · **v0.405 Python App 验收-提现-契分-勋章四链联动剧本 (2026-08-07)** — --accept-withdraw-credit-badge-test 4/4 · **v0.404 README 收官总览数字同步 (2026-08-07)** — Status v0.406 全貌（INV-SK-18 · --domains 83/83） · **v0.403 运行时不变量复核扩展 (2026-08-07)** — INV-SK-18 复核进审计，--domains 83/83 · **v0.402 标准库语料强化 (2026-08-07)** — data.transform 十元素形状 66 项 · **v0.401 新增不变量 INV-SK-18 (2026-08-07)** — 验收-提现-契分-勋章四链联动 PROVED · 全量 354 PROVED · **v0.400 批次 27 收尾 (2026-08-06)** — 小阶段 268/496 · 数字同步 + 全量验收全绿 · **v0.399 Rust 全业务链五链守恒对账 (2026-08-06)** — 冒烟 98/98 · **v0.398 前端全业务链五链守恒演示 (2026-08-06)** — web 五链守恒 · **v0.397 Python App 全业务链五链守恒剧本 (2026-08-06)** — --full-business-five-link-test 5/5 · **v0.396 README 收官总览数字同步 (2026-08-06)** — Status v0.396 全貌（INV-SK-17 · --domains 82/82） · **v0.395 运行时不变量复核扩展 (2026-08-06)** — INV-SK-17 复核进审计，--domains 82/82 · **v0.394 标准库语料强化 (2026-08-06)** — ai.confidence 十元素形状 36 项 · **v0.393 新增不变量 INV-SK-17 (2026-08-06)** — 全业务链五链守恒 PROVED · 全量 354 PROVED · **v0.392 批次 26 收尾 (2026-08-06)** — 小阶段 260/496 · 数字同步 + 全量验收全绿 · **v0.391 Makefile/CI 补双货品四链测试 (2026-08-06)** — make di + CI 对账 · **v0.390 Elixir 双货品四链自检 (2026-08-06)** — 二十六域自检齐 · **v0.389 Rust 双货品四链对账 (2026-08-06)** — 冒烟 93/93 · **v0.388 前端双货品四链演示 (2026-08-06)** — web 双货品四链 · **v0.387 Python App 双货品四链联动剧本 (2026-08-06)** — --dual-item-four-link-test 4/4 · **v0.386 README 收官总览数字同步 (2026-08-06)** — Status v0.386 全貌（INV-IN-11 · --domains 81/81） · **v0.385 运行时不变量复核扩展 (2026-08-06)** — INV-IN-11 复核进审计，--domains 81/81 · **v0.384 标准库语料强化 (2026-08-06)** — math.base 十元素形状 43 项 · **v0.383 新增不变量 INV-IN-11 (2026-08-06)** — 双货品四链联动 PROVED · 全量 354 PROVED · **v0.382 批次 25 收尾 (2026-08-06)** — 小阶段 250/496 · 数字同步 + 全量验收全绿 · **v0.381 Makefile/CI 补双资产估值-风险四链测试 (2026-08-06)** — make dvr + CI 对账 · **v0.380 Elixir 双资产估值-风险四链自检 (2026-08-06)** — 二十五域自检齐 · **v0.379 Rust 双资产估值-风险四链对账 (2026-08-06)** — 冒烟 91/91 · **v0.378 前端双资产估值-风险四链演示 (2026-08-06)** — web 估值-风险四链 · **v0.377 Python App 双资产买卖-估值-风险四链联动剧本 (2026-08-06)** — --dual-asset-vr-test 4/4 · **v0.376 README 收官总览数字同步 (2026-08-06)** — Status v0.376 全貌（INV-PF-11 · --domains 80/80） · **v0.375 运行时不变量复核扩展 (2026-08-06)** — INV-PF-11 复核进审计，--domains 80/80 · **v0.374 标准库语料强化 (2026-08-06)** — data.transform 九元素形状 60 项 · **v0.373 新增不变量 INV-PF-11 (2026-08-06)** — 双资产买卖-估值-风险四链联动 PROVED · 全量 354 PROVED · **v0.372 批次 24 收尾 (2026-08-06)** — 小阶段 240/496 · 数字同步 + 全量验收全绿 · **v0.371 Makefile/CI 补提现-契分联动测试 (2026-08-06)** — make wc + CI 对账 · **v0.370 Elixir 提现-契分联动自检 (2026-08-06)** — 二十四域自检齐 · **v0.369 Rust 提现-契分联动对账 (2026-08-06)** — 冒烟 89/89 · **v0.368 前端提现-契分联动演示 (2026-08-06)** — web 提现链联动 · **v0.367 Python App 提现-契分联动剧本 (2026-08-06)** — --withdraw-credit-test 3/3 · **v0.366 README 收官总览数字同步 (2026-08-06)** — Status v0.366 全貌（INV-SK-16 · --domains 79/79） · **v0.365 运行时不变量复核扩展 (2026-08-06)** — INV-SK-16 复核进审计，--domains 79/79 · **v0.364 标准库语料强化 (2026-08-06)** — ai.confidence 九元素形状 32 项 · **v0.363 新增不变量 INV-SK-16 (2026-08-06)** — 提现-契分联动 PROVED · 全量 354 PROVED · **v0.362 批次 23 收尾 (2026-08-06)** — 小阶段 230/496 · 数字同步 + 全量验收全绿 · **v0.361 Makefile/CI 补四链联动测试 (2026-08-06)** — make rsf + CI 对账 · **v0.360 Elixir 四链联动自检 (2026-08-06)** — 二十三域自检齐 · **v0.359 Rust 四链联动对账 (2026-08-06)** — 冒烟 86/86 · **v0.358 前端四链联动演示 (2026-08-06)** — web 入库-出库-履约四链 · **v0.357 Python App 入库-出库-水位-履约四链联动剧本 (2026-08-06)** — --receive-ship-fillrate-test 3/3 · **v0.356 README 收官总览数字同步 (2026-08-06)** — Status v0.356 全貌（INV-IN-10 · --domains 78/78） · **v0.355 运行时不变量复核扩展 (2026-08-06)** — INV-IN-10 复核进审计，--domains 78/78 · **v0.354 标准库语料强化 (2026-08-06)** — math.base 九元素形状 39 项 · **v0.353 新增不变量 INV-IN-10 (2026-08-06)** — 入库-出库-水位-履约四链联动 PROVED · 全量 354 PROVED · **v0.352 批次 22 收尾 (2026-08-06)** — 小阶段 220/496 · 数字同步 + 全量验收全绿 · **v0.351 Makefile/CI 补双资产交易链测试 (2026-08-06)** — make da + CI 对账 · **v0.350 Elixir 双资产交易链自检 (2026-08-06)** — 二十二域自检齐 · **v0.349 Rust 双资产交易链对账 (2026-08-06)** — 冒烟 84/84 · **v0.348 前端双资产交易链演示 (2026-08-06)** — web 估值守恒链 · **v0.347 Python App 双资产混合交易链剧本 (2026-08-06)** — --dual-asset-test 4/4 · **v0.346 README 收官总览数字同步 (2026-08-06)** — Status v0.346 全貌（INV-PF-10 · --domains 77/77） · **v0.345 运行时不变量复核扩展 (2026-08-06)** — INV-PF-10 复核进审计，--domains 77/77 · **v0.344 标准库语料强化 (2026-08-06)** — data.transform 八元素形状 54 项 · **v0.343 新增不变量 INV-PF-10 (2026-08-06)** — 双资产混合交易链估值守恒 PROVED · 全量 354 PROVED · **v0.342 批次 21 收尾 (2026-08-06)** — 小阶段 210/496 · 数字同步 + 全量验收全绿 · **v0.341 Makefile/CI 补验收-积分-契分测试 (2026-08-06)** — make apc + CI 对账 · **v0.340 Elixir 验收-积分-契分自检 (2026-08-06)** — 二十一域自检齐 · **v0.339 Rust 验收-积分-契分对账 (2026-08-06)** — 冒烟 82/82 · **v0.338 前端验收-积分-契分演示 (2026-08-06)** — web 验收链三维联动 · **v0.337 Python App 验收-积分-契分三维联动剧本 (2026-08-06)** — --accept-points-credit-test 3/3 · **v0.336 README 收官总览数字同步 (2026-08-06)** — Status v0.336 全貌（INV-SK-15 · --domains 76/76） · **v0.335 运行时不变量复核扩展 (2026-08-06)** — INV-SK-15 复核进审计，--domains 76/76 · **v0.334 标准库语料强化 (2026-08-06)** — ai.confidence 八元素形状 28 项 · **v0.333 新增不变量 INV-SK-15 (2026-08-06)** — 验收-积分-契分三维联动 PROVED · 全量 354 PROVED · **v0.332 批次 20 收尾 (2026-08-06)** — 小阶段 200/496 · 数字同步 + 全量验收全绿 + PyPI 0.7.3 发布 · **v0.331 Makefile/CI 补库存-履约联动测试 (2026-08-06)** — make sf + CI 对账 · **v0.330 Elixir 库存-履约联动自检 (2026-08-06)** — 二十域自检齐 · **v0.329 Rust 库存-履约联动对账 (2026-08-06)** — 冒烟 79/79 · **v0.328 前端库存-履约联动演示 (2026-08-06)** — web 库存-履约联动 · **v0.327 Python App 库存-履约联动剧本 (2026-08-06)** — --stock-fillrate-test 3/3 · **v0.326 README 收官总览数字同步 (2026-08-06)** — Status v0.326 全貌（INV-IN-9 · --domains 75/75） · **v0.325 运行时不变量复核扩展 (2026-08-06)** — INV-IN-9 复核进审计，--domains 75/75 · **v0.324 标准库语料强化 (2026-08-06)** — math.base 八元素形状 35 项 · **v0.323 新增不变量 INV-IN-9 (2026-08-06)** — 库存-履约联动 PROVED · 全量 354 PROVED · **v0.322 批次 19 收尾 (2026-08-06)** — 小阶段 190/496 · 数字同步 + 全量验收全绿 · **v0.321 Makefile/CI 补估值-风险联动测试 (2026-08-06)** — make vr + CI 对账 · **v0.320 Elixir 估值-风险联动自检 (2026-08-06)** — 十九域自检齐 · **v0.319 Rust 估值-风险联动对账 (2026-08-06)** — 冒烟 77/77 · **v0.318 前端估值-风险联动演示 (2026-08-06)** — web 组合估值-风险联动 · **v0.317 Python App 估值-风险联动剧本 (2026-08-06)** — --valuation-risk-test 3/3 · **v0.316 README 收官总览数字同步 (2026-08-06)** — Status v0.316 全貌（INV-PF-9 · --domains 74/74） · **v0.315 运行时不变量复核扩展 (2026-08-06)** — INV-PF-9 复核进审计，--domains 74/74 · **v0.314 标准库语料强化 (2026-08-06)** — data.transform 七元素形状 48 项 · **v0.313 新增不变量 INV-PF-9 (2026-08-06)** — 组合估值-风险联动 PROVED · 全量 354 PROVED · **v0.312 批次 18 收尾 (2026-08-06)** — 小阶段 180/496 · 数字同步 + 全量验收全绿 · **v0.311 Makefile/CI 补三维联动测试 (2026-08-06)** — make tpq + CI 对账 · **v0.310 Elixir 三维联动自检 (2026-08-06)** — 十八域自检齐 · **v0.309 Rust 三维联动对账 (2026-08-06)** — 冒烟 75/75 · **v0.308 前端三维联动演示 (2026-08-06)** — web 任务-积分-配额三维 · **v0.307 Python App 任务-积分-配额三维联动剧本 (2026-08-06)** — --task-points-quota-test 3/3 · **v0.306 README 收官总览数字同步 (2026-08-06)** — Status v0.306 全貌（INV-SK-14 · --domains 73/73） · **v0.305 运行时不变量复核扩展 (2026-08-06)** — INV-SK-14 复核进审计，--domains 73/73 · **v0.304 标准库语料强化 (2026-08-06)** — ai.confidence 七元素形状 24 项 · **v0.303 新增不变量 INV-SK-14 (2026-08-06)** — 任务-积分-配额三维联动 PROVED · 全量 354 PROVED · **v0.302 批次 17 收尾 (2026-08-06)** — 小阶段 170/496 · 数字同步 + 全量验收全绿 · **v0.301 Makefile/CI 补积分-配额联动测试 (2026-08-06)** — make pq + CI 对账 · **v0.300 批次 17 阶段收尾 (2026-08-06)** — 小阶段 168/496 · 数字同步 + 全量验收全绿 · **v0.299 Elixir 积分-配额联动自检 (2026-08-06)** — 十七域自检齐 · **v0.298 Rust 积分-配额对账 (2026-08-06)** — 冒烟 72/72 · **v0.297 Python App 积分-配额联动剧本 (2026-08-06)** — --points-quota-test 2/2 · **v0.296 README 收官总览数字同步 (2026-08-06)** — Status v0.296 全貌（INV-SK-13 · --domains 72/72） · **v0.295 运行时不变量复核扩展 (2026-08-06)** — INV-SK-13 复核进审计，--domains 72/72 · **v0.294 标准库语料强化 (2026-08-06)** — math.base ⊖/⊙ 形状边界 31 项 · **v0.293 新增不变量 INV-SK-13 (2026-08-06)** — 积分-配额联动链 PROVED · 全量 354 PROVED · **v0.292 批次 16 收尾 (2026-08-06)** — 小阶段 160/496 · 数字同步 + 全量验收全绿 · **v0.291 Makefile/CI 补三链联动测试 (2026-08-06)** — make cb + CI 对账 · **v0.290 Elixir 三链联动自检 (2026-08-06)** — 十六域自检齐 · **v0.289 Rust 三链联动对账 (2026-08-06)** — 冒烟 70/70 · **v0.288 前端三链联动演示 (2026-08-06)** — web 契分-贡献-勋章三链 · **v0.287 Python App 契分-贡献-勋章三链剧本 (2026-08-06)** — --credit-badge-test 3/3 · **v0.286 README 收官总览数字同步 (2026-08-06)** — Status v0.286 全貌 · **v0.285 运行时不变量复核扩展 (2026-08-06)** — --domains 71/71 · **v0.284 标准库语料强化 (2026-08-06)** — ai.confidence 六元素形状 20 项 · **v0.283 新增不变量 INV-SK-12 (2026-08-06)** — 契分-贡献-勋章三链联动 PROVED · 全量 254 PROVED · **v0.282 批次 15 收尾 (2026-08-06)** — 小阶段 150/496 · 数字同步 + 全量验收全绿 · **v0.281 Makefile/CI 补组合流转测试 (2026-08-06)** — make pfflow + CI 对账 · **v0.280 Elixir 组合流转自检 (2026-08-06)** — 十五域自检齐 · **v0.279 Rust 组合流转对账 (2026-08-06)** — 冒烟 67/67 · **v0.278 前端 portfolio 流转演示 (2026-08-06)** — web 组合生命周期链 · **v0.277 Python App portfolio 流转剧本 (2026-08-06)** — --portfolio-flow-test 5/5 · **v0.276 README 收官总览数字同步 (2026-08-06)** — Status v0.276 全貌 · **v0.275 运行时不变量复核扩展 (2026-08-06)** — --domains 71/71 · **v0.274 标准库语料强化 (2026-08-06)** — data.transform 五元素形状 42 项 · **v0.273 新增不变量 INV-PF-8 (2026-08-06)** — 混合资产链完整性 PROVED · 全量 250 PROVED · **v0.272 批次 14 收尾 (2026-08-06)** — 小阶段 140/496 · 数字同步 + 全量验收全绿 · **v0.271 Makefile/CI 补库存流转测试 (2026-08-06)** — make invflow + CI 对账 · **v0.270 Elixir 库存流转自检 (2026-08-06)** — 十四域自检齐 · **v0.269 Rust 库存流转对账 (2026-08-06)** — 冒烟 65/65 · **v0.268 前端库存流转演示 (2026-08-06)** — web 混合出库链 · **v0.267 Python App 库存流转剧本 (2026-08-06)** — --inventory-flow-test 4/4 · **v0.266 README 收官总览数字同步 (2026-08-06)** — Status v0.266 全貌 · **v0.265 运行时不变量复核扩展 (2026-08-06)** — --domains 71/71 · **v0.264 标准库语料强化 (2026-08-06)** — math.base 长形状 29 项 · **v0.263 新增不变量 INV-IN-8 (2026-08-06)** — 混合出库联动链 PROVED · 全量 246 PROVED · **v0.262 批次 13 收尾 (2026-08-06)** — 小阶段 130/496 · 数字同步 + 全量验收全绿 · **v0.261 Makefile/CI 补勋章链测试 (2026-08-06)** — make badge + CI 对账 · **v0.260 Elixir 勋章链自检 (2026-08-06)** — 十三域自检齐 · **v0.259 Rust 勋章链对账 (2026-08-06)** — 冒烟 63/63 · **v0.258 前端勋章链演示 (2026-08-06)** — web 勋章档位链 · **v0.257 Python App 勋章链剧本 (2026-08-06)** — --badge-test 2/2 · **v0.256 README 收官总览数字同步 (2026-08-06)** — Status v0.256 全貌 · **v0.255 运行时不变量复核扩展 (2026-08-06)** — --domains 71/71 · **v0.254 标准库语料强化 (2026-08-06)** — ai.confidence 长形状 16 项 · **v0.253 新增不变量 INV-SK-11 (2026-08-06)** — 契分-勋章联动链 PROVED · 全量 242 PROVED · **v0.252 批次 12 收尾 (2026-08-06)** — 小阶段 120/496 · 数字同步 + 全量验收全绿 · **v0.251 Makefile/CI 补额度链测试 (2026-08-06)** — make quota + CI 对账 · **v0.250 Elixir 额度链自检 (2026-08-06)** — 十二域自检齐 · **v0.249 Rust 额度链对账 (2026-08-06)** — 冒烟 61/61 · **v0.248 前端额度流转演示 (2026-08-06)** — web 额度链 · **v0.247 Python App 额度流转剧本 (2026-08-06)** — --quota-flow-test 2/2 · **v0.246 README 收官总览数字同步 (2026-08-06)** — Status v0.246 全貌 · **v0.245 运行时不变量复核扩展 (2026-08-06)** — --domains 71/71 · **v0.244 标准库语料强化 (2026-08-06)** — data.transform 长形状 33 项 · **v0.243 新增不变量 INV-SK-10 (2026-08-06)** — 契分-贡献联动链 PROVED · 全量 238 PROVED · **v0.242 批次 11 收尾 (2026-08-06)** — 小阶段 110/496 · 数字同步 + 全量验收全绿 · **v0.241 Makefile/CI 补贡献分测试 (2026-08-06)** — make contribution + CI 对账 · **v0.240 Elixir 贡献分自检 (2026-08-06)** — 十一域自检齐 · **v0.239 Rust 贡献分对账 (2026-08-06)** — 冒烟 60/60 · **v0.238 前端贡献分演示 (2026-08-06)** — web 贡献分链 · **v0.237 Python App 贡献分剧本 (2026-08-06)** — --contribution-test 2/2 · **v0.236 README 收官总览数字同步 (2026-08-06)** — Status v0.236 全貌 · **v0.235 运行时不变量复核扩展 (2026-08-06)** — --domains 71/71 · **v0.234 标准库语料强化 (2026-08-06)** — math.base 算术边界 27 项 · **v0.233 新增不变量 INV-PF-7 (2026-08-06)** — 资产链完整性 PROVED · 全量 234 PROVED · **v0.232 批次 10 收尾 + PyPI 0.7.2 发布 (2026-08-06)** — 小阶段 100/496 · 每 100 阶段发布规则首次兑现 · **v0.231 Makefile/CI 补审计测试 (2026-08-06)** — make audit + CI 对账 · **v0.230 Elixir 审计链自检 (2026-08-06)** — 十域自检齐 · **v0.229 Rust 审计端点 + 对账 (2026-08-06)** — 冒烟 58/58 审计 · **v0.228 前端审计轨迹视图 (2026-08-06)** — web /audit · **v0.227 Python App 审计剧本 (2026-08-06)** — GET /audit + --audit-test 6/6 · **v0.226 README 收官总览数字同步 (2026-08-06)** — Status v0.226 全貌 · **v0.225 运行时不变量复核扩展 (2026-08-06)** — --domains 71/71 · **v0.224 标准库语料强化 (2026-08-06)** — data.transform 反向形状 24 项 · **v0.223 新增不变量 INV-IN-7 (2026-08-06)** — 混合货品联动链 PROVED · 全量 230 PROVED · **v0.222 批次 9 收尾 (2026-08-06)** — 小阶段 90/496 · 数字同步 + 全量验收全绿 · **v0.221 Makefile/CI 补全流程测试 (2026-08-06)** — make full + CI 对账 · **v0.220 Elixir 全流程自检 (2026-08-06)** — 九域自检齐 · **v0.219 Rust 全流程对账 (2026-08-06)** — 冒烟 56/56 · **v0.218 前端全流程演示 (2026-08-06)** — web §SK 端到端链 · **v0.217 Python App 业务剧本 (2026-08-06)** — --full-test 5/5 · **v0.216 README 收官总览数字同步 (2026-08-06)** — Status v0.216 全貌 · **v0.215 运行时不变量复核扩展 (2026-08-06)** — --domains 71/71 · **v0.214 标准库语料强化 (2026-08-06)** — ai.confidence 形状边界 12 项 · **v0.213 新增不变量 INV-SK-9 (2026-08-06)** — 额度-契分联动链 PROVED · 全量 226 PROVED · **v0.212 批次 8 收尾 (2026-08-06)** — 小阶段 80/496 · 数字同步 + 全量验收全绿 · **v0.211 Makefile/CI 补信用链测试 (2026-08-06)** — make credit + CI 对账 · **v0.210 Elixir 信用链自检 (2026-08-06)** — 八域自检齐 · **v0.209 Rust 信用链对账 (2026-08-06)** — 冒烟 53/53 · **v0.208 前端信用链演示 (2026-08-06)** — web 信用流转链 · **v0.207 Python App 信用链剧本 (2026-08-06)** — --credit-test 3/3 · **v0.206 README 收官总览数字同步 (2026-08-06)** — Status v0.206 全貌 · **v0.205 运行时不变量复核扩展 (2026-08-06)** — --domains 71/71 · **v0.204 标准库语料强化 (2026-08-06)** — ai.confidence 边界 8 项 · **v0.203 新增不变量 INV-PF-6 (2026-08-06)** — 交易链完整性 PROVED · 全量 222 PROVED · **v0.202 批次 7 收尾 (2026-08-06)** — 小阶段 70/496 · 数字同步 + 全量验收全绿 · **v0.201 Makefile/CI 补库存链测试 (2026-08-06)** — make invchain + CI 对账 · **v0.200 Elixir 库存链自检 (2026-08-06)** — 七域自检齐 · **v0.199 Rust 库存链对账 (2026-08-06)** — 冒烟 51/51 · **v0.198 前端库存链展示增强 (2026-08-06)** — invChain 各步明细 · **v0.197 Python App 库存链剧本 (2026-08-06)** — --inventory-chain-test 5/5 · **v0.196 README 收官总览数字同步 (2026-08-06)** — Status v0.196 全貌 · **v0.195 运行时不变量复核扩展 (2026-08-06)** — --domains 71/71 · **v0.194 标准库语料强化 (2026-08-06)** — data.transform 形状边界 18 项 · **v0.193 新增不变量 INV-IN-6 (2026-08-06)** — 入库-出库联动链 PROVED · 全量 218 PROVED · **v0.192 批次 6 收尾 (2026-08-06)** — 小阶段 60/496 · 数字同步 + 全量验收全绿 · **v0.191 Makefile/CI 补积分链测试 (2026-08-06)** — make points + CI 对账 · **v0.190 Elixir 积分链自检 (2026-08-06)** — 六域自检齐 · **v0.189 Rust 积分链对账 (2026-08-06)** — 冒烟 50/50 · **v0.188 前端积分链演示 (2026-08-06)** — web 积分流转链 · **v0.187 Python App 积分链剧本 (2026-08-06)** — --points-test 3/3 · **v0.186 README 收官总览数字同步 (2026-08-06)** — Status v0.186 全貌 · **v0.185 运行时不变量复核扩展 (2026-08-06)** — --domains 71/71 · **v0.184 标准库语料强化 (2026-08-06)** — std 边界用例 24 项 · **v0.183 新增不变量 INV-SK-8 (2026-08-06)** — 赏金-积分联动链 PROVED · 全量 214 PROVED · **v0.182 批次 5 收尾 (2026-08-06)** — 小阶段 50/496 · 数字同步 + 全量验收全绿 · **v0.181 Makefile/CI 补错误边界测试 (2026-08-06)** — make errors + CI 对账 · **v0.180 Elixir 错误边界自检 (2026-08-06)** — 五域自检齐 · **v0.179 Rust 错误边界对账 (2026-08-06)** — 冒烟 48/48 · **v0.178 前端错误提示增强 (2026-08-06)** — 语义化错误文案 · **v0.177 Python App 错误边界剧本 (2026-08-06)** — --errors-test 7/7 · **v0.176 README 收官总览数字同步 (2026-08-06)** — Status v0.176 全貌 · **v0.175 运行时不变量复核扩展 (2026-08-06)** — --domains 71/71 · **v0.174 三域错误边界语料 (2026-08-06)** — corpus 错误路径强化 · consensus 56/56 · **v0.173 新增不变量 INV-PF-5 (2026-08-06)** — 买入-卖出链守恒 PROVED · 全量 171 PROVED · **v0.172 批次 4 收尾 (2026-08-06)** — 小阶段 40/496 · 数字同步 + 全量验收全绿 · **v0.171 Makefile/CI 补跨域测试 (2026-08-06)** — make cross-domain + CI 对账 · **v0.170 Elixir 跨域自检 (2026-08-06)** — 四域自检齐 · **v0.169 Rust 跨域链对账 (2026-08-06)** — 冒烟 46/46 跨域链 · **v0.168 前端三域联动演示 (2026-08-06)** — web 三域链展示 · **v0.167 Python App 三域联动剧本 (2026-08-06)** — --cross-domain-test 5/5 · **v0.166 README 收官总览数字同步 (2026-08-06)** — Status v0.166 全貌 · **v0.165 运行时不变量复核扩展 (2026-08-05)** — --domains 71/71 · **v0.164 跨域联动语料 (2026-08-05)** — corpus 三域链 10 操作 · consensus 56/56 · **v0.163 新增不变量 INV-SK-7 (2026-08-05)** — 任务-契分联动链 PROVED · 全量 137 PROVED · **v0.162 批次 3 收尾 (2026-08-05)** — 小阶段 30/496 · 数字同步 + 全量验收全绿 · **v0.161 Makefile/CI 补供应链测试 (2026-08-05)** — make inventory + CI 对账 · **v0.160 Elixir §IN 自检补全 (2026-08-05)** — 三域自检含联动链 · **v0.159 Rust 供应链链式对账 (2026-08-05)** — 冒烟 44/44 链式 · **v0.158 前端供应链联动演示 (2026-08-05)** — web 联动链展示 · **v0.157 Python App 供应链联动测试 (2026-08-05)** — --inventory-test 5/5 · **v0.156 README 收官总览数字同步 (2026-08-05)** — Status v0.156 全貌 · **v0.155 运行时不变量复核扩展 (2026-08-05)** — --domains 71/71 · **v0.154 供应链域联动语料 (2026-08-05)** — corpus 5 操作联动 · consensus 56/56 · **v0.153 新增不变量 INV-IN-5 (2026-08-05)** — 混合货品可加链 PROVED · 全量 125 PROVED · **v0.152 批次 2 收尾 (2026-08-05)** — 小阶段 20/496 · 数字同步 + 全量验收全绿 · **v0.151 Makefile/CI 补金融测试 (2026-08-05)** — make portfolio + CI 对账 · **v0.150 Elixir §IN/§PF 自检补全 (2026-08-05)** — §PF 原生函数 + 三域自检齐 · **v0.149 Rust 金融市场端点 (2026-08-05)** — sk §PF 实现 + 冒烟 43/43 · **v0.148 前端金融市场面板 (2026-08-05)** — web §PF 全操作 · 三域面板齐 · **v0.147 Python App portfolio 市场端点 (2026-08-05)** — §PF 5 端点 · --portfolio-test 5/5 · **v0.146 README 收官总览数字同步 (2026-08-05)** — Status v0.146 全貌 · **v0.145 运行时不变量复核扩展 (2026-08-05)** — --domains 71/71 · **v0.144 金融域联动语料 (2026-08-05)** — corpus 5 操作联动 · consensus 56/56 · **v0.143 新增不变量 INV-PF-4 (2026-08-05)** — 交易链可加性 PROVED · 全量 110 PROVED · **v0.142 批次收尾 (2026-08-05)** — 小阶段 10/496 · 数字同步 + 全量验收全绿 · **v0.141 Makefile/CI 补 stats (2026-08-05)** — make stats + CI 统计对账 · **v0.140 Elixir 自检覆盖确认 (2026-08-05)** — §SK 全操作 88/88 · **v0.139 双端统计对账 (2026-08-05)** — Rust /stats 与 Python 对等 · 冒烟 38/38 · **v0.138 前端统计显示 (2026-08-05)** — web /stats 平台统计 · **v0.137 教程补 pip 安装 (2026-08-05)** — TUTORIAL 双路径 A/B · **v0.136 新增不变量 INV-SK-6 (2026-08-05)** — 额度-托管联动链 PROVED · 全量 109 PROVED · **v0.135 五大制度联动语料 (2026-08-05)** — corpus 13 操作联动 · consensus 56/56 · **v0.134 业务统计端点 (2026-08-05)** — GET /stats JSON 统计 · **v0.133 README PyPI 徽章 (2026-08-05)** — PyPI version/downloads 徽章 · **v0.132 发布链端到端验证成功 (2026-08-05)** — 打 tag 全自动发布 PyPI 0.7.1 · **v0.131 发布链补全 (2026-08-05)** — 打 tag 全自动发布到 PyPI · **v0.130 PyPI 发布成功 (2026-08-05)** — pip install sigma-lang 全球可用 · **v0.129 发布验证成功 (2026-08-05)** — 打 tag 即发布 · GitHub Actions success · **v0.128 发布 workflow (2026-08-05)** — publish.yml tag 触发构建+Release · **v0.127 打包验证 (2026-08-05)** — pip install 即用 import 验证通过 · **v0.126 Python 包化 (2026-08-05)** — pyproject.toml 打包 sigma_core · **v0.124 入门教程 (2026-08-05)** — docs/TUTORIAL.md 30 分钟上手 · **v0.122 生产启动脚本 (2026-08-05)** — make ready/deploy 一条命令上线 · **v0.121 上线就绪检查 (2026-08-05)** — --launch-ready 环境一键确认 · **v0.120 里程碑达成 (2026-08-05)** — v0.100–v0.120 连续推进收官 · **v0.119 README 收官总览更新 (2026-08-05)** — Status v0.119 全貌 · **v0.118 性能基准 (2026-08-05)** — --bench 吞吐/延迟基线 · **v0.117 README 上线指南 (2026-08-05)** — Deploy Guide 上线启动+运维要点 · **v0.116 CI 报告扩展 (2026-08-05)** — --report 含运行验收段 · **v0.115 协议版本化 (2026-08-05)** — spec 0.7.0 + RFC 记录 · **v0.114 前端联调剧本扩展 (2026-08-05)** — --frontend-scenario 19/19 覆盖三域 · **v0.113 双端面板对账 (2026-08-05)** — Rust /panel 与 Python 对等 · **v0.112 API 文档同步 (2026-08-05)** — docs/api_zhaocha.md /panel + 新命令 · **v0.111 前端供应链面板 (2026-08-05)** — web inventory 全操作 · **v0.110 前端增长期面板 (2026-08-05)** — web badge/dispute/team 全操作 · **v0.109 三域 story 不变量段扩展 (2026-08-05)** — --domains 71/71 含 20 项不变量复核 · **v0.108 sigma-prove 全量重验 80+ (2026-08-05)** — 354 项 PROVED / 29 模块全绿 · **v0.107 任务生命周期不变量 (2026-08-05)** — INV-SK 状态机链 PROVED · **v0.106 金融不变量补全 (2026-08-05)** — INV-PF 资产非负链 PROVED · **v0.105 供应链不变量补全 (2026-08-05)** — INV-IN 入库链可加/出库链不超卖 PROVED · **v0.104 上线验收 (2026-08-05)** — --deploy-accept 上线形态 9/9 · **v0.103 并发安全验证 (2026-08-05)** — --concurrency-test 并发 70 请求状态一致 · **v0.102 launch 默认日志接入 (2026-08-05)** — data/ 默认 state/audit/log · **v0.101 部署加固 (2026-08-05)** — --launch 透传部署配置 + 持久化健壮性 · **v0.100 跨百版本里程碑 (2026-08-04)** — v0.10→v0.100 里程碑链完整 · **v0.99 里程碑达成 (2026-08-04)** — v0.91–v0.99 连续推进收官 · **v0.98 README 找茬运行指南 (2026-08-04)** — Run Guide 一条命令开工 · **v0.97 协议版本化 (2026-08-04)** — spec 0.6.0 + RFC 记录 · **v0.96 运行验收 (2026-08-04)** — --run-accept 端到端 8/8 · **v0.95 运行状态面板 (2026-08-04)** — /panel 业务+门禁摘要页 · **v0.94 一键开工 (2026-08-04)** — --launch 前后端一条命令 · **v0.93 前端联调验证 (2026-08-04)** — --web-test 双服务 5/5 · **v0.92 前端 UI 完善 (2026-08-04)** — 错误横幅/任务详情/用户面板/状态筛选 · **v0.91 找茬静态前端 (2026-08-04)** — web/index.html 单页应用 · **v0.90 里程碑达成 (2026-08-04)** — v0.71–v0.90 连续推进收官 · **v0.89 README 收官总览 (2026-08-04)** — Status 56/56 + 收官总览段 · **v0.88 贡献者指南 (2026-08-04)** — docs/CONTRIBUTING.md 上手路径 · **v0.87 CI 全量回归报告 (2026-08-04)** — --report JSON + CI artifact · **v0.86 协议版本化 (2026-08-04)** — spec 0.5.0 + RFC 记录 · **v0.85 README 开工检查清单 (2026-08-04)** — Launch Checklist 10 项上线勾选 · **v0.84 双端 HTTP API 逐项对账 (2026-08-04)** — Rust 冒烟 36/36 与 Python 逐项一致 · **v0.83 前端联调剧本 (2026-08-04)** — `--frontend-scenario` 11/11 · **v0.82 HTTP 方法语义对齐 (2026-08-04)** — POST 变更 + GET 查询 · **v0.81 找茬 API 文档 (2026-08-04)** — docs/api_zhaocha.md 全端点文档 · **v0.80 sigma-prove 全量重验 70+ (2026-08-04)** — 354 项 PROVED / 29 模块全绿 · **v0.79 三域 story 不变量段扩展 (2026-08-04)** — --domains 47/47 含 12 项不变量复核 · **v0.78 增长期跨操作不变量 (2026-08-04)** — INV-G 授权签发/裁决链 PROVED · **v0.77 团机制跨操作不变量 (2026-08-04)** — INV-T 不超员/成员递增 PROVED · **v0.76 额度制跨操作不变量 (2026-08-04)** — INV-Q 不超用/重置恢复 PROVED · **v0.75 找茬 App 启动自检 (2026-08-04)** — --serve 先过 §SK.6 门禁再监听 · **v0.74 找茬 App 健康检查 (2026-08-04)** — `/health` 服务状态 + 门禁摘要 · **v0.73 找茬 App 分级日志 (2026-08-04)** — `--log-file` 访问/错误分级 · **v0.72 找茬 App 状态原子写 (2026-08-04)** — tmp + rename 防崩溃损坏 · **v0.71 找茬 App 鉴权层 (2026-08-04)** — `--auth-token` token 校验 401 门禁 · **v0.70 里程碑达成 (2026-08-04)** — v0.51–v0.70 连续推进收官 · **v0.69 README 产品落地指南 (2026-08-04)** — 找茬功能 ↔ §SK 对照 + 落地三步走 · **v0.68 找茬 App 部署文档 (2026-08-04)** — docs/deploy_zhaocha.md · **v0.67 找茬业务流双端对账 (2026-08-04)** — --scenario 双端 16/16 逐项一致 · **v0.66 找茬完整业务流 CLI 剧本 (2026-08-04)** — `--scenario` 16/16 · **v0.65 sigma-prove 全量义务重验 (2026-08-04)** — 62 项 PROVED / 29 模块全绿 · **v0.64 三域 story 不变量检查段 (2026-08-04)** — --domains 41/41 含不变量复核 · **v0.63 找茬跨操作不变量 (2026-08-04)** — INV-SK 赏金守恒/不超提 PROVED · **v0.62 金融跨操作不变量 (2026-08-04)** — INV-PF 现金/份额守恒 PROVED · **v0.61 供应链跨操作不变量 (2026-08-04)** — INV-IN 总量守恒/非负链 PROVED · **v0.60 协议版本化 (2026-08-04)** — spec 0.4.0 + RFC 记录 · **v0.59 README 架构数据流全景 (2026-08-04)** — 架构数据流全景章节 · **v0.58 spec 中英对照补全 (2026-08-04)** — §IN 供应链中文参考版 · **v0.57 语料扩容 (2026-08-04)** — 语料按主题拆三模块，consensus 56/56 · **v0.56 一键验收接 CI (2026-08-04)** — Makefile + GitHub Actions · **v0.55 找茬 App 审计日志 (2026-08-04)** — `--audit-log` 可对账审计追踪 · **v0.54 找茬 App HTTP 错误码语义化 (2026-08-04)** — §SK/§IN 错误 → 语义化 4xx · **v0.53 找茬 App 查询端点 (2026-08-04)** — /tasks /users 任务与用户列表 · **v0.52 找茬 App 用户会话层 (2026-08-04)** — /register /me 用户态隔离 · **v0.51 找茬 App 状态持久化 (2026-08-04)** — `--state` JSON 重启不丢 · **v0.50 里程碑达成 (2026-08-03)** — v0.27–v0.50 连续推进收官 · **v0.49 收官验收续 (2026-08-03)** — `sigma-accept.py` 9 道门禁一键验收 · **v0.48 一键收官验收 (2026-08-03)** — `sigma-accept.py` 六道门禁一键跑通 · **v0.47 README 新人上手 (2026-08-03)** — 三域概览 + 快速开始 + 验证清单 · **v0.46 三域协议巩固 (2026-08-03)** — `--domains` 35/35 · **v0.45 供应链 app 参考实现 (2026-08-03)** — §IN HTTP 端点 + 冒烟 25/25 · **v0.44 三端供应链 story 对账 (2026-08-03)** — 供应链故事线三端 6/6 逐项一致 · **v0.43 供应链证明 + runtime (2026-08-03)** — §IN 义务 PROVED + --inventory 6/6 · **v0.42 供应链语料 + 共识 (2026-08-03)** — inventory 语料进共识门禁，47/47 · **v0.41 三端供应链执行层 (2026-08-03)** — §IN 五操作三端实现 · **v0.40 第三个自举新域（供应链 inventory@1.0）(2026-08-03)** — §IN 供应链语义，泛化性三验 · **v0.39 完整业务验收剧本 (2026-08-03)** — `sigma-runtime --all` 29/29 · **v0.38 Rust app 增长期端点 + 冒烟对账 (2026-08-03)** — 增长期 HTTP 双端 20/20 逐项一致 · **v0.37 Python app 增长期端点 (2026-08-03)** — 增长期 HTTP 端点 + 冒烟 20/20 · **v0.36 三端增长期 story 对账 (2026-08-03)** — 增长期故事线三端 11/11 逐项一致 · **v0.35 增长期审计故事线 (2026-08-03)** — `sigma-runtime --growth` 11/11 · **v0.34 增长期义务证明 (2026-08-03)** — sigma-prove 增长期 7 项义务 PROVED · **v0.33 增长期语料模块化 (2026-08-03)** — socketkit_growth 独立语料，consensus 45/45 · **v0.32 增长期语义⑥积分可追溯 (2026-08-03)** — `points_ledger` 积分来源可追溯 · **v0.31 增长期语义⑤额度预支 (2026-08-03)** — `quota_advance` 预支下月额度 · **v0.30 增长期语义④团收益 (2026-08-03)** — `team_share` 团内收益按贡献分配 · **v0.29 增长期语义③团机制 (2026-08-03)** — `team_create/team_join` 受茬团/找茬团 · **v0.28 增长期语义②督导 (2026-08-03)** — `dispute_review` 督导处理纠纷 · **v0.27 增长期语义①核验师 (2026-08-03)** — `badge_issue` 核验师签发勋章 · **v0.26 Rust HTTP 服务 + 冒烟对账 (2026-08-03)** — HTTP 层 Python/Rust 双端同尺 · **v0.25 Rust 参考实现 (2026-08-03)** — `app.rs` 生产级后端，四端 story 逐项一致 · **v0.24 三端 §SK.6 story 一致性 (2026-08-03)** — 业务故事线 Python/Rust/Elixir 三端逐项一致 · **v0.23 MVP 端到端 HTTP 冒烟测试 (2026-08-03)** — `sigma_app --smoke` HTTP 七步全链路可重复验收 · **v0.22 找茬 MVP 参考实现 (2026-08-03)** — `sigma_app.py` 可运行后端，业务全委托 §SK 语义 · **v0.21 找茬 MVP 全链路审计剧本 (2026-08-03)** — §SK.6 十二步业务故事线 + `sigma-runtime --story`，App 开工验收剧本 · **v0.20 找茬五大制度补齐 (2026-08-03)** — 额度制/积分制/勋章制进 ΣLang，业务规则链完整可证明 · **v0.19 第二个自举新域（金融 portfolio@1.0）(2026-08-03)** — 协议泛化性再验证，consensus 43/43 · **v0.18 状态机不变量证明 (2026-08-03)** — 作者授权 + 4 项状态机不变量 z3 可证明 · **v0.17 §SK 对齐真实业务 (2026-08-03)** — Task 4 态状态机 + 契分制，MVP 全流程三端一致可执行可证明 · **v0.16 SocketKit 语料执行化 (2026-08-03)** — 业务语义进入 Law XIII 共识门禁 · **v0.15 三端 §SK 执行层 (2026-08-03)** — §SK 业务语义 Python/Rust/Elixir 三端一致可执行 · **v0.14 SocketKit Runtime (2026-08-03)** — §SK 参考实现 + 审计运行时 + z3 证明闭环，共识门禁 41/41 全绿 · **v0.13 SocketKit Protocol (2026-08-02)** — §SK 语义定义，共识门禁 40/40 全绿 · **v0.12 Novel Spec Test (2026-08-02)** — 新域自举闭环 · **v0.11 可用 (2026-08-02)** — 包管理器 `sigma-cli.py` + 标准库 3 包，共识门禁 38/38 全绿 · **v0.10 可用 (2026-08-02)** — 数学符号 / 基本操作 / 常量包可用，证明可消解，共识门禁 35/35 全绿
-- **Spec Version / 规范版本**: 0.7.0
-- **Date / 日期**: 2026-08-05
-- **License / 许可证**: MIT
+| 项 | 值 |
+|----|----|
+| Milestone / 里程碑 | v0.540（批次 41） |
+| Spec Version / 规范版本 | 0.7.0 |
+| PyPI | sigma-lang 0.7.5 |
+| License / 许可证 | MIT |
+| Date / 日期 | 2026-08-07 |
 
 ## Citation / 引用
 
 ```
-ΣLang: An AI-Native Semantic Protocol
+ΣLang: A Specification Protocol for Verifiable AI Consensus
 Version 0.7.0
 https://github.com/sigma-lang/sigma-lang
 ```
+
 *（内容由AI生成，仅供参考）*
