@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vq × ΣLang 口径语义层 Case Study</title>
+<style>
+  :root { --bg:#fbfbfb; --card:#fff; --ink:#1c1c1c; --muted:#7a7a7a; --line:#e6e6e6; --accent:#14532d; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;
+         background:var(--bg); color:var(--ink); line-height:1.75; }
+  header { padding:90px 8% 50px; max-width:1100px; margin:0 auto; }
+  header .kicker { font-size:12px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); }
+  header h1 { font-size:34px; font-weight:300; margin:14px 0 12px; }
+  header p { color:var(--muted); font-size:14.5px; max-width:680px; }
+  main { max-width:1100px; margin:0 auto; padding:10px 8% 100px; }
+  section { margin-bottom:64px; }
+  h2 { font-size:12.5px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted);
+       font-weight:600; margin:0 0 26px; }
+  .big { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1px;
+         background:var(--line); border:1px solid var(--line); margin:22px 0; }
+  .cell { background:#fff; padding:28px 24px; }
+  .cell .num { font-size:36px; font-weight:200; color:var(--accent); }
+  .cell .lbl { font-size:12.5px; color:var(--muted); margin-top:4px; }
+  .cell .delta { font-size:13px; font-weight:600; color:var(--accent); margin-top:6px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; margin:18px 0; }
+  th { text-align:left; font-size:11.5px; letter-spacing:1.5px; text-transform:uppercase;
+       color:var(--muted); padding:10px 12px; border-bottom:1px solid var(--ink); font-weight:600; }
+  td { padding:11px 12px; border-bottom:1px solid var(--line); }
+  .good { color:var(--accent); font-weight:600; }
+  .note { color:var(--muted); font-size:13px; border-left:2px solid var(--line); padding-left:16px; margin:18px 0; }
+  code { font-family:Consolas,Menlo,monospace; font-size:12.5px; background:#f4f4f4; padding:1px 6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">VirtualQuest × ΣLang · Case Study</div>
+  <h1>口径语义层：NL2SQL 口径错误率下降 94%</h1>
+  <p>把 ΣLang 确定性语义规约注入 VirtualQuest（NL2SQL 平台）的提问链路后，
+  同一批 30 条口径问题的口径类错误率从 56.7% 降至 3.3%。</p>
+</header>
+
+<main>
+
+<section>
+  <h2>一、实验设计</h2>
+  <table>
+    <tr><th>项</th><th>说明</th></tr>
+    <tr><td>平台</td><td>VirtualQuest（Vanna 2.0.2 + DeepSeek v4-flash + ChromaDB）</td></tr>
+    <tr><td>干预</td><td>ΣLang 口径语义层：① system prompt 注入"业务口径铁律"段（方式 A）② 生成 SQL 后口径语义校验（M3）③ 评分口径因子</td></tr>
+    <tr><td>评测集</td><td>30 条口径问题 × 5 概念（GMV / 放款笔数 / 逾期率 / 活跃用户 / ARPU），每条含直达问法、变体、易混淆问法</td></tr>
+    <tr><td>对照</td><td>同一批问题、同一模型：<code>--without-spec</code>（基线）vs <code>--with-spec</code>（集成后）</td></tr>
+  </table>
+  <div class="note">口径类错误 = 生成 SQL 的语义（表/过滤/聚合）与口径规约定义不一致。评测不写 history 表、不污染线上数据。</div>
+</section>
+
+<section>
+  <h2>二、结果</h2>
+  <div class="big">
+    <div class="cell"><div class="num">56.7%</div><div class="lbl">基线口径错误率（without_spec）</div></div>
+    <div class="cell"><div class="num">3.3%</div><div class="lbl">集成后口径错误率（with_spec）</div><div class="delta">↓ 94.1%</div></div>
+    <div class="cell"><div class="num">19%</div><div class="lbl">基线命中后口径通过率</div></div>
+    <div class="cell"><div class="num">96%</div><div class="lbl">集成后命中后口径通过率</div><div class="delta">+77pp</div></div>
+  </div>
+  <table>
+    <tr><th>指标</th><th>基线（without_spec）</th><th>集成后（with_spec）</th><th>变化</th></tr>
+    <tr><td>口径错误率</td><td>56.7%（17/30）</td><td class="good">3.3%（1/30）</td><td class="good">↓ 94.1%（验收线 ≥30% 大幅达成）</td></tr>
+    <tr><td>spec 命中率</td><td>70%（21/30）</td><td>83.3%（25/30）</td><td>+13.3pp</td></tr>
+    <tr><td>命中后口径通过率</td><td>19.0%（4/21）</td><td class="good">96%（24/25）</td><td class="good">+77pp</td></tr>
+    <tr><td>SQL 结构有效</td><td>26/30（4 条异常）</td><td>30/30</td><td>+4</td></tr>
+    <tr><td>总正确率</td><td>不可评分（LLM 评分降级）</td><td>80%（24/30）</td><td>—</td></tr>
+  </table>
+  <div class="note">口径错误率按"下限估计"计算（spec_check 自动判定，匹配概念且不一致计为错误）。</div>
+</section>
+
+<section>
+  <h2>三、关键观察</h2>
+  <table>
+    <tr><th>观察</th><th>证据</th></tr>
+    <tr><td>口径语义层有效性（内部对照）</td><td>集成后：spec 命中的问题 96% 正确，未命中的 5 条 0% 正确——同一模型、同一批问题，差异只来自"有没有口径语义层"</td></tr>
+    <tr><td>M3 校验真实拦截</td><td>问题 29（ARPU 分母口径）生成错误 SQL，spec_check 精确报出"概念 active_users 缺少基准过滤 order_status"</td></tr>
+    <tr><td>最大增益在"命中后"</td><td>基线命中后通过率仅 19%（prompt 里没有口径定义时，模型自由发挥）；注入铁律后 96%</td></tr>
+    <tr><td>剩余缺口是覆盖而非质量</td><td>5 条未命中全因问法不在 aliases（"放款金额""逾期金额占比"等）——补 aliases 即可继续提升命中率</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>四、限制与后续</h2>
+  <h3 style="font-size:14px;font-weight:600;">限制</h3>
+  <ul style="font-size:13.5px;padding-left:20px;">
+    <li>基线总正确率无法评分（LLM 评分服务降级），对比仅覆盖口径类错误率（计划核心指标）</li>
+    <li>单次实验（30 条 × 1 轮），未做多轮稳定性验证</li>
+    <li>基线 4 条 SQL 生成异常，口径错误率是下限估计</li>
+  </ul>
+  <h3 style="font-size:14px;font-weight:600;">后续动作</h3>
+  <ul style="font-size:13.5px;padding-left:20px;">
+    <li>补 aliases（5 条未命中问法）→ 预期命中率 83% → 95%+</li>
+    <li>多轮复测（3 轮 × 30 条）验证稳定性</li>
+    <li>将评测纳入 vq CI（run_eval.py 已支持 --resume / --limit）</li>
+  </ul>
+</section>
+
+</main>
+</body>
+</html>
