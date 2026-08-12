@@ -21,10 +21,36 @@
   "spec": "§SK",
   "version": "0.7.0",
   "fingerprint_prefix": "0xF000",
+  "constants": [ConstantDecl...],  // 可选：集中声明魔法常量（v0.31 起）
   "types": [TypeDecl...],
   "operations": [OperationDecl...]
 }
 ```
+
+## ConstantDecl（v0.31 起，可选）
+
+```json
+{
+  "status": {"open": 0, "in_progress": 1, "pending_review": 2, "completed": 3},
+  "decision": {"reject": 0, "accept": 1},
+  "badge": {"levels": {"bronze": 0, "silver": 1, "gold": 2, "diamond": 3},
+            "thresholds": [100, 300, 600]},
+  "verifier_min_id": 1000,
+  "credit": {"initial": 100, "kind0_per_completion": 5,
+             "kind1_floor_ratio": {"num": 7, "den": 10}, "floor": 0},
+  "contribution": {"floor": 0},
+  "team": {"min_capacity": 1},
+  "ledger": {"entry_id_start": 1, "min_source_id": 1}
+}
+```
+
+`constants` 区集中声明散落在 operations 的 definition / laws / preconditions 中的魔法常量
+（状态值、徽章阈值、验证者门槛、契分系数、初始 credit 等）。规则：
+
+1. 所有实现必须使用 `constants` 中的数值，不得自行另设；
+2. `constants` 是**描述性声明**，引擎不依赖它求值（求值语义仍由 operations 的 definition 决定）；
+3. 若 definition / laws 中的字面量与 `constants` 冲突，以 `constants` 为准并视为 spec 错误；
+4. 可选字段：未提供 `constants` 区的旧 spec 仍合法。
 
 ## TypeDecl
 
@@ -83,6 +109,37 @@
   `map_get`（Map<K,V>）
 - 预定义常量：`"$_"` 表示上一个操作的结果（用于 corpus 序列测试）
 
+## 内置函数语义（definition 的 `{"fn": ...}` 节点）
+
+| 函数 | 语义 |
+|------|------|
+| `index(coll, i)` | 取列表第 i 个元素；**越界抛 `ShapeError`**（见「类型守卫规范」）；非列表/非整数参数抛 `TypeError` |
+| `min` / `max` | **重载**：单列表参数 → 取该列表的最值；多参数 → 取所有参数的最值（§SK：`max(0, fold_add(a))`） |
+| `add` / `sub` | 整数加 / 左结合减 |
+| `ge` / `lt` / `eq` 等 | 比较运算 |
+| `fold_add(xs)` | 若 xs 是列表的列表 → 每行**最后一个元素**求和；否则普通求和；非列表抛 `TypeError` |
+| `fold_credit(init, events)` | 契分折叠：初始 init；事件 `[kind, count]`：kind=0 → `+5×count`；kind=1 → 逐次 `×7//10`（向下取整）；结果下限 0 |
+| `weighted_accept(xs)` / `weighted_support(xs)` | 对 `[reviewer, vote, weight]` 行，vote==1 的 weight 之和 |
+| `weighted_reject(xs)` | vote==0 的 weight 之和 |
+| `split_floor(contribs, reward)` | 按贡献分账：`share = floor(reward × c / total)`；total==0 抛 `DivByZero` |
+| `enumerate_ledger(entries)` | 输入 `[[旧id, 金额, source], ...]` → 输出 `[[1, source, 金额], ...]`（编号 1..n）；source<1 抛 `NotTraceable`；金额<0 抛 `TypeError` |
+
+## 类型守卫规范（v0.31 起固定）
+
+跨工具实现必须使用以下**固定错误名**，不得泄漏原生异常：
+
+1. **类型错误**：列表参数收到非列表（或 nat 参数收到非整数，如 `review_merge(3)`）→ 抛 `TypeError`（固定）；
+2. **形状错误**：`index` 越界（索引超出列表长度）→ 抛 `ShapeError`（固定；与操作实参数目不符的 `ShapeError` 同族）；
+3. 其余业务错误按各操作 `preconditions` 的 `error` 字段命名（如 `StateError` / `AuthError` / `DivByZero` 等），preconditions 的 `error` 必须与 tests 的 `error` 一致。
+
+## preconditions 表达式的辅助函数
+
+`preconditions[].expr` 是受限表达式串（无 `__builtins__`），除参数名外可用以下白名单辅助函数：
+`index` / `min` / `max` / `len` / `abs` / `sum` / `sum_contribs` / `min_source_id`。
+其中：
+- `sum_contribs(c)`：c 的每行第 2 列（贡献）之和；
+- `min_source_id(e)`：e 的每行第 3 列（source）最小值，空列表返回 +∞（不触发 NotTraceable）。
+
 ## 错误名约定
 
 错误名必须与现有实现一致：`BountyErr` / `StateError` / `AuthError` / `TypeError` /
@@ -90,6 +147,10 @@
 `InsufficientStock` / `TeamFull` / `InsufficientFunds` / `UnknownAsset` /
 `InsufficientShares` / `UnknownItem` / `DivByZero` / `NotTraceable` / `ReserveErr` /
 `BidAmountErr` / `ClosedErr` / `TimeoutErr`。
+
+错误名分工（v0.31 起固定，见「类型守卫规范」）：
+- `TypeError` — 参数类型不符（期望列表收到非列表、期望整数收到非整数）；
+- `ShapeError` — 形状类错误：`index` 越界、操作实参数目不符。
 
 ## 一致性要求
 

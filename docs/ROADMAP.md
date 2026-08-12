@@ -1,7 +1,7 @@
 # ΣLang 整改路线图 · Roadmap v1.0
 
-> **日期**：2026-08-11
-> **现状**：Phase 0 — 人工参考实现已对齐（consensus 56/56、z3 358 PROVED）
+> **日期**：2026-08-12
+> **现状**：Phase 0 已完成（consensus 56/56、z3 358 PROVED）；Phase 1 进行中——5 个独立 AI 模型已实证 60/60 通过（2026-08-12，见 `docs/cross_tool_report.html`）
 > **目标**：Phase 3 — 任何 AI 模型可消费 spec 并自主产出通过 consensus gate 的实现
 
 ---
@@ -24,7 +24,7 @@
 | 问题 | 严重程度 | 说明 |
 |------|---------|------|
 | **定位错位** | 🔴 严重 | "AI-Native Semantic Protocol"名不副实：协议和 AI 之间没有运行时通路 |
-| **无 AI 闭环验证** | 🔴 严重 | 从未尝试让 AI 读 spec 并自主产出实现 → 过了 consensus gate 才算"AI 可消费" |
+| **无 AI 闭环验证** | ✅ 已闭环（2026-08-12） | 5 个独立 AI 模型已各自仅凭 JSON spec 实现 §SK 全部操作并 60/60 通过（见 `docs/cross_tool_report.html`）；自动化工具链（sigma-ai-bench.py）仍待完善 |
 | **spec 不可机器解析** | 🟡 中等 | Markdown 是人读格式，无 JSON/YAML 等价物，AI 解析不稳定 |
 | **Demo 体量的过度仪式感** | 🟡 中等 | 三端 verifier + z3 的维护成本远超找茬产品的复杂度 |
 | **类型系统极弱** | 🟢 后续 | ℕ-only 无法表达字符串、时间、泛型等现实业务 |
@@ -54,7 +54,7 @@
 
 ```
 Phase 0 ──────→ Phase 1 ──────→ Phase 2 ──────→ Phase 3
-[已完成]        [下一步]         [中期]           [远期]
+[已完成]        [进行中]         [中期]           [远期]
 人工参考对齐    AI 替代 1 个     AI 替代 2 个     协议原生
 56/56 consensus  verifier         verifier         无需人工翻译
 ```
@@ -65,9 +65,14 @@ Phase 0 ──────→ Phase 1 ──────→ Phase 2 ────
 
 **意义**：证明了 spec 对**人类**没有歧义。三个不同语言、不同思维方式的程序员，读同一份规则书，得出的结论完全一样。这是后续所有 AI 实验的基准线。
 
-### Phase 1（下一步 🚀）— AI 替代一个 verifier
+### Phase 1（进行中 🚀）— AI 替代一个 verifier
 
 **目标**：让 LLM 读 spec → 自动生成 Python 实现 → 通过 consensus gate → 与人工参考结果一致。
+
+**进展（2026-08-12）**：跨工具实证已完成——五个独立 AI 实现者（DeepSeek / zai
+子代理 / Qwen3dot8Max / Seed2dot1Turbo / Hy3）各自仅凭 `spec_p0_socketkit.json`
+实现 §SK 全部 22 个操作，同一套 60 条测试全部 60/60 通过（300 次测试 0 失败）。
+汇总见 `docs/cross_tool_report.html`，机器可读明细见 `bench/leaderboard.json`。
 
 **具体动作**：
 
@@ -284,7 +289,7 @@ result = engine.eval("task_create", [7, 100])  # → [7, 100, 0, 0]
 
 - [ ] 至少 1 份 spec（§SK）有完整的 JSON 格式，与 Markdown 语义等价
 - [ ] `sigma-ai-bench.py` 可跑通至少 1 个模型的自动化测试
-- [ ] 至少 1 个 AI 模型能在 ≤ 3 轮自我修正后通过 consensus gate（≥ 50/56）
+- [x] 至少 1 个 AI 模型能在 ≤ 3 轮自我修正后通过 consensus gate（≥ 50/56）——✅ **已完成（2026-08-12）**：5 个模型实证（deepseek-chat / zai-subagent / qwen3dot8max / seed2dot1turbo / hy3）全部 60/60 通过，详见 `docs/cross_tool_report.html` 与 `bench/leaderboard.json`
 - [ ] README 定位已修正
 
 ### Phase 2 验收条件

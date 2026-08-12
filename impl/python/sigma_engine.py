@@ -36,7 +36,8 @@ kind=table 状态机（schema 原生支持；§SK v0.30 JSON 用 lambda+precondi
     table 作用于第一个参数（状态值），返回其修改副本。
 
 内置函数词汇表（BUILTIN_FNS，可经 register_builtin 扩展）：
-    通用:     index / len / min / max / fold_add / map / add / sub / mul / floordiv / mod
+    通用:     index / len / min / max / fold_add / map / add / sub / mul / floordiv / div / mod
+              （div: 真除法 int/int → float，除零 → DivByZero；§IN fill_rate ℚ 语义）
     类型扩展: str_len / str_concat / str_contains（Str 字符串）
               time_now_epoch（Time，unix epoch，返回固定种子便于测试）
               option_some / option_none（Option<T>：None=none，非 None=some）
@@ -56,7 +57,8 @@ import os
 import sys
 from functools import reduce
 
-__version__ = "0.3.0"   # 0.3.0: 整改项 4.7 类型扩展（Str / Time / Option<T> / Map<K,V>）
+__version__ = "0.3.1"   # 0.3.1: 新增通用 div（真除法，float 结果，除零 → DivByZero；§IN fill_rate 的 ℚ 语义需要）
+                         # 0.3.0: 整改项 4.7 类型扩展（Str / Time / Option<T> / Map<K,V>）
 
 # ---------------------------------------------------------------------------
 # 命名错误体系（与 spec/json-schema.md「错误名约定」一致，共 20 个）
@@ -137,7 +139,7 @@ def _fn_index(xs, i):
     try:
         return xs[i]
     except IndexError:
-        _raise_error("TypeError", f"index: index {i} out of range for list of len {len(xs)}")
+        _raise_error("ShapeError", f"index: index {i} out of range for list of len {len(xs)}")
 
 
 def _fn_len(xs):
@@ -188,6 +190,15 @@ def _fn_floordiv(a, b):
     if b == 0:
         _raise_error("DivByZero", "floordiv: division by zero")
     return a // b
+
+
+def _fn_div(a, b):
+    """真除法（§IN fill_rate 的 ℚ 语义）：int/int → float；除零 → DivByZero。"""
+    _require_int(a, "div")
+    _require_int(b, "div")
+    if b == 0:
+        _raise_error("DivByZero", "div: division by zero")
+    return a / b
 
 
 def _fn_mod(a, b):
@@ -361,6 +372,7 @@ BUILTIN_FNS = {
     "sub": _fn_sub,
     "mul": _fn_mul,
     "floordiv": _fn_floordiv,
+    "div": _fn_div,
     "mod": _fn_mod,
     # 比较运算符（§SK: 条件里以 fn 节点出现，如 {"fn": "ge", ...} / {"fn": "lt", ...}）
     "eq": _fn_eq,
@@ -876,9 +888,10 @@ def _selftest(engine):
                           {"t": [7, 100, 0, 0]}) == 1))
     check("expr.if_fn_cond", lambda: (
         engine._eval_node({"if": {"fn": "ge", "args": [5, 3]}, "then": 1, "else": 0}, {}) == 1))
-    check("expr.dollar_last_result", lambda: (
-        engine.eval("task_create", [7, 100]) is not None
-        and engine._eval_node("$_", {}) == [7, 100, 0, 0]))
+    if "task_create" in engine.operations:
+        check("expr.dollar_last_result", lambda: (
+            engine.eval("task_create", [7, 100]) is not None
+            and engine._eval_node("$_", {}) == [7, 100, 0, 0]))
 
     # —— 类型扩展（整改项 4.7）：Str / Time / Option<T> / Map<K,V> ——
 

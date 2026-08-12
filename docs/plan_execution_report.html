@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ΣLang 计划执行报告 · Execution Report</title>
+<style>
+  :root { --bg:#ffffff; --ink:#111111; --muted:#8a8a8a; --line:#e8e8e8; --accent:#1a3a5c; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;
+         background:var(--bg); color:var(--ink); line-height:1.8; }
+  header { padding:110px 8% 60px; max-width:1200px; margin:0 auto; }
+  header .kicker { font-size:12px; letter-spacing:4px; text-transform:uppercase; color:var(--muted); }
+  header h1 { font-size:40px; font-weight:200; margin:18px 0 14px; letter-spacing:1px; }
+  header p { color:var(--muted); font-size:15px; max-width:640px; margin:0; }
+  main { max-width:1200px; margin:0 auto; padding:20px 8% 120px; }
+  section { margin-bottom:90px; }
+  h2 { font-size:13px; letter-spacing:3px; text-transform:uppercase; color:var(--muted);
+       font-weight:600; margin:0 0 32px; }
+  h3 { font-size:17px; font-weight:500; margin:28px 0 10px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:2px;
+          background:var(--line); border:1px solid var(--line); }
+  .cell { background:#fff; padding:30px 26px; }
+  .cell .num { font-size:34px; font-weight:200; color:var(--accent); }
+  .cell .lbl { font-size:13px; color:var(--muted); margin-top:6px; }
+  table { width:100%; border-collapse:collapse; font-size:14px; margin:18px 0; }
+  th { text-align:left; font-weight:600; font-size:12px; letter-spacing:1.5px;
+       text-transform:uppercase; color:var(--muted); padding:10px 12px; border-bottom:1px solid var(--ink); }
+  td { padding:12px; border-bottom:1px solid var(--line); vertical-align:top; }
+  .ok { color:var(--accent); font-weight:600; }
+  .part { color:#8a6d3b; font-weight:600; }
+  code { font-family:Consolas,Menlo,monospace; font-size:13px; background:#f6f6f6; padding:1px 6px; }
+  .note { color:var(--muted); font-size:13.5px; border-left:2px solid var(--line); padding-left:18px; margin:22px 0; }
+  footer { max-width:1200px; margin:0 auto; padding:0 8% 60px; color:var(--muted); font-size:12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">ΣLang · Next Plan Execution</div>
+  <h1>计划执行报告</h1>
+  <p>按 docs/next_plan.md 完整执行 P0-1 / P0-2 / P1-1 / P1-2 / P2-1 / P2-2 六项整改，
+  4 个并行实施 Agent + 独立复核闭环，全部产物带运行证据。</p>
+</header>
+
+<main>
+
+<section>
+  <h2>执行摘要</h2>
+  <div class="grid">
+    <div class="cell"><div class="num">6/6</div><div class="lbl">计划整改项处理（5 完成 + 1 部分）</div></div>
+    <div class="cell"><div class="num">8/8</div><div class="lbl">独立复核通过</div></div>
+    <div class="cell"><div class="num">102/102</div><div class="lbl">引擎自检（v0.31 无回归）</div></div>
+    <div class="cell"><div class="num">4×60/60</div><div class="lbl">可复跑实现者回归全绿</div></div>
+  </div>
+  <div class="note">§SK spec 升级 v0.31（constants 区、错误名固定、类型守卫规范），
+  5 模型排行榜发布，§PF/§IN JSON 落地，vq 口径基线问题集就绪。唯一部分完成项为 vq 集成前后对比实验，
+  需 vq 部署运行后执行（vq 历史数据为空，已按计划风险缓解改用人工问题集）。</div>
+</section>
+
+<section>
+  <h2>步骤执行明细</h2>
+  <table>
+    <tr><th>计划项</th><th>状态</th><th>产物与证据</th></tr>
+    <tr><td>P0-1 · §SK v0.31</td><td class="ok">完成</td>
+        <td>spec_p0_socketkit.json v0.31.0：constants 8 组、points_ledger 行布局注释、22 ops/60 tests 不变；json-schema.md 补 min/max 重载、index→ShapeError、类型守卫；TASK_SPEC.md 同步；引擎 102/102 无回归</td></tr>
+    <tr><td>P0-2 · 复核脚本</td><td class="ok">完成</td>
+        <td>tools/sigma-impl-verify.py（--spec/--impl）；实跑 Hy3 / Qwen3dot8Max / Seed2dot1Turbo 全 60/60，exit 0；tests/README 补一键复核命令</td></tr>
+    <tr><td>P1-1 · vq 口径实验</td><td class="part">部分</td>
+        <td>基线问题集 docs/vq_baseline_questions.md（30 条 × 5 概念，含易混淆问法）；集成前后对比待 vq 运行（history 表为空，按计划 §4 风险缓解替代）</td></tr>
+    <tr><td>P1-2 · 排行榜</td><td class="ok">完成</td>
+        <td>bench/leaderboard.json 18 条：5 模型全 PASS（deepseek-chat / zai-subagent / qwen3dot8max / seed2dot1turbo / hy3）；README §3.5 排行表 + 可追溯来源</td></tr>
+    <tr><td>P2-1 · §PF/§IN JSON</td><td class="ok">完成</td>
+        <td>spec_p0_portfolio.json（5 ops/17 tests）+ spec_p0_inventory.json（5 ops/16 tests）；json.load 合法，引擎加载全过</td></tr>
+    <tr><td>P2-2 · 文档同步</td><td class="ok">完成</td>
+        <td>spec-template.md 新增"评测沉淀的最佳实践"；ROADMAP.md Phase 1 标注 5 模型实证（2026-08-12）</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>回归与验收</h2>
+  <table>
+    <tr><th>验收口径（next_plan §5）</th><th>结果</th></tr>
+    <tr><td>spec v0.31 后 5 实现者重跑 60/60</td><td class="ok">✅ 4 个可复跑实现者全绿（Hy3/Qwen3dot8Max/Seed2dot1Turbo/zai）；DeepSeek 以 bench 3 轮 100% 记录为证据</td></tr>
+    <tr><td>sigma-impl-verify.py 一键复核</td><td class="ok">✅ 一条命令输出全部 reports 实现者汇总</td></tr>
+    <tr><td>vq 口径对比数据</td><td class="part">🔶 基线就绪，对比待 vq 部署运行</td></tr>
+    <tr><td>README 5 模型排行榜</td><td class="ok">✅ §3.5</td></tr>
+    <tr><td>§PF/§IN JSON 齐备</td><td class="ok">✅ 齐备；实现者评测为可选后续</td></tr>
+  </table>
+  <h3>复核结论</h3>
+  <p>独立复核 8/8 通过；2 处非阻断偏差已记录：① §SK 本体 preconditions 保持 expr 字符串（结构化仅作新 spec 最佳实践，行为层零变更优先）；② 复核工具扫描范围为 reports/ 下 3 份实现（zai 与 DeepSeek 实现未在扫描目录，已单独补证）。</p>
+</section>
+
+<section>
+  <h2>风险与回滚</h2>
+  <table>
+    <tr><th>项</th><th>说明</th></tr>
+    <tr><td>行为层变更</td><td>仅 1 处：引擎 _fn_index 越界 TypeError→ShapeError（与文档统一）；102/102 无回归；回滚 <code>git checkout impl/python/sigma_engine.py</code></td></tr>
+    <tr><td>vq 数据</td><td>仅新增文档（基线问题集），无数据写入；history 空表不构成风险</td></tr>
+    <tr><td>遗留临时文件</td><td>_sem_check.json 等清理被安全策略拒绝，保留并记录，不影响运行</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>交接说明</h2>
+  <h3>待办（需外部环境）</h3>
+  <ul style="color:var(--ink);padding-left:20px;font-size:14px;">
+    <li>vq 部署运行后：用 30 条问题集执行集成前后对比（口径类错误率 ≥30% 下降）</li>
+    <li>§PF/§IN 实现者评测（复用 tests/ 的 TASK_SPEC/PROMPT 流程或 bench）</li>
+    <li>json-schema.md 的 if 示例与规格实际用法对齐（建议项）</li>
+  </ul>
+  <h3>复核方式</h3>
+  <p><code>python3 tools/sigma-impl-verify.py</code>（实现者一键复核）· <code>python3 impl/python/sigma_engine.py</code>（引擎 102/102）· 复核报告 <code>.cluster/sigma-plan-exec/review.md</code></p>
+</section>
+
+</main>
+<footer>ΣLang Next Plan Execution · 2026-08-12 · 11 Build 风格</footer>
+</body>
+</html>

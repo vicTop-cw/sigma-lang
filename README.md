@@ -225,7 +225,28 @@ python3 tools/sigma-ai-bench.py --model claude-4 --spec spec_p0_socketkit.json -
 哪些操作被普遍误解、哪个模型全过——一目了然，最终输出排行榜：哪个模型在"从规约中
 提取精确语义"这项能力上最强。
 
-### 3.5 路线图
+### 3.5 排行榜：5 模型实证（2026-08-12）
+
+五个完全独立的 AI 实现者（来自不同厂商 / 不同训练生态），各自仅凭同一份
+`spec_p0_socketkit.json`（22 个操作）独立实现，跑同一套 60 条测试——**全部 60/60
+通过，跨工具一致率 100%（300 次测试，0 失败）**：
+
+| 模型 | 来源 / 工具 | 方式 | 通过率 |
+|------|-------------|------|---------|
+| deepseek-chat | 真实 API | bench 驱动，3 轮反馈循环（source=api） | 60/60 × 3 轮（100%） |
+| zai-subagent | 本机 Agent 集群 | 独立子代理读 JSON 实现（source=agent） | 60/60（100%） |
+| qwen3dot8max | Qoder | 手动：读 JSON 手写实现（source=manual） | 60/60（100%） |
+| seed2dot1turbo | TRAE（字节） | 手动：读 JSON 手写实现（source=manual） | 60/60（100%） |
+| hy3 | WorkBuddy（腾讯） | 手动：通用解释器实现（source=manual） | 60/60（100%） |
+
+> 数据可追溯：三份手动报告与实现文件在 `tests/reports/`（`Hy3.md` /
+> `Qwen3dot8Max.md` / `Seed2dot1Turbo.md` 及 `_impl_*.py`）；跨工具汇总与实现差异
+> 分析见 `docs/cross_tool_report.html`；机器可读明细见 `bench/leaderboard.json`。
+> 结论：**规约"机器可解析"的承诺被五个独立 AI 实证——行为层零分歧**；表示层仍有
+> 6 处改进点（错误名、min/max 重载、constants 区等），已沉淀进
+> `docs/spec-template.md` 最佳实践。
+
+### 3.6 路线图
 
 ```
 Phase 0 ──────→ Phase 1 ──────→ Phase 2 ──────→ Phase 3

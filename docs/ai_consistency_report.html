@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ΣLang AI 实现一致性验证报告</title>
+<style>
+  :root { --bg:#f4f6f9; --card:#fff; --ink:#1f2937; --muted:#6b7280; --navy:#1a2a4a;
+          --blue:#2c5282; --line:#dde3ec; --ok:#276749; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
+         background:var(--bg); color:var(--ink); line-height:1.7; }
+  header { background:linear-gradient(160deg,#1a2a4a,#2c5282); color:#fff; padding:40px 48px 34px; }
+  header .kicker { font-size:12px; letter-spacing:2.5px; text-transform:uppercase; opacity:.75; }
+  header h1 { margin:8px 0 10px; font-size:25px; }
+  header p { margin:4px 0; opacity:.85; font-size:14px; max-width:880px; }
+  main { max-width:1020px; margin:0 auto; padding:28px 22px 60px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:8px;
+            padding:24px 28px; margin-bottom:20px; }
+  h2 { margin:0 0 14px; font-size:18px; color:var(--navy); border-left:4px solid var(--blue); padding-left:11px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; margin:10px 0; }
+  th { background:#eef1f7; color:var(--navy); text-align:left; padding:9px 12px; border-bottom:2px solid var(--line); }
+  td { padding:9px 12px; border-bottom:1px solid var(--line); }
+  .big { font-size:26px; font-weight:700; color:var(--ok); }
+  .muted { color:var(--muted); font-size:12.5px; }
+  code { background:#eef1f7; border-radius:4px; padding:1px 6px; font-size:12.5px; font-family:Consolas,monospace; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin:14px 0; }
+  .card { border:1px solid var(--line); border-radius:6px; padding:14px 16px; background:#fafbfe; }
+  .card .num { font-size:30px; font-weight:700; color:var(--navy); }
+  .card .lbl { font-size:12.5px; color:var(--muted); }
+  .okline { border-left:4px solid var(--ok); background:#f0f7f2; padding:12px 16px; border-radius:0 6px 6px 0; margin:12px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">AI Implementation Consistency Verification</div>
+  <h1>ΣLang AI 实现一致性验证报告</h1>
+  <p>实验：让两个完全独立的 AI（DeepSeek 真实 API 与 zai 子代理）各自从同一份 §SK JSON 规约实现业务语义，
+  验证"一个符号、一种含义、一个结果——谁来算都一样"的协议承诺。</p>
+</header>
+
+<main>
+
+<section>
+  <h2>一、实验设计</h2>
+  <table>
+    <tr><th>实现者</th><th>接入方式</th><th>输入</th><th>验证工具</th></tr>
+    <tr><td>DeepSeek（deepseek-v4-flash，真实 API）</td>
+        <td>sigma-ai-bench.py 真实模式（OpenAI 兼容接口，vq 的 API key）</td>
+        <td>spec/spec_p0_socketkit.json（22 操作 / 60 测试）</td>
+        <td>bench 验证层：60 条测试逐条比对输出与错误名</td></tr>
+    <tr><td>zai 子代理（Agent 集群模式）</td>
+        <td>独立 Agent 只读 spec JSON，自行实现 22 个操作</td>
+        <td>同一份 spec JSON</td>
+        <td>自检脚本：60 条测试逐条执行（本报告对结果独立复跑确认）</td></tr>
+    <tr><td>参考实现（引擎 sigma_engine.py）</td>
+        <td>ground truth</td>
+        <td>同一份 spec JSON</td>
+        <td>引擎自检 corpus 60/60</td></tr>
+  </table>
+  <p class="muted">约束：两个 AI 实现者互相隔离、均未参考手写参考实现（sigma_core.py），只能从规约本身提取语义。</p>
+</section>
+
+<section>
+  <h2>二、实验结果</h2>
+  <div class="cards">
+    <div class="card"><div class="num">60/60</div><div class="lbl">DeepSeek 每轮通过（3 轮全对）</div></div>
+    <div class="card"><div class="num">60/60</div><div class="lbl">zai 子代理通过（独立复跑确认）</div></div>
+    <div class="card"><div class="num">60/60</div><div class="lbl">参考引擎 corpus</div></div>
+    <div class="card"><div class="num">3/3</div><div class="lbl">实现者全部与参考一致</div></div>
+  </div>
+  <table>
+    <tr><th>实现者</th><th>测试规模</th><th>通过</th><th>通过率</th><th>失败项</th></tr>
+    <tr><td>DeepSeek 第 1 轮</td><td>60</td><td>60</td><td>100%</td><td>0</td></tr>
+    <tr><td>DeepSeek 第 2 轮</td><td>60</td><td>60</td><td>100%</td><td>0</td></tr>
+    <tr><td>DeepSeek 第 3 轮</td><td>60</td><td>60</td><td>100%</td><td>0</td></tr>
+    <tr><td>zai 子代理</td><td>60</td><td>60</td><td>100%</td><td>0</td></tr>
+  </table>
+  <div class="okline"><b>结论：三个独立实现者对同一份规约的理解完全一致——sigma 的"AI 读 spec → 自证一致"闭环（ROADMAP Phase 1）验证通过。</b></div>
+</section>
+
+<section>
+  <h2>三、验证了 sigma 的什么</h2>
+  <table>
+    <tr><th>协议承诺</th><th>验证结果</th></tr>
+    <tr><td>spec JSON 可被 AI 直接消费（无歧义）</td><td>✅ 两个 AI 均未读参考实现，仅凭规约产出 100% 一致行为</td></tr>
+    <tr><td>跨实现者一致性（Law XIII）</td><td>✅ DeepSeek = zai = 参考引擎 = 60/60，逐项一致</td></tr>
+    <tr><td>错误语义可传递（错误名精确匹配）</td><td>✅ 两个 AI 生成的错误路径（BountyErr/StateError/AuthError 等）与规约完全一致</td></tr>
+    <tr><td>Benchmark 工具链可用</td><td>✅ 真实模式（API key + 3 轮反馈循环）跑通，结果入 leaderboard</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>四、附：vq 整合落地情况（检查结果）</h2>
+  <table>
+    <tr><th>方案项</th><th>状态</th><th>证据</th></tr>
+    <tr><td>方式 A：口径规约 + prompt 注入</td><td>✅ 已实现</td><td>spec_service.py（概念匹配/口径铁律段）+ vanna_service.py 已注入</td></tr>
+    <tr><td>口径 spec 数据</td><td>✅ 5 个概念</td><td>spec_ql_p0_metrics.json：gmv / 放款笔数 / 逾期率 / 活跃用户 / ARPU（§QL v0.1.0）</td></tr>
+    <tr><td>方式 B：口径后校验</td><td>✅ 模块已实现</td><td>spec_validator.py（校验接口就绪）</td></tr>
+  </table>
+  <p class="muted">注：vq 目录非 git 仓库，无法用 git 追溯变更；落地文件与方案文档一致。</p>
+</section>
+
+</main>
+</body>
+</html>

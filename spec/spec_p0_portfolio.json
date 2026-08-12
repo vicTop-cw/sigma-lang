@@ -1,0 +1,140 @@
+{
+  "spec": "§PF",
+  "version": "0.19.0",
+  "fingerprint_prefix": "0xE000",
+  "types": [
+    {"name": "Portfolio", "kind": "list", "element": "nat"},
+    {"name": "Cash", "kind": "alias", "target": "nat"},
+    {"name": "Qty", "kind": "alias", "target": "nat"},
+    {"name": "Asset", "kind": "alias", "target": "nat"}
+  ],
+  "operations": [
+    {
+      "name": "portfolio_new",
+      "fingerprint": "0xE001",
+      "signature": {"params": ["nat"], "returns": "Portfolio"},
+      "definition": {
+        "kind": "lambda",
+        "params": ["c"],
+        "body": {"list": ["c", 0, 0]}
+      },
+      "preconditions": [
+        {"expr": "c >= 0", "error": "TypeError", "description": "cash must be >= 0 (开户现金不可为负)"}
+      ],
+      "laws": [
+        {"forall": ["c"], "predicate": "0 <= index(portfolio_new(c), 0)", "description": "cash >= 0"},
+        {"forall": ["c"], "predicate": "index(portfolio_new(c), 1) == 0", "description": "qtyA starts at 0"},
+        {"forall": ["c"], "predicate": "index(portfolio_new(c), 2) == 0", "description": "qtyB starts at 0"}
+      ],
+      "tests": [
+        {"input": [100], "output": [100, 0, 0], "description": "open portfolio with 100 cash"},
+        {"input": [0], "output": [0, 0, 0], "description": "zero cash allowed"},
+        {"input": [-5], "output": null, "error": "TypeError", "description": "negative cash rejected"}
+      ]
+    },
+    {
+      "name": "buy",
+      "fingerprint": "0xE002",
+      "signature": {"params": ["Portfolio", "Asset", "Qty"], "returns": "Portfolio"},
+      "definition": {
+        "kind": "lambda",
+        "params": ["p", "a", "q"],
+        "body": {"if": {"fn": "eq", "args": ["a", 0]},
+          "then": {"list": [
+            {"fn": "sub", "args": [{"fn": "index", "args": ["p", 0]}, "q"]},
+            {"fn": "add", "args": [{"fn": "index", "args": ["p", 1]}, "q"]},
+            {"fn": "index", "args": ["p", 2]}]},
+          "else": {"list": [
+            {"fn": "sub", "args": [{"fn": "index", "args": ["p", 0]}, "q"]},
+            {"fn": "index", "args": ["p", 1]},
+            {"fn": "add", "args": [{"fn": "index", "args": ["p", 2]}, "q"]}]}}
+      },
+      "preconditions": [
+        {"expr": "a == 0 or a == 1", "error": "UnknownAsset", "description": "asset must be 0 (A) or 1 (B)"},
+        {"expr": "index(p, 0) >= q", "error": "InsufficientFunds", "description": "cash must cover qty at unit price 1 (不可超买)"}
+      ],
+      "laws": [
+        {"forall": ["p", "a", "q"], "predicate": "index(p, 0) >= q => portfolio_value(buy(p, a, q)) == portfolio_value(p)", "description": "conservation: value unchanged by buy (守恒)"},
+        {"forall": ["p", "a", "q"], "predicate": "index(p, 0) >= q => index(buy(p, a, q), 0) >= 0", "description": "cash >= 0 after buy"}
+      ],
+      "tests": [
+        {"input": [{"op": "portfolio_new", "args": [100]}, 0, 30], "output": [70, 30, 0], "description": "buy 30 of A with 100 cash"},
+        {"input": [{"op": "portfolio_new", "args": [100]}, 1, 25], "output": [75, 0, 25], "description": "buy 25 of B with 100 cash"},
+        {"input": [{"op": "portfolio_new", "args": [10]}, 0, 30], "output": null, "error": "InsufficientFunds", "description": "buy more than cash rejected"},
+        {"input": [{"op": "portfolio_new", "args": [100]}, 2, 5], "output": null, "error": "UnknownAsset", "description": "unknown asset 2 rejected"}
+      ]
+    },
+    {
+      "name": "sell",
+      "fingerprint": "0xE003",
+      "signature": {"params": ["Portfolio", "Asset", "Qty"], "returns": "Portfolio"},
+      "definition": {
+        "kind": "lambda",
+        "params": ["p", "a", "q"],
+        "body": {"if": {"fn": "eq", "args": ["a", 0]},
+          "then": {"list": [
+            {"fn": "add", "args": [{"fn": "index", "args": ["p", 0]}, "q"]},
+            {"fn": "sub", "args": [{"fn": "index", "args": ["p", 1]}, "q"]},
+            {"fn": "index", "args": ["p", 2]}]},
+          "else": {"list": [
+            {"fn": "add", "args": [{"fn": "index", "args": ["p", 0]}, "q"]},
+            {"fn": "index", "args": ["p", 1]},
+            {"fn": "sub", "args": [{"fn": "index", "args": ["p", 2]}, "q"]}]}}
+      },
+      "preconditions": [
+        {"expr": "a == 0 or a == 1", "error": "UnknownAsset", "description": "asset must be 0 (A) or 1 (B)"},
+        {"expr": "index(p, a + 1) >= q", "error": "InsufficientShares", "description": "cannot sell more than held (禁止裸卖空)"}
+      ],
+      "laws": [
+        {"forall": ["p", "a", "q"], "predicate": "index(p, a + 1) >= q => portfolio_value(sell(p, a, q)) == portfolio_value(p)", "description": "conservation: value unchanged by sell (守恒)"},
+        {"forall": ["p", "a", "q"], "predicate": "index(p, a + 1) >= q => index(sell(p, a, q), a + 1) >= 0", "description": "no naked shorts: position never negative"}
+      ],
+      "tests": [
+        {"input": [{"op": "buy", "args": [{"op": "portfolio_new", "args": [100]}, 0, 30]}, 0, 20], "output": [90, 10, 0], "description": "sell 20 of 30 held A"},
+        {"input": [[70, 30, 0], 0, 30], "output": [100, 0, 0], "description": "liquidate all A back to cash"},
+        {"input": [[70, 30, 0], 0, 40], "output": null, "error": "InsufficientShares", "description": "sell more than held rejected"},
+        {"input": [[70, 30, 0], 2, 5], "output": null, "error": "UnknownAsset", "description": "unknown asset 2 rejected"}
+      ]
+    },
+    {
+      "name": "portfolio_value",
+      "fingerprint": "0xE004",
+      "signature": {"params": ["Portfolio"], "returns": "nat"},
+      "definition": {
+        "kind": "lambda",
+        "params": ["p"],
+        "body": {"fn": "fold_add", "args": ["p"]}
+      },
+      "preconditions": [],
+      "laws": [
+        {"forall": ["p"], "predicate": "0 <= portfolio_value(p)", "description": "value never negative"},
+        {"forall": ["p"], "predicate": "portfolio_value(p) == portfolio_value(append(p, [0]))", "description": "zero qty is neutral (no-op)"}
+      ],
+      "tests": [
+        {"input": [{"op": "portfolio_new", "args": [100]}], "output": 100, "description": "fresh portfolio worth its cash"},
+        {"input": [[70, 30, 0]], "output": 100, "description": "70 cash + 30 A = 100"},
+        {"input": [[50, 20, 30]], "output": 100, "description": "50 cash + 20 A + 30 B = 100"}
+      ]
+    },
+    {
+      "name": "risk_score",
+      "fingerprint": "0xE005",
+      "signature": {"params": ["Portfolio"], "returns": "nat"},
+      "definition": {
+        "kind": "lambda",
+        "params": ["p"],
+        "body": {"fn": "add", "args": [{"fn": "index", "args": ["p", 1]}, {"fn": "index", "args": ["p", 2]}]}
+      },
+      "preconditions": [],
+      "laws": [
+        {"forall": ["p"], "predicate": "0 <= risk_score(p)", "description": "exposure never negative"},
+        {"forall": ["p"], "predicate": "risk_score(p) <= portfolio_value(p)", "description": "exposure bounded by total value"}
+      ],
+      "tests": [
+        {"input": [{"op": "portfolio_new", "args": [100]}], "output": 0, "description": "no positions, no exposure"},
+        {"input": [[70, 30, 0]], "output": 30, "description": "exposure = qtyA 30"},
+        {"input": [[50, 20, 30]], "output": 50, "description": "exposure = qtyA 20 + qtyB 30"}
+      ]
+    }
+  ]
+}

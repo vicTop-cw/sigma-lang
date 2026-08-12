@@ -1,5 +1,17 @@
 [
   {
+    "model": "deepseek-chat",
+    "mode": "real",
+    "spec": "E:\\IDEProjects\\AI\\sigma-lang\\spec\\spec_p0_socketkit.json",
+    "timestamp": "2026-08-12T09:18:45+0800",
+    "rounds": 3,
+    "total_attempts": 180,
+    "best_pass_rate": 1.0,
+    "final_pass_rate": 1.0,
+    "final_status": "PASS",
+    "results_file": "results.json"
+  },
+  {
     "model": "mock-fixer",
     "mode": "mock",
     "spec": "E:\\IDEProjects\\AI\\sigma-lang\\spec\\spec_p0_socketkit.json",
@@ -154,5 +166,98 @@
     "final_pass_rate": 0.4667,
     "final_status": "FAIL",
     "results_file": "results.json"
+  },
+  {
+    "model": "zai-subagent",
+    "mode": "agent",
+    "source": "agent",
+    "spec": "E:\\IDEProjects\\AI\\sigma-lang\\spec\\spec_p0_socketkit.json",
+    "timestamp": "2026-08-12T10:02:00+0800",
+    "rounds": 1,
+    "total_attempts": 60,
+    "pass_rate": 1.0,
+    "best_pass_rate": 1.0,
+    "final_pass_rate": 1.0,
+    "final_status": "PASS",
+    "results_file": "docs/cross_tool_report.html"
+  },
+  {
+    "model": "qwen3dot8max",
+    "mode": "manual",
+    "source": "manual",
+    "spec": "E:\\IDEProjects\\AI\\sigma-lang\\spec\\spec_p0_socketkit.json",
+    "timestamp": "2026-08-12T10:15:00+0800",
+    "rounds": 1,
+    "total_attempts": 60,
+    "pass_rate": 1.0,
+    "best_pass_rate": 1.0,
+    "final_pass_rate": 1.0,
+    "final_status": "PASS",
+    "results_file": "tests/reports/Qwen3dot8Max.md"
+  },
+  {
+    "model": "seed2dot1turbo",
+    "mode": "manual",
+    "source": "manual",
+    "spec": "E:\\IDEProjects\\AI\\sigma-lang\\spec\\spec_p0_socketkit.json",
+    "timestamp": "2026-08-12T10:28:00+0800",
+    "rounds": 1,
+    "total_attempts": 60,
+    "pass_rate": 1.0,
+    "best_pass_rate": 1.0,
+    "final_pass_rate": 1.0,
+    "final_status": "PASS",
+    "results_file": "tests/reports/Seed2dot1Turbo.md"
+  },
+  {
+    "model": "hy3",
+    "mode": "manual",
+    "source": "manual",
+    "spec": "E:\\IDEProjects\\AI\\sigma-lang\\spec\\spec_p0_socketkit.json",
+    "timestamp": "2026-08-12T10:24:00+0800",
+    "rounds": 1,
+    "total_attempts": 60,
+    "pass_rate": 1.0,
+    "best_pass_rate": 1.0,
+    "final_pass_rate": 1.0,
+    "final_status": "PASS",
+    "results_file": "tests/reports/Hy3.md"
+  },
+  {
+    "model": "qwen3dot8max",
+    "spec": "E:\\IDEProjects\\AI\\sigma-lang\\spec\\spec_p0_socketkit.json",
+    "spec_version": "0.31.0",
+    "pass_rate": 1.0,
+    "tests": "60/60",
+    "source": "manual",
+    "timestamp": "2026-08-12T11:33:14+0800"
+  },
+  {
+    "model": "seed2dot1turbo",
+    "spec": "E:\\IDEProjects\\AI\\sigma-lang\\spec\\spec_p0_socketkit.json",
+    "spec_version": "0.31.0",
+    "pass_rate": 1.0,
+    "tests": "60/60",
+    "source": "manual",
+    "timestamp": "2026-08-12T11:33:14+0800"
+  },
+  {
+    "model": "deepseekv4flash-atomcode",
+    "spec": "E:\\IDEProjects\\AI\\sigma-lang\\spec\\spec_p0_socketkit.json",
+    "spec_version": "0.31.0",
+    "pass_rate": 1.0,
+    "tests": "60/60",
+    "source": "manual",
+    "timestamp": "2026-08-12T11:33:14+0800"
+  },
+  {
+    "model": "hy3",
+    "spec": "E:\\IDEProjects\\AI\\sigma-lang\\spec\\spec_p0_socketkit.json",
+    "spec_version": "0.31.0",
+    "pass_rate": 1.0,
+    "tests": "60/60",
+    "source": "manual",
+    "timestamp": "2026-08-12T11:33:14+0800",
+    "note": "已重跑修复（2026-08-12 11:37），独立复核 60/60"
   }
 ]

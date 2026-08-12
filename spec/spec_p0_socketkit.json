@@ -1,7 +1,33 @@
 {
   "spec": "§SK",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "fingerprint_prefix": "0xF000",
+  "constants": {
+    "status": {
+      "open": 0,
+      "in_progress": 1,
+      "pending_review": 2,
+      "completed": 3
+    },
+    "decision": {
+      "reject": 0,
+      "accept": 1
+    },
+    "badge": {
+      "levels": {"bronze": 0, "silver": 1, "gold": 2, "diamond": 3},
+      "thresholds": [100, 300, 600]
+    },
+    "verifier_min_id": 1000,
+    "credit": {
+      "initial": 100,
+      "kind0_per_completion": 5,
+      "kind1_floor_ratio": {"num": 7, "den": 10},
+      "floor": 0
+    },
+    "contribution": {"floor": 0},
+    "team": {"min_capacity": 1},
+    "ledger": {"entry_id_start": 1, "min_source_id": 1}
+  },
   "types": [
     {"name": "Author", "kind": "alias", "target": "nat"},
     {"name": "Hunter", "kind": "alias", "target": "nat"},
@@ -490,10 +516,10 @@
         {"expr": "min_source_id(e) >= 1", "error": "NotTraceable", "description": "every entry must be traceable (source_id >= 1; 0 = no source -> NotTraceable)"}
       ],
       "laws": [
-        {"forall": ["e"], "predicate": "all(index(entry, 0) == i + 1 for i, entry in enumerate(points_ledger(e)))", "description": "entry ids sequential from 1..n"},
-        {"forall": ["e"], "predicate": "all(index(entry, 1) >= 1 for entry in points_ledger(e))", "description": "every source traceable (source_id >= 1)"},
-        {"forall": ["e"], "predicate": "all(index(entry, 2) >= 0 for entry in points_ledger(e))", "description": "every amount non-negative"},
-        {"forall": ["e"], "predicate": "any(index(entry, 2) == 0 for entry in e) => raises(points_ledger(e), NotTraceable)", "description": "untraceable source (source_id 0) rejected"}
+        {"forall": ["e"], "predicate": "all(index(entry, 0) == i + 1 for i, entry in enumerate(points_ledger(e)))", "description": "entry ids sequential from 1..n (行布局: 输入 [旧id, 金额, source] -> 输出 [新编号, source, 金额]; 输出行第 1 列 = 新编号)"},
+        {"forall": ["e"], "predicate": "all(index(entry, 1) >= 1 for entry in points_ledger(e))", "description": "every source traceable (source_id >= 1; 输出行第 2 列 = source)"},
+        {"forall": ["e"], "predicate": "all(index(entry, 2) >= 0 for entry in points_ledger(e))", "description": "every amount non-negative (输出行第 3 列 = 金额)"},
+        {"forall": ["e"], "predicate": "any(index(entry, 2) == 0 for entry in e) => raises(points_ledger(e), NotTraceable)", "description": "untraceable source (输入行 [旧id, 金额, source] 的 source 位 == 0) rejected"}
       ],
       "tests": [
         {"input": [[[0, 100, 1]]], "output": [[1, 1, 100]], "description": "single entry: [entry_id 1, source 1, amount 100]"},
